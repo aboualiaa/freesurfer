@@ -8,13 +8,8 @@
 #
 #  Looks for a .img extension (exits 1 if so)
 #
-# Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
-# CVS Revision Info:
-#    $Author: nicks $
-#    $Date: 2011/03/02 20:16:39 $
-#    $Revision: 1.7 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,7 +22,7 @@
 #
 
 
-set VERSION = '$Id: isanalyze,v 1.7 2011/03/02 20:16:39 nicks Exp $';
+set VERSION = 'isanalyze @FS_VERSION@';
 
 if($#argv != 1) then
   echo "isanalyze filename"

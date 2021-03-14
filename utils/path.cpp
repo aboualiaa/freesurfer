@@ -1,17 +1,6 @@
-/**
- * @file  path.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:54 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,9 +12,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "error.h"
 #include "getline.h"
@@ -33,23 +23,23 @@
 #include "path.h"
 
 int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
-  FILE *fp;
-  int num_scanf;
-  int line_number;
-  int path_pno;
-  int num_points;
-  char *line = nullptr;
+  FILE * fp;
+  int    num_scanf;
+  int    line_number;
+  int    path_pno;
+  int    num_points;
+  char * line      = NULL;
   size_t line_size = 1024;
-  int version;
-  PATH *path = nullptr;
-  PATH **paths = nullptr;
-  int num_paths = 0;
-  float x, y, z;
-  int vno;
+  int    version;
+  PATH * path      = NULL;
+  PATH **paths     = NULL;
+  int    num_paths = 0;
+  float  x, y, z;
+  int    vno;
 
   /* Try opening the file. */
   fp = fopen(fname, "r");
-  if (nullptr == fp) {
+  if (NULL == fp) {
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "Couldn't open %s\n", fname));
   }
   line_number = 0;
@@ -141,7 +131,7 @@ int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
 
       /* Allocate our path object. */
       path = PathAlloc(num_points, fname);
-      if (nullptr == path) {
+      if (NULL == path) {
         fclose(fp);
         free(line);
         if (paths)
@@ -205,9 +195,9 @@ int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
         }
 
         /* Add this coordinate to our label. */
-        path->points[path_pno].x = x;
-        path->points[path_pno].y = y;
-        path->points[path_pno].z = z;
+        path->points[path_pno].x   = x;
+        path->points[path_pno].y   = y;
+        path->points[path_pno].z   = z;
         path->points[path_pno].vno = vno;
       }
 
@@ -231,14 +221,14 @@ int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
       }
 
       /* Add the path to our array. */
-      if (nullptr == paths) {
+      if (NULL == paths) {
         paths = (PATH **)calloc(num_paths + 1, sizeof(PATH *));
       } else {
         paths = (PATH **)realloc(paths, (num_paths + 1) * sizeof(PATH *));
       }
       paths[num_paths] = path;
       num_paths++;
-      path = nullptr;
+      path = NULL;
     } else {
       /* Didn't get a keyword we're looking for. */
       ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM,
@@ -252,7 +242,7 @@ int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
   free(line);
   fclose(fp);
 
-  *num_read = num_paths;
+  *num_read       = num_paths;
   *returned_paths = paths;
 
   return (ERROR_NONE);
@@ -260,12 +250,12 @@ int PathReadMany(char *fname, int *num_read, PATH ***returned_paths) {
 
 int PathWriteMany(char *fname, int num_paths, PATH **paths) {
   FILE *fp;
-  int path;
-  int path_pno;
+  int   path;
+  int   path_pno;
 
   /* Try to open the file. */
   fp = fopen(fname, "w");
-  if (nullptr == fp) {
+  if (NULL == fp) {
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "Couldn't open %s\n", fname));
   }
 
@@ -297,58 +287,59 @@ int PathWriteMany(char *fname, int num_paths, PATH **paths) {
   return (ERROR_NONE);
 }
 
-PATH *PathAlloc(int n_points, char *name) {
+PATH *PathAlloc(int n_points, const char *name) {
   PATH *path;
 
   if (n_points < 0)
-    return nullptr;
+    return NULL;
 
   /* Allocate path struct. */
   path = (PATH *)malloc(sizeof(PATH));
-  if (nullptr == path) {
+  if (NULL == path) {
     printf("ERROR: Couldn't allocate path.\n");
-    return nullptr;
+    return NULL;
   }
 
   /* Set the number of points. */
   path->n_points = n_points;
 
   /* Copy in a name. */
-  if (nullptr != name)
-    strncpy(path->name, name, 100);
-  else
+  if (NULL != name) {
+    strncpy(path->name, name, 100 - 1);
+  } else {
     strcpy(path->name, "");
+  }
 
   /* Allocate the point storage. */
   path->points = (PATH_POINT *)calloc(n_points, sizeof(PATH_POINT));
-  if (nullptr == path) {
+  if (NULL == path) {
     printf("ERROR: Couldn't allocate %d points in path.\n", n_points);
     free(path);
-    return nullptr;
+    return NULL;
   }
 
   return path;
 }
 
 int PathFree(PATH **path) {
-  if (nullptr == path || nullptr == (*path))
+  if (NULL == path || NULL == (*path))
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "No path supplied."));
 
   /* Free the points array, then the path struct. */
   free((*path)->points);
   free((*path));
-  *path = nullptr;
+  *path = NULL;
 
   return (ERROR_NONE);
 }
 
 int PathIsPathFile(char *fname) {
-  FILE *fp = nullptr;
-  int is_path_file = 0;
+  FILE *fp           = NULL;
+  int   is_path_file = 0;
 
   /* Open the file. */
   fp = fopen(fname, "r");
-  if (nullptr == fp)
+  if (NULL == fp)
     return 0;
 
   /* Run the stream version. */
@@ -361,10 +352,10 @@ int PathIsPathFile(char *fname) {
 }
 
 int PathIsPathFileStream(FILE *fp) {
-  char *line = nullptr;
-  size_t size = 1024;
-  char *needle = nullptr;
-  int found = 0;
+  char * line   = NULL;
+  size_t size   = 1024;
+  char * needle = NULL;
+  int    found  = 0;
 
   found = 0;
 
@@ -381,7 +372,7 @@ int PathIsPathFileStream(FILE *fp) {
     if (line[0] == '#') {
       /* Look for the Path string. It's a path file if so. */
       needle = strstr(line, "Path");
-      if (nullptr != needle) {
+      if (NULL != needle) {
         found = 1;
         break;
       }
@@ -394,18 +385,18 @@ int PathIsPathFileStream(FILE *fp) {
 }
 
 int PathConvertToLabel(PATH *path, LABEL **label) {
-  LABEL *new_label = nullptr;
-  int pno = 0;
+  LABEL *new_label = NULL;
+  int    pno       = 0;
 
-  if (nullptr == path)
+  if (NULL == path)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "Path pointer was null"));
 
-  if (nullptr == label)
+  if (NULL == label)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "Label pointer not null"));
 
   /* Make a label the size of first path. */
-  new_label = LabelAlloc(path->n_points, nullptr, nullptr);
-  if (nullptr == new_label)
+  new_label = LabelAlloc(path->n_points, NULL, NULL);
+  if (NULL == new_label)
     ErrorReturn(ERROR_NO_MEMORY,
                 (ERROR_NO_MEMORY, "Couldn't allocate label of %d points",
                  path->n_points));
@@ -414,9 +405,9 @@ int PathConvertToLabel(PATH *path, LABEL **label) {
 
   /* Write all the path points to the label. */
   for (pno = 0; pno < path->n_points; pno++) {
-    new_label->lv[pno].x = path->points[pno].x;
-    new_label->lv[pno].y = path->points[pno].y;
-    new_label->lv[pno].z = path->points[pno].z;
+    new_label->lv[pno].x   = path->points[pno].x;
+    new_label->lv[pno].y   = path->points[pno].y;
+    new_label->lv[pno].z   = path->points[pno].z;
     new_label->lv[pno].vno = path->points[pno].vno;
   }
 
@@ -427,27 +418,27 @@ int PathConvertToLabel(PATH *path, LABEL **label) {
 }
 
 int PathCreateFromLabel(LABEL *label, PATH **path) {
-  PATH *new_path = nullptr;
-  int pno = 0;
+  PATH *new_path = NULL;
+  int   pno      = 0;
 
-  if (nullptr == label)
+  if (NULL == label)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "Label pointer was null"));
 
-  if (nullptr == path)
+  if (NULL == path)
     ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "Path pointer was null"));
 
   /* Make the path. */
-  new_path = PathAlloc(label->n_points, nullptr);
-  if (nullptr == path)
+  new_path = PathAlloc(label->n_points, NULL);
+  if (NULL == path)
     ErrorReturn(ERROR_NO_MEMORY,
                 (ERROR_NO_MEMORY, "Couldn't allocate path of %d points",
                  label->n_points));
 
   /* Read points into the path from the label. */
   for (pno = 0; pno < label->n_points; pno++) {
-    new_path->points[pno].x = label->lv[pno].x;
-    new_path->points[pno].y = label->lv[pno].y;
-    new_path->points[pno].z = label->lv[pno].z;
+    new_path->points[pno].x   = label->lv[pno].x;
+    new_path->points[pno].y   = label->lv[pno].y;
+    new_path->points[pno].z   = label->lv[pno].z;
     new_path->points[pno].vno = label->lv[pno].vno;
   }
 

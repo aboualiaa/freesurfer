@@ -1,16 +1,7 @@
-/**
- * @file  ToolWindowMeasure.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:48 $
- *    $Revision: 1.15 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,8 +16,8 @@
 #define TOOLWINDOWMEASURE_H
 
 #include "UIUpdateHelper.h"
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 
 namespace Ui {
 class ToolWindowMeasure;
@@ -71,9 +62,9 @@ private:
 
   QList<QWidget *> m_widgets2D;
   QList<QWidget *> m_widgets3D;
-  Region2D *m_region;
-  SurfaceRegion *m_surfaceRegion;
-  bool m_bToUpdateWidgets;
+  Region2D *       m_region;
+  SurfaceRegion *  m_surfaceRegion;
+  bool             m_bToUpdateWidgets;
 };
 
 #endif // TOOLWINDOWMEASURE_H

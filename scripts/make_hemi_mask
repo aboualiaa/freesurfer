@@ -8,12 +8,8 @@
 #   hemi and map back to original space
 #
 # Original Author: Martin Reuter
-# CVS Revision Info:
-#    $Author: mreuter $
-#    $Date: 2014/09/29 15:29:21 $
-#    $Revision: 1.5 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,7 +21,7 @@
 #
 #
 
-set VERSION = '$Id: make_hemi_mask,v 1.5 2014/09/29 15:29:21 mreuter Exp $';
+set VERSION = 'make_hemi_mask @FS_VERSION@';
 
 
 if ( $#argv < 3 ) then

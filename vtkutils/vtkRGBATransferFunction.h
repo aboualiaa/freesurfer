@@ -1,7 +1,5 @@
 /**
- * @file  vtkRGBATransferFunction.h
- * @brief  Defines a transfer function for mapping a property to an RGBA color
- * value.
+ * @brief  Defines a transfer function for mapping a property to an RGBA color value.
  *
  * This code is based on vtkColorTransferFunction. It was modified to
  * add an alpha element to all color output. This required adding a
@@ -11,12 +9,8 @@
  */
 /*
  * Original Author: Kitware, Inc, modified by Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -103,7 +97,7 @@ public:
   // Description:
   // Returns an RGBA color for the specified scalar value
   double *GetColor(double x) { return vtkScalarsToColors::GetColor(x); }
-  void GetColor(double x, double rgba[4]);
+  void    GetColor(double x, double rgba[4]);
 
   // Description:
   // Get the color components individually.
@@ -132,8 +126,8 @@ public:
 
   // Description:
   // Fills in a table of n function values between x1 and x2
-  void GetTable(double x1, double x2, int n, double *table);
-  void GetTable(double x1, double x2, int n, float *table);
+  void                 GetTable(double x1, double x2, int n, double *table);
+  void                 GetTable(double x1, double x2, int n, float *table);
   const unsigned char *GetTable(double x1, double x2, int n);
 
   // Description:
@@ -168,7 +162,7 @@ public:
   // Returns a list of all nodes
   // Fills from a pointer to data stored in a similar list of nodes.
   double *GetDataPointer() { return this->Function; };
-  void FillFromDataPointer(int, double *);
+  void    FillFromDataPointer(int, double *);
 
   // Description:
   // map a set of scalars through the lookup table
@@ -194,8 +188,8 @@ protected:
 
   // The color function
   double *Function;
-  int FunctionSize;
-  int NumberOfPoints;
+  int     FunctionSize;
+  int     NumberOfPoints;
 
   // An evaluated color (0 to 255 RGBA)
   unsigned char UnsignedCharRGBAValue[4];
@@ -203,9 +197,9 @@ protected:
   // The min and max point locations for all three transfer functions
   double Range[2];
 
-  vtkTimeStamp BuildTime;
+  vtkTimeStamp   BuildTime;
   unsigned char *Table;
-  int TableSize;
+  int            TableSize;
 
   // Description:
   // Set the range of scalars being mapped. The set has no functionality

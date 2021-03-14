@@ -3,6 +3,8 @@
 
 #include "VTKPolyDataToPolylineMeshFilter.h"
 
+#include "itkMesh.h"
+
 #include <vtkCellArray.h>
 #include <vtkCellData.h>
 #include <vtkFieldData.h>
@@ -10,7 +12,7 @@
 template <class TImage>
 VTKPolyDataToPolylineMeshFilter<TImage>::VTKPolyDataToPolylineMeshFilter() {
   this->ProcessObject::SetNumberOfRequiredOutputs(1);
-  m_VTKPolyData = 0;
+  m_VTKPolyData                       = 0;
   typename TImage::Pointer outputMesh = TImage::New();
   this->ProcessObject::SetNthOutput(0, outputMesh.GetPointer());
 }
@@ -20,8 +22,8 @@ void VTKPolyDataToPolylineMeshFilter<TImage>::GenerateData() {
 
   GenerateData2();
   typename OutputMeshType::Pointer outputMesh = this->GetOutput();
-  vtkFieldData *fieldData = m_VTKPolyData->GetFieldData();
-  int k = 0;
+  vtkFieldData *                   fieldData  = m_VTKPolyData->GetFieldData();
+  int                              k          = 0;
   if (fieldData != 0) {
 
     for (int i = 0; i < fieldData->GetNumberOfArrays(); i++) {
@@ -44,7 +46,7 @@ void VTKPolyDataToPolylineMeshFilter<TImage>::GenerateData() {
     outputMesh->GetCellData()->Reserve(outputMesh->GetNumberOfCells());
 
     for (int i = 0; i < array->GetNumberOfTuples(); i++) {
-      double val = *(array->GetTuple(i));
+      double           val = *(array->GetTuple(i));
       std::vector<int> hola;
       hola.push_back(*(array->GetTuple(i)));
       //                   outputMesh->SetCellData(i, hola);
@@ -64,12 +66,13 @@ void VTKPolyDataToPolylineMeshFilter<TImage>::GenerateData2() {
 
   typename OutputMeshType::Pointer outputMesh = this->GetOutput();
   outputMesh->SetCellsAllocationMethod(
-      OutputMeshType::CellsAllocatedDynamicallyCellByCell);
+      itk::MeshEnums::MeshClassCellsAllocationMethod::
+          CellsAllocatedDynamicallyCellByCell);
 
   outputMesh->GetPoints()->Reserve(m_VTKPolyData->GetNumberOfPoints());
 
   PointIdentifier pointId = 0;
-  CellIdentifier cellId = 0;
+  CellIdentifier  cellId  = 0;
 
   vtkCellArray *lines = m_VTKPolyData->GetLines();
   lines->InitTraversal();

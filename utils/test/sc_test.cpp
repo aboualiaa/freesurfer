@@ -1,14 +1,9 @@
 /**
- * @file  sc_test.c
  * @brief tests of core math routines
  *
  */
 /*
  * Original Author: Nick Schmansky, Silvester Czanner
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2016/02/27 20:38:29 $
- *    $Revision: 1.15 $
  *
  * Copyright (C) 2002 Jason H Stover.
  *
@@ -17,11 +12,11 @@
  */
 
 //#include <config.h>
+#include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
-#include <math.h>
 
 #define HAVE_VPRINTF 1
 #define STDC_HEADERS 1
@@ -47,7 +42,7 @@
 
 const sc_rng_type *sc_rng_intern_type = &intern_rng_type;
 
-static unsigned int tests = 0;
+static unsigned int tests  = 0;
 static unsigned int passed = 0;
 static unsigned int failed = 0;
 
@@ -95,7 +90,7 @@ int sc_isnan(const double x) {
 
 int sc_isinf(const double x) {
   double y = x - x;
-  int s = (y != y);
+  int    s = (y != y);
 
   if (s && x > 0)
     return +1;
@@ -225,7 +220,7 @@ void sc_test_factor(double result, double expected, double factor,
     status = (result > expected || result < expected);
   } else {
     double u = result / expected;
-    status = (u > factor || u < 1.0 / factor);
+    status   = (u > factor || u < 1.0 / factor);
   }
 
   tests++;
@@ -1074,9 +1069,9 @@ void test_tdistinv(void) {
        TEST_TOL6);
 }
 
-#define FUNC(x) test_##x, "test sc_ran_" #x
+#define FUNC(x)  test_##x, "test sc_ran_" #x
 #define FUNC2(x) test_##x, test_##x##_pdf, "test sc_ran_" #x
-#define N 100000
+#define N        100000
 
 static sc_rng *r_global;
 
@@ -1084,9 +1079,9 @@ static double test_ugaussian(void) { return sc_ran_gaussian(r_global, 1.0); }
 
 void testMoments(double (*f)(void), const char *name, double a, double b,
                  double p) {
-  int i;
+  int    i;
   double count = 0, expected, sigma;
-  int status;
+  int    status;
 
   for (i = 0; i < N; i++) {
     double r = f();
@@ -1095,7 +1090,7 @@ void testMoments(double (*f)(void), const char *name, double a, double b,
   }
 
   expected = p * N;
-  sigma = fabs(count - expected) / sqrt(expected);
+  sigma    = fabs(count - expected) / sqrt(expected);
 
   status = (sigma > 3);
 

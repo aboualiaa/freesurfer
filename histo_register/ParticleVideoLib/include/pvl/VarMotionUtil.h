@@ -1,8 +1,8 @@
 #ifndef _PVL_VAR_MOTION_UTIL_H_
 #define _PVL_VAR_MOTION_UTIL_H_
 #include <sbl/core/Config.h>
-#include <sbl/math/Vector.h>
 #include <sbl/image/MotionField.h>
+#include <sbl/math/Vector.h>
 using namespace sbl;
 namespace pvl {
 

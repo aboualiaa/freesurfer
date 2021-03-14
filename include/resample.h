@@ -1,17 +1,6 @@
-/**
- * @file  resample.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/12/08 19:42:26 $
- *    $Revision: 1.25 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,8 +16,8 @@
 #define RESAMPLE_H_INC
 
 #include "MRIio_old.h"
-#include "mrisurf.h"
 #include "label.h"
+#include "mrisurf.h"
 
 /* float-to-integer conversions */
 #define FLT2INT_ROUND 0 /* c = (int)rint(x) */
@@ -37,8 +26,8 @@
 
 /* interpolation methods */
 #define INTERP_NEAREST 0
-#define INTERP_TLI 1
-#define INTERP_SINC 2
+#define INTERP_TLI     1
+#define INTERP_SINC    2
 
 #define IND2CRS
 #define CRS2IND
@@ -49,8 +38,8 @@ char *ResampleVtxMapFile;
 extern char *ResampleVtxMapFile;
 #endif
 
-int interpolation_code(char *interpolation_string);
-int float2int_code(char *float2int_string);
+int interpolation_code(const char *interpolation_string);
+int float2int_code(const char *float2int_string);
 
 int ProjNormFracThick(float *x, float *y, float *z, const MRI_SURFACE *surf,
                       int vtx, float frac);
@@ -120,7 +109,7 @@ MRI *surf2surf_nnf(MRI *SrcSurfVals, MRI_SURFACE *SrcSurfReg,
                    MRI_SURFACE *TrgSurfReg, int UseHash);
 
 MRI *MRImapSurf2VolClosest(MRIS *surf, MRI *vol, MATRIX *Ma2v, float projfrac);
-int MRIsurf2Vol(MRI *surfvals, MRI *vol, MRI *map);
+int  MRIsurf2Vol(MRI *surfvals, MRI *vol, MRI *map);
 MRI *MRIsurf2VolOpt(MRI *ribbon, MRIS **surfs, MRI **overlays, int nsurfs,
                     LTA *Q, MRI *volsurf);
 

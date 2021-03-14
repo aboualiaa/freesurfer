@@ -1,29 +1,30 @@
+#include <algorithm>
 #include <functional>
 #include <iostream>
-#include <algorithm>
+#include <sstream>
 
-#include <boost/test/unit_test.hpp>
-#include <boost/test/data/test_case.hpp>
-#include <boost/test/data/monomorphic.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/test/data/monomorphic.hpp>
+#include <boost/test/data/test_case.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include "itkImageRegionConstIteratorWithIndex.h"
 
-#include "kvlAtlasMesh.h"
 #include "atlasmeshvisitcounter.hpp"
 #include "atlasmeshvisitcountercpuwrapper.hpp"
+#include "kvlAtlasMesh.h"
 #ifdef CUDA_FOUND
-#include "cudaimage.hpp"
 #include "atlasmeshvisitcountercuda.hpp"
+#include "cudaimage.hpp"
 #include "visitcountersimplecuda.hpp"
 #include "visitcountertetrahedralmeshcuda.hpp"
 #endif
 
 #include "imageutils.hpp"
 #include "testfileloader.hpp"
-#include "testiosupport.hpp"
 
 #ifdef CUDA_FOUND
+#include "testiosupport.hpp"
 #ifdef GPU_ALL_PRECISIONS
 typedef boost::mpl::list<kvl::cuda::VisitCounterSimple<float, float>,
                          kvl::cuda::VisitCounterSimple<double, double>,
@@ -39,14 +40,14 @@ typedef boost::mpl::list<kvl::cuda::VisitCounterSimple<double, double>,
 
 // --------------------
 
-const int nDims = 3;
+const int nDims     = 3;
 const int nVertices = 4;
-const int nAlphas = 1;
+const int nAlphas   = 1;
 
 // --------------------
 
 static std::ostream &operator<<(std::ostream &os,
-                                const float v[nVertices][nDims]) {
+                                const float   v[nVertices][nDims]) {
   os << "[";
 
   for (unsigned int j = 0; j < nVertices; j++) {
@@ -75,7 +76,7 @@ static std::string TetrahedronToString(const float v[nVertices][nDims]) {
 
 void CheckVisitCounter(kvl::interfaces::AtlasMeshVisitCounter *visitCounter,
                        TestFileLoader::ImageType::ConstPointer targetImage,
-                       kvl::AtlasMesh::ConstPointer targetMesh) {
+                       kvl::AtlasMesh::ConstPointer            targetMesh) {
   kvl::AtlasMeshVisitCounter::Pointer originalVisitCounter =
       kvl::AtlasMeshVisitCounter::New();
 
@@ -105,26 +106,27 @@ void CheckVisitCounter(kvl::interfaces::AtlasMeshVisitCounter *visitCounter,
 // -------------------
 
 typedef kvl::interfaces::AtlasMeshVisitCounter::ImageType ImageType;
-typedef itk::AutomaticTopologyMeshSource<kvl::AtlasMesh> MeshSource;
-typedef MeshSource::IdentifierType IdentifierType;
+typedef itk::AutomaticTopologyMeshSource<kvl::AtlasMesh>  MeshSource;
+typedef itk::AutomaticTopologyMeshSource<kvl::AtlasMesh>::IdentifierType
+                       IdentifierType;
 typedef kvl::AtlasMesh Mesh;
 
 // ----------------------------
 
 void SingleTetrahedronUnitMesh(
     kvl::interfaces::AtlasMeshVisitCounter *visitCounter,
-    float vertices[nVertices][nDims],
-    std::function<int(int, int, int)> expectedCount) {
+    float                                   vertices[nVertices][nDims],
+    std::function<int(int, int, int)>       expectedCount) {
   const int imageSize = 2;
-  const int nx = imageSize;
-  const int ny = imageSize;
-  const int nz = imageSize;
+  const int nx        = imageSize;
+  const int ny        = imageSize;
+  const int nz        = imageSize;
 
   ImageType::Pointer image =
       kvl::Testing::CreateImageCube<ImageType>(imageSize, 0);
   BOOST_TEST_CHECKPOINT("Image created");
 
-  Mesh::Pointer mesh =
+  kvl::AtlasMesh::Pointer mesh =
       kvl::Testing::CreateSingleTetrahedronMesh(vertices, nAlphas);
   BOOST_TEST_CHECKPOINT("Mesh created");
 
@@ -296,9 +298,8 @@ void UpperCornerExact(kvl::interfaces::AtlasMeshVisitCounter *visitCounter) {
 
 void GenerateSpecificCornerTetrahedron(float verts[nVertices][nDims],
                                        const unsigned char corner,
-                                       const float scale) {
-  // Generate a 'corner' tetrahedron, where the apex is specified by the bits of
-  // the 'corner' argument
+                                       const float         scale) {
+  // Generate a 'corner' tetrahedron, where the apex is specified by the bits of the 'corner' argument
 
   // Separate out the bits specifying the corner
   unsigned char mask = 4;
@@ -332,8 +333,8 @@ void GenerateSpecificCornerTetrahedron(float verts[nVertices][nDims],
 
 ImageType::ConstPointer
 ApplyVisitCounterToMesh(kvl::interfaces::AtlasMeshVisitCounter *visitCounter,
-                        const ImageType *targetImage,
-                        Mesh::Pointer targetMesh) {
+                        const ImageType *                       targetImage,
+                        kvl::AtlasMesh::Pointer                 targetMesh) {
   visitCounter->SetRegions(targetImage->GetLargestPossibleRegion());
   visitCounter->VisitCount(targetMesh);
   BOOST_TEST_CHECKPOINT("VisitCount run");
@@ -366,7 +367,7 @@ void CheckVisitCounterWithPermutations(
   {
     kvl::AtlasMeshVisitCounterCPUWrapper origVisitCounter;
     BOOST_TEST_CHECKPOINT("Created reference VisitCounter");
-    Mesh::Pointer baseMesh =
+    kvl::AtlasMesh::Pointer baseMesh =
         kvl::Testing::CreateSingleTetrahedronMesh(tetrahedron, nAlphas);
     BOOST_TEST_CHECKPOINT("baseMesh Created");
     standardVisit =
@@ -394,7 +395,7 @@ void CheckVisitCounterWithPermutations(
 
     BOOST_TEST_CONTEXT("Tetrahedron : " << TetrahedronToString(permTet)) {
       // Generate the result image
-      Mesh::Pointer mesh =
+      kvl::AtlasMesh::Pointer mesh =
           kvl::Testing::CreateSingleTetrahedronMesh(permTet, nAlphas);
       BOOST_TEST_CHECKPOINT("Permuted mesh created");
 
@@ -576,9 +577,9 @@ BOOST_DATA_TEST_CASE(ConsistencyCheck, boost::unit_test::data::xrange(1, 2),
   GenerateSpecificCornerTetrahedron(scaleVertices, 0, scale);
   BOOST_TEST_CHECKPOINT("Created tetrahedra");
 
-  Mesh::Pointer unitMesh =
+  kvl::AtlasMesh::Pointer unitMesh =
       kvl::Testing::CreateSingleTetrahedronMesh(unitVertices, nAlphas);
-  Mesh::Pointer scaleMesh =
+  kvl::AtlasMesh::Pointer scaleMesh =
       kvl::Testing::CreateSingleTetrahedronMesh(scaleVertices, nAlphas);
   BOOST_TEST_CHECKPOINT("Created meshes");
 
@@ -588,7 +589,7 @@ BOOST_DATA_TEST_CASE(ConsistencyCheck, boost::unit_test::data::xrange(1, 2),
 
   ImageType::ConstPointer unitVisit =
       ApplyVisitCounterToMesh(&visitCounter, targetImage, unitMesh);
-  const ImageType *unitResult = visitCounter.GetImage();
+  const ImageType *       unitResult = visitCounter.GetImage();
   ImageType::ConstPointer scaleVisit =
       ApplyVisitCounterToMesh(&visitCounter, targetImage, scaleMesh);
   const ImageType *scaleResult = visitCounter.GetImage();
@@ -631,8 +632,8 @@ BOOST_AUTO_TEST_CASE(ReferenceImpl) {
   // Note that image and mesh are supplied by TestFileLoader
   CheckVisitCounter(&visitCounter, image, mesh);
 
-  BOOST_TEST_MESSAGE("SetRegions Time  : " << visitCounter.tSetRegions);
-  BOOST_TEST_MESSAGE("VisitCounter Time: " << visitCounter.tVisitCount);
+  //  BOOST_TEST_MESSAGE("SetRegions Time  : " << visitCounter.tSetRegions);
+  //  BOOST_TEST_MESSAGE("VisitCounter Time: " << visitCounter.tVisitCount);
 }
 
 #ifdef CUDA_FOUND

@@ -1,16 +1,11 @@
 /**
- * @file  utils.h
  * @brief well....utils!
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2016/01/20 23:38:54 $
- *    $Revision: 1.58 $
  *
- * Copyright © 2011-2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,20 +21,21 @@
 #define UTILS_H
 
 #include "base.h"
+#include <string>
 
-#define MATLAB_FILE 0
-#define HIPS_FILE 1
-#define LIST_FILE 2
+#define MATLAB_FILE  0
+#define HIPS_FILE    1
+#define LIST_FILE    2
 #define UNKNOWN_FILE 3
-#define TEXT_FILE 4
+#define TEXT_FILE    4
 
 double randomNumber(double low, double hi);
-int setRandomSeed(long seed);
-long getRandomSeed();
-long getRandomCalls();
+int    setRandomSeed(long seed);
+long   getRandomSeed();
+long   getRandomCalls();
 
 double normAngle(double angle);
-float deltaAngle(float angle1, float angle2);
+float  deltaAngle(float angle1, float angle2);
 double calcDeltaPhi(double phi1, double phi2);
 
 #if 1
@@ -51,8 +47,8 @@ double latan2(double y, double x);
 float fastApproxAtan2f(float y, float x);
 
 float angleDistance(float theta1, float theta2);
-int QuadEqual(double a1, double a2);
-void fComplementCode(double *pdIn, double *pdOut, int iLen);
+int   QuadEqual(double a1, double a2);
+void  fComplementCode(double *pdIn, double *pdOut, int iLen);
 #ifndef _HOME_
 char *fgetl(char *s, int n, FILE *fp);
 #endif
@@ -71,19 +67,28 @@ char *StrReplace(const char *src, char *dst, char csrc, int cdst);
 
 char *FileNameOnly(const char *str, char *fname);
 char *FileNameFromWildcard(const char *inStr, char *outStr);
-int FileExists(const char *fname);
-int FileType(const char *fname);
-int FileNumber(const char *fname);
-int FileNumberOfEntries(const char *fname);
+int   FileExists(const char *fname);
+int   FileType(const char *fname);
+int   FileNumber(const char *fname);
+int   FileNumberOfEntries(const char *fname);
 char *FileName(char *full_name);
 char *FileFullName(char *full_name);
 char *FileTmpName(const char *basename);
-void FileRename(const char *inName, const char *outName);
+void  FileRename(const char *inName, const char *outName);
 char *FileNameAbsolute(const char *fname, char *absFname);
 char *FileNamePath(const char *fname, char *pathName);
 char *FileNameRemoveExtension(const char *in_fname, char *out_fname);
 char *FileNameExtension(const char *fname, char *ext);
 char *AppendString(char *src, char *app);
+
+bool stringEndsWith(const std::string &value, const std::string &ending);
+
+bool        directoryExists(std::string const &directory);
+bool        directoryIsWritable(std::string const &directory);
+std::string getEnvironVar(std::string const &key);
+std::string getBaseTempDir();
+std::string makeTempFile(std::string const &suffix = "");
+std::string makeTempDir();
 
 int devIsinf(float value);
 int devIsnan(float value);
@@ -91,27 +96,27 @@ int devFinite(float value);
 
 int GetVmPeak();
 int GetVmSize();
-int getMemoryUsed();    // return total virtual memory used by Progname
-                        // in Kbytes. works only under Linux /proc system
-void printMemoryUsed(); // print function of the above.
-char *strcpyalloc(const char *str);
-int ItemsInString(const char *str);
-char *deblank(const char *str);
-char *str_toupper(char *str);
+int getMemoryUsed();      // return total virtual memory used by Progname
+                          // in Kbytes. works only under Linux /proc system
+void   printMemoryUsed(); // print function of the above.
+char * strcpyalloc(const char *str);
+int    ItemsInString(const char *str);
+char * deblank(const char *str);
+char * str_toupper(char *str);
 double sum2stddev(double xsum, double xsum2, int nx);
-int compare_ints(const void *v1, const void *v2);
-int compare_floats(const void *v1, const void *v2);
-int nunqiue_int_list(int *idlist, int nlist);
+int    compare_ints(const void *v1, const void *v2);
+int    compare_floats(const void *v1, const void *v2);
+int    nunqiue_int_list(int *idlist, int nlist);
 
 int *unqiue_int_list(int *idlist, int nlist, int *nunique);
-int most_frequent_int_list(int *idlist, int nlist, int *nmax);
+int  most_frequent_int_list(int *idlist, int nlist, int *nmax);
 
 /* Necessary when Intel C/C++ compiler is used... */
 void __ltoq();
 void __qtol();
 
 char *GetNthItemFromString(const char *str, int nth);
-int CountItemsInString(const char *str);
+int   CountItemsInString(const char *str);
 
 /* Routines for Robust Gaussians (Median and MAD) */
 float kth_smallest(float a[], int n, int k);
@@ -129,15 +134,15 @@ int outputHelpXml(const unsigned char *text, unsigned int size);
 /* Set progress callback */
 extern void (*progress_callback)(int progress);
 extern int global_progress_range[2];
-void SetProgressCallback(void (*callback)(int), int start, int end);
-void exec_progress_callback(int slice, int total_slices, int frame,
-                            int total_frames);
+void       SetProgressCallback(void (*callback)(int), int start, int end);
+void       exec_progress_callback(int slice, int total_slices, int frame,
+                                  int total_frames);
 
-int *compute_permutation(int num, int *vec);
-int *GetMemUsage(int *u);
-int PrintMemUsage(FILE *fp);
-int PrintRUsage(int who, const char *pre, FILE *fp);
-int WriteRUsage(int who, const char *pre, char *fname);
+int *   compute_permutation(int num, int *vec);
+int *   GetMemUsage(int *u);
+int     PrintMemUsage(FILE *fp);
+int     PrintRUsage(int who, const char *pre, FILE *fp);
+int     WriteRUsage(int who, const char *pre, char *fname);
 double *DListStats(double *dlist, int nlist, double *stats);
 
 #endif

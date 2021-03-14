@@ -1,5 +1,4 @@
 /**
- * @file  vtkKWProgressDialog.cxx
  * @brief A KWWidgets progress dialog
  *
  * A simple KWWidgets dialog box with a progress bar tht listens to
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,17 +20,14 @@
  */
 
 #include "vtkKWProgressDialog.h"
+#include "vtkAlgorithm.h"
 #include "vtkKWApplication.h"
 #include "vtkKWDialog.h"
-#include "vtkKWProgressGauge.h"
 #include "vtkKWLabel.h"
+#include "vtkKWProgressGauge.h"
 #include "vtkObjectFactory.h"
-#include "vtkAlgorithm.h"
 
-using namespace std;
-
-// vtkStandardNewMacro( vtkKWProgressDialog );
-vtkCxxRevisionMacro(vtkKWProgressDialog, "$Revision: 1.3 $");
+//vtkStandardNewMacro( vtkKWProgressDialog );
 
 vtkKWProgressDialog *vtkKWProgressDialog::New() {
 
@@ -65,8 +57,8 @@ void vtkKWProgressDialog::Execute(vtkObject *iCaller, unsigned long iEvent,
 
   if (iEvent == vtkCommand::ProgressEvent) {
 
-    vtkAlgorithm *algo = (vtkAlgorithm *)iCaller;
-    double progress = *(double *)(iCallData);
+    vtkAlgorithm *algo     = (vtkAlgorithm *)iCaller;
+    double        progress = *(double *)(iCallData);
 
     if (0 == progress) {
 
@@ -102,7 +94,7 @@ void vtkKWProgressDialog::Execute(vtkObject *iCaller, unsigned long iEvent,
         mProgressGauge->Delete();
         mDialog->Delete();
 
-        mDialog = NULL;
+        mDialog        = NULL;
         mProgressGauge = NULL;
       }
 

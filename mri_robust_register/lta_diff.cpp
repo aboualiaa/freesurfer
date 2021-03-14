@@ -1,17 +1,12 @@
 /**
- * @file  lta_diff.cpp
  * @brief A programm to compute differences of lta files (transforms)
  *
  */
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2016/03/10 16:57:29 $
- *    $Revision: 1.27 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,27 +17,45 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
+#include <cassert>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <vcl_iostream.h>
+#include <vector>
 
 #define export // obsolete feature 'export template' used in these headers
 #include <vnl/algo/vnl_determinant.h>
+#include <vnl/vnl_matlab_print.h>
+#include <vnl/vnl_matrix.h>
 #undef export
 
+#include "MyMatrix.h"
 #include "Registration.h"
 
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mrimorph.h"
+#include "timer.h"
+#include "transform.h"
 #include "version.h"
 
 using namespace std;
 
-struct Parameters
-{
+struct Parameters {
   string progname;
   string t1name;
   string t2name;
-  int disttype;
+  int    disttype;
   double normdiv;
-  bool invert1;
-  bool invert2;
-  bool vox2vox;
+  bool   invert1;
+  bool   invert2;
+  bool   vox2vox;
   double radius;
 };
 
@@ -51,7 +64,7 @@ static struct Parameters P = {"", "", "", 2, 1.0, false, false, false, 100.0};
 /*----------------------------------------------------------------------
  ----------------------------------------------------------------------*/
 #include "lta_diff.help.xml.h"
-static void printUsage() {
+static void printUsage(void) {
   outputHelpXml(lta_diff_help_xml, lta_diff_help_xml_len);
 }
 
@@ -64,7 +77,7 @@ static void printUsage() {
  \returns       number of used arguments for this command
  */
 static int parseNextCommand(int argc, char *argv[], Parameters &P) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[0] + 1; // remove '-'
@@ -73,31 +86,31 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   }
   StrUpper(option);
 
-  // cout << " option: " << option << endl;
+  //cout << " option: " << option << endl;
 
   if (!strcmp(option, "DIST") || !strcmp(option, "D")) {
     P.disttype = atoi(argv[1]);
-    nargs = 1;
+    nargs      = 1;
     cout << "--dist: Computing distance type: " << P.disttype << " ." << endl;
   } else if (!strcmp(option, "NORMDIV")) {
     P.normdiv = atof(argv[1]);
-    nargs = 1;
+    nargs     = 1;
     cout << "--normdiv: divide final distance by " << P.normdiv << " ." << endl;
   } else if (!strcmp(option, "RADIUS")) {
     P.radius = atof(argv[1]);
-    nargs = 1;
+    nargs    = 1;
     cout << "--radius: use RMS radius " << P.radius << "mm." << endl;
   } else if (!strcmp(option, "INVERT1")) {
     P.invert1 = true;
-    nargs = 0;
+    nargs     = 0;
     cout << "--invert1: inverting first transform. " << endl;
   } else if (!strcmp(option, "INVERT2")) {
     P.invert2 = true;
-    nargs = 0;
+    nargs     = 0;
     cout << "--invert2: inverting second transform. " << endl;
   } else if (!strcmp(option, "VOX")) {
     P.vox2vox = true;
-    nargs = 0;
+    nargs     = 0;
     cout << "--vox: analysing VOX to VOX transform (after correcting for voxel "
             "size). "
          << endl;
@@ -128,8 +141,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
 static bool parseCommandLine(int argc, char *argv[], Parameters &P) {
   // Check for version flag and exit if nothing else is passed:
   int nargs = handleVersionOption(argc, argv, "lta_diff");
-  if (nargs && argc - nargs == 1)
-  {
+  if (nargs && argc - nargs == 1) {
     exit(0);
   }
   argc -= nargs;
@@ -288,13 +300,13 @@ double cornerdiff(LTA *lta1, LTA *lta2, bool vox2vox) {
     LTAchangeType(lta2, LINEAR_RAS_TO_RAS);
   }
 
-  VECTOR *v_X = VectorAlloc(4, MATRIX_REAL);  /* input (src) coordinates */
+  VECTOR *v_X  = VectorAlloc(4, MATRIX_REAL); /* input (src) coordinates */
   VECTOR *v_XR = VectorAlloc(4, MATRIX_REAL); /* input (src) coordinates */
   VECTOR *v_Y1 =
       VectorAlloc(4, MATRIX_REAL); /* transformed (dst) coordinates */
   VECTOR *v_Y2 =
       VectorAlloc(4, MATRIX_REAL); /* transformed (dst) coordinates */
-  VECTOR_ELT(v_X, 4) = 1;
+  VECTOR_ELT(v_X, 4)  = 1;
   VECTOR_ELT(v_Y1, 4) = 1;
   VECTOR_ELT(v_Y2, 4) = 1;
 
@@ -302,7 +314,7 @@ double cornerdiff(LTA *lta1, LTA *lta2, bool vox2vox) {
   assert(lta1->xforms[0].src.height == lta2->xforms[0].src.height);
   assert(lta1->xforms[0].src.width == lta2->xforms[0].src.width);
 
-  int y3, y2, y1;
+  int    y3, y2, y1;
   double d = 0;
   for (y3 = 0; y3 < 2; y3++) {
     V3_Z(v_X) = y3 * (lta1->xforms[0].src.depth - 1);
@@ -329,10 +341,9 @@ double cornerdiff(LTA *lta1, LTA *lta2, bool vox2vox) {
         double d2 = V3_Y(v_Y1) - V3_Y(v_Y2);
         double d3 = V3_Z(v_Y1) - V3_Z(v_Y2);
         d += sqrt(d1 * d1 + d2 * d2 + d3 * d3);
-        // cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<
-        // V3_Z(v_X) << endl; cout << "   mapped to "<< V3_X(v_Y1) << " , " <<
-        // V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << endl; cout << "   mapped to "<<
-        // V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << endl;
+        //cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<  V3_Z(v_X) << endl;
+        //cout << "   mapped to "<< V3_X(v_Y1) << " , " <<  V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << endl;
+        //cout << "   mapped to "<< V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << endl;
       }
     }
   }
@@ -356,11 +367,11 @@ double cornerdiff(LTA *lta1, bool vox2vox) {
   VECTOR *v_X = VectorAlloc(4, MATRIX_REAL); /* input (src) coordinates */
   VECTOR *v_Y1 =
       VectorAlloc(4, MATRIX_REAL); /* transformed (dst) coordinates */
-  VECTOR_ELT(v_X, 4) = 1;
+  VECTOR_ELT(v_X, 4)  = 1;
   VECTOR_ELT(v_Y1, 4) = 1;
 
-  int y3, y2, y1;
-  double d = 0;
+  int    y3, y2, y1;
+  double d    = 0;
   double dmax = 0;
   for (y3 = 0; y3 < 2; y3++) {
     V3_Z(v_X) = y3 * (lta1->xforms[0].src.depth - 1);
@@ -372,7 +383,7 @@ double cornerdiff(LTA *lta1, bool vox2vox) {
         if (vox2vox)
           MatrixMultiply(lta1->xforms[0].m_L, v_X, v_Y1);
         else {
-          // map corner to ras, map it with Ras2ras and compute distance
+          //map corner to ras, map it with Ras2ras and compute distance
           MATRIX *mv2r = vg_i_to_r(&lta1->xforms[0].src);
           MatrixMultiply(mv2r, v_X, v_X);
           MatrixMultiply(lta1->xforms[0].m_L, v_X, v_Y1);
@@ -383,14 +394,13 @@ double cornerdiff(LTA *lta1, bool vox2vox) {
         double d2 = V3_Y(v_Y1) - V3_Y(v_X);
         double d3 = V3_Z(v_Y1) - V3_Z(v_X);
         double dd = sqrt(d1 * d1 + d2 * d2 + d3 * d3);
-        // cout << " dd: " << dd << endl;
+        //cout << " dd: " << dd << endl;
         if (dd > dmax)
           dmax = dd;
         d += dd;
-        // cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<
-        // V3_Z(v_X) << endl; cout << "   mapped to "<< V3_X(v_Y1) << " , " <<
-        // V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << endl; cout << "   mapped to "<<
-        // V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << endl;
+        //cout << " corner : " << V3_X(v_X) << " , " <<  V3_Y(v_X) << " , " <<  V3_Z(v_X) << endl;
+        //cout << "   mapped to "<< V3_X(v_Y1) << " , " <<  V3_Y(v_Y1) << " , " <<  V3_Z(v_Y1) << endl;
+        //cout << "   mapped to "<< V3_X(v_Y2) << " , " <<  V3_Y(v_Y2) << " , " <<  V3_Z(v_Y2) << endl;
       }
     }
   }
@@ -403,10 +413,10 @@ double cornerdiff(LTA *lta1, bool vox2vox) {
 double determinant(MATRIX *M1, MATRIX *M2) {
 
   //   MATRIX* M = MatrixAlloc(4,4,MATRIX_REAL);
-  MATRIX *M = MatrixCopy(M1, nullptr);
-  if (M2 != nullptr) {
-    // cout << " inverting" << endl;
-    // M = MatrixInverse(M1,M);
+  MATRIX *M = MatrixCopy(M1, NULL);
+  if (M2 != NULL) {
+    //cout << " inverting" << endl;
+    //M = MatrixInverse(M1,M);
     M = MatrixMultiply(M2, M, M);
   }
 
@@ -443,20 +453,20 @@ void testQuaternion(const vnl_matrix<double> &Rot) {
 void decompose(MATRIX *M1, MATRIX *M2) {
   vnl_matrix<double> m = MyMatrix::convertMATRIX2VNL(M1);
 
-  if (M2 != nullptr) {
-    // cout << " inverting" << endl;
-    // M = MatrixInverse(M1,M);
+  if (M2 != NULL) {
+    //cout << " inverting" << endl;
+    //M = MatrixInverse(M1,M);
     vnl_matrix<double> m2 = MyMatrix::convertMATRIX2VNL(M2);
-    m = m * m2;
+    m                     = m * m2;
   }
 
   cout << " Decompose M1*M2 into Rot * Shear * Scale + Trans: " << endl << endl;
 
-  vnl_matrix<double> Rot, Shear;
+  vnl_matrix<double>      Rot, Shear;
   vnl_diag_matrix<double> Scale;
   MyMatrix::Polar2Decomposition(m.extract(3, 3), Rot, Shear, Scale);
   vnl_matlab_print(std::cout, Rot, "Rot", vnl_matlab_print_format_long);
-  cout << endl;
+  std::cout << std::endl;
 
   Quaternion Q;
   Q.importMatrix(Rot[0][0], Rot[0][1], Rot[0][2], Rot[1][0], Rot[1][1],
@@ -469,14 +479,14 @@ void decompose(MATRIX *M1, MATRIX *M2) {
   cout << endl;
 
   vnl_matlab_print(std::cout, Shear, "Shear", vnl_matlab_print_format_long);
-  cout << endl;
+  std::cout << std::endl;
 
   vnl_matlab_print(std::cout, Scale, "Scale", vnl_matlab_print_format_long);
-  cout << endl;
+  std::cout << std::endl;
 
   vnl_vector<double> t = m.extract(3, 1, 0, 3).get_column(0);
   vnl_matlab_print(std::cout, t, "Trans", vnl_matlab_print_format_long);
-  cout << endl;
+  std::cout << std::endl;
 
   cout << "AbsTrans = " << t.two_norm() << endl;
   cout << endl;
@@ -487,7 +497,7 @@ void decompose(MATRIX *M1, MATRIX *M2) {
 double sphereDiff(MATRIX *M1, MATRIX *M2, double r) {
 
   MATRIX *M = MatrixAlloc(4, 4, MATRIX_REAL);
-  if (M2 == nullptr)
+  if (M2 == NULL)
     M = MatrixCopy(M1, M);
   else {
     M = MatrixInverse(M1, M);
@@ -496,10 +506,10 @@ double sphereDiff(MATRIX *M1, MATRIX *M2, double r) {
 
   // MatrixPrintFmt(stdout,"% 2.8f",M);
 
-  double dmax = 0;
-  double dmin = std::numeric_limits<double>::infinity();
-  double davg = 0;
-  int counter = 0;
+  double dmax    = 0;
+  double dmin    = std::numeric_limits<double>::infinity();
+  double davg    = 0;
+  int    counter = 0;
 
   VECTOR *v_A = VectorAlloc(4, MATRIX_REAL); /* input (src) coordinates */
   VECTOR *v_B = VectorAlloc(4, MATRIX_REAL); /* transformed (dst) coordinates */
@@ -518,9 +528,9 @@ double sphereDiff(MATRIX *M1, MATRIX *M2, double r) {
   double d2 = V3_Y(v_B) - V3_Y(v_A);
   double d3 = V3_Z(v_B) - V3_Z(v_A);
   double dd = sqrt(d1 * d1 + d2 * d2 + d3 * d3);
-  dmax = dd;
-  dmin = dd;
-  davg = dd;
+  dmax      = dd;
+  dmin      = dd;
+  davg      = dd;
   counter++;
   V3_X(v_A) = 0;
   V3_Y(v_A) = 0;
@@ -543,15 +553,14 @@ double sphereDiff(MATRIX *M1, MATRIX *M2, double r) {
     double angle1 = (i * M_PI * 0.5) / max; // from -pi/2 to +pi/2
     // radius:
     double r1 = cos(angle1);
-    double h = sin(angle1);
-    // circumference is 2pi *r1, we want 4*max samples at aequator (where r=1
-    // and cc 2pi)
+    double h  = sin(angle1);
+    // circumference is 2pi *r1, we want 4*max samples at aequator (where r=1 and cc 2pi)
     int max2 = int(4.0 * max * r1);
     for (int j = 0; j < max2; j++) {
       double angle2 = (2.0 * M_PI * j) / max2; // from 0 to 2pi
-      V3_X(v_A) = r * r1 * cos(angle2);
-      V3_Y(v_A) = r * r1 * sin(angle2);
-      V3_Z(v_A) = r * h;
+      V3_X(v_A)     = r * r1 * cos(angle2);
+      V3_Y(v_A)     = r * r1 * sin(angle2);
+      V3_Z(v_A)     = r * h;
       MatrixMultiply(M, v_A, v_B);
       d1 = V3_X(v_B) - V3_X(v_A);
       d2 = V3_Y(v_B) - V3_Y(v_A);
@@ -573,12 +582,12 @@ double sphereDiff(MATRIX *M1, MATRIX *M2, double r) {
 
 void testSphereDiff() {
 
-  MATRIX *T = MatrixIdentity(4, nullptr);
+  MATRIX *T     = MatrixIdentity(4, NULL);
   T->rptr[1][4] = 10.0;
   cout << sphereDiff(T, NULL, 100) << endl;
 
   // rotation 90degree around z axis
-  MATRIX *R = MatrixIdentity(4, nullptr);
+  MATRIX *R     = MatrixIdentity(4, NULL);
   R->rptr[1][1] = 0;
   R->rptr[1][2] = -1;
   R->rptr[2][1] = 1;
@@ -591,14 +600,14 @@ void testSphereDiff() {
 double interpolationError2D(double angle) {
   int side = 256;
 
-  // MRI* mri_error = MRIalloc(side, side,1,MRI_FLOAT);
+  //MRI* mri_error = MRIalloc(side, side,1,MRI_FLOAT);
   MATRIX *a = MatrixAllocRotation(3, angle, Z_ROTATION);
 
   VECTOR *v_X = VectorAlloc(3, MATRIX_REAL); // input (src) coordinates
   VECTOR *v_Y = VectorAlloc(3, MATRIX_REAL); // transformed (dst) coordinates
-  double errorsum = 0, x, y;
-  int xm, ym;
-  double val, xmd, ymd, xpd, ypd; // d's are distances
+  double  errorsum = 0, x, y;
+  int     xm, ym;
+  double  val, xmd, ymd, xpd, ypd; // d's are distances
   V3_Z(v_Y) = 0;
   for (int y1 = 0; y1 < side; y1++)
     for (int y2 = 0; y2 < side; y2++) {
@@ -621,9 +630,9 @@ double interpolationError2D(double angle) {
       xpd = (1.0f - xmd);
       ypd = (1.0f - ymd);
 
-      // cout << "x: " << x << " xm: " << xm << " xp: " << xp << " xmd: " << xmd
-      // << " xpd: " << xpd << endl; cout << "y: " << y <<" ym: " << ym << " yp:
-      // " << yp << " ymd: " << ymd << " ypd: " << ypd << endl; assert(x>=0);
+      //cout << "x: " << x << " xm: " << xm << " xp: " << xp << " xmd: " << xmd << " xpd: " << xpd << endl;
+      //cout << "y: " << y <<" ym: " << ym << " yp: " << yp << " ymd: " << ymd << " ypd: " << ypd << endl;
+      //assert(x>=0);
       assert(xmd >= 0 && xpd >= 0);
       assert(ymd >= 0 && ypd >= 0);
 
@@ -636,11 +645,11 @@ double interpolationError2D(double angle) {
         val += ymd;
       else
         val += ypd;
-      // MRIFvox(mri_error,y1,y2,0) = (float)(val) ;
+      //MRIFvox(mri_error,y1,y2,0) = (float)(val) ;
       errorsum += val;
     }
-  // MRIwrite(mri_error,"mri_error.mgz");
-  // MRIfree(&mri_error);
+  //MRIwrite(mri_error,"mri_error.mgz");
+  //MRIfree(&mri_error);
   return errorsum;
 }
 
@@ -649,18 +658,18 @@ double interpolationError(LTA *lta) {
   LTAchangeType(lta, LINEAR_VOX_TO_VOX);
 
   // sample from dst back to src
-  MATRIX *mAinv = MatrixInverse(lta->xforms[0].m_L, nullptr);
+  MATRIX *mAinv = MatrixInverse(lta->xforms[0].m_L, NULL);
   if (!mAinv)
     ErrorExit(ERROR_BADPARM, "interpolationError: xform is singular");
-  int width = lta->xforms[0].dst.width;
-  int height = lta->xforms[0].dst.height;
-  int depth = lta->xforms[0].dst.depth;
-  VECTOR *v_X = VectorAlloc(4, MATRIX_REAL); // input (src) coordinates
-  VECTOR *v_Y = VectorAlloc(4, MATRIX_REAL); // transformed (dst) coordinates
-  int y3, y2, y1;
-  double x, y, z;
-  int xm, ym, zm;
-  double val, xmd, ymd, zmd, xpd, ypd, zpd; // d's are distances
+  int     width  = lta->xforms[0].dst.width;
+  int     height = lta->xforms[0].dst.height;
+  int     depth  = lta->xforms[0].dst.depth;
+  VECTOR *v_X    = VectorAlloc(4, MATRIX_REAL); // input (src) coordinates
+  VECTOR *v_Y    = VectorAlloc(4, MATRIX_REAL); // transformed (dst) coordinates
+  int     y3, y2, y1;
+  double  x, y, z;
+  int     xm, ym, zm;
+  double  val, xmd, ymd, zmd, xpd, ypd, zpd; // d's are distances
 
   MRI *mri_error = MRIalloc(width, height, depth, MRI_FLOAT);
 
@@ -722,46 +731,46 @@ MATRIX *getIsoVOX(LTA *lta) {
     exit(1);
   }
 
-  MATRIX *Ms = MatrixAlloc(4, 4, MATRIX_REAL);
+  MATRIX *Ms     = MatrixAlloc(4, 4, MATRIX_REAL);
   Ms->rptr[1][1] = lt->src.xsize;
   Ms->rptr[2][2] = lt->src.ysize;
   Ms->rptr[3][3] = lt->src.zsize;
   Ms->rptr[4][4] = 1;
 
-  MATRIX *Mt = MatrixAlloc(4, 4, MATRIX_REAL);
+  MATRIX *Mt     = MatrixAlloc(4, 4, MATRIX_REAL);
   Mt->rptr[1][1] = lt->dst.xsize;
   Mt->rptr[2][2] = lt->dst.ysize;
   Mt->rptr[3][3] = lt->dst.zsize;
   Mt->rptr[4][4] = 1;
 
   LTAchangeType(lta, LINEAR_VOX_TO_VOX);
-  MATRIX *VOX = MatrixCopy(lt->m_L, nullptr);
-  VOX = MatrixMultiply(Mt, VOX, VOX);
-  VOX = MatrixMultiply(VOX, Ms, VOX);
+  MATRIX *VOX = MatrixCopy(lt->m_L, NULL);
+  VOX         = MatrixMultiply(Mt, VOX, VOX);
+  VOX         = MatrixMultiply(VOX, Ms, VOX);
 
   MatrixFree(&Ms);
   MatrixFree(&Mt);
   return VOX;
 }
 
-int main(int argc, char *argv[])
-{
-  if (!parseCommandLine(argc, argv, P)) exit(1);
+int main(int argc, char *argv[]) {
+  if (!parseCommandLine(argc, argv, P))
+    exit(1);
 
   if (P.disttype == 100) {
-    int steps = 200;
-    double div = 16.0;
+    int            steps = 200;
+    double         div   = 16.0;
     vector<double> theta(steps);
     vector<double> err(steps);
     for (int i = 0; i < steps; i++) {
       // 0.. PI/div in 20 steps
       // -PI/div ..0 is symmetric
       theta[i] = M_PI * (i + 1) / ((steps)*div);
-      err[i] = interpolationError2D(theta[i]);
+      err[i]   = interpolationError2D(theta[i]);
     }
     ostringstream ss;
     ss << "interror-rot16";
-    string fn = ss.str() + ".plot";
+    string   fn = ss.str() + ".plot";
     ofstream f(fn.c_str(), ios::out);
 
     f << "set terminal postscript eps color" << endl;
@@ -781,7 +790,7 @@ int main(int argc, char *argv[])
     cerr << "Could not open the first input file: " << P.t1name << endl;
     exit(1);
   }
-  LTA *lta2 = nullptr;
+  LTA *lta2 = NULL;
   if (P.t2name != "") {
     lta2 = LTAreadEx(P.t2name.c_str());
     if (!lta2) {
@@ -789,14 +798,14 @@ int main(int argc, char *argv[])
       exit(1);
     }
   }
-  // else
+  //else
   //  lta2 = LTAreadEx("identity.nofile");
 
   if (P.invert1) {
     VOL_GEOM vgtmp;
-    LT *lt;
-    MATRIX *m_tmp = lta1->xforms[0].m_L;
-    lta1->xforms[0].m_L = MatrixInverse(lta1->xforms[0].m_L, nullptr);
+    LT *     lt;
+    MATRIX * m_tmp      = lta1->xforms[0].m_L;
+    lta1->xforms[0].m_L = MatrixInverse(lta1->xforms[0].m_L, NULL);
     MatrixFree(&m_tmp);
     lt = &lta1->xforms[0];
     if (lt->dst.valid == 0 || lt->src.valid == 0) {
@@ -818,9 +827,9 @@ int main(int argc, char *argv[])
     }
 
     VOL_GEOM vgtmp;
-    LT *lt;
-    MATRIX *m_tmp = lta2->xforms[0].m_L;
-    lta2->xforms[0].m_L = MatrixInverse(lta2->xforms[0].m_L, nullptr);
+    LT *     lt;
+    MATRIX * m_tmp      = lta2->xforms[0].m_L;
+    lta2->xforms[0].m_L = MatrixInverse(lta2->xforms[0].m_L, NULL);
     MatrixFree(&m_tmp);
     lt = &lta2->xforms[0];
     if (lt->dst.valid == 0 || lt->src.valid == 0) {
@@ -835,25 +844,25 @@ int main(int argc, char *argv[])
     copyVolGeom(&vgtmp, &lt->src);
   }
 
-  // LTAchangeType(lta1,LINEAR_VOX_TO_VOX);
-  // MATRIX* VOX1 = MatrixCopy(lta1->xforms[0].m_L,NULL);
+  //LTAchangeType(lta1,LINEAR_VOX_TO_VOX);
+  //MATRIX* VOX1 = MatrixCopy(lta1->xforms[0].m_L,NULL);
   MATRIX *VOX1 = getIsoVOX(lta1);
   LTAchangeType(lta1, LINEAR_RAS_TO_RAS);
-  MATRIX *RAS1 = MatrixCopy(lta1->xforms[0].m_L, nullptr);
-  MATRIX *M1 = RAS1;
+  MATRIX *RAS1 = MatrixCopy(lta1->xforms[0].m_L, NULL);
+  MATRIX *M1   = RAS1;
   if (P.vox2vox)
     M1 = VOX1;
 
-  MATRIX *RAS2 = nullptr;
-  MATRIX *VOX2 = nullptr;
-  MATRIX *M2 = nullptr;
+  MATRIX *RAS2 = NULL;
+  MATRIX *VOX2 = NULL;
+  MATRIX *M2   = NULL;
   if (lta2) {
-    // LTAchangeType(lta2,LINEAR_VOX_TO_VOX);
-    // VOX2 = MatrixCopy(lta2->xforms[0].m_L,NULL);
+    //LTAchangeType(lta2,LINEAR_VOX_TO_VOX);
+    //VOX2 = MatrixCopy(lta2->xforms[0].m_L,NULL);
     VOX2 = getIsoVOX(lta2);
     LTAchangeType(lta2, LINEAR_RAS_TO_RAS);
-    RAS2 = MatrixCopy(lta2->xforms[0].m_L, nullptr);
-    M2 = RAS2;
+    RAS2 = MatrixCopy(lta2->xforms[0].m_L, NULL);
+    M2   = RAS2;
     if (P.vox2vox)
       M2 = VOX2;
   }
@@ -879,7 +888,7 @@ int main(int argc, char *argv[])
     dist = determinant(M1, M2);
     break;
   case 6:
-    dist = MyMatrix::getResampSmoothing(lta1); // independent of vox or ras
+    dist = MyMatrix::getResampSmoothing(lta1); //independent of vox or ras
     break;
   case 7:
     decompose(M1, M2);

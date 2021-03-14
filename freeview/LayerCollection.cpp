@@ -1,16 +1,11 @@
 /**
- * @file  LayerCollection.cpp
  * @brief Collection of layers of the same type.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/05/31 18:30:40 $
- *    $Revision: 1.44 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,16 +20,19 @@
 
 #include "LayerCollection.h"
 #include "Layer.h"
+#include "LayerMRI.h"
 #include "LayerProperty.h"
-#include <math.h>
+#include "LayerPropertyMRI.h"
 #include <QDebug>
+#include <QTimer>
 #include <iostream>
+#include <math.h>
 
 LayerCollection::LayerCollection(const QString &strType, QObject *parent)
     : QObject(parent), m_layerActive(NULL), m_strType(strType) {
   for (int i = 0; i < 3; i++) {
-    m_dSlicePosition[i] = 0;
-    m_dWorldOrigin[i] = 0;
+    m_dSlicePosition[i]  = 0;
+    m_dWorldOrigin[i]    = 0;
     m_dWorldVoxelSize[i] = 1;
   }
 }
@@ -186,9 +184,9 @@ bool LayerCollection::MoveLayerUp(Layer *layer) {
 
   for (int i = 1; i < unlocked_layers.size(); i++) {
     if (unlocked_layers[i] == layer) {
-      Layer *temp = unlocked_layers[i - 1];
+      Layer *temp            = unlocked_layers[i - 1];
       unlocked_layers[i - 1] = layer;
-      unlocked_layers[i] = temp;
+      unlocked_layers[i]     = temp;
 
       // restore locked layers
       /*
@@ -226,9 +224,9 @@ bool LayerCollection::MoveLayerDown(Layer *layer) {
 
   for (int i = 0; i < unlocked_layers.size() - 1; i++) {
     if (unlocked_layers[i] == layer) {
-      Layer *temp = unlocked_layers[i + 1];
+      Layer *temp            = unlocked_layers[i + 1];
       unlocked_layers[i + 1] = layer;
-      unlocked_layers[i] = temp;
+      unlocked_layers[i]     = temp;
 
       // restore locked layers
       /*
@@ -400,9 +398,29 @@ void LayerCollection::Append2DProps(vtkRenderer *renderer, int nImagePlane) {
 }
 
 void LayerCollection::Append3DProps(vtkRenderer *renderer,
-                                    bool *bSliceVisibility) {
-  for (int i = (int)m_layers.size() - 1; i >= 0; i--) {
-    m_layers[i]->Append3DProps(renderer, bSliceVisibility);
+                                    bool *       bSliceVisibility) {
+  if (m_strType != "MRI") {
+    for (int i = (int)m_layers.size() - 1; i >= 0; i--) {
+      m_layers[i]->Append3DProps(renderer, bSliceVisibility);
+    }
+  } else {
+    QList<Layer *> contour_layers;
+    QList<Layer *> normal_layers;
+    for (size_t i = 0; i < m_layers.size(); i++) {
+      if (m_layers[i]->IsTypeOf("VolumeTrack") ||
+          qobject_cast<LayerMRI *>(m_layers[i])
+              ->GetProperty()
+              ->GetShowAsContour())
+        contour_layers << m_layers[i];
+      else
+        normal_layers << m_layers[i];
+    }
+
+    for (int i = (int)contour_layers.size() - 1; i >= 0; i--)
+      contour_layers[i]->Append3DProps(renderer, bSliceVisibility);
+
+    for (int i = (int)normal_layers.size() - 1; i >= 0; i--)
+      normal_layers[i]->Append3DProps(renderer, bSliceVisibility);
   }
 }
 

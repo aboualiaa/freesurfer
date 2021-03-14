@@ -44,13 +44,13 @@ QVTKOpenGLWidget::QVTKOpenGLWidget(vtkGenericOpenGLRenderWindow *w,
 
 //-----------------------------------------------------------------------------
 QVTKOpenGLWidget::QVTKOpenGLWidget(vtkGenericOpenGLRenderWindow *w,
-                                   QOpenGLContext *shareContext,
+                                   QOpenGLContext *              shareContext,
                                    QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f) {
   // Internal QVTKOpenGLWindow creation
   this->qVTKOpenGLWindowInternal = new QVTKOpenGLWindow(w, shareContext);
-  QVBoxLayout *vBoxLayout = new QVBoxLayout(this);
-  QWidget *container =
+  QVBoxLayout *vBoxLayout        = new QVBoxLayout(this);
+  QWidget *    container =
       QWidget::createWindowContainer(this->qVTKOpenGLWindowInternal, this, f);
   container->setAttribute(Qt::WA_TransparentForMouseEvents);
   container->setMouseTracking(true);

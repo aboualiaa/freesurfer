@@ -32,9 +32,9 @@ public:
 
   /// proxy copy constructor (take ownership)
   aptr(aptr_ref<T> apr) {
-    T *p = apr.ptr;
+    T *p    = apr.ptr;
     apr.ptr = 0;
-    m_ptr = p;
+    m_ptr   = p;
   }
 
   /// pointer conversion (give up ownership)
@@ -42,7 +42,7 @@ public:
 
   /// pointer proxy conversion (give up ownership)
   template <class T2> operator aptr_ref<T2>() {
-    T2 *p = m_ptr;
+    T2 *         p = m_ptr;
     aptr_ref<T2> apr(p);
     m_ptr = 0;
     return apr;
@@ -65,7 +65,7 @@ public:
 
   /// proxy assignment operator (take ownership)
   aptr<T> &operator=(aptr_ref<T> apr) {
-    T *p = apr.ptr;
+    T *p    = apr.ptr;
     apr.ptr = 0;
     reset(p);
     return *this;
@@ -85,7 +85,7 @@ public:
 
   /// give up ownership
   T *release() {
-    T *p = m_ptr;
+    T *p  = m_ptr;
     m_ptr = 0;
     return p;
   }

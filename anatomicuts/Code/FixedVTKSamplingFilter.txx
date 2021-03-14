@@ -16,11 +16,11 @@ FixedVTKSamplingFilter<TInputMesh, TOutputMesh>::FixedVTKSamplingFilter() {
 template <class TInputMesh, class TOutputMesh>
 void FixedVTKSamplingFilter<TInputMesh, TOutputMesh>::GenerateData() {
   typedef typename TInputMesh::CellsContainer CellsContainer;
-  // std::cout << this->GetInput()->GetNumberOfCells() << std::endl;
+  //std::cout << this->GetInput()->GetNumberOfCells() << std::endl;
   this->GetInput()->GetCells()->Begin();
   typename CellsContainer::ConstIterator cellIt =
       this->GetInput()->GetCells()->Begin();
-  // initializing output mesh
+  //initializing output mesh
   typename OutputMeshType::Pointer outputMesh = this->GetOutput();
   outputMesh->SetCellsAllocationMethod(
       OutputMeshType::CellsAllocatedDynamicallyCellByCell);
@@ -28,19 +28,17 @@ void FixedVTKSamplingFilter<TInputMesh, TOutputMesh>::GenerateData() {
     outputMesh->GetPoints()->Reserve(this->GetInput()->GetNumberOfCells() *
                                      this->GetSampling());
   }
-  //      std::cout << " number of cells " <<
-  //      this->GetInput()->GetNumberOfCells() << std::endl;
-  //			std::cout << " sampling " << this->GetSampling() <<
-  //std::endl;
-  OutputPointIdentifier index = 0;
-  OutputCellIdentifier indexCell = 0;
+  //      std::cout << " number of cells " << this->GetInput()->GetNumberOfCells() << std::endl;
+  //			std::cout << " sampling " << this->GetSampling() << std::endl;
+  OutputPointIdentifier index     = 0;
+  OutputCellIdentifier  indexCell = 0;
   for (; cellIt != this->GetInput()->GetCells()->End(); ++cellIt) {
-    int j = 0;
+    int    j = 0;
     double x, y, z;
     double vecPoints[3 * cellIt.Value()->GetNumberOfPoints()];
     typename TInputMesh::CellTraits::PointIdIterator pointIdIt =
         cellIt.Value()->PointIdsBegin();
-    alglib::real_2d_array pts;
+    alglib::real_2d_array          pts;
     typename TInputMesh::PointType ptPrev;
     this->GetInput()->GetPoint(*pointIdIt, &ptPrev);
     double dist = 0;
@@ -59,8 +57,8 @@ void FixedVTKSamplingFilter<TInputMesh, TOutputMesh>::GenerateData() {
     alglib::pspline3interpolant s;
     alglib::pspline3build(pts, cellIt.Value()->GetNumberOfPoints(), 1, 0, s);
 
-    float ii = 0;
-    int k = 0;
+    float                 ii = 0;
+    int                   k  = 0;
     OutputCellAutoPointer line;
     line.TakeOwnership(new PolylineCellType);
     int sampling = ceil(dist);

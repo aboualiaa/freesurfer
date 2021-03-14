@@ -1,5 +1,4 @@
 /**
- * @file  gifti.h
  * @brief local utilities for GIFTI library
  *
  * This file has some some extra functions for use with the GIFTI
@@ -7,13 +6,9 @@
  *
  */
 /*
- * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:09 $
- *    $Revision: 1.13 $
+ * Original Author: Kevin Teich 
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -33,9 +28,9 @@
 
 MRIS *mrisReadGIFTIfile(const char *fname, MRIS *mris);
 MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum);
-MRI *MRISreadGiftiAsMRI(const char *fname, int read_volume);
-int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
-                   const char *curv_fname);
-int mriWriteGifti(MRI *mri, const char *out_fname);
+MRI * MRISreadGiftiAsMRI(const char *fname, int read_volume);
+int   MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
+                     const char *curv_fname);
+int   mriWriteGifti(MRI *mri, const char *out_fname);
 
 #endif

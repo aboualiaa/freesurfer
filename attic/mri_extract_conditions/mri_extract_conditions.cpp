@@ -1,17 +1,6 @@
-/**
- * @file  mri_extract_conditions.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:15 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,34 +12,31 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
-#include "matrix.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "matrix.h"
 #include "mri.h"
 #include "proto.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mri_extract_conditions.c,v 1.5 2011/03/02 00:04:15 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
-static int detrend = 0;
-const char *Progname;
-static int *conditions = NULL;
+static int    detrend = 0;
+const char *  Progname;
+static int *  conditions = NULL;
 static float *timepoints = NULL;
 
 MRI *MRIextractConditions(MRI *mri_in, int *conditions, MRI *mri_out);
@@ -58,9 +44,9 @@ MRI *MRIdetrendVolume(MRI *mri_in, int *conditions, MRI *mri_out);
 
 int main(int argc, char *argv[]) {
   char **av, *in_vol, *out_vol, *paradigm_fname, line[STRLEN];
-  int ac, nargs, t;
-  MRI *mri_in, *mri_out;
-  FILE *fp;
+  int    ac, nargs, t;
+  MRI *  mri_in, *mri_out;
+  FILE * fp;
 
   nargs = handleVersionOption(argc, argv, "mri_extract_conditions");
   if (nargs && argc - nargs == 1)
@@ -82,9 +68,9 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit();
 
-  in_vol = argv[1];
+  in_vol         = argv[1];
   paradigm_fname = argv[2];
-  out_vol = argv[3];
+  out_vol        = argv[3];
 
   printf("reading volume from %s...\n", in_vol);
   mri_in = MRIread(in_vol);
@@ -96,7 +82,7 @@ int main(int argc, char *argv[]) {
          mri_in->nframes);
   conditions = (int *)calloc(mri_in->nframes, sizeof(int));
   timepoints = (float *)calloc(mri_in->nframes, sizeof(float));
-  fp = fopen(paradigm_fname, "r");
+  fp         = fopen(paradigm_fname, "r");
   if (!fp)
     ErrorExit(ERROR_NOMEMORY, "%s: could not read paradigm file %s", Progname,
               paradigm_fname);
@@ -128,7 +114,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -144,7 +130,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -182,15 +168,15 @@ static void print_help(void) {
 }
 
 static void print_version(void) {
-  fprintf(stderr, "%s\n", vcid);
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 MRI *MRIdetrendVolume(MRI *mri_in, int *conditions, MRI *mri_out) {
-  int x, y, z, t, ntime, nnull, i;
+  int     x, y, z, t, ntime, nnull, i;
   MATRIX *m_X, *m_Xt = NULL, *m_XtX = NULL, *m_XtXinv = NULL, *m = NULL;
   VECTOR *v_out, *v_p;
-  float val, mean, a, b;
+  float   val, mean, a, b;
 
   if (!mri_out)
     mri_out = MRIcopy(mri_in, NULL);
@@ -200,9 +186,9 @@ MRI *MRIdetrendVolume(MRI *mri_in, int *conditions, MRI *mri_out) {
     if (conditions[t] == 0)
       nnull++;
 
-  m_X = MatrixAlloc(nnull, 2, MATRIX_REAL);
+  m_X   = MatrixAlloc(nnull, 2, MATRIX_REAL);
   v_out = VectorAlloc(nnull, MATRIX_REAL);
-  v_p = VectorAlloc(2, MATRIX_REAL);
+  v_p   = VectorAlloc(2, MATRIX_REAL);
 
   for (x = 0; x < mri_out->width; x++) {
     for (y = 0; y < mri_out->height; y++) {
@@ -231,22 +217,22 @@ MRI *MRIdetrendVolume(MRI *mri_in, int *conditions, MRI *mri_out) {
             break;
           }
           *MATRIX_RELT(v_out, i + 1, 1) = val;
-          *MATRIX_RELT(m_X, i + 1, 1) = t;
-          *MATRIX_RELT(m_X, i + 1, 2) = 1;
+          *MATRIX_RELT(m_X, i + 1, 1)   = t;
+          *MATRIX_RELT(m_X, i + 1, 2)   = 1;
           mean += val;
           i++;
         }
         mean /= (float)i;
-        m_Xt = MatrixTranspose(m_X, m_Xt);
-        m_XtX = MatrixMultiply(m_Xt, m_X, m_XtX);
+        m_Xt     = MatrixTranspose(m_X, m_Xt);
+        m_XtX    = MatrixMultiply(m_Xt, m_X, m_XtX);
         m_XtXinv = MatrixInverse(m_XtX, m_XtXinv);
         if (m_XtXinv == NULL)
           ErrorExit(ERROR_BADPARM, "non-invertible matrix at %d,%d,%d", x, y,
                     z);
-        m = MatrixMultiply(m_XtXinv, m_Xt, m);
+        m   = MatrixMultiply(m_XtXinv, m_Xt, m);
         v_p = MatrixMultiply(m, v_out, v_p);
-        a = VECTOR_ELT(v_p, 1);
-        b = VECTOR_ELT(v_p, 2);
+        a   = VECTOR_ELT(v_p, 1);
+        b   = VECTOR_ELT(v_p, 2);
 
         /* detrend by subtracting (a*t-b - mean) from each time point */
         for (t = 0; t < ntime; t++) {
@@ -315,9 +301,9 @@ MRI *MRIextractConditions(MRI *mri_in, int *conditions, MRI *mri_out) {
   ncond++;
 
   printf("extracting %d conditions + null\n", ncond - 1);
-  width = mri_in->width;
-  height = mri_in->height;
-  depth = mri_in->depth;
+  width   = mri_in->width;
+  height  = mri_in->height;
+  depth   = mri_in->depth;
   mri_out = MRIallocSequence(width, height, depth, MRI_FLOAT, ncond * 2);
   for (x = 0; x < mri_out->width; x++) {
     for (y = 0; y < mri_out->height; y++) {
@@ -355,7 +341,7 @@ MRI *MRIextractConditions(MRI *mri_in, int *conditions, MRI *mri_out) {
             continue;
           means[c] /= (float)counts[c];
           vars[c] = vars[c] / (float)counts[c] - means[c] * means[c];
-          MRIFseq_vox(mri_out, x, y, z, c * 2) = means[c];
+          MRIFseq_vox(mri_out, x, y, z, c * 2)     = means[c];
           MRIFseq_vox(mri_out, x, y, z, c * 2 + 1) = sqrt(vars[c]);
         }
       }

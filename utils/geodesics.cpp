@@ -2,12 +2,12 @@
 // for calculating geodesics on a polyhedral surface
 //
 
-#include <stdlib.h>
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <map>
 #include <stack>
+#include <stdlib.h>
 #include <vector>
 
 #include "geodesics.h"
@@ -23,46 +23,46 @@
 // Vertex
 struct Vertex {
   float x, y;
-  int id;
+  int   id;
 };
 
 // StackItem
 struct StackItem {
   Vertex a, b, c;
-  int idx;
-  float mina, maxa;
+  int    idx;
+  float  mina, maxa;
 };
 
 // Triangle
 struct Triangle {
   float length[3];
   float angle[3];
-  int vert[3];
-  int neighbor[3];
-  bool inChain;
+  int   vert[3];
+  int   neighbor[3];
+  bool  inChain;
 };
 
-static int getIndex(int *arr, int vid);
-static float distanceBetween(int v1, int v2, MRIS *surf);
-static int findNeighbor(int faceidx, int v1, int v2, MRIS *surf);
+static int    getIndex(int *arr, int vid);
+static float  distanceBetween(int v1, int v2, MRIS *surf);
+static int    findNeighbor(int faceidx, int v1, int v2, MRIS *surf);
 static Vertex extendedPoint(Vertex A, Vertex B, float dA, float dB, float dAB);
 static std::pair<int, int> makeKey(int a, int b);
-static void progressBar(float progress);
+static void                progressBar(float progress);
 
 Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
-  int msec;
+  int   msec;
   Timer mytimer;
   printf("computeGeodesics(): maxdist = %g, nvertices = %d\n", maxdist,
          surf->nvertices);
   fflush(stdout);
 
   // pre-compute and set-up required values to build triangle chain:
-  FACE *face;
-  Triangle *triangle;
+  FACE *                face;
+  Triangle *            triangle;
   std::vector<Triangle> triangles(surf->nfaces);
-  int idx1, idx2;
+  int                   idx1, idx2;
   for (int nf = 0; nf < surf->nfaces; nf++) {
-    face = &surf->faces[nf];
+    face     = &surf->faces[nf];
     triangle = &triangles[nf];
     for (int ns = 0; ns < 3; ns++) {
       idx1 = (ns + 1) % 3;
@@ -71,7 +71,7 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
           distanceBetween(face->v[idx1], face->v[idx2], surf);
       triangle->neighbor[ns] =
           findNeighbor(nf, face->v[idx1], face->v[idx2], surf);
-      triangle->vert[ns] = face->v[ns];
+      triangle->vert[ns]  = face->v[ns];
       triangle->angle[ns] = face->angle[ns];
     }
     triangle->inChain = false;
@@ -88,14 +88,14 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
                                   // can be removed... there's an easier way
   std::map<std::pair<int, int>, float> pathmap;
   // private vars:
-  std::vector<int> chain;
-  std::stack<StackItem> stack;
-  std::vector<bool> isnearest(surf->nvertices);
+  std::vector<int>                               chain;
+  std::stack<StackItem>                          stack;
+  std::vector<bool>                              isnearest(surf->nvertices);
   std::map<std::pair<int, int>, float>::iterator edge;
-  StackItem stackitem;
-  Vertex A, B, C, D;
-  int iA, iB, iC, iD;
-  int current_idx;
+  StackItem                                      stackitem;
+  Vertex                                         A, B, C, D;
+  int                                            iA, iB, iC, iD;
+  int                                            current_idx;
   float min_angle, max_angle, current_angle, distance;
 
   // ------ STEP 1 ------
@@ -114,7 +114,7 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
         isnearest[c] = false;
       // set up initial triangle in plane:
       current_idx = basevertex->f[i];
-      triangle = &triangles[current_idx];
+      triangle    = &triangles[current_idx];
       // formally add to chain:
       chain.push_back(current_idx);
       triangle->inChain = true;
@@ -127,21 +127,21 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
       min_angle = 0.0;
       max_angle = triangle->angle[iC];
       // compute vertex A along x axis:
-      A.x = triangle->length[iB];
-      A.y = 0.0;
+      A.x  = triangle->length[iB];
+      A.y  = 0.0;
       A.id = triangle->vert[iA];
       // compute vertex B in positive y (no need for this to be pre-computed):
-      B.x = triangle->length[iA] * cos(max_angle);
-      B.y = triangle->length[iA] * sin(max_angle);
+      B.x  = triangle->length[iA] * cos(max_angle);
+      B.y  = triangle->length[iA] * sin(max_angle);
       B.id = triangle->vert[iB];
       // reset vertex C (base vertex which represents the origin):
-      C.x = 0.0;
-      C.y = 0.0;
+      C.x  = 0.0;
+      C.y  = 0.0;
       C.id = triangle->vert[iC];
       // formally consider the distance from C to A as a geodesic:
       nearestverts[vertexID].push_back(A.id);
       isnearest[A.id] = true;
-      edge = pathmap.find(makeKey(vertexID, A.id));
+      edge            = pathmap.find(makeKey(vertexID, A.id));
       if (edge != pathmap.end())
         edge->second = triangle->length[iB];
       else
@@ -150,7 +150,7 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
       // formally consider the distance from C to B as a geodesic:
       nearestverts[vertexID].push_back(B.id);
       isnearest[B.id] = true;
-      edge = pathmap.find(makeKey(vertexID, B.id));
+      edge            = pathmap.find(makeKey(vertexID, B.id));
       if (edge != pathmap.end())
         edge->second = triangle->length[iA];
       else
@@ -169,14 +169,14 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
             break;
           // if not, just revert to the last stack item:
           else {
-            stackitem = stack.top();
-            A = stackitem.a;
-            B = stackitem.b;
-            C = stackitem.c;
-            min_angle = stackitem.mina;
-            max_angle = stackitem.maxa;
+            stackitem   = stack.top();
+            A           = stackitem.a;
+            B           = stackitem.b;
+            C           = stackitem.c;
+            min_angle   = stackitem.mina;
+            max_angle   = stackitem.maxa;
             current_idx = stackitem.idx;
-            triangle = &triangles[current_idx];
+            triangle    = &triangles[current_idx];
             // trim the chain back to the current triangle:
             while ((chain.back() != current_idx) && (chain.size() > 0)) {
               triangles[chain.back()].inChain = false;
@@ -195,7 +195,7 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
           iB = getIndex(triangle->vert, B.id);
           iD = idxlookup[iA + iB];
           // calculate the planar position of the extended vertex D:
-          D = extendedPoint(A, B, triangle->length[iB], triangle->length[iA],
+          D    = extendedPoint(A, B, triangle->length[iB], triangle->length[iA],
                             triangle->length[iD]);
           D.id = triangle->vert[iD];
           // calculate the angle that the vector D makes with x-axis:
@@ -229,15 +229,15 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
               pathmap.insert(make_pair(makeKey(vertexID, D.id), distance));
             }
             // push triangle to the stack:
-            stackitem.a = A;
-            stackitem.b = D;
-            stackitem.c = B;
-            stackitem.idx = current_idx;
+            stackitem.a    = A;
+            stackitem.b    = D;
+            stackitem.c    = B;
+            stackitem.idx  = current_idx;
             stackitem.mina = min_angle;
             stackitem.maxa = current_angle;
             stack.push(stackitem);
-            C = A;
-            A = D;
+            C         = A;
+            A         = D;
             min_angle = current_angle;
           }
           // this is used to find bugs within the surface (so far I've only
@@ -250,7 +250,7 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
           }
         }
         // get the next triangle and repeat:
-        iC = getIndex(triangle->vert, C.id);
+        iC          = getIndex(triangle->vert, C.id);
         current_idx = triangle->neighbor[iC];
       }
     }
@@ -275,7 +275,7 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
       isnearest[nearestverts[k][d]] == true;
     }
     for (unsigned int i = 0; i < nearestverts[k].size(); i++) {
-      vi = nearestverts[k][i];
+      vi   = nearestverts[k][i];
       edge = pathmap.find(makeKey(k, vi));
       if ((vi == k) || (edge != pathmap.end()))
         continue;
@@ -322,7 +322,7 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
     for (unsigned int d = 0; d < nearestverts[k].size(); d++) {
       edge = pathmap.find(makeKey(k, nearestverts[k][d]));
       if (edge != pathmap.end()) {
-        geo[k].v[geo[k].vnum] = nearestverts[k][d];
+        geo[k].v[geo[k].vnum]    = nearestverts[k][d];
         geo[k].dist[geo[k].vnum] = edge->second;
         geo[k].vnum += 1;
         if (geo[k].vnum > MAX_GEODESICS) {
@@ -350,9 +350,9 @@ Geodesics *computeGeodesics(MRIS *surf, float maxdist) {
 }
 
 void geodesicsWrite(Geodesics *geo, int nvertices, char *fname) {
-  int vtxno;
+  int   vtxno;
   FILE *fp;
-  int msec;
+  int   msec;
 
   printf("geodesicsWrite(): uniquifying\n");
   Timer mytimer;
@@ -378,8 +378,8 @@ void geodesicsWrite(Geodesics *geo, int nvertices, char *fname) {
 }
 
 Geodesics *geodesicsRead(char *fname, int *pnvertices) {
-  int magic, nthvtx;
-  char tmpstr[1000];
+  int   magic, nthvtx;
+  char  tmpstr[1000];
   FILE *fp;
 
   fp = fopen(fname, "rb");
@@ -432,7 +432,7 @@ Geodesics *geodesicsRead(char *fname, int *pnvertices) {
 \brief Removes relicants from the v (and dist) lists; vnum is updated.
 */
 int geodesicsUniquify(Geodesics *geod) {
-  int nthnbr, *vlist, nunique, k, *vuniq;
+  int    nthnbr, *vlist, nunique, k, *vuniq;
   float *dist;
 
   // make a copy of the original list
@@ -456,7 +456,7 @@ int geodesicsUniquify(Geodesics *geod) {
     for (k = 0; k < geod->vnum; k++) {
       if (vlist[k] == vuniq[nthnbr]) {
         geod->dist[nthnbr] = dist[k];
-        geod->v[nthnbr] = vlist[k];
+        geod->v[nthnbr]    = vlist[k];
         break;
       }
     }
@@ -481,8 +481,8 @@ static int getIndex(int *arr, int vid) {
 
 static float distanceBetween(int v1, int v2, MRIS *surf) {
   VERTEX_TOPOLOGY const *const vt = &surf->vertices_topology[v1];
-  VERTEX const *const v = &surf->vertices[v1];
-  int const *ns = vt->v;
+  VERTEX const *const          v  = &surf->vertices[v1];
+  int const *                  ns = vt->v;
   int idx = std::distance(ns, std::find(ns, ns + vt->vnum, v2));
   return v->dist[idx];
 }
@@ -503,11 +503,11 @@ static int findNeighbor(int faceidx, int v1, int v2, MRIS *surf) {
 
 static Vertex extendedPoint(Vertex A, Vertex B, float dA, float dB, float dAB) {
   Vertex D;
-  float a, h, px, py;
-  a = (dA * dA - dB * dB + dAB * dAB) / (2 * dAB);
-  h = sqrt(dA * dA - a * a);
-  px = A.x + a * (B.x - A.x) / dAB;
-  py = A.y + a * (B.y - A.y) / dAB;
+  float  a, h, px, py;
+  a   = (dA * dA - dB * dB + dAB * dAB) / (2 * dAB);
+  h   = sqrt(dA * dA - a * a);
+  px  = A.x + a * (B.x - A.x) / dAB;
+  py  = A.y + a * (B.y - A.y) / dAB;
   D.x = px + h * (B.y - A.y) / dAB;
   D.y = py - h * (B.x - A.x) / dAB;
   return D;
@@ -538,7 +538,7 @@ static void progressBar(float progress) {
 
 MRI *GeoSmooth(MRI *src, double fwhm, MRIS *surf, Geodesics *geod,
                MRI *volindex, MRI *out) {
-  int vtxno;
+  int    vtxno;
   double gvar, gstd, gf;
 
   if (out == NULL) {
@@ -567,8 +567,8 @@ MRI *GeoSmooth(MRI *src, double fwhm, MRIS *surf, Geodesics *geod,
 #endif
       for (vtxno = 0; vtxno < surf->nvertices; vtxno++) {
     ROMP_PFLB_begin int nthnbr, nbrvtxno, frame;
-    double ksum, *sum, d, vkern;
-    Geodesics *vtxgeod;
+    double              ksum, *sum, d, vkern;
+    Geodesics *         vtxgeod;
     if (vtxno % 10000 == 0)
       printf("vtxno %d\n", vtxno);
     if (surf->vertices[vtxno].ripflag)
@@ -583,8 +583,8 @@ MRI *GeoSmooth(MRI *src, double fwhm, MRIS *surf, Geodesics *geod,
     // Set up init using self
     // vkern = surf->vertices[vtxno].area/gf; // scale by the area
     vkern = 1 / gf;
-    ksum = vkern;
-    sum = (double *)calloc(sizeof(double), src->nframes);
+    ksum  = vkern;
+    sum   = (double *)calloc(sizeof(double), src->nframes);
     for (frame = 0; frame < src->nframes; frame++)
       sum[frame] = (vkern * MRIgetVoxVal(src, vtxno, 0, 0, frame));
 
@@ -603,7 +603,7 @@ MRI *GeoSmooth(MRI *src, double fwhm, MRIS *surf, Geodesics *geod,
 
     for (frame = 0; frame < src->nframes; frame++)
       MRIsetVoxVal(out, vtxno, 0, 0, frame, (sum[frame] / ksum));
-    surf->vertices[vtxno].valbak = ksum;
+    surf->vertices[vtxno].valbak  = ksum;
     surf->vertices[vtxno].val2bak = vtxgeod->vnum;
     free(sum);
     if (volindex)
@@ -629,7 +629,7 @@ int GeoCount(Geodesics *geod, int nvertices) {
 
 int GeoDumpVertex(char *fname, Geodesics *geod, int vtxno) {
   FILE *fp;
-  int nthnbr;
+  int   nthnbr;
   fp = fopen(fname, "w");
   for (nthnbr = 0; nthnbr < geod[vtxno].vnum; nthnbr++) {
     fprintf(fp, "%5d %g\n", geod[vtxno].v[nthnbr], geod[vtxno].dist[nthnbr]);
@@ -639,9 +639,9 @@ int GeoDumpVertex(char *fname, Geodesics *geod, int vtxno) {
 }
 
 int geodesicsWriteV2(Geodesics *geo, int nvertices, char *fname) {
-  int vtxno, *vnum, *vlist, nth, nthnbr, nnbrstot;
+  int    vtxno, *vnum, *vlist, nth, nthnbr, nnbrstot;
   float *dist;
-  FILE *fp;
+  FILE * fp;
 
   nnbrstot = 0;
   for (vtxno = 0; vtxno < nvertices; vtxno++)
@@ -663,12 +663,12 @@ int geodesicsWriteV2(Geodesics *geo, int nvertices, char *fname) {
 
   // Pack the neighbor vertex numbers and dist into an arrays, then fwrite
   vlist = (int *)calloc(sizeof(int), nnbrstot);
-  dist = (float *)calloc(sizeof(float), nnbrstot);
-  nth = 0;
+  dist  = (float *)calloc(sizeof(float), nnbrstot);
+  nth   = 0;
   for (vtxno = 0; vtxno < nvertices; vtxno++) {
     for (nthnbr = 0; nthnbr < geo[vtxno].vnum; nthnbr++) {
       vlist[nth] = geo[vtxno].v[nthnbr];
-      dist[nth] = geo[vtxno].dist[nthnbr];
+      dist[nth]  = geo[vtxno].dist[nthnbr];
       nth++;
     }
   }
@@ -682,12 +682,12 @@ int geodesicsWriteV2(Geodesics *geo, int nvertices, char *fname) {
 }
 
 Geodesics *geodesicsReadV2(char *fname, int *pnvertices) {
-  int magic;
-  char tmpstr[1000];
-  FILE *fp;
-  int vtxno, *vnum, *vlist, nth, nthnbr, nnbrstot;
+  int    magic;
+  char   tmpstr[1000];
+  FILE * fp;
+  int    vtxno, *vnum, *vlist, nth, nthnbr, nnbrstot;
   float *dist;
-  int msec;
+  int    msec;
 
   fp = fopen(fname, "rb");
   fscanf(fp, "%s", tmpstr);
@@ -724,7 +724,7 @@ Geodesics *geodesicsReadV2(char *fname, int *pnvertices) {
   printf("  allocing vlist and dlist %d\n", nnbrstot);
   fflush(stdout);
   vlist = (int *)calloc(sizeof(int), nnbrstot);
-  dist = (float *)calloc(sizeof(float), nnbrstot);
+  dist  = (float *)calloc(sizeof(float), nnbrstot);
   printf("  reading in vlist %d\n", nnbrstot);
   fflush(stdout);
   fread(vlist, sizeof(int), nnbrstot, fp);
@@ -737,14 +737,14 @@ Geodesics *geodesicsReadV2(char *fname, int *pnvertices) {
   printf("  t = %g min\n", msec / (1000.0 * 60));
   printf("Alloc geo\n");
   Geodesics *geo = (Geodesics *)calloc(*pnvertices, sizeof(Geodesics));
-  msec = mytimer.milliseconds();
+  msec           = mytimer.milliseconds();
   printf("  t = %g min\n", msec / (1000.0 * 60));
   printf("Setting\n");
   nth = 0;
   for (vtxno = 0; vtxno < *pnvertices; vtxno++) {
     geo[vtxno].vnum = vnum[vtxno];
     for (nthnbr = 0; nthnbr < geo[vtxno].vnum; nthnbr++) {
-      geo[vtxno].v[nthnbr] = vlist[nth];
+      geo[vtxno].v[nthnbr]    = vlist[nth];
       geo[vtxno].dist[nthnbr] = dist[nth];
       nth++;
     }
@@ -763,28 +763,28 @@ Geodesics *geodesicsReadV2(char *fname, int *pnvertices) {
 // distance along the sphere between two  vertices
 double MRISsphereDist(MRIS *sphere, VERTEX *vtx1, VERTEX *vtx2) {
   double r, dot, d;
-  r = sqrt(vtx1->x * vtx1->x + vtx1->y * vtx1->y + vtx1->z * vtx1->z);
+  r   = sqrt(vtx1->x * vtx1->x + vtx1->y * vtx1->y + vtx1->z * vtx1->z);
   dot = (vtx1->x * vtx2->x + vtx1->y * vtx2->y + vtx1->z * vtx2->z) / (r * r);
-  d = acos(dot) * r;
+  d   = acos(dot) * r;
   // printf("r = %g, dot = %g, d = %g\n",r,dot,d);
   return (d);
 }
 
 double geodesicsCheckSphereDist(MRIS *sphere, Geodesics *geod) {
-  int vtxno;
+  int    vtxno;
   double e;
 
   e = 0;
   for (vtxno = 0; vtxno < sphere->nvertices; vtxno++) {
-    int nbrvtxno, nthnbr;
+    int     nbrvtxno, nthnbr;
     VERTEX *vtx1, *vtx2;
-    double dA, dB;
+    double  dA, dB;
     vtx1 = &sphere->vertices[vtxno];
     for (nthnbr = 0; nthnbr < geod[vtxno].vnum; nthnbr++) {
       nbrvtxno = geod[vtxno].v[nthnbr];
-      dA = geod[vtxno].dist[nthnbr];
-      vtx2 = &sphere->vertices[nbrvtxno];
-      dB = MRISsphereDist(sphere, vtx1, vtx2);
+      dA       = geod[vtxno].dist[nthnbr];
+      vtx2     = &sphere->vertices[nbrvtxno];
+      dB       = MRISsphereDist(sphere, vtx1, vtx2);
       printf("%5d %5d %6.4f %6.4f  %8.6f %8.4f\n", vtxno, nbrvtxno, dA, dB,
              dA - dB, e);
       e += fabs(dA - dB);
@@ -829,12 +829,12 @@ int VtxVolIndexPrint(VTXVOLINDEX *vvi, int nlist) {
 
 int VtxVolIndexSortTest(int nlist) {
   VTXVOLINDEX *vvi, *vvi2;
-  int n, nunique;
+  int          n, nunique;
   vvi = (VTXVOLINDEX *)calloc(sizeof(VTXVOLINDEX), nlist);
   for (n = 0; n < nlist; n++) {
-    vvi[n].vtxno = round(100 * drand48());
+    vvi[n].vtxno    = round(100 * drand48());
     vvi[n].volindex = round(100 * drand48());
-    vvi[n].dist = 10 * drand48();
+    vvi[n].dist     = 10 * drand48();
   }
   vvi[0].volindex = vvi[nlist - 1].volindex;
   vvi[1].volindex = vvi[nlist - 1].volindex;
@@ -853,26 +853,26 @@ int VtxVolIndexSortTest(int nlist) {
 }
 
 VTXVOLINDEX *VtxVolIndexUnique(VTXVOLINDEX *vvi, int nlist, int *nunique) {
-  int n, nthu, nhits;
+  int          n, nthu, nhits;
   VTXVOLINDEX *uvvi;
-  double distsum;
+  double       distsum;
 
   VtxVolIndexSort(vvi, nlist);
 
   uvvi = (VTXVOLINDEX *)calloc(sizeof(VTXVOLINDEX), nlist);
 
   nthu = 0;
-  n = 0;
+  n    = 0;
   memcpy(&uvvi[nthu], &vvi[n], sizeof(VTXVOLINDEX));
   distsum = vvi[n].dist;
-  nhits = 1;
+  nhits   = 1;
   for (n = 1; n < nlist; n++) {
     if (uvvi[nthu].volindex != vvi[n].volindex) {
       uvvi[nthu].dist = distsum / nhits;
       nthu++;
       memcpy(&uvvi[nthu], &vvi[n], sizeof(VTXVOLINDEX));
       distsum = vvi[n].dist;
-      nhits = 1;
+      nhits   = 1;
     } else {
       distsum += vvi[n].dist;
       nhits++;
@@ -883,16 +883,16 @@ VTXVOLINDEX *VtxVolIndexUnique(VTXVOLINDEX *vvi, int nlist, int *nunique) {
 }
 
 VTXVOLINDEX *VtxVolIndexPack(Geodesics *geod, int vtxno, MRI *volindex) {
-  int nthnbr, nbrvtxno;
+  int          nthnbr, nbrvtxno;
   VTXVOLINDEX *vvi;
   // Geodesics *geodvtx = &geod[vtxno];
 
   vvi = (VTXVOLINDEX *)calloc(sizeof(VTXVOLINDEX), geod[vtxno].vnum);
 
   for (nthnbr = 0; nthnbr < geod[vtxno].vnum; nthnbr++) {
-    nbrvtxno = geod[vtxno].v[nthnbr];
-    vvi[nthnbr].vtxno = nbrvtxno;
-    vvi[nthnbr].dist = geod[vtxno].dist[nthnbr];
+    nbrvtxno             = geod[vtxno].v[nthnbr];
+    vvi[nthnbr].vtxno    = nbrvtxno;
+    vvi[nthnbr].dist     = geod[vtxno].dist[nthnbr];
     vvi[nthnbr].volindex = MRIgetVoxVal(volindex, nbrvtxno, 0, 0, 0);
   }
   // vvi[nthnbr].vtxno = vtxno;
@@ -903,19 +903,19 @@ VTXVOLINDEX *VtxVolIndexPack(Geodesics *geod, int vtxno, MRI *volindex) {
 
 Geodesics *VtxVolPruneGeod(Geodesics *geod, int vtxno, MRI *volindex) {
   VTXVOLINDEX *vvi, *uvvi;
-  Geodesics *ugeod;
-  int nunique;
-  int nthnbr;
+  Geodesics *  ugeod;
+  int          nunique;
+  int          nthnbr;
 
   vvi = VtxVolIndexPack(geod, vtxno, volindex);
   // if(vtxno == 123093)  VtxVolIndexPrint(vvi, geod[vtxno].vnum);
 
   uvvi = VtxVolIndexUnique(vvi, geod[vtxno].vnum, &nunique);
 
-  ugeod = (Geodesics *)calloc(sizeof(Geodesics), 1);
+  ugeod       = (Geodesics *)calloc(sizeof(Geodesics), 1);
   ugeod->vnum = nunique;
   for (nthnbr = 0; nthnbr < ugeod->vnum; nthnbr++) {
-    ugeod->v[nthnbr] = uvvi[nthnbr].vtxno;
+    ugeod->v[nthnbr]    = uvvi[nthnbr].vtxno;
     ugeod->dist[nthnbr] = uvvi[nthnbr].dist;
   }
 

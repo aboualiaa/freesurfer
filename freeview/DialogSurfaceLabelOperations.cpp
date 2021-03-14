@@ -16,16 +16,16 @@ void DialogSurfaceLabelOperations::OnButtonClicked() {
   QVariantMap op;
   if (sender() == ui->pushButtonDilate) {
     op["operation"] = "dilate";
-    op["times"] = ui->spinBoxDilateTimes->value();
+    op["times"]     = ui->spinBoxDilateTimes->value();
   } else if (sender() == ui->pushButtonErode) {
     op["operation"] = "erode";
-    op["times"] = ui->spinBoxErodeTimes->value();
+    op["times"]     = ui->spinBoxErodeTimes->value();
   } else if (sender() == ui->pushButtonOpen) {
     op["operation"] = "open";
-    op["times"] = ui->spinBoxOpenTimes->value();
+    op["times"]     = ui->spinBoxOpenTimes->value();
   } else if (sender() == ui->pushButtonClose) {
     op["operation"] = "close";
-    op["times"] = ui->spinBoxCloseTimes->value();
+    op["times"]     = ui->spinBoxCloseTimes->value();
   }
 
   if (!op.isEmpty())

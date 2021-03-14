@@ -7,16 +7,13 @@ namespace kvl {
 
 namespace FragmentProcessor {
 
-/**
- *
- */
 class CalculateMinLogLikelihood {
 public:
   CalculateMinLogLikelihood() {
-    m_SourcePointer = 0;
-    m_Mesh = 0;
+    m_SourcePointer    = 0;
+    m_Mesh             = 0;
     m_MinLogLikelihood = 0.0f;
-    m_mapCompToComp = 0;
+    m_mapCompToComp    = 0;
   }
 
   ~CalculateMinLogLikelihood(){};
@@ -28,8 +25,7 @@ public:
     if (m_mapCompToComp == 0) // no collapsed labels
     {
 
-      // Calculate the numerator of the Labelification weights W0, W1, and W2 in
-      // this point
+      // Calculate the numerator of the Labelification weights W0, W1, and W2 in this point
       float W0 = m_AlphasInVertex0[*m_SourcePointer] * pi0;
       float W1 = m_AlphasInVertex1[*m_SourcePointer] * pi1;
       float W2 = m_AlphasInVertex2[*m_SourcePointer] * pi2;
@@ -44,8 +40,7 @@ public:
       for (int ind = 0; ind < m_mapCompToComp[*m_SourcePointer].size(); ind++) {
         const unsigned char k = m_mapCompToComp[*m_SourcePointer][ind];
 
-        // // std::cout << " ammllc " << ((int) *m_SourcePointer) << " " <<
-        // ((int) k) << std::endl;
+        // // std::cout << " ammllc " << ((int) *m_SourcePointer) << " " << ((int) k) << std::endl;
 
         float W0 = m_AlphasInVertex0[k] * pi0;
         float W1 = m_AlphasInVertex1[k] * pi1;
@@ -115,17 +110,14 @@ private:
 
 } // End namespace FragmentProcessor
 
-/**
- *
- */
 class AtlasMeshMinLogLikelihoodCalculator
     : public AtlasMeshRasterizor<FragmentProcessor::CalculateMinLogLikelihood> {
 public:
   /** Standard class typedefs */
   typedef AtlasMeshMinLogLikelihoodCalculator Self;
   typedef AtlasMeshRasterizor<FragmentProcessor::CalculateMinLogLikelihood>
-      Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+                                        Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -136,7 +128,7 @@ public:
 
   /** Some typedefs */
   typedef Superclass::FragmentProcessorType FragmentProcessorType;
-  typedef Superclass::LabelImageType LabelImageType;
+  typedef Superclass::LabelImageType        LabelImageType;
 
   /** */
   float GetMinLogLikelihood() const {
@@ -162,9 +154,8 @@ protected:
   virtual ~AtlasMeshMinLogLikelihoodCalculator(){};
 
 private:
-  AtlasMeshMinLogLikelihoodCalculator(const Self &); // purposely not
-                                                     // implemented
-  void operator=(const Self &); // purposely not implemented
+  AtlasMeshMinLogLikelihoodCalculator(const Self &); //purposely not implemented
+  void operator=(const Self &);                      //purposely not implemented
 };
 
 } // end namespace kvl

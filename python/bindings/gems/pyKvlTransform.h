@@ -7,7 +7,7 @@ namespace py = pybind11;
 
 #include "kvlCroppedImageReader.h"
 
-using TransformType = kvl::CroppedImageReader::TransformType;
+using TransformType    = kvl::CroppedImageReader::TransformType;
 using TransformPointer = TransformType::Pointer;
 
 class KvlTransform {
@@ -20,6 +20,8 @@ public:
   TransformPointer m_transform;
 
   KvlTransform(TransformPointer transform) : m_transform(transform){};
-  [[nodiscard]] const TransformPointer GetTransform() const { return m_transform; }
+  [[nodiscard]] const TransformPointer GetTransform() const {
+    return m_transform;
+  }
 };
 #endif // GEMS_PYKVLTRANSFORM_H

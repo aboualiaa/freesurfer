@@ -70,7 +70,7 @@ public:
   void drawPolygon(const QPoint *points, int pointCount, PolygonDrawMode mode);
 
 protected:
-  QVTKWidget *Widget;
+  QVTKWidget *             Widget;
   QVTKPaintEngineInternal *Internal;
 };
 

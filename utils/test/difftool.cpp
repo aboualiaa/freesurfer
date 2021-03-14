@@ -1,17 +1,6 @@
-/**
- * @file  difftool.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,37 +16,35 @@
 // difftool.cpp
 //
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #if (__GNUC__ < 3)
 #include "/usr/include/g++-3/alloc.h"
 #endif
 #include <string>
 
-extern "C" {
 #include "mri.h"
 
-char *Progname = "difftool";
-}
+const char *Progname = "difftool";
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  string f1;
-  string f2;
-  string outfile;
+  std::string f1;
+  std::string f2;
+  std::string outfile;
 
   if (argc < 3) {
     // tie in and out
     cin.tie(&cout);
-    cout << "1st filename :";
+    std::cout << "1st filename :";
 
     cin >> f1;
-    cout << "2nd filename :";
+    std::cout << "2nd filename :";
 
     cin >> f2;
 
-    cout << "output filename :";
+    std::cout << "output filename :";
 
     cin >> outfile;
   } else {
@@ -71,19 +58,19 @@ int main(int argc, char *argv[]) {
 
   MRI *mri1 = MRIread(const_cast<char *>(f1.c_str()));
   if (mri1 == 0) {
-    cout << "could not read " << f1.c_str() << endl;
+    std::cout << "could not read " << f1.c_str() << std::endl;
     return -1;
   }
 
   MRI *mri2 = MRIread(const_cast<char *>(f2.c_str()));
   if (mri2 == 0) {
-    cout << "could not read " << f2.c_str() << endl;
+    std::cout << "could not read " << f2.c_str() << std::endl;
     return -1;
   }
   // verify width, height, depth and type are the same
   if ((mri1->width != mri2->width) || (mri1->height != mri2->height) ||
       (mri1->depth != mri2->depth) || (mri1->type != mri2->type)) {
-    cout << "size or type did not match" << endl;
+    std::cout << "size or type did not match" << std::endl;
     return -1;
   }
   // now diff
@@ -97,19 +84,19 @@ int main(int argc, char *argv[]) {
       for (int i = 0; i < mri1->width; ++i) {
         switch (mri1->type) {
         case MRI_UCHAR:
-          u1 = MRIvox(mri1, i, j, k);
-          u2 = MRIvox(mri2, i, j, k);
-          udiff = (u1 - u2) / 2 + 127;
+          u1                   = MRIvox(mri1, i, j, k);
+          u2                   = MRIvox(mri2, i, j, k);
+          udiff                = (u1 - u2) / 2 + 127;
           MRIvox(res, i, j, k) = udiff;
           if (u1 != u2)
-            cout << "(" << i << ", " << j << ", " << k << ") = (" << (int)u1
-                 << ", " << (int)u2 << ")" << endl;
+            std::cout << "(" << i << ", " << j << ", " << k << ") = ("
+                      << (int)u1 << ", " << (int)u2 << ")" << std::endl;
           break;
         case MRI_SHORT:
         case MRI_FLOAT:
         default:
-          cout << "Sorry.  currently supports only uchar, short, or float"
-               << endl;
+          std::cout << "Sorry.  currently supports only uchar, short, or float"
+                    << std::endl;
           goto cleanup;
         }
       }
@@ -118,9 +105,9 @@ int main(int argc, char *argv[]) {
     MRIwrite(res, const_cast<char *>(outfile.c_str()));
 
 cleanup:
-  cout << "Cleanup" << endl;
+  std::cout << "Cleanup" << std::endl;
   MRIfree(&mri1);
   MRIfree(&mri2);
   MRIfree(&res);
-  cout << "Done" << endl;
+  std::cout << "Done" << std::endl;
 }

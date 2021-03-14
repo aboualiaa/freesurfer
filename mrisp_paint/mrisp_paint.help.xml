@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mrisp_paint</name>
-	<synopsis>mrisp_paint [options] &lt;template file&gt; &lt;input surface&gt; &lt;output name&gt;</synopsis>
-	<description>This program is useful for extracting one of the arrays ("a variable") from a surface-registration template file. The output is a file containing a surface-worth of per-vertex values, saved in "curvature" format. Because the template data is sampled to a particular surface mesh, this conjures the idea of "painting to a surface".
+  <name>mrisp_paint</name>
+  <synopsis>mrisp_paint [options] &lt;template file&gt; &lt;input surface&gt; &lt;output name&gt;</synopsis>
+  <description>This program is useful for extracting one of the arrays ("a variable") from a surface-registration template file. The output is a file containing a surface-worth of per-vertex values, saved in "curvature" format. Because the template data is sampled to a particular surface mesh, this conjures the idea of "painting to a surface".
 
 Extra Notes:
 1. I (GW) am fairly certain that it only makes sense to use a sphere as the input surface to which to resample the template data. At that, it probably only produces a useful result to resample the data to the ?h.sphere.reg file of a subject that's been registered to this template. (Of course, once that's done, the output curv-format file can be displayed on any of the same subject's surfaces.)
@@ -77,6 +76,5 @@ Extra Notes:
     <explanation>the output specified as an argument. This is a file containing a surface-worth of per-vertex values, saved in "curvature" format. The per-vertex values are the selected variable from the template file, sampled to the given surface.</explanation>
   </outputs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mris_make_template</see-also>
+  <see-also>mris_make_template</see-also>
 </help>
-

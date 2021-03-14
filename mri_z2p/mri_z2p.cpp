@@ -1,17 +1,6 @@
-/**
- * @file  mri_z2p.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:26 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -43,47 +32,47 @@
 
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
+#include "cmdargs.h"
 #include "diag.h"
 #include "mri2.h"
-#include "version.h"
-#include "cmdargs.h"
-#include "randomfields.h"
 #include "mri_identify.h"
+#include "mrisutils.h"
+#include "randomfields.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_z2p.c,v 1.12 2011/03/02 00:04:26 nicks Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *ZVolFile = nullptr;
-char *PVolFile = nullptr;
+char *ZVolFile      = nullptr;
+char *PVolFile      = nullptr;
 char *Log10PVolFile = nullptr;
-char *MaskVolFile = nullptr;
-int TwoSided = 1;
+char *MaskVolFile   = nullptr;
+int   TwoSided      = 1;
 
-MRI *z, *p, *sig, *mask = nullptr;
-char *featdir = nullptr;
-char *fmt;
+MRI *       z, *p, *sig, *mask = NULL;
+char *      featdir = NULL;
+const char *fmt;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, nthzstat;
+  int  nargs, nthzstat;
   char tmpstr[1000];
 
   nargs = handleVersionOption(argc, argv, "mri_z2p");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -166,8 +155,8 @@ int main(int argc, char *argv[]) {
       exit(1);
 
     TwoSided = 1; // Use 2-sided for t
-    p = RFz2p(z, mask, TwoSided, nullptr);
-    sig = MRIlog10(p, mask, sig, 1);
+    p        = RFz2p(z, mask, TwoSided, nullptr);
+    sig      = MRIlog10(p, mask, sig, 1);
     sprintf(tmpstr, "%s/stats/zsig%d.%s", featdir, nthzstat, fmt);
     printf("Writing sig to %s\n", tmpstr);
     MRIwrite(sig, tmpstr);
@@ -193,8 +182,8 @@ int main(int argc, char *argv[]) {
       exit(1);
 
     TwoSided = 0; // Use 1-sided for F
-    p = RFz2p(z, mask, TwoSided, nullptr);
-    sig = MRIlog10(p, mask, sig, 1);
+    p        = RFz2p(z, mask, TwoSided, nullptr);
+    sig      = MRIlog10(p, mask, sig, 1);
     sprintf(tmpstr, "%s/stats/zfsig%d.%s", featdir, nthzstat, fmt);
     printf("Writing sig to %s\n", tmpstr);
     MRIwrite(sig, tmpstr);
@@ -218,7 +207,7 @@ int main(int argc, char *argv[]) {
 */
 /* ------ Doxygen markup ends on the line above ---- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -258,32 +247,32 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--z")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      ZVolFile = pargv[0];
+      ZVolFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--p")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      PVolFile = pargv[0];
+      PVolFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--log10p")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       Log10PVolFile = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       MaskVolFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--feat")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      featdir = pargv[0];
+      featdir   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--featfmt")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      fmt = pargv[0];
+      fmt       = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--nii"))
       fmt = "nii";
@@ -353,7 +342,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -375,10 +364,9 @@ static void print_help() {
 \fn static void print_version(void)
 \brief Prints version and exits
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for
- * Doxygen) -- */
-static void print_version() {
-  printf("%s\n", vcid);
+/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -415,7 +403,7 @@ static void check_options() {
  * Doxygen) -- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

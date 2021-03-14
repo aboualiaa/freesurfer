@@ -62,14 +62,14 @@ protected:
 
   int UniformScaling; // Determine whether eigenvalues are used as scaling
                       // factors in corresponding eigenvector directions
-  int FAScaling;      // Determine whether sqrt(fa) is used as a scaling factor
+  int   FAScaling;    // Determine whether sqrt(fa) is used as a scaling factor
   float ScaleFactor;  // Scale factor to use to scale geometry
 
   vtkLookupTable *ColorTable; // color table for current output. indeces match
                               // scalars of output's pointdata
 
   enum {
-    FA = 0,
+    FA  = 0,
     EV1 = 1,
     EV2 = 4,
     EV3 = 7,

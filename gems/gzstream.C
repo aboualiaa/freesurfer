@@ -18,8 +18,6 @@
 // ============================================================================
 //
 // File          : gzstream.C
-// Revision      : $Revision: 1.1 $
-// Revision_date : $Date: 2016/12/02 17:16:10 $
 // Author(s)     : Deepak Bandyopadhyay, Lutz Kettner
 //
 // Standard streambuf implementation following Nicolai Josuttis, "The
@@ -27,7 +25,9 @@
 // ============================================================================
 
 #include <gzstream.h>
-#include <string.h>
+#include <iostream>
+#include <string.h> // for memcpy
+
 #ifdef GZSTREAM_NAMESPACE
 namespace GZSTREAM_NAMESPACE {
 #endif
@@ -42,23 +42,23 @@ namespace GZSTREAM_NAMESPACE {
 
 gzstreambuf *gzstreambuf::open(const char *name, int open_mode) {
   if (is_open())
-    return (gzstreambuf *)nullptr;
+    return (gzstreambuf *)0;
   mode = open_mode;
   // no append nor read/write mode
   if ((mode & std::ios::ate) || (mode & std::ios::app) ||
       ((mode & std::ios::in) && (mode & std::ios::out)))
-    return (gzstreambuf *)nullptr;
-  char fmode[10];
+    return (gzstreambuf *)0;
+  char  fmode[10];
   char *fmodeptr = fmode;
   if (mode & std::ios::in)
     *fmodeptr++ = 'r';
   else if (mode & std::ios::out)
     *fmodeptr++ = 'w';
   *fmodeptr++ = 'b';
-  *fmodeptr = '\0';
-  file = gzopen(name, fmode);
-  if (file == nullptr)
-    return (gzstreambuf *)nullptr;
+  *fmodeptr   = '\0';
+  file        = gzopen(name, fmode);
+  if (file == 0)
+    return (gzstreambuf *)0;
   opened = 1;
   return this;
 }
@@ -70,7 +70,7 @@ gzstreambuf *gzstreambuf::close() {
     if (gzclose(file) == Z_OK)
       return this;
   }
-  return (gzstreambuf *)nullptr;
+  return (gzstreambuf *)0;
 }
 
 int gzstreambuf::underflow() { // used for input buffer only

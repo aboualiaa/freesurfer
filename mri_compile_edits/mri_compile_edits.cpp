@@ -1,5 +1,4 @@
 /**
- * @file  mri_compile_edits.c
  * @brief program to find all edits made to a subject and write out
  *    a .mgz volume summarizing them.
  *
@@ -7,12 +6,8 @@
  * stream and writes them into a single volume with different labels.
  *
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2012/02/08 20:33:17 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011-2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,12 +19,23 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "colortab.h"
+#include "const.h"
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "proto.h"
+#include "timer.h"
+#include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -37,23 +43,24 @@ static void usage_exit(int code);
 
 static char sdir[STRLEN] = "";
 
-#define EDIT_WM_OFF 1
-#define EDIT_WM_ON 2
-#define EDIT_BRAIN_OFF 3
-#define EDIT_BRAIN_ON 4
-#define EDIT_BM_CHANGED 5 // brainmask.mgz changed
+#define EDIT_WM_OFF         1
+#define EDIT_WM_ON          2
+#define EDIT_BRAIN_OFF      3
+#define EDIT_BRAIN_ON       4
+#define EDIT_BM_CHANGED     5 // brainmask.mgz changed
 #define EDIT_FINALSURFS_OFF 6
-#define EDIT_FINALSURFS_ON 7
-#define EDIT_ASEG_CHANGED 8
-#define CTAB_ENTRIES EDIT_ASEG_CHANGED + 1
+#define EDIT_FINALSURFS_ON  7
+#define EDIT_ASEG_CHANGED   8
+#define CTAB_ENTRIES        EDIT_ASEG_CHANGED + 1
 
 int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN];
-  int ac, nargs, i;
-  char *subject, *cp, mdir[STRLEN], *out_fname, *name;
-  int r, g, b, nedits = 0;
-  MRI *mri = nullptr, *mri_edits = nullptr, *mri_aseg_auto = nullptr,
-      *mri_bm_auto = nullptr;
+  char **     av, fname[STRLEN];
+  int         ac, nargs, i;
+  char *      subject, *cp, mdir[STRLEN], *out_fname;
+  const char *name;
+  int         r, g, b, nedits = 0;
+  MRI *       mri = NULL, *mri_edits = NULL, *mri_aseg_auto = NULL,
+      *mri_bm_auto = NULL;
   FILE *ctfp;
 
   // default output file name:
@@ -66,7 +73,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   ac = argc;
   av = argv;
@@ -81,7 +88,7 @@ int main(int argc, char *argv[]) {
 
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
-    if (cp == nullptr)
+    if (cp == NULL)
       ErrorExit(ERROR_BADPARM,
                 "%s: SUBJECTS_DIR must be defined in the env or on cmdline "
                 "with -sdir",
@@ -95,16 +102,25 @@ int main(int argc, char *argv[]) {
   printf("Compiling volume edits for subject %s...\n", subject);
   fflush(stdout);
 
-  sprintf(mdir, "%s/%s/mri", sdir, subject);
+  int req = snprintf(mdir, STRLEN, "%s/%s/mri", sdir, subject);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
 
   /*
    * brain.mgz
    */
-  sprintf(fname, "%s/brain.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/brain.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
     int edits = MRIsetVoxelsWithValue(mri, mri_edits, WM_EDITED_OFF_VAL,
                                       EDIT_BRAIN_OFF);
     if (edits)
@@ -122,11 +138,15 @@ int main(int argc, char *argv[]) {
   /*
    * wm.mgz
    */
-  sprintf(fname, "%s/wm.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/wm.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
     int edits =
         MRIsetVoxelsWithValue(mri, mri_edits, WM_EDITED_OFF_VAL, EDIT_WM_OFF);
     if (edits)
@@ -143,12 +163,21 @@ int main(int argc, char *argv[]) {
   /*
    * brainmask.mgz
    */
-  sprintf(fname, "%s/brainmask.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/brainmask.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
-    sprintf(fname, "%s/brainmask.auto.mgz", mdir);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
+    int req = snprintf(fname, STRLEN, "%s/brainmask.auto.mgz", mdir);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     mri_bm_auto = MRIread(fname);
     if (mri_bm_auto) {
       int edits = MRIsetDifferentVoxelsWithValue(mri, mri_bm_auto, mri_edits,
@@ -165,11 +194,15 @@ int main(int argc, char *argv[]) {
   /*
    * brain.finalsurfs.mgz
    */
-  sprintf(fname, "%s/brain.finalsurfs.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/brain.finalsurfs.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
     int edits = MRIsetVoxelsWithValue(mri, mri_edits, WM_EDITED_OFF_VAL,
                                       EDIT_FINALSURFS_OFF);
     if (edits)
@@ -187,12 +220,20 @@ int main(int argc, char *argv[]) {
   /*
    * aseg.mgz
    */
-  sprintf(fname, "%s/aseg.mgz", mdir);
+  req = snprintf(fname, STRLEN, "%s/aseg.mgz", mdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mri = MRIread(fname);
   if (mri) {
-    if (nullptr == mri_edits)
-      mri_edits = MRIclone(mri, nullptr);
-    sprintf(fname, "%s/aseg.auto.mgz", mdir);
+    if (NULL == mri_edits)
+      mri_edits = MRIclone(mri, NULL);
+    int req = snprintf(fname, STRLEN, "%s/aseg.auto.mgz", mdir);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     mri_aseg_auto = MRIread(fname);
     if (mri_aseg_auto) {
       int edits = MRIsetDifferentVoxelsWithValue(mri, mri_aseg_auto, mri_edits,
@@ -213,57 +254,57 @@ int main(int argc, char *argv[]) {
       switch (i) {
       case EDIT_WM_OFF:
         name = "wm-OFF";
-        r = 0;
-        g = 0;
-        b = 255;
+        r    = 0;
+        g    = 0;
+        b    = 255;
         break;
       case EDIT_WM_ON:
         name = "wm-ON";
-        r = 255;
-        g = 0;
-        b = 0;
+        r    = 255;
+        g    = 0;
+        b    = 0;
         break;
       case EDIT_BRAIN_OFF:
         name = "brain-OFF";
-        r = 0;
-        g = 255;
-        b = 255;
+        r    = 0;
+        g    = 255;
+        b    = 255;
         break;
       case EDIT_BRAIN_ON:
         name = "brain-ON";
-        r = 255;
-        g = 255;
-        b = 0;
+        r    = 255;
+        g    = 255;
+        b    = 0;
         break;
       case EDIT_BM_CHANGED:
         name = "brainmask-CHANGED";
-        r = 0;
-        g = 64;
-        b = 255;
+        r    = 0;
+        g    = 64;
+        b    = 255;
         break;
       case EDIT_FINALSURFS_OFF:
         name = "brain.finalsurf-OFF";
-        r = 0;
-        g = 128;
-        b = 255;
+        r    = 0;
+        g    = 128;
+        b    = 255;
         break;
       case EDIT_FINALSURFS_ON:
         name = "brain.finalsurfs-ON";
-        r = 255;
-        g = 128;
-        b = 0;
+        r    = 255;
+        g    = 128;
+        b    = 0;
         break;
       case EDIT_ASEG_CHANGED:
         name = "aseg-CHANGED";
-        r = 255;
-        g = 255;
-        b = 128;
+        r    = 255;
+        g    = 255;
+        b    = 128;
         break;
       default:
         name = "Unknown";
-        r = 0;
-        g = 0;
-        b = 0;
+        r    = 0;
+        g    = 0;
+        b    = 0;
         break;
         continue;
       }
@@ -292,7 +333,11 @@ int main(int argc, char *argv[]) {
            out_fname);
     MRIwrite(mri_edits, out_fname);
     if (mri_edits->ct) {
-      sprintf(fname, "%s/mri_compile_edits_LUT", mdir);
+      int req = snprintf(fname, STRLEN, "%s/mri_compile_edits_LUT", mdir);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("Colortable saved to %s :\n", fname);
       CTABprintASCII(mri_edits->ct, stdout);
       ctfp = fopen(fname, "w");
@@ -321,7 +366,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

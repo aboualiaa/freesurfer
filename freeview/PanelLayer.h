@@ -1,16 +1,7 @@
-/**
- * @file  PanelLayer.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: zkaufman $
- *    $Date: 2016/08/05 03:02:30 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,12 +15,12 @@
 #ifndef PANELLAYER_H
 #define PANELLAYER_H
 
+#include "LayerCollection.h"
 #include "UIUpdateHelper.h"
-#include <QScrollArea>
 #include <QList>
+#include <QScrollArea>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include "LayerCollection.h"
 
 class QLineEdit;
 class QSpinBox;
@@ -43,8 +34,8 @@ class PanelLayer : public QScrollArea, public UIUpdateHelper {
 public:
   explicit PanelLayer(const QString &layerType, QWidget *parent = 0);
 
-  void InitializeLayerTreeWidget(QTreeWidget *treeWidget);
-  void SetCurrentLayer(Layer *layer);
+  void         InitializeLayerTreeWidget(QTreeWidget *treeWidget);
+  void         SetCurrentLayer(Layer *layer);
   virtual void DisconnectAllLayers();
   virtual void ConnectLayer(Layer *layer);
 
@@ -56,10 +47,10 @@ public slots:
   void UpdateWidgets();
 
 protected:
-  virtual void DoIdle() = 0;
-  virtual void DoUpdateWidgets() = 0;
-  void BlockAllSignals(bool bBlock);
-  template <typename T> inline T GetCurrentLayer();
+  virtual void                          DoIdle()          = 0;
+  virtual void                          DoUpdateWidgets() = 0;
+  void                                  BlockAllSignals(bool bBlock);
+  template <typename T> inline T        GetCurrentLayer();
   template <typename T> inline QList<T> GetSelectedLayers();
 
 protected slots:
@@ -73,12 +64,12 @@ protected slots:
 protected:
   QList<QWidget *> allWidgets;
   QList<QAction *> allActions;
-  QTreeWidget *treeWidgetLayers;
+  QTreeWidget *    treeWidgetLayers;
   LayerCollection *m_layerCollection;
 
 private:
-  bool m_bToUpdate;
-  Layer *m_currentLayer;
+  bool    m_bToUpdate;
+  Layer * m_currentLayer;
   QString m_layerType;
 };
 
@@ -108,6 +99,10 @@ template <typename T> QList<T> PanelLayer::GetSelectedLayers() {
     if (t)
       list << t;
   }
+  T tc = qobject_cast<T>(m_currentLayer);
+  if (list.isEmpty() && tc)
+    list << tc;
+
   return list;
 }
 

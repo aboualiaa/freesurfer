@@ -1,5 +1,4 @@
 /**
- * @file  CostFunctions.h
  * @brief A class that makes available many different cost functions for images
  *   and to combine multiple volumes by mean or median
  *   MRIiterator iterates through MRI (readonly)
@@ -7,12 +6,8 @@
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2014/11/15 04:50:07 $
- *    $Revision: 1.19 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,14 +25,14 @@
 #ifndef CostFunctions_H
 #define CostFunctions_H
 
+#include "matrix.h"
 #include "mri.h"
 #include "mriBSpline.h"
-#include "matrix.h"
 
 //#include <utility>
 //#include <string>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #define export // obsolete feature 'export template' used in these headers
 #include <vnl/vnl_matrix_fixed.h>
@@ -46,8 +41,7 @@
 #include "JointHisto.h"
 
 /** \class CostFunctions
- * \brief Static class implementing several cost functions and other image
- * statistics
+ * \brief Static class implementing several cost functions and other image statistics
  */
 class CostFunctions {
 public:
@@ -105,7 +99,7 @@ public:
                               const vnl_matrix_fixed<double, 4, 4> &Mti, int d1,
                               int d2, int d3, double sat = 4.6851);
   //! never really tested (old)
-  static double tukeyBiweight(MRI *i1, MRI *i2 = nullptr, double sat = 4.6851);
+  static double tukeyBiweight(MRI *i1, MRI *i2 = NULL, double sat = 4.6851);
   //! never really tested
   static double normalizedCorrelation(MRI *i1, MRI *i2);
 
@@ -151,7 +145,7 @@ public:
   }
 
   //! not implemented and not sure where they are from? Flirt?
-  static float woods(MRI *i1, MRI *i2 = nullptr);
+  static float woods(MRI *i1, MRI *i2 = NULL);
   //! not implemented and not sure where they are from? Flirt?
   static float correlationRatio(MRI *i1, MRI *i2);
 
@@ -191,19 +185,19 @@ public:
   float operator*();
 
 protected:
-  float fromUCHAR();
-  float fromSHORT();
-  float fromINT();
-  float fromLONG();
-  float fromFLOAT();
+  float fromUCHAR(void);
+  float fromSHORT(void);
+  float fromINT(void);
+  float fromLONG(void);
+  float fromFLOAT(void);
 
   MRIiterator &opincchunk(int);
   MRIiterator &opincnochunk(int);
 
-  MRI *img;
+  MRI *          img;
   unsigned char *pos;
   unsigned char *end;
-  float (MRIiterator::*getVal)();
+  float (MRIiterator::*getVal)(void);
   MRIiterator &(MRIiterator::*opinc)(int);
   int x, y, z;
   int bytes_per_voxel;
@@ -216,23 +210,23 @@ inline MRIiterator::MRIiterator(MRI *i) : img(i) {
 
   switch (img->type) {
   case MRI_UCHAR:
-    getVal = &MRIiterator::fromUCHAR;
+    getVal          = &MRIiterator::fromUCHAR;
     bytes_per_voxel = sizeof(unsigned char);
     break;
   case MRI_SHORT:
-    getVal = &MRIiterator::fromSHORT;
+    getVal          = &MRIiterator::fromSHORT;
     bytes_per_voxel = sizeof(short);
     break;
   case MRI_INT:
-    getVal = &MRIiterator::fromINT;
+    getVal          = &MRIiterator::fromINT;
     bytes_per_voxel = sizeof(int);
     break;
   case MRI_LONG:
-    getVal = &MRIiterator::fromLONG;
+    getVal          = &MRIiterator::fromLONG;
     bytes_per_voxel = sizeof(long);
     break;
   case MRI_FLOAT:
-    getVal = &MRIiterator::fromFLOAT;
+    getVal          = &MRIiterator::fromFLOAT;
     bytes_per_voxel = sizeof(float);
     break;
   default:
@@ -245,15 +239,15 @@ inline void MRIiterator::begin()
 // set pos to first element
 {
   if (img->ischunked) {
-    pos = (unsigned char *)img->chunk;
-    end = (unsigned char *)img->chunk + img->bytes_total;
+    pos   = (unsigned char *)img->chunk;
+    end   = (unsigned char *)img->chunk + img->bytes_total;
     opinc = &MRIiterator::opincchunk;
   } else {
-    x = 0;
-    y = 0;
-    z = 0;
-    pos = (unsigned char *)img->slices[0][0];
-    end = nullptr;
+    x     = 0;
+    y     = 0;
+    z     = 0;
+    pos   = (unsigned char *)img->slices[0][0];
+    end   = NULL;
     opinc = &MRIiterator::opincnochunk;
   }
 }
@@ -284,8 +278,8 @@ inline MRIiterator &MRIiterator::opincnochunk(int) {
       y = 0;
       z++;
       if (z == img->depth) {
-        z = 0;
-        pos = nullptr;
+        z   = 0;
+        pos = NULL;
         return *this;
       }
     }

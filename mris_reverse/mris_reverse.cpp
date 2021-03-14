@@ -1,17 +1,6 @@
-/**
- * @file  mris_reverse.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:33 $
- *    $Revision: 1.10 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,12 +16,9 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_reverse.c,v 1.10 2011/03/02 00:04:33 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -41,12 +27,12 @@ static void print_version();
 const char *Progname;
 
 static int patch_flag = 0;
-static int which = REVERSE_X;
+static int which      = REVERSE_X;
 
 int main(int argc, char *argv[]) {
   char **av, *in_fname, *out_fname, path[STRLEN], fname[STRLEN], hemi[STRLEN],
       *cp;
-  int ac, nargs;
+  int          ac, nargs;
   MRI_SURFACE *mris;
 
   nargs = handleVersionOption(argc, argv, "mris_reverse");
@@ -69,7 +55,7 @@ int main(int argc, char *argv[]) {
   if (argc < 3)
     usage_exit();
 
-  in_fname = argv[1];
+  in_fname  = argv[1];
   out_fname = argv[2];
 
   if (patch_flag) {
@@ -114,7 +100,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -164,7 +150,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

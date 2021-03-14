@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define a function that exits if something goes wrong.
-function doIt {
+function doIt() {
 
   command="$1"
 
@@ -13,7 +13,6 @@ function doIt {
   fi
 }
 
-
 if [ $# -le 2 ]; then
   echo "Usage: $0 prefix suffix outputFile [subjectsDirectory]"
   exit -1
@@ -21,7 +20,7 @@ fi
 
 prefix=$1
 suffix=$2
-outputfile=$3;
+outputfile=$3
 resultsDirectory=$SUBJECTS_DIR
 if [ $# -ge 4 ]; then
   resultsDirectory=$4
@@ -37,23 +36,22 @@ echo "   $suffix"
 echo "And writing them to: "
 echo "   $outputfile "
 
-
 # Go to the output directory
 doIt "cd $resultsDirectory"
 
 # List all subdirectories (subjects)
-subjectNames=(`ls -d */`) # list only directories
+subjectNames=($(ls -d */)) # list only directories
 numberOfSubjects=${#subjectNames[*]}
 
 # Go inside each subject's subdirectory and collect volumes
 
 namesWritten="no"
-for i in `eval echo {1..$numberOfSubjects}`; do
+for i in $(eval echo {1..$numberOfSubjects}); do
 
   # Get subject name
   let subjectIndex=$i-1
-  subjectName=${subjectNames[ $subjectIndex ]}
-  subjectName=`echo "${subjectName//\/}"` # strips the /
+  subjectName=${subjectNames[$subjectIndex]}
+  subjectName=$(echo "${subjectName//\//}") # strips the /
 
   # Files with volumes
   leftVolFile="$resultsDirectory/$subjectName/mri/lh.${prefix}Volumes-${suffix}.v21.txt"
@@ -62,38 +60,38 @@ for i in `eval echo {1..$numberOfSubjects}`; do
   # If they exist, collect data
   if [ -f $leftVolFile ] && [ -f $rightVolFile ]; then
 
-     echo "Collecting data for subject: $subjectName"
-    
-     # if it's the first subject, gather names of structures
-     if [ $namesWritten == "no" ]; then
-        namesWritten="yes"
-     
-        nameString="Subject "; 
-        while read line; do
-          arr=(`echo ${line}`);
-          nameString="$nameString  left_${arr[0]}" 
-        done < $leftVolFile
+    echo "Collecting data for subject: $subjectName"
 
-        while read line; do
-          arr=(`echo ${line}`);
-          nameString="$nameString  right_${arr[0]}"
-        done < $leftVolFile
- 
-        echo $nameString > $outputfile
+    # if it's the first subject, gather names of structures
+    if [ $namesWritten == "no" ]; then
+      namesWritten="yes"
 
-     fi
-    
-     volumes="$subjectName"; 
-     while read line; do
-       arr=(`echo ${line}`);
-       volumes="$volumes  ${arr[1]}" 
-     done < $leftVolFile
-     while read line; do
-       arr=(`echo ${line}`);
-       volumes="$volumes  ${arr[1]}" 
-     done < $rightVolFile
+      nameString="Subject "
+      while read line; do
+        arr=($(echo ${line}))
+        nameString="$nameString  left_${arr[0]}"
+      done <$leftVolFile
 
-     echo $volumes >> $outputfile
+      while read line; do
+        arr=($(echo ${line}))
+        nameString="$nameString  right_${arr[0]}"
+      done <$leftVolFile
+
+      echo $nameString >$outputfile
+
+    fi
+
+    volumes="$subjectName"
+    while read line; do
+      arr=($(echo ${line}))
+      volumes="$volumes  ${arr[1]}"
+    done <$leftVolFile
+    while read line; do
+      arr=($(echo ${line}))
+      volumes="$volumes  ${arr[1]}"
+    done <$rightVolFile
+
+    echo $volumes >>$outputfile
 
   else
     # echo "Skipping directory $subjectName "
@@ -101,5 +99,3 @@ for i in `eval echo {1..$numberOfSubjects}`; do
   fi
 
 done # End loop over all subjects
-
-

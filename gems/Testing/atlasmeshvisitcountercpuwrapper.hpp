@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kvlAtlasMeshVisitCounter.h"
 #include "atlasmeshvisitcounter.hpp"
+#include "kvlAtlasMeshVisitCounter.h"
 
 #include "stopwatch.hpp"
 

@@ -1,16 +1,11 @@
 /**
- * @file  VolumeFilter.h
  * @brief Base VolumeFilter class.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/10/18 18:13:24 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,8 +21,8 @@
 #ifndef VolumeFilter_h
 #define VolumeFilter_h
 
-#include <QObject>
 #include "CommonDataStruct.h"
+#include <QObject>
 
 #include "mri.h"
 
@@ -69,11 +64,11 @@ protected slots:
 protected:
   virtual bool Execute() = 0;
 
-  int m_nKernelSize;
+  int       m_nKernelSize;
   LayerMRI *m_volumeInput;
   LayerMRI *m_volumeOutput;
-  int m_nTimerCount;
-  QTimer *m_timerProgress;
+  int       m_nTimerCount;
+  QTimer *  m_timerProgress;
 };
 
 #endif

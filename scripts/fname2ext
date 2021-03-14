@@ -9,12 +9,8 @@
 #   The file does not need to exist.
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: nicks $
-#    $Date: 2011/03/02 20:16:39 $
-#    $Revision: 1.2 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,7 +23,7 @@
 #
 
 
-set VERSION = '$Id: fname2ext,v 1.2 2011/03/02 20:16:39 nicks Exp $';
+set VERSION = 'fname2ext @FS_VERSION@';
 
 if($#argv != 1) then
   echo "fname2stem filename"

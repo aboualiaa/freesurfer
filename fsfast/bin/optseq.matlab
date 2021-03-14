@@ -4,12 +4,8 @@
 # optseq.matlab
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2015/12/10 22:51:30 $
-#    $Revision: 1.2 $
 #
-# Copyright (C) 2002-2007,
+# Copyright © 2021
 # The General Hospital Corporation (Boston, MA). 
 # All rights reserved.
 #
@@ -23,7 +19,7 @@
 #
 
 
-set VERSION = '$Id: optseq.matlab,v 1.2 2015/12/10 22:51:30 zkaufman Exp $';
+set VERSION = 'optseq.matlab @FS_VERSION@';
 
 set pforder = 0;
 

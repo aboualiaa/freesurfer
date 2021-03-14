@@ -1,16 +1,7 @@
-/**
- * @file  DialogNewPointSet.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:46 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,11 +13,11 @@
  *
  */
 #include "DialogNewPointSet.h"
-#include "ui_DialogNewPointSet.h"
-#include "LayerMRI.h"
 #include "LayerCollection.h"
-#include "MainWindow.h"
+#include "LayerMRI.h"
 #include "LayerPropertyPointSet.h"
+#include "MainWindow.h"
+#include "ui_DialogNewPointSet.h"
 #include <QMessageBox>
 
 DialogNewPointSet::DialogNewPointSet(QWidget *parent)
@@ -35,7 +26,7 @@ DialogNewPointSet::DialogNewPointSet(QWidget *parent)
   LayerCollection *col_mri =
       MainWindow::GetMainWindow()->GetLayerCollection("MRI");
   QList<Layer *> layers = col_mri->GetLayers();
-  int nSel = 0;
+  int            nSel   = 0;
   for (int i = 0; i < layers.size(); i++) {
     ui->comboBoxTemplate->addItem(layers[i]->GetName(),
                                   QVariant::fromValue((QObject *)layers[i]));

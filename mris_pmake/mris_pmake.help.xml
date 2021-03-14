@@ -21,7 +21,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mris_pmake</name>
   <synopsis>(Using existing options file)
@@ -29,7 +28,7 @@ mris_pmake [--optionsFile=&lt;fileName&gt;] [--dir=&lt;workingDir&gt;] [--listen
  
 (No options file; will create)
 mris_pmake --subject &lt;subj&gt; --hemi &lt;hemi&gt; --surface0 &lt;surface0File&gt; --surface1 &lt;surface1File&gt; --curv0 &lt;curv0File&gt; --curv1 &lt;curv1File&gt; --useAbsCurvs --mpmProg &lt;mpmProgName&gt; --mpmArgs &lt;argsForMpmProg&gt;</synopsis>
-	<description>'mris_pmake' calculates paths and related costs on FreeSurfer surfaces based on an edge cost and Dijkstra's algorithm.
+  <description>'mris_pmake' calculates paths and related costs on FreeSurfer surfaces based on an edge cost and Dijkstra's algorithm.
 
 In its simplest usage, a &lt;start&gt; and &lt;end&gt; vertex index on the surface is specified (typically in the &lt;optionsFile&gt;), and the program calculates the shortest path connected the points as well as the path cost. "Shortest" path in this case only has meaning in the context of the cost function that is being evaluated (see COST FUNCTION for details).
 
@@ -61,7 +60,9 @@ The curvature, c, is specified in the &lt;optionsFile&gt; with the 'curvatureFil
 An additional non-linear penalty is also available, and if 'b_transitionPenalties' is TRUE, will be applied to the cost function, by an index-to-index multiplication of the cost vector. It currently triggered if the original 'c' value undergoes a zero-crossing along a trajectory path.
   </description>
   <arguments>
-    <positional><intro>None</intro></positional>
+    <positional>
+      <intro>None</intro>
+    </positional>
     <required-flagged>
       <intro>If no &lt;optionsFile&gt; is present. One will be created when 'mris_pmake' starts.</intro>
       <argument>--subject &lt;subj&gt;</argument>
@@ -76,7 +77,7 @@ An additional non-linear penalty is also available, and if 'b_transitionPenaltie
       <argument>--dir=&lt;workingDir&gt;</argument>
       <explanation>The working directory. This will override a working directory that might have been specified in the &lt;fileName&gt; prefix. Defaults is current directory.</explanation>
       <argument>--listen</argument>
-      <explanation>Start in LISTEN mode, i.e. initialize the program and read the default 'options.txt' file parsing surfaces and curvatures, but do not actually calculate a path. Instead, once ready, start listening on the embedded server socket for instructions. Send a 'RUN' string in a UDP packet to the port specified in &lt;optionsFile&gt; to perform the path search.</explanation> 
+      <explanation>Start in LISTEN mode, i.e. initialize the program and read the default 'options.txt' file parsing surfaces and curvatures, but do not actually calculate a path. Instead, once ready, start listening on the embedded server socket for instructions. Send a 'RUN' string in a UDP packet to the port specified in &lt;optionsFile&gt; to perform the path search.</explanation>
       <argument>--listenOnPort &lt;port&gt;</argument>
       <explanation>Similar to above, but do not interpret the &lt;optionsFile&gt; environment. Essentially create the server port on &lt;port&gt; and do nothing else. In this mode, the program requires an explicit 'HUP' text string to be sent as a UDP packet to &lt;port&gt; to read the default enviroment, or an options file can be spec'd by sending a UDP string 'OPT &lt;optionsFile&gt;'.</explanation>
       <intro>If no &lt;optionsFile&gt; is present.</intro>
@@ -91,12 +92,12 @@ An additional non-linear penalty is also available, and if 'b_transitionPenaltie
       <argument>--useAbsCurvs</argument>
       <explanation>If specified, use an fabs(...) on each curvature map. Otherwise, the curvature map field is offset so that its minimum value (most negative) is zero.</explanation>
       <argument>--mpmProg &lt;mpmProgName&gt;</argument>
-      <explanation>The mpmProg to run.</explanation> 
+      <explanation>The mpmProg to run.</explanation>
       <argument>--mpmArgs &lt;argsForMpmProg&gt;</argument>
       <explanation>A semi-colon delimited list of arguments for the specified &lt;mpmProg&gt;. This list is of course dependent on the particular mpmProg being executed.</explanation>
     </optional-flagged>
   </arguments>
-	<example>The best mechanism to run a 'mris_pmake' process is from a companion 'shell' called 'dsh'. The use of 'dsh' is beyond the scope of this help, but in the simplest case (and assuming a valid &lt;optionsFile&gt;), simply run 'dsh' and wait for it to provide a prompt. At the prompt type 'RUN' and wait for the next prompt, at which simply type 'quit'.
+  <example>The best mechanism to run a 'mris_pmake' process is from a companion 'shell' called 'dsh'. The use of 'dsh' is beyond the scope of this help, but in the simplest case (and assuming a valid &lt;optionsFile&gt;), simply run 'dsh' and wait for it to provide a prompt. At the prompt type 'RUN' and wait for the next prompt, at which simply type 'quit'.
 
 Alternatively, 'mris_pmake' can be evoked in a more conventional FreeSurfer manner, specifying subject and hemisphere by using appropriate command line args. This is most useful when non-interactive behaviour is desired and typically implies running an embedded mpmProg.
 
@@ -116,4 +117,3 @@ If you do not have an options file:
 2. For a subject called '11' and using the rh.smoothwm.K1.crv file as main curvature function, type: &gt;mris_pmake --subject 11 --hemi rh --curv0 smoothwm.K1.crv --mpmProg autodijk  </example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

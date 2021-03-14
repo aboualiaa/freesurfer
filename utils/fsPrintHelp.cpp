@@ -1,17 +1,12 @@
 /**
- * @file  fsPrintHelp.c
  * @brief utility to read an .xml file and output it in a readable format
  *
  * routines for printing of help text formated in xml
  */
 /*
  * Original Author: Greg Terrono
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:44 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,14 +21,14 @@
 //-------------------------------------------------------------------
 
 #include <cctype>
+#include <cstring>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include <cstring>
 
 static void printName(xmlNodePtr cur);
 static void printContents(xmlDocPtr doc, xmlNodePtr cur);
-static int tagNameIs(const char *c, xmlNodePtr cur);
-static int wrdLen(char *c);
+static int  tagNameIs(const char *c, xmlNodePtr cur);
+static int  wrdLen(char *c);
 
 int outputHelpDoc(const xmlDocPtr doc)
 // output the help text from the xml Doc
@@ -72,7 +67,7 @@ int outputHelpDoc(const xmlDocPtr doc)
           printf(" ARGUMENTS");
           xmlNodePtr argumentElement;
           argumentElement = argumentType->xmlChildrenNode;
-          int first = 1;
+          int first       = 1;
           while (argumentElement != nullptr) {
             if (!tagNameIs("text", argumentElement)) {
               if (tagNameIs("intro", argumentElement) ||
@@ -101,7 +96,7 @@ int outputHelpDoc(const xmlDocPtr doc)
       if (tagNameIs("outputs", cur)) {
         xmlNodePtr outputElement;
         outputElement = cur->xmlChildrenNode;
-        int first = 1;
+        int first     = 1;
         while (outputElement != nullptr) {
           if (!tagNameIs("text", outputElement)) {
             if (tagNameIs("intro", outputElement) ||
@@ -140,7 +135,7 @@ int outputHelp(const char *name)
 // load and parse xml doc from file
 {
   xmlDocPtr doc;
-  char *fname = (char *)name;
+  char *    fname = (char *)name;
 
   // Checks for the .xml file name
   if (name == nullptr) {
@@ -231,7 +226,7 @@ static void printName(xmlNodePtr cur) {
 #define FSPRINT_MAX_CHARS 78
 static void printContents(xmlDocPtr doc, xmlNodePtr cur) {
   xmlChar *contents;
-  contents = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+  contents       = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
   unsigned int i = 0, j;
   while (i < strlen((char *)contents)) {
     int tabNum = 1;
@@ -290,7 +285,7 @@ static int wrdLen(char *c) {
 int main(int argc, char *argv[]) {
   if (argv[1] == nullptr) {
     // assuming input is being piped (ie 'cat somefile.help.xml | fsPrintHelp')
-    argv[1] = "/dev/stdin";
+    return outputHelp("/dev/stdin");
   }
   return outputHelp(argv[1]);
   exit(0);

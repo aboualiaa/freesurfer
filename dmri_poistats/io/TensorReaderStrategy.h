@@ -10,7 +10,7 @@
 
 class TensorReaderStrategy {
 public:
-  typedef itk::DiffusionTensor3D<float> TensorPixelType;
+  typedef itk::DiffusionTensor3D<float>  TensorPixelType;
   typedef itk::Image<TensorPixelType, 3> TensorImageType;
 
   TensorReaderStrategy();

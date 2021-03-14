@@ -1,5 +1,4 @@
 /**
- * @file  SurfaceOverlay.h
  * @brief The common properties available to MRI layers
  *
  * An interface implemented by a collection. Layers will get
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2014/03/27 20:13:34 $
- *    $Revision: 1.20 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -123,7 +118,19 @@ public:
 
   double PositionToPercentile(double dPos, bool ignore_zeros);
 
+  void GetDisplayRange(double *range) {
+    range[0] = m_dDisplayRange[0];
+    range[1] = m_dDisplayRange[1];
+  }
+
+  void SetDisplayRange(double *range) {
+    m_dDisplayRange[0] = range[0];
+    m_dDisplayRange[1] = range[1];
+  }
+
   qint64 GetID() { return m_nID; }
+
+  void UpdateMaxHistCount(double *range, int nBins);
 
 signals:
   void DataUpdated();
@@ -135,35 +142,36 @@ public slots:
   void EmitDataUpdated() { emit DataUpdated(); }
 
 private:
-  float *m_fData;
-  float *m_fDataRaw;
-  float *m_fDataUnsmoothed;
+  float *   m_fData;
+  float *   m_fDataRaw;
+  float *   m_fDataUnsmoothed;
   qlonglong m_nDataSize;
-  double m_dMaxValue;
-  double m_dMinValue;
-  double m_dNonZeroMinValue;
-  double m_dRawMaxValue;
-  double m_dRawMinValue;
+  double    m_dMaxValue;
+  double    m_dMinValue;
+  double    m_dNonZeroMinValue;
+  double    m_dRawMaxValue;
+  double    m_dRawMinValue;
+  double    m_dDisplayRange[2];
 
-  QString m_strName;
-  QString m_strFileName;
-  QString m_strRegFileName;
+  QString       m_strName;
+  QString       m_strFileName;
+  QString       m_strRegFileName;
   LayerSurface *m_surface;
 
   bool m_bCorrelationData;
   bool m_bCorrelationDataReady;
   bool m_bComputeCorrelation;
 
-  MRI *m_mriCorrelation;
+  MRI *                   m_mriCorrelation;
   SurfaceOverlayProperty *m_property;
   // indicate there is a paired overlay sharing correlation data and property
   SurfaceOverlay *m_overlayPaired;
 
-  int m_nActiveFrame;
-  int m_nNumOfFrames;
+  int       m_nActiveFrame;
+  int       m_nNumOfFrames;
   LayerMRI *m_volumeCorrelationSource;
-  float *m_fCorrelationSourceData;
-  float *m_fCorrelationDataBuffer;
+  float *   m_fCorrelationSourceData;
+  float *   m_fCorrelationDataBuffer;
 
   qint64 m_nID;
 };

@@ -1,7 +1,7 @@
 #include "kvlHistogrammer.h"
 
-#include <itkMath.h>
 #include "kvlTetrahedronInteriorConstIterator.h"
+#include <itkMath.h>
 
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
@@ -14,9 +14,9 @@ namespace kvl {
 Histogrammer ::Histogrammer() {
 
   m_MinLogLikelihood = 0;
-  m_Image = nullptr;
-  m_BinnedImage = nullptr;
-  m_NumberOfBins = 0;
+  m_Image            = 0;
+  m_BinnedImage      = 0;
+  m_NumberOfBins     = 0;
 }
 
 //
@@ -46,12 +46,12 @@ void Histogrammer ::ComputeRobustRange(const ImageType *image,
   }
 
   // Build histogram
-  const int numberOfBins = 4000;
-  const double slope = static_cast<double>(numberOfBins - 1) /
+  const int    numberOfBins = 4000;
+  const double slope        = static_cast<double>(numberOfBins - 1) /
                        (static_cast<double>(max) - static_cast<double>(min));
-  const double offset = static_cast<double>(min);
+  const double        offset = static_cast<double>(min);
   std::vector<double> histogram(numberOfBins, 0.0);
-  double sumOfHistogram = 0.0;
+  double              sumOfHistogram = 0.0;
   for (itk::ImageRegionConstIterator<ImageType> it(image,
                                                    image->GetBufferedRegion());
        !it.IsAtEnd(); ++it) {
@@ -129,11 +129,11 @@ void Histogrammer ::UpdateBinnedImage() {
   const double slope =
       static_cast<double>(m_NumberOfBins - 1) / (robustMax - robustMin);
   const double offset = robustMin;
-  m_BinnedImage = BinnedImageType::New();
+  m_BinnedImage       = BinnedImageType::New();
   m_BinnedImage->SetRegions(m_Image->GetBufferedRegion());
   m_BinnedImage->Allocate();
 
-  itk::ImageRegionConstIterator<ImageType> it(m_Image,
+  itk::ImageRegionConstIterator<ImageType>  it(m_Image,
                                               m_Image->GetBufferedRegion());
   itk::ImageRegionIterator<BinnedImageType> binnedIt(
       m_BinnedImage, m_Image->GetBufferedRegion());
@@ -177,10 +177,17 @@ void Histogrammer ::Rasterize(const AtlasMesh *mesh) {
   for (int classNumber = 0; classNumber < numberOfClasses; ++classNumber) {
     emptyHistogram.push_back(std::vector<double>(m_NumberOfBins, 0.0));
   }
-  m_Histogram = emptyHistogram;
+  m_Histogram        = emptyHistogram;
   m_MinLogLikelihood = 0.0;
   m_ThreadSpecificHistograms.clear();
   m_ThreadSpecificMinLogLikelihoods.clear();
+
+  // Initialize thread-specific histogram from a clean slate
+  HistogramThreadAccumType emptyThreadHistogram;
+  for (int classNumber = 0; classNumber < numberOfClasses; ++classNumber) {
+    emptyThreadHistogram.push_back(
+        std::vector<ThreadAccumDataType>(m_NumberOfBins, 0.0));
+  }
 
   // For each thread, create an empty histogram and cost so that
   // different threads never interfere with one another
@@ -190,28 +197,36 @@ void Histogrammer ::Rasterize(const AtlasMesh *mesh) {
     m_ThreadSpecificMinLogLikelihoods.push_back(0.0);
 
     // Initialize to zero-filled histogram
-    m_ThreadSpecificHistograms.push_back(emptyHistogram);
+    m_ThreadSpecificHistograms.push_back(emptyThreadHistogram);
   } // End loop over threads
 
   // Now rasterize
   Superclass::Rasterize(mesh);
 
-  // Collect the results of all the threads
-  for (std::vector<double>::const_iterator it =
-           m_ThreadSpecificMinLogLikelihoods.begin();
-       it != m_ThreadSpecificMinLogLikelihoods.end(); ++it) {
-    m_MinLogLikelihood += *it;
+  // Collect the results of all threads and copy to final MinLogLikelihood
+  for (int i = 1; i < m_ThreadSpecificMinLogLikelihoods.size(); i++) {
+    m_ThreadSpecificMinLogLikelihoods[0] +=
+        m_ThreadSpecificMinLogLikelihoods[i];
   }
+  m_MinLogLikelihood = m_ThreadSpecificMinLogLikelihoods[0];
 
-  for (std::vector<HistogramType>::const_iterator it =
-           m_ThreadSpecificHistograms.begin();
-       it != m_ThreadSpecificHistograms.end(); ++it) {
+  // Collect the results of all the histogram threads
+  for (int i = 1; i < m_ThreadSpecificHistograms.size(); i++) {
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
       for (int binNumber = 0; binNumber < m_NumberOfBins; binNumber++) {
-        m_Histogram[classNumber][binNumber] += (*it)[classNumber][binNumber];
+        m_ThreadSpecificHistograms[0][classNumber][binNumber] +=
+            m_ThreadSpecificHistograms[i][classNumber][binNumber];
       }
     }
-  } // End loop over all threads
+  }
+
+  // Copy to final histogram
+  for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
+    for (int binNumber = 0; binNumber < m_NumberOfBins; binNumber++) {
+      m_Histogram[classNumber][binNumber] =
+          m_ThreadSpecificHistograms[0][classNumber][binNumber];
+    }
+  }
 }
 
 //
@@ -225,7 +240,7 @@ bool Histogrammer ::RasterizeTetrahedron(
   mesh->GetCell(tetrahedronId, cell);
 
   AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-  const AtlasMesh::PointIdentifier id0 = *pit;
+  const AtlasMesh::PointIdentifier     id0 = *pit;
   ++pit;
   const AtlasMesh::PointIdentifier id1 = *pit;
   ++pit;
@@ -270,7 +285,7 @@ bool Histogrammer ::RasterizeTetrahedron(
     }
 
     //
-    double denominator = 1e-15;
+    double denominator        = 1e-15;
     double weightToDistribute = 1e-15;
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
       const double tmp =

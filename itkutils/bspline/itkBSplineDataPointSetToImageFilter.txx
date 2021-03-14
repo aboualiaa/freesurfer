@@ -2,15 +2,15 @@
 #define __itkBSplineDataPointSetToImageFilter_txx
 
 #include "itkBSplineDataPointSetToImageFilter.h"
+#include "itkCastImageFilter.h"
+#include "itkImageDuplicator.h"
 #include "itkImageRegionConstIteratorWithIndex.h"
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionIteratorWithIndex.h"
-#include "itkImageDuplicator.h"
-#include "itkCastImageFilter.h"
 #include "itkNumericTraits.h"
 
-#include "vnl/vnl_math.h"
 #include "vnl/algo/vnl_matrix_inverse.h"
+#include "vnl/vnl_math.h"
 #include "vnl/vnl_vector.h"
 
 namespace itk {
@@ -21,22 +21,22 @@ BSplineDataPointSetToImageFilter<
   this->m_SplineOrder.Fill(3);
   for (unsigned int i = 0; i < ImageDimension; i++) {
     this->m_NumberOfControlPoints[i] = (this->m_SplineOrder[i] + 1);
-    this->m_Kernel[i] = KernelType::New();
+    this->m_Kernel[i]                = KernelType::New();
     this->m_Kernel[i]->SetSplineOrder(this->m_SplineOrder[i]);
   }
 
   this->m_CloseDimension.Fill(0);
-  this->m_DoMultilevel = false;
+  this->m_DoMultilevel        = false;
   this->m_GenerateOutputImage = true;
   this->m_NumberOfLevels.Fill(1);
   this->m_MaximumNumberOfLevels = 1;
 
-  this->m_PhiLattice = PointDataImageType::New();
-  this->m_PsiLattice = PointDataImageType::New();
-  this->m_InputPointData = PointDataContainerType::New();
+  this->m_PhiLattice      = PointDataImageType::New();
+  this->m_PsiLattice      = PointDataImageType::New();
+  this->m_InputPointData  = PointDataContainerType::New();
   this->m_OutputPointData = PointDataContainerType::New();
 
-  this->m_PointWeights = WeightsContainerType::New();
+  this->m_PointWeights    = WeightsContainerType::New();
   this->m_UsePointWeights = false;
 }
 
@@ -98,7 +98,7 @@ void BSplineDataPointSetToImageFilter<
 template <class TInputPointSet, class TOutputImage>
 void BSplineDataPointSetToImageFilter<
     TInputPointSet, TOutputImage>::SetNumberOfLevels(ArrayType levels) {
-  this->m_NumberOfLevels = levels;
+  this->m_NumberOfLevels        = levels;
   this->m_MaximumNumberOfLevels = 1;
   for (unsigned int i = 0; i < ImageDimension; i++) {
     if (this->m_NumberOfLevels[i] == 0) {
@@ -127,7 +127,7 @@ template <class TInputPointSet, class TOutputImage>
 void BSplineDataPointSetToImageFilter<TInputPointSet, TOutputImage>::
     SetPointWeights(typename WeightsContainerType::Pointer weights) {
   this->m_UsePointWeights = true;
-  this->m_PointWeights = weights;
+  this->m_PointWeights    = weights;
   this->Modified();
 }
 
@@ -157,7 +157,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
     ++It;
   }
 
-  this->m_CurrentLevel = 0;
+  this->m_CurrentLevel                 = 0;
   this->m_CurrentNumberOfControlPoints = this->m_NumberOfControlPoints;
   this->GenerateControlLattice();
   this->UpdatePointSet();
@@ -203,7 +203,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
     RealType avg_p = NumericTraits<RealType>::Zero;
 
     typename PointDataContainerType::Iterator ItIn, ItOut;
-    ItIn = this->m_InputPointData->Begin();
+    ItIn  = this->m_InputPointData->Begin();
     ItOut = this->m_OutputPointData->Begin();
     while (ItIn != this->m_InputPointData->End()) {
       this->m_InputPointData->InsertElement(ItIn.Index(),
@@ -234,7 +234,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
     }
 
     typedef ImageDuplicator<PointDataImageType> ImageDuplicatorType;
-    typename ImageDuplicatorType::Pointer Duplicator =
+    typename ImageDuplicatorType::Pointer       Duplicator =
         ImageDuplicatorType::New();
     Duplicator->SetInputImage(this->m_PsiLattice);
     Duplicator->Update();
@@ -274,12 +274,12 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
   data.Fill(0.0);
   RefinedLattice->FillBuffer(data);
 
-  typename PointDataImageType::IndexType idx;
-  typename PointDataImageType::IndexType idx_Psi;
-  typename PointDataImageType::IndexType tmp;
-  typename PointDataImageType::IndexType tmp_Psi;
-  typename PointDataImageType::IndexType off;
-  typename PointDataImageType::IndexType off_Psi;
+  typename PointDataImageType::IndexType            idx;
+  typename PointDataImageType::IndexType            idx_Psi;
+  typename PointDataImageType::IndexType            tmp;
+  typename PointDataImageType::IndexType            tmp_Psi;
+  typename PointDataImageType::IndexType            off;
+  typename PointDataImageType::IndexType            off_Psi;
   typename PointDataImageType::RegionType::SizeType size_Psi;
 
   size.Fill(2);
@@ -358,7 +358,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
     bool IsEvenIndex = false;
     while (!IsEvenIndex && !It.IsAtEnd()) {
       ++It;
-      idx = It.GetIndex();
+      idx         = It.GetIndex();
       IsEvenIndex = true;
       for (unsigned int i = 0; i < ImageDimension; i++) {
         if (idx[i] % 2) {
@@ -447,7 +447,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
 
     RealType w2_sum = 0.0;
     for (Itw.GoToBegin(); !Itw.IsAtEnd(); ++Itw) {
-      RealType B = 1.0;
+      RealType                          B   = 1.0;
       typename RealImageType::IndexType idx = Itw.GetIndex();
       for (unsigned int i = 0; i < ImageDimension; i++) {
         RealType u =
@@ -467,8 +467,8 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
           idx[i] %= delta->GetLargestPossibleRegion().GetSize()[i];
         }
       }
-      RealType wc = this->m_PointWeights->GetElement(It.Index());
-      RealType t = Itw.Get();
+      RealType      wc   = this->m_PointWeights->GetElement(It.Index());
+      RealType      t    = Itw.Get();
       PointDataType data = It.Value();
       data *= (t / w2_sum);
       Itp.Set(data);
@@ -507,7 +507,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
 
   ItIn = this->m_InputPointData->Begin();
   while (ItIn != this->m_InputPointData->End()) {
-    PointType point;
+    PointType     point;
     PointDataType dataOut;
 
     for (unsigned int i = 0; i < ImageDimension; i++) {
@@ -528,7 +528,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
 
   for (It.GoToBegin(); !It.IsAtEnd(); ++It) {
     typename ImageType::IndexType idx = It.GetIndex();
-    PointType point;
+    PointType                     point;
     for (unsigned int i = 0; i < ImageDimension; i++) {
       point[i] = static_cast<RealType>(idx[i]) /
                  (static_cast<RealType>(this->m_Size[i] - 1));
@@ -541,7 +541,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet,
 
 template <class TInputPointSet, class TOutputImage>
 void BSplineDataPointSetToImageFilter<
-    TInputPointSet, TOutputImage>::EvaluateAtPoint(PointType point,
+    TInputPointSet, TOutputImage>::EvaluateAtPoint(PointType      point,
                                                    PointDataType &data) {
   for (unsigned int i = 0; i < ImageDimension; i++) {
     point[i] -= this->m_Origin[i];
@@ -552,7 +552,7 @@ void BSplineDataPointSetToImageFilter<
 
 template <class TInputPointSet, class TOutputImage>
 void BSplineDataPointSetToImageFilter<
-    TInputPointSet, TOutputImage>::EvaluateAtIndex(IndexType idx,
+    TInputPointSet, TOutputImage>::EvaluateAtIndex(IndexType      idx,
                                                    PointDataType &data) {
   PointType point;
   this->GetOutput()->TransformIndexToPhysicalPoint(idx, point);
@@ -599,7 +599,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet, TOutputImage>::Evaluate(
   data.Fill(0.0);
 
   for (Itw.GoToBegin(); !Itw.IsAtEnd(); ++Itw) {
-    RealType B = 1.0;
+    RealType                          B   = 1.0;
     typename RealImageType::IndexType idx = Itw.GetIndex();
     for (unsigned int i = 0; i < ImageDimension; i++) {
       RealType u = p[i] -
@@ -642,7 +642,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet, TOutputImage>::
 template <class TInputPointSet, class TOutputImage>
 void BSplineDataPointSetToImageFilter<TInputPointSet, TOutputImage>::
     EvaluateGradientAtContinuousIndex(ContinuousIndexType idx,
-                                      GradientType &gradient) {
+                                      GradientType &      gradient) {
   PointType point;
   this->GetOutput()->TransformContinuousIndexToPhysicalPoint(idx, gradient);
   this->EvaluateGradientAtPoint(point, gradient);
@@ -650,7 +650,7 @@ void BSplineDataPointSetToImageFilter<TInputPointSet, TOutputImage>::
 
 template <class TInputPointSet, class TOutputImage>
 void BSplineDataPointSetToImageFilter<
-    TInputPointSet, TOutputImage>::EvaluateGradient(PointType params,
+    TInputPointSet, TOutputImage>::EvaluateGradient(PointType     params,
                                                     GradientType &gradient) {
   vnl_vector<RealType> p(ImageDimension);
   for (unsigned int i = 0; i < ImageDimension; i++) {
@@ -683,7 +683,7 @@ void BSplineDataPointSetToImageFilter<
 
   for (unsigned int j = 0; j < gradient.cols(); j++) {
     for (Itw.GoToBegin(); !Itw.IsAtEnd(); ++Itw) {
-      RealType B = 1.0;
+      RealType                          B   = 1.0;
       typename RealImageType::IndexType idx = Itw.GetIndex();
       for (unsigned int k = 0; k < ImageDimension; k++) {
         RealType u =

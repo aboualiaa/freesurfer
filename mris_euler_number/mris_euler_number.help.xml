@@ -21,7 +21,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mris_euler_number</name>
   <synopsis>mris_euler_number [&lt;options&gt;] insurf</synopsis>
@@ -43,7 +42,6 @@
     <output>eulernumber</output>
     <explanation>EulerNumber as text to stdout</explanation>
   </outputs>
-	<example>mris_euler_number surface</example>
+  <example>mris_euler_number surface</example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

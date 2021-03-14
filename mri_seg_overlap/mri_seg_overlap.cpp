@@ -1,9 +1,9 @@
 #include <iomanip>
 
-#include "mri_seg_overlap.help.xml.h"
 #include "argparse.h"
-#include "lut.h"
 #include "json.h"
+#include "lut.h"
+#include "mri_seg_overlap.help.xml.h"
 
 #include "mri2.h"
 
@@ -15,12 +15,12 @@ struct OverlapMeasure {
   using computefunc = double (*)(IntermediateMetrics &);
   OverlapMeasure(std::string _name, computefunc _func)
       : name(_name), compute(_func){};
-  std::string name;
-  computefunc compute;
+  std::string           name;
+  computefunc           compute;
   std::map<int, double> labels; // measures for each label
-  double mean = 0, std = 0;
-  double wmean = 0;    // volume-weighted mean
-  double wmean_sc = 0; // exclude wm and cortex
+  double                mean = 0, std = 0;
+  double                wmean    = 0; // volume-weighted mean
+  double                wmean_sc = 0; // exclude wm and cortex
 };
 
 static double computeDice(IntermediateMetrics &im) {
@@ -31,9 +31,7 @@ static double computeJaccard(IntermediateMetrics &im) {
   return im.intersect / im.total;
 }
 
-
-int main(int argc, char **argv) 
-{
+int main(int argc, char **argv) {
   // ------ parse arguments ------
 
   ArgumentParser parser;
@@ -53,20 +51,20 @@ int main(int argc, char **argv)
   // ------ load inputs ------
 
   std::string seg1_fname = parser.retrieve<std::string>("seg1");
-  MRI *seg1 = MRIread(seg1_fname.c_str());
+  MRI *       seg1       = MRIread(seg1_fname.c_str());
   if (!seg1)
-    logFatal(1) << "could not read input volume " << seg1;
+    fs::fatal() << "could not read input volume " << seg1;
 
   std::string seg2_fname = parser.retrieve<std::string>("seg2");
-  MRI *seg2 = MRIread(seg2_fname.c_str());
+  MRI *       seg2       = MRIread(seg2_fname.c_str());
   if (!seg2)
-    logFatal(1) << "could not read input volume " << seg2;
+    fs::fatal() << "could not read input volume " << seg2;
 
   // check input dimensions
   if (MRIdimMismatch(seg1, seg2, 0))
-    logFatal(1) << "input volumes must have matching dimensions";
+    fs::fatal() << "input volumes must have matching dimensions";
   if (seg1->nframes != seg2->nframes)
-    logFatal(1) << "input volumes must have the same number of frames";
+    fs::fatal() << "input volumes must have the same number of frames";
 
   // ------ retrieve user options ------
 
@@ -83,7 +81,7 @@ int main(int argc, char **argv)
       else if (str == "jaccard")
         measures.push_back(OverlapMeasure("jaccard", &computeJaccard));
       else
-        logFatal(1) << "unknown measure '" << str
+        fs::fatal() << "unknown measure '" << str
                     << "'... options are: dice, jaccard";
     }
   } else {
@@ -93,22 +91,22 @@ int main(int argc, char **argv)
 
   // a few sanity checks on the user input
   if (parser.exists("labelfile") && parser.exists("labels")) {
-    logFatal(1)
+    fs::fatal()
         << "can't use both the --labels and --labelfile options together";
   } else if (parser.exists("names") && !parser.exists("labels")) {
-    logFatal(1)
+    fs::fatal()
         << "the --names option must be used along with the --labels option";
   } else if (parser.exists("seg") &&
              (parser.exists("labelfile") || parser.exists("labels"))) {
-    logFatal(1) << "can't specify --seg in addition to a custom label list";
+    fs::fatal() << "can't specify --seg in addition to a custom label list";
   }
 
   // check if user wants to ignore label names
   bool reportNames = !parser.exists("no-names");
 
   // determine which labels to report on
-  bool all_labels = false;
-  std::vector<int> labels;
+  bool                       all_labels = false;
+  std::vector<int>           labels;
   std::map<int, std::string> labelnames;
   if (parser.exists("labels")) {
     // user has specified labels on the command line
@@ -118,7 +116,7 @@ int main(int argc, char **argv)
       std::vector<std::string> names =
           parser.retrieve<std::vector<std::string>>("names");
       if (names.size() != labels.size()) {
-        logFatal(1) << "number of label names (" << labelnames.size()
+        fs::fatal() << "number of label names (" << labelnames.size()
                     << ") must match "
                        "the number of specified labels ("
                     << labels.size() << ")";
@@ -130,7 +128,7 @@ int main(int argc, char **argv)
     // user specified labels via a file - assume lookup-table format
     LookupTable lut(parser.retrieve<std::string>("labelfile"));
     if (lut.empty())
-      logFatal(1) << "provided label file contains no valid labels";
+      fs::fatal() << "provided label file contains no valid labels";
     labels = lut.labels();
     if (lut.hasNameInfo())
       for (int i : labels)
@@ -204,14 +202,14 @@ int main(int argc, char **argv)
 
   // sanity check to make sure the label list isn't empty
   if (labels.empty())
-    logFatal(1) << "no matching labels to report on";
+    fs::fatal() << "no matching labels to report on";
 
   // determine default label names (if not already known) via FreeSurferColorLUT
   if (reportNames && labelnames.empty()) {
     LookupTable lut(std::string(std::getenv("FREESURFER_HOME")) +
                     "/FreeSurferColorLUT.txt");
     if (lut.empty()) {
-      logWarning
+      fs::warning()
           << "can't load default FreeSurferColorLUT - is FREESURFER_HOME set?";
       reportNames = false;
     } else if (lut.hasNameInfo()) {
@@ -237,7 +235,7 @@ int main(int argc, char **argv)
       subcortical = true;
     // compute measures
     for (auto &measure : measures) {
-      double value = measure.compute(im);
+      double value      = measure.compute(im);
       measure.labels[l] = value;
       measure.mean += value;
       measure.wmean += value * combined_volume;
@@ -300,8 +298,8 @@ int main(int argc, char **argv)
     // measures
     for (auto &measure : measures) {
       nlohmann::json subjson;
-      subjson["mean"] = measure.mean;
-      subjson["std"] = measure.std;
+      subjson["mean"]          = measure.mean;
+      subjson["std"]           = measure.std;
       subjson["weighted-mean"] = measure.wmean;
       if (parser.exists("seg"))
         subjson["weighted-subcortical-mean"] = measure.wmean_sc;

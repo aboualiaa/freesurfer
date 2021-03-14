@@ -1,17 +1,11 @@
 /**
- * @file  romp_support.h
- * @brief prototypes and structures for getting reprodiucible results from and
- * for timing omp loops.
+ * @brief prototypes and structures for getting reprodiucible results from and for timing omp loops.
  *
  */
 /*
  * Original Author: Bevin Brett
- * CVS Revision Info:
- *    $Author: brettb $
- *    $Date: 2017/12 $
- *    $Revision: 1.0 $
  *
- * Copyright © 2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -110,21 +104,21 @@ extern ROMP_level romp_level;
 //
 typedef struct ROMP_pf_static_struct {
   void *volatile ptr;
-  const char *file;
-  const char *func;
+  const char * file;
+  const char * func;
   unsigned int line;
 } ROMP_pf_static_struct;
 
 typedef struct ROMP_pf_stack_struct {
   struct ROMP_pf_static_struct *staticInfo;
-  Timer timer;
-  long watchedThreadBeginCPUTimes[ROMP_maxWatchedThreadNum];
-  int gone_parallel;
+  Timer                         timer;
+  long       watchedThreadBeginCPUTimes[ROMP_maxWatchedThreadNum];
+  int        gone_parallel;
   ROMP_level entry_level;
 } ROMP_pf_stack_struct;
 
 void ROMP_pf_begin(ROMP_pf_static_struct *pf_static,
-                   ROMP_pf_stack_struct *pf_stack);
+                   ROMP_pf_stack_struct * pf_stack);
 
 int ROMP_if_parallel1(ROMP_level);
 int ROMP_if_parallel2(ROMP_level, ROMP_pf_stack_struct *);
@@ -144,11 +138,11 @@ void ROMP_pf_end(ROMP_pf_stack_struct *pf_stack);
 //
 typedef struct ROMP_pflb_stack_struct {
   ROMP_pf_stack_struct *pf_stack;
-  Timer timer;
-  int tid;
+  Timer                 timer;
+  int                   tid;
 } ROMP_pflb_stack_struct;
 
-void ROMP_pflb_begin(ROMP_pf_stack_struct *pf_stack,
+void ROMP_pflb_begin(ROMP_pf_stack_struct *  pf_stack,
                      ROMP_pflb_stack_struct *pflb_stack);
 
 void ROMP_pflb_end(ROMP_pflb_stack_struct *pflb_stack);
@@ -190,17 +184,17 @@ void ROMP_pflb_end(ROMP_pflb_stack_struct *pflb_stack);
   {                                                                            \
     static ROMP_pf_static_struct ROMP_pf_static = {0L, __BASE_FILE__,          \
                                                    __func__, __LINE__};        \
-    ROMP_pf_stack_struct ROMP_pf_stack;                                        \
+    ROMP_pf_stack_struct         ROMP_pf_stack;                                \
     ROMP_pf_begin(&ROMP_pf_static, &ROMP_pf_stack);
 
 #define ROMP_PF_end                                                            \
   ROMP_pf_end(&ROMP_pf_stack);                                                 \
   }
 
-#define ROMP_PFLB_begin                                                        \
+#define ROMP_PFLB_begin                                                          \
   /* ROMP_pflb_stack_struct  ROMP_pflb_stack;                                  \
   if (!ROMP_pf_stack.skip_pflb_timing) ROMP_pflb_begin(&ROMP_pf_stack,         \
-  &ROMP_pflb_stack); */                                                        \
+  &ROMP_pflb_stack); */ \
   // end of macro
 
 #define ROMP_PFLB_end                                                          \
@@ -224,7 +218,7 @@ void ROMP_pflb_end(ROMP_pflb_stack_struct *pflb_stack);
 // Such scopes look a single trip loop, so can exploit the above support
 //
 #define ROMP_SCOPE_begin ROMP_PF_begin
-#define ROMP_SCOPE_end ROMP_PF_end
+#define ROMP_SCOPE_end   ROMP_PF_end
 
 // Deterministic reductions
 //
@@ -243,14 +237,14 @@ using ROMP_Distributor = struct ROMP_Distributor;
 
 struct ROMP_Distributor {
 
-#define ROMP_DISTRIBUTOR_PARTIAL_CAPACITY 128
+#define ROMP_DISTRIBUTOR_PARTIAL_CAPACITY   128
 #define ROMP_DISTRIBUTOR_REDUCTION_CAPACITY 3
 
   double *originals[ROMP_DISTRIBUTOR_REDUCTION_CAPACITY];
 
   struct Partials {
-    int lo;
-    int hi;
+    int    lo;
+    int    hi;
     double partialSum[ROMP_DISTRIBUTOR_REDUCTION_CAPACITY];
   } partials[ROMP_DISTRIBUTOR_PARTIAL_CAPACITY];
 

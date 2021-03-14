@@ -1,16 +1,11 @@
 /**
- * @file  mri_relabel_hypointensities.c
  * @brief relabels hypointense wm voxels
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2015/05/15 18:44:10 $
- *    $Revision: 1.13 $
  *
- * Copyright © 2011-2015 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,35 +17,33 @@
  *
  */
 
-#include "diag.h"
 #include "cma.h"
+#include "diag.h"
 #include "version.h"
-
-static char vcid[] =
-    "$Id: mri_relabel_hypointensities.c,v 1.13 2015/05/15 18:44:10 nicks Exp $";
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-static int relabel_hypointensities(MRI *mri, MRI_SURFACE *mris, int right);
-static int relabel_hypointensities_neighboring_gray(MRI *mri);
+static int  relabel_hypointensities(MRI *mri, MRI_SURFACE *mris, int right);
+static int  relabel_hypointensities_neighboring_gray(MRI *mri);
 
 const char *Progname;
 
 static int do_rh = 1;
 static int do_lh = 1;
 
-static char *surf_name = "white";
+static const char *surf_name = "white";
 
 int main(int argc, char *argv[]) {
-  char **av, *hemi, fname[STRLEN], *in_aseg_name, *out_aseg_name, *surf_dir;
-  int ac, nargs, h;
+  char **      av, fname[STRLEN], *in_aseg_name, *out_aseg_name, *surf_dir;
+  const char * hemi;
+  int          ac, nargs, h;
   MRI_SURFACE *mris;
-  MRI *mri_aseg;
+  MRI *        mri_aseg;
 
   nargs = handleVersionOption(argc, argv, "mri_relabel_hypointensities");
   if (nargs && argc - nargs == 1) {
@@ -74,8 +67,8 @@ int main(int argc, char *argv[]) {
     usage_exit();
   }
 
-  in_aseg_name = argv[1];
-  surf_dir = argv[2];
+  in_aseg_name  = argv[1];
+  surf_dir      = argv[2];
   out_aseg_name = argv[3];
 
   mri_aseg = MRIread(in_aseg_name);
@@ -117,7 +110,7 @@ int main(int argc, char *argv[]) {
 /*----------------------------------------------------------------------
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -132,9 +125,9 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "-version")) {
     print_version();
   } else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else
@@ -170,18 +163,18 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 static int relabel_hypointensities(MRI *mri, MRI_SURFACE *mris, int right) {
-  int x, y, z, label, changed;
+  int              x, y, z, label, changed;
   MRIS_HASH_TABLE *mht;
-  VERTEX *v;
-  float dx, dy, dz, dot, dist;
-  double xw, yw, zw;
-  MRI *mri_dist;
+  VERTEX *         v;
+  float            dx, dy, dz, dot, dist;
+  double           xw, yw, zw;
+  MRI *            mri_dist;
 
   mri_dist = MRIcloneDifferentType(mri, MRI_FLOAT);
   MRIScomputeDistanceToSurface(mris, mri_dist, mri_dist->xsize);
@@ -210,16 +203,16 @@ static int relabel_hypointensities(MRI *mri, MRI_SURFACE *mris, int right) {
         if (v == nullptr) /* no vertices within range -
                           assume it is hypointensity */
         {
-          dot = -1;
+          dot  = -1;
           dist = MRIgetVoxVal(mri_dist, x, y, z, 0);
           if (dist > 0) {
             dot = 1;
           }
         } else {
-          dx = xw - v->x;
-          dy = yw - v->y;
-          dz = zw - v->z;
-          dot = v->nx * dx + v->ny * dy + v->nz * dz;
+          dx   = xw - v->x;
+          dy   = yw - v->y;
+          dz   = zw - v->z;
+          dot  = v->nx * dx + v->ny * dy + v->nz * dz;
           dist = sqrt(dx * dx + dy * dy + dz * dz);
         }
         if (dot < 0 && dist > 1) {
@@ -237,7 +230,7 @@ static int relabel_hypointensities(MRI *mri, MRI_SURFACE *mris, int right) {
 }
 
 int relabel_hypointensities_neighboring_gray(MRI *mri) {
-  int x, y, z, label, changed, i;
+  int  x, y, z, label, changed, i;
   MRI *mri_tmp = nullptr;
 
   for (changed = i = 0; i < 2; i++) {

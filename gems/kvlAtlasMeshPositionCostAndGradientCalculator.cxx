@@ -1,8 +1,8 @@
 #include "kvlAtlasMeshPositionCostAndGradientCalculator.h"
 
-#include <itkMath.h>
-#include "vnl/vnl_matrix_fixed.h"
 #include "vnl/vnl_inverse.h"
+#include "vnl/vnl_matrix_fixed.h"
+#include <itkMath.h>
 
 namespace kvl {
 
@@ -13,11 +13,11 @@ AtlasMeshPositionCostAndGradientCalculator ::
     AtlasMeshPositionCostAndGradientCalculator() {
 
   m_MinLogLikelihoodTimesPrior = 0;
-  m_IgnoreDeformationPrior = false;
-  m_OnlyDeformationPrior = false;
-  m_PositionGradient = nullptr;
-  m_Abort = false;
-  m_BoundaryCondition = SLIDING;
+  m_IgnoreDeformationPrior     = false;
+  m_OnlyDeformationPrior       = false;
+  m_PositionGradient           = 0;
+  m_Abort                      = false;
+  m_BoundaryCondition          = SLIDING;
 
   this->SetMeshToImageTransform(TransformType::New());
 }
@@ -35,8 +35,8 @@ void AtlasMeshPositionCostAndGradientCalculator ::Rasterize(
     const AtlasMesh *mesh) {
 
   // Initialize from a clean slate
-  m_Abort = false;
-  m_PositionGradient = nullptr;
+  m_Abort                      = false;
+  m_PositionGradient           = 0;
   m_MinLogLikelihoodTimesPrior = 0;
   m_ThreadSpecificPositionGradients.clear();
   m_ThreadSpecificMinLogLikelihoodTimesPriors.clear();
@@ -53,11 +53,10 @@ void AtlasMeshPositionCostAndGradientCalculator ::Rasterize(
     // Initialize cost to zero for this thread
     m_ThreadSpecificMinLogLikelihoodTimesPriors.push_back(0.0);
 
-    // Create a container to hold the position gradient of this thread, and
-    // initialize to zero
-    AtlasPositionGradientContainerType::Pointer positionGradient =
-        AtlasPositionGradientContainerType::New();
-    AtlasPositionGradientType zeroEntry(0.0f);
+    // Create a container to hold the position gradient of this thread, and initialize to zero
+    AtlasPositionGradientThreadAccumContainerType::Pointer positionGradient =
+        AtlasPositionGradientThreadAccumContainerType::New();
+    AtlasPositionGradientThreadAccumType zeroEntry(0.0f);
     for (AtlasMesh::PointsContainer::ConstIterator pointIt =
              mesh->GetPoints()->Begin();
          pointIt != mesh->GetPoints()->End(); ++pointIt) {
@@ -88,9 +87,9 @@ void AtlasMeshPositionCostAndGradientCalculator ::Rasterize(
   clock.Stop();
   std::cout << "Time taken by actual rasterization: " << clock.GetMean()
             << std::endl;
-  double dataTermRasterizationTime = 0.0;
+  double dataTermRasterizationTime  = 0.0;
   double priorTermRasterizationTime = 0.0;
-  double otherRasterizationTime = 0.0;
+  double otherRasterizationTime     = 0.0;
   for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
        threadNumber++) {
     dataTermRasterizationTime +=
@@ -127,30 +126,47 @@ void AtlasMeshPositionCostAndGradientCalculator ::Rasterize(
     return;
   }
 
-  // Collect the results of all the threads
-  for (std::vector<double>::const_iterator it =
-           m_ThreadSpecificMinLogLikelihoodTimesPriors.begin();
-       it != m_ThreadSpecificMinLogLikelihoodTimesPriors.end(); ++it) {
-    if (std::isnan(*it) || std::isinf(*it)) {
+  // Collect MinLogLikelihoodTimesPrior across all threads
+  ThreadAccumDataType totalThreadMinLogLikelihoodTimesPrior = 0;
+  for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
+       threadNumber++) {
+    const double typedValue =
+        double(m_ThreadSpecificMinLogLikelihoodTimesPriors[threadNumber]);
+    if (std::isnan(typedValue) || std::isinf(typedValue)) {
       // Something has gone wrong
       m_MinLogLikelihoodTimesPrior = itk::NumericTraits<double>::max();
       return;
     }
 
-    m_MinLogLikelihoodTimesPrior += *it;
+    totalThreadMinLogLikelihoodTimesPrior +=
+        m_ThreadSpecificMinLogLikelihoodTimesPriors[threadNumber];
   }
 
-  for (std::vector<AtlasPositionGradientContainerType::Pointer>::const_iterator
-           it = m_ThreadSpecificPositionGradients.begin();
-       it != m_ThreadSpecificPositionGradients.end(); ++it) {
-    AtlasPositionGradientContainerType::Iterator sourceIt = (*it)->Begin();
-    AtlasPositionGradientContainerType::Iterator targetIt =
-        m_PositionGradient->Begin();
-    for (; targetIt != m_PositionGradient->End(); ++sourceIt, ++targetIt) {
-      targetIt.Value() += sourceIt.Value();
-    }
+  // Copy accumulator value to final MinLogLikelihoodTimesPrior
+  m_MinLogLikelihoodTimesPrior = totalThreadMinLogLikelihoodTimesPrior;
 
-  } // End loop over all threads
+  // Accumulate PositionGradient across all threads
+  for (int threadNumber = 1; threadNumber < this->GetNumberOfThreads();
+       threadNumber++) {
+    AtlasPositionGradientThreadAccumContainerType::ConstIterator threadIt =
+        m_ThreadSpecificPositionGradients[threadNumber]->Begin();
+    AtlasPositionGradientThreadAccumContainerType::Iterator firstThreadIt =
+        m_ThreadSpecificPositionGradients[0]->Begin();
+    for (; firstThreadIt != m_ThreadSpecificPositionGradients[0]->End();
+         ++threadIt, ++firstThreadIt) {
+      firstThreadIt.Value() += threadIt.Value();
+    }
+  }
+
+  // Copy accumulated values to final PositionGradients
+  AtlasPositionGradientThreadAccumContainerType::Iterator
+      firstThreadGradientIt = m_ThreadSpecificPositionGradients[0]->Begin();
+  AtlasPositionGradientContainerType::Iterator finalGradientIt =
+      m_PositionGradient->Begin();
+  for (; finalGradientIt != m_PositionGradient->End();
+       ++firstThreadGradientIt, ++finalGradientIt) {
+    finalGradientIt.Value() = firstThreadGradientIt.Value();
+  }
 
 #if KVL_ENABLE_TIME_PROBE
   clock.Stop();
@@ -181,33 +197,28 @@ void AtlasMeshPositionCostAndGradientCalculator ::SetMeshToImageTransform(
 
   TransformType::Pointer inScopeHolder = nullptr;
   if (!meshToImageTransform) {
-    // meshToImageTransform = TransformType::New();
-    inScopeHolder = TransformType::New();
+    //meshToImageTransform = TransformType::New();
+    inScopeHolder        = TransformType::New();
     meshToImageTransform = inScopeHolder;
   }
 
-  // The sliding boundary conditions are implemented by multiplying the raw
-  // gradient with an appropriate 3x3 matrix, mapping it into the allowable
-  // subspace. Since a vertex can move or not in x, y, and z directions, there
-  // are 8 distinct matrices to perform the mapping. These are precomputed here.
+  // The sliding boundary conditions are implemented by multiplying the raw gradient with an appropriate
+  // 3x3 matrix, mapping it into the allowable subspace. Since a vertex can move or not in x, y, and z
+  // directions, there are 8 distinct matrices to perform the mapping. These are precomputed here.
   //
-  // The index [0...7] is computed as follows: canMoveX*4 + canMoveY*2 +
-  // canMoveX
+  // The index [0...7] is computed as follows: canMoveX*4 + canMoveY*2 + canMoveX
   //
-  // The appropriate mapping matrix for each condition is given by a
-  // least-squares fit, resulting in
+  // The appropriate mapping matrix for each condition is given by a least-squares fit, resulting in
   //
   //     correctionMatrix = C * inv( C' * C ) * C'
   //
-  // where C has appropriate columns of the 3x3 matrix part of the
-  // meshToImageTransform (we don't care about the translation part): if a
-  // certain direction cannot move, that column is missing from C
+  // where C has appropriate columns of the 3x3 matrix part of the meshToImageTransform (we don't care about
+  // the translation part): if a certain direction cannot move, that column is missing from C
   //
-  // Special cases are index 0 (cannot move in any of the three directions), in
-  // which case correctionMatrix=0, and index 7 (can move freely in all three
-  // directions), in which case correctionMatrix=1. It's stupid to actually
-  // explicitly multiply these correction matrices with the raw gradient, but
-  // I'm computing them here anyway to avoid future programming errors.
+  // Special cases are index 0 (cannot move in any of the three directions), in which case correctionMatrix=0,
+  // and index 7 (can move freely in all three directions), in which case correctionMatrix=1. It's stupid to
+  // actually explicitly multiply these correction matrices with the raw gradient, but I'm computing them here
+  // anyway to avoid future programming errors.
   //
   SlidingBoundaryCorrectionMatrixType correctionMatrix;
 
@@ -331,17 +342,16 @@ bool AtlasMeshPositionCostAndGradientCalculator ::RasterizeTetrahedron(
 #else
 
   // Cache relevant things about the tetrahedron
-  // ReferenceTetrahedronInfo  info;
-  // mesh->GetCellData( tetrahedronId, &info );
-  // Implements internally mesh->GetCellData()->GetElementIfIndexExists(cellId,
-  // data); More efficient is ReferenceTetrahedronInfo&  info =
-  // mesh->GetCellData()->ElementAt(ElementIdentifier)
+  //ReferenceTetrahedronInfo  info;
+  //mesh->GetCellData( tetrahedronId, &info );
+  // Implements internally mesh->GetCellData()->GetElementIfIndexExists(cellId, data);
+  // More efficient is ReferenceTetrahedronInfo&  info = mesh->GetCellData()->ElementAt(ElementIdentifier)
   const ReferenceTetrahedronInfo &info =
       mesh->GetCellData()->ElementAt(tetrahedronId);
 
-  // AtlasMesh::CellAutoPointer  cell;
-  // mesh->GetCell( tetrahedronId, cell );
-  // AtlasMesh::CellType::PointIdIterator  pit = cell->PointIdsBegin();
+  //AtlasMesh::CellAutoPointer  cell;
+  //mesh->GetCell( tetrahedronId, cell );
+  //AtlasMesh::CellType::PointIdIterator  pit = cell->PointIdsBegin();
   // Implements internally:
   //      CellType* cellptr = 0;
   //      this->GetCells()->GetElementIfIndexExists(cellId, &cellptr);
@@ -356,32 +366,31 @@ bool AtlasMeshPositionCostAndGradientCalculator ::RasterizeTetrahedron(
   ++pit;
   const AtlasMesh::PointIdentifier id3 = *pit;
 
-  // AtlasMesh::PointType p0;
-  // AtlasMesh::PointType p1;
-  // AtlasMesh::PointType p2;
-  // AtlasMesh::PointType p3;
-  // mesh->GetPoint( id0, &p0 );
-  // mesh->GetPoint( id1, &p1 );
-  // mesh->GetPoint( id2, &p2 );
-  // mesh->GetPoint( id3, &p3 );
-  // Implements internally mesh->GetPoints()->GetElementIfIndexExists(ptId,
-  // point); More efficient is AtlasMesh::PointType&  p0 =
-  // mesh->GetPoints()->ElementAt( id0 );
+  //AtlasMesh::PointType p0;
+  //AtlasMesh::PointType p1;
+  //AtlasMesh::PointType p2;
+  //AtlasMesh::PointType p3;
+  //mesh->GetPoint( id0, &p0 );
+  //mesh->GetPoint( id1, &p1 );
+  //mesh->GetPoint( id2, &p2 );
+  //mesh->GetPoint( id3, &p3 );
+  // Implements internally mesh->GetPoints()->GetElementIfIndexExists(ptId, point);
+  // More efficient is AtlasMesh::PointType&  p0 = mesh->GetPoints()->ElementAt( id0 );
   const AtlasMesh::PointType &p0 = mesh->GetPoints()->ElementAt(id0);
   const AtlasMesh::PointType &p1 = mesh->GetPoints()->ElementAt(id1);
   const AtlasMesh::PointType &p2 = mesh->GetPoints()->ElementAt(id2);
   const AtlasMesh::PointType &p3 = mesh->GetPoints()->ElementAt(id3);
 
-  double &priorPlusDataCost =
+  ThreadAccumDataType &priorPlusDataCost =
       m_ThreadSpecificMinLogLikelihoodTimesPriors[threadNumber];
 
-  AtlasPositionGradientType &gradientInVertex0 =
+  AtlasPositionGradientThreadAccumType &gradientInVertex0 =
       m_ThreadSpecificPositionGradients[threadNumber]->ElementAt(id0);
-  AtlasPositionGradientType &gradientInVertex1 =
+  AtlasPositionGradientThreadAccumType &gradientInVertex1 =
       m_ThreadSpecificPositionGradients[threadNumber]->ElementAt(id1);
-  AtlasPositionGradientType &gradientInVertex2 =
+  AtlasPositionGradientThreadAccumType &gradientInVertex2 =
       m_ThreadSpecificPositionGradients[threadNumber]->ElementAt(id2);
-  AtlasPositionGradientType &gradientInVertex3 =
+  AtlasPositionGradientThreadAccumType &gradientInVertex3 =
       m_ThreadSpecificPositionGradients[threadNumber]->ElementAt(id3);
 
 #endif
@@ -444,13 +453,13 @@ bool AtlasMeshPositionCostAndGradientCalculator ::
     AddPriorContributionOfTetrahedron(
         const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
         const AtlasMesh::PointType &p2, const AtlasMesh::PointType &p3,
-        const ReferenceTetrahedronInfo &info, double &priorPlusDataCost,
-        AtlasPositionGradientType &gradientInVertex0,
-        AtlasPositionGradientType &gradientInVertex1,
-        AtlasPositionGradientType &gradientInVertex2,
-        AtlasPositionGradientType &gradientInVertex3) {
-  // Z is inv( [ p0 p1 p2 p3; 1 1 1 1 ] ) of the tetrahedron in reference
-  // position
+        const ReferenceTetrahedronInfo &      info,
+        ThreadAccumDataType &                 priorPlusDataCost,
+        AtlasPositionGradientThreadAccumType &gradientInVertex0,
+        AtlasPositionGradientThreadAccumType &gradientInVertex1,
+        AtlasPositionGradientThreadAccumType &gradientInVertex2,
+        AtlasPositionGradientThreadAccumType &gradientInVertex3) {
+  // Z is inv( [ p0 p1 p2 p3; 1 1 1 1 ] ) of the tetrahedron in reference position
   const double referenceVolumeTimesK = info.m_ReferenceVolumeTimesK;
 
   const double z11 = info.m_Z11;
@@ -486,8 +495,7 @@ bool AtlasMeshPositionCostAndGradientCalculator ::
   const double y34 = p3[2];
 
   //
-  // Let's add Ashburner's prior cost for the tethrahedron deformation from its
-  // reference position
+  // Let's add Ashburner's prior cost for the tethrahedron deformation from its reference position
   //
   const double m11 = z11 * y11 + z21 * y12 + z31 * y13 + z41 * y14;
   const double m21 = z11 * y21 + z21 * y22 + z31 * y23 + z41 * y24;
@@ -517,14 +525,13 @@ bool AtlasMeshPositionCostAndGradientCalculator ::
   const double k32 = -(m11 * m32 - m31 * m12);
   const double k33 = (m11 * m22 - m12 * m21);
 
-  // Trace of J' * J is actually the sum of the squares of the singular values
-  // of J: s1^2 + s2^2 + s3^2
+  // Trace of J' * J is actually the sum of the squares of the singular values of J: s1^2 + s2^2 + s3^2
   const double sumOfSquaresOfSingularValuesOfJ =
       m11 * m11 + m12 * m12 + m13 * m13 + m21 * m21 + m22 * m22 + m23 * m23 +
       m31 * m31 + m32 * m32 + m33 * m33;
 
-  // Trace of ( inv(J) )' * inv( J ) is actually the sum of the squares of the
-  // reciprocals of the singular values of J: 1/s1^2 + 1/s2^2 + 1/s3^2
+  // Trace of ( inv(J) )' * inv( J ) is actually the sum of the squares of the reciprocals of the singular values
+  // of J: 1/s1^2 + 1/s2^2 + 1/s3^2
   const double traceOfKTransposeTimesK =
       (k11 * k11 + k12 * k12 + k13 * k13 + k21 * k21 + k22 * k22 + k23 * k23 +
        k31 * k31 + k32 * k32 + k33 * k33);
@@ -537,8 +544,7 @@ bool AtlasMeshPositionCostAndGradientCalculator ::
   priorPlusDataCost += priorCost;
 
   //
-  // OK, now add contribution to derivatives of Ashburner's prior cost in each
-  // of the tetrahedron's vertices
+  // OK, now add contribution to derivatives of Ashburner's prior cost in each of the tetrahedron's vertices
   //
   const double ddetJdm11 = m22 * m33 - m32 * m23;
   const double ddetJdm21 = m13 * m32 - m12 * m33;
@@ -620,8 +626,7 @@ bool AtlasMeshPositionCostAndGradientCalculator ::
   const double dcostdy24 = dcostdm21 * z41 + dcostdm22 * z42 + dcostdm23 * z43;
   const double dcostdy34 = dcostdm31 * z41 + dcostdm32 * z42 + dcostdm33 * z43;
 
-  // Add the stuff to the existing gradients in each of the tetrahedron's four
-  // vertices
+  // Add the stuff to the existing gradients in each of the tetrahedron's four vertices
   gradientInVertex0[0] += dcostdy11;
   gradientInVertex0[1] += dcostdy21;
   gradientInVertex0[2] += dcostdy31;
@@ -649,22 +654,22 @@ void AtlasMeshPositionCostAndGradientCalculator ::ImposeBoundaryCondition(
 
   switch (m_BoundaryCondition) {
   case SLIDING: {
-    // std::cout << "SLIDING" << std::endl;
+    //std::cout << "SLIDING" << std::endl;
     this->ImposeSlidingBoundaryConditions(mesh);
     break;
   }
   case AFFINE: {
-    // std::cout << "AFFINE" << std::endl;
+    //std::cout << "AFFINE" << std::endl;
     this->ImposeAffineBoundaryConditions(mesh);
     break;
   }
   case TRANSLATION: {
-    // std::cout << "TRANSLATION" << std::endl;
+    //std::cout << "TRANSLATION" << std::endl;
     this->ImposeTranslationBoundaryConditions(mesh);
     break;
   }
   default: {
-    // std::cout << "NONE" << std::endl;
+    //std::cout << "NONE" << std::endl;
     break;
   }
   }
@@ -693,10 +698,9 @@ void AtlasMeshPositionCostAndGradientCalculator ::
       index += 1;
     }
 
-    // Multiply by the correct 3x3 matrix imposing the appropriate boundary
-    // conditions. For index 7, this is always the identity matrix, so we'll
-    // just skip the explicit multiplication there (is vast majority of vertices
-    // anyway, so better be fast there)
+    // Multiply by the correct 3x3 matrix imposing the appropriate boundary conditions.
+    // For index 7, this is always the identity matrix, so we'll just skip the explicit
+    // multiplication there (is vast majority of vertices anyway, so better be fast there)
     if (index < 7) {
       gradientIt.Value() =
           m_SlidingBoundaryCorrectionMatrices[index] * gradientIt.Value();
@@ -710,31 +714,28 @@ void AtlasMeshPositionCostAndGradientCalculator ::
 //
 void AtlasMeshPositionCostAndGradientCalculator ::
     ImposeAffineBoundaryConditions(const AtlasMesh *mesh) {
-  // Make sure the gradient obeys an affine transformation model. This is
-  // accomplished by using an implicit model according to which a new position
-  // 3D y = (y1, y2, y3)^T is obtained from the current 3D position x = (x1, x2,
-  // x3)^T using an affine transformation:
+  // Make sure the gradient obeys an affine transformation model. This is accomplished
+  // by using an implicit model according to which a new position 3D y = (y1, y2, y3)^T
+  // is obtained from the current 3D position x = (x1, x2, x3)^T using an affine transformation:
   //
   //   y1 = a11 * x1 + a12 * x2 + a13 * x3 + t1
   //   y2 = a21 * x2 + a22 * x2 + a23 * x3 + t2
   //   y3 = a31 * x2 + a32 * x2 + a33 * x3 + t3
   //
-  // where t = (t1, t2, t3)^T is a translation and the "a" parameters are
-  // elements of a 3x3 matrix A.
+  // where t = (t1, t2, t3)^T is a translation and the "a" parameters are elements of
+  // a 3x3 matrix A.
   //
-  // Using the notation X to denote a ( numberOfPoints x 4 ) matrix with on the
-  // n-th row the position ( x1 x2 x3 1 ) of the n-th point, and G the (
-  // numberOfPoints x 3 ) gradient, the projection of G(:,1) -- the first column
-  // of G, i.e., the "left-direction" direction parameterized by the first row
-  // of the system above -- into the affine subspace spanned by the vectors of X
-  // is given
+  // Using the notation X to denote a ( numberOfPoints x 4 ) matrix with on the n-th row
+  // the position ( x1 x2 x3 1 ) of the n-th point, and G the ( numberOfPoints x 3 ) gradient,
+  // the projection of G(:,1) -- the first column of G, i.e., the "left-direction" direction
+  // parameterized by the first row of the system above -- into the affine subspace spanned
+  // by the vectors of X is given
   //
   //   Gaffine(:,1) = X * ( X^T * X )^{-1} * X^T * G(:,1)
   //
-  // This can be seen by the fact that the projected gradient is given by the
-  // constrained form Gaffine(:,1) = X * ( a11' a12' a13' t1' ) = X * p;
-  // requiring the difference between the original and the projected  gradient
-  // vector to be perpendicular to basis vectors yields
+  // This can be seen by the fact that the projected gradient is given by the constrained form
+  // Gaffine(:,1) = X * ( a11' a12' a13' t1' ) = X * p; requiring the difference between the
+  // original and the projected  gradient vector to be perpendicular to basis vectors yields
   //
   //    ( X * p - G(:,1) )^T * X = 0
   //
@@ -742,26 +743,23 @@ void AtlasMeshPositionCostAndGradientCalculator ::
   //
   //    p = ( X^T * X )^{-1} * X^T * G(:,1)
   //
-  // The same argument goes for the two other directions (rows in the system
-  // above)
+  // The same argument goes for the two other directions (rows in the system above)
   //
-  // One last thing: we essentially get access to y, whereas we need x to
-  // construct X. I'm assuming that the first-ever time this function is called,
-  // t=( 0 0 0)^T and A = identity, so that x = y in that case; from this X is
-  // constructed and stored for future use.
+  // One last thing: we essentially get access to y, whereas we need x to construct X. I'm
+  // assuming that the first-ever time this function is called, t=( 0 0 0)^T and A = identity,
+  // so that x = y in that case; from this X is constructed and stored for future use.
   //
-  // One truly last thing: instead of storing X and working with the rows of A
-  // and t as implicit parameters, I'm changing basis, essentially working with,
-  // for each direction, 4x1 implicit parameter vector pnew = C * p, where C is
-  // the Cholesky decomposition of the matrix-to-be-inverted X^T * X. This is
-  // accomplished by using Z = X * C^{-1} as basis vectors instead (which span
-  // the same affine subspace), which is computed using essentially a hand-coded
-  // QR decomposition (Gram-Schmidt orthonormalization) -- this basis has the
-  // advantage that Z^T * Z = C^{-1}^T * X^T * X * C^{-1} = C^{-1}^T * C^T * C *
-  // C^{-1} = I, so no need to invert matrices anymore
+  // One truly last thing: instead of storing X and working with the rows of A and t as
+  // implicit parameters, I'm changing basis, essentially working with, for each direction,
+  // 4x1 implicit parameter vector pnew = C * p, where C is the Cholesky decomposition of
+  // the matrix-to-be-inverted X^T * X. This is accomplished by using Z = X * C^{-1} as basis vectors
+  // instead (which span the same affine subspace), which is computed using essentially a
+  // hand-coded QR decomposition (Gram-Schmidt orthonormalization) -- this basis has the advantage
+  // that Z^T * Z = C^{-1}^T * X^T * X * C^{-1} = C^{-1}^T * C^T * C * C^{-1} = I,
+  // so no need to invert matrices anymore
 
   // Let's first construct X and G
-  const int numberOfRows = mesh->GetPoints()->Size();
+  const int          numberOfRows = mesh->GetPoints()->Size();
   vnl_matrix<double> G(numberOfRows, 3);
   AtlasPositionGradientContainerType::Iterator gradientIt =
       m_PositionGradient->Begin();
@@ -784,8 +782,8 @@ void AtlasMeshPositionCostAndGradientCalculator ::
       m_AffineProjectionMatrix(rowNumber, 3) = pointIt.Value()[2];
     }
 
-    // Gram-Schmidt Orthonormalization up-front, so that we don't have to worry
-    // about inverting the same 4x4 matrix over and over
+    // Gram-Schmidt Orthonormalization up-front, so that we don't have to worry about inverting
+    // the same 4x4 matrix over and over
     m_AffineProjectionMatrix.set_column(
         0, m_AffineProjectionMatrix.get_column(0).normalize());
     for (int columnNumber = 1; columnNumber < 4; columnNumber++) {
@@ -800,16 +798,14 @@ void AtlasMeshPositionCostAndGradientCalculator ::
       m_AffineProjectionMatrix.set_column(columnNumber, column.normalize());
     }
 
-    // std::cout << m_AffineProjectionMatrix.transpose() *
-    // m_AffineProjectionMatrix << std::endl;
+    //std::cout << m_AffineProjectionMatrix.transpose() * m_AffineProjectionMatrix << std::endl;
   }
 
   // Compute  conformedG = X * X^T * G
   const vnl_matrix<double> conformedG =
       m_AffineProjectionMatrix * (m_AffineProjectionMatrix.transpose() * G);
-  // const  vnl_matrix< double >  conformedG
-  //       = m_X * ( vnl_inverse( m_X.transpose() * m_X ) * ( m_X.transpose() *
-  //       G ) );
+  //const  vnl_matrix< double >  conformedG
+  //       = m_X * ( vnl_inverse( m_X.transpose() * m_X ) * ( m_X.transpose() * G ) );
 
   // Now copy the result back into our gradient representation
   gradientIt = m_PositionGradient->Begin();
@@ -825,11 +821,10 @@ void AtlasMeshPositionCostAndGradientCalculator ::
 //
 void AtlasMeshPositionCostAndGradientCalculator ::
     ImposeTranslationBoundaryConditions(const AtlasMesh *mesh) {
-  // Same as for affine case, but just simpler (X is just a (normalized) column
-  // of ones)
+  // Same as for affine case, but just simpler (X is just a (normalized) column of ones)
 
   // Let's first construct X and G
-  const int numberOfRows = mesh->GetPoints()->Size();
+  const int          numberOfRows = mesh->GetPoints()->Size();
   vnl_matrix<double> X(numberOfRows, 1);
   vnl_matrix<double> G(numberOfRows, 3);
   AtlasMesh::PointsContainer::ConstIterator pointIt =

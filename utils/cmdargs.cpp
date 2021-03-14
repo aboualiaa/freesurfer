@@ -1,17 +1,6 @@
-/**
- * @file  cmdargs.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:42 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,16 +13,10 @@
  */
 
 // cmdargs.c - utilities for handling command-line arguments
-// $Id: cmdargs.c,v 1.3 2011/03/02 00:04:42 nicks Exp $
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
-/* --------------------------------------------- */
-const char *CMDSrcVersion() {
-  return ("$Id: cmdargs.c,v 1.3 2011/03/02 00:04:42 nicks Exp $");
-}
 
 /* --------------------------------------------------------------------------
    CMDargNErr() - prints a msg as to the number of arguments needed by a flag

@@ -35,19 +35,19 @@
 #define MAX(a, b)                                                              \
   ((a) > (b) ? (a) : (b)) //!<  Returns the max value between a and b
 #define MAXMAX(a, b, c) ((a) > (b) ? MAX(a, c) : MAX(b, c))
-#define GW_MIN(a, b) MIN(a, b) //!<  Returns the min value between a and b
-#undef GW_MAX                  // already defined by Windows.h ...
-#define GW_MAX(a, b) MAX(a, b) //!<  Returns the max value between a and b
+#define GW_MIN(a, b)    MIN(a, b)    //!<  Returns the min value between a and b
+#undef GW_MAX                        // already defined by Windows.h ...
+#define GW_MAX(a, b)       MAX(a, b) //!<  Returns the max value between a and b
 #define GW_MAXMAX(a, b, c) MAXMAX(a, b, c)
 
 #define GW_SCALE_01(x, rMin, rMax) ((x - rMin) / (rMax - rMin))
 
-#define GW_ABS(a) ((a) > 0 ? (a) : -(a)) //!<  Returns the absolute value a
-#define GW_SIGN(a) ((a) > 0 ? 1 : -1)    //!<  Returns the sign of a
-#define SQR(x) ((x) * (x))               //!<  Returns x square
-#define CUBE(x) ((x) * (x) * (x))        //!<  Returns x cube
-#define GW_SQR(x) SQR(x)                 //!<  Returns x square
-#define GW_CUBE(x) CUBE(x)               //!<  Returns x cube
+#define GW_ABS(a)  ((a) > 0 ? (a) : -(a)) //!<  Returns the absolute value a
+#define GW_SIGN(a) ((a) > 0 ? 1 : -1)     //!<  Returns the sign of a
+#define SQR(x)     ((x) * (x))            //!<  Returns x square
+#define CUBE(x)    ((x) * (x) * (x))      //!<  Returns x cube
+#define GW_SQR(x)  SQR(x)                 //!<  Returns x square
+#define GW_CUBE(x) CUBE(x)                //!<  Returns x cube
 
 #define GW_CLAMP_01(x)                                                         \
   if ((x) < 0)                                                                 \
@@ -99,7 +99,7 @@
 /** \name some constants */
 //-------------------------------------------------------------------------
 //@{
-#define GW_True true
+#define GW_True  true
 #define GW_False false
 /** to make aproximate computations (derivation, GW_Float comparaisons ...) */
 #define GW_EPSILON 1e-9
@@ -146,11 +146,12 @@
 //-------------------------------------------------------------------------
 //@{
 #ifdef GW_DEBUG
-#define GW_ASSERT(expr) _ASSERT(expr)
+#define GW_ASSERT(expr)     _ASSERT(expr)
 #define GW_DEBUG_ONLY(expr) expr
 #else
-#define GW_ASSERT(expr) // if(!(expr)) cerr << "Error in file " << __FILE__ << "
-                        // line " << __LINE__ << "." << endl
+#define GW_ASSERT(                                                             \
+    expr) // if(!(expr)) cerr << "Error in file " << __FILE__ << "             \
+          // line " << __LINE__ << "." << endl
 #define GW_DEBUG_ONLY(expr)
 #endif // GW_DEBUG
 //@}

@@ -26,7 +26,7 @@ Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 char Face::ripflag() const { return repr->f_ripflag[idx]; }
 char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
+int  Face::marked() const { return repr->f_marked[idx]; }
 
 void Face::set_ripflag(char to) { repr->f_ripflag[idx] = to; }
 void Face::set_oripflag(char to) { repr->f_oripflag[idx] = to; }
@@ -93,12 +93,12 @@ Surface::Surface(AnalysisM::Surface const &src) : Repr_Elt(src) {}
 Surface::Surface(Analysis::Surface const &src) : Repr_Elt(src) {}
 Surface::Surface(AllM::Surface const &src) : Repr_Elt(src) {}
 
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -132,17 +132,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -152,8 +152,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -195,9 +195,9 @@ Face::Face(Analysis::Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
+char   Face::ripflag() const { return repr->f_ripflag[idx]; }
+char   Face::oripflag() const { return repr->f_oripflag[idx]; }
+int    Face::marked() const { return repr->f_marked[idx]; }
 
 void Face::set_ripflag(char to) { repr->f_ripflag[idx] = to; }
 void Face::set_oripflag(char to) { repr->f_oripflag[idx] = to; }
@@ -334,8 +334,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -350,21 +350,21 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -398,17 +398,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -418,8 +418,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -459,9 +459,9 @@ Face::Face(Analysis::Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
+char   Face::ripflag() const { return repr->f_ripflag[idx]; }
+char   Face::oripflag() const { return repr->f_oripflag[idx]; }
+int    Face::marked() const { return repr->f_marked[idx]; }
 
 void Face::set_ripflag(char to) { repr->f_ripflag[idx] = to; }
 void Face::set_oripflag(char to) { repr->f_oripflag[idx] = to; }
@@ -641,8 +641,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -657,21 +657,21 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -725,17 +725,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -745,8 +745,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -805,15 +805,15 @@ Face::Face(Analysis::Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
-PDMATRIX Face::norm() const { return repr->f_norm[idx]; }
+char       Face::ripflag() const { return repr->f_ripflag[idx]; }
+char       Face::oripflag() const { return repr->f_oripflag[idx]; }
+int        Face::marked() const { return repr->f_marked[idx]; }
+PDMATRIX   Face::norm() const { return repr->f_norm[idx]; }
 A3PDMATRIX Face::gradNorm() const { return repr->f_gradNorm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -1004,8 +1004,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -1020,9 +1020,9 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -1042,32 +1042,32 @@ float Surface::zhi() const { return repr->zhi; }
 float Surface::x0() const { //  center of spherical expansion
   return repr->x0;
 }
-float Surface::y0() const { return repr->y0; }
-float Surface::z0() const { return repr->z0; }
-float Surface::max_curv() const { return repr->max_curv; }
-float Surface::min_curv() const { return repr->min_curv; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::y0() const { return repr->y0; }
+float  Surface::z0() const { return repr->z0; }
+float  Surface::max_curv() const { return repr->max_curv; }
+float  Surface::min_curv() const { return repr->min_curv; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 int Surface::zeros() const { return repr->zeros; }
 int Surface::hemisphere() const { //  which hemisphere
   return repr->hemisphere;
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -1104,7 +1104,7 @@ Surface::origxyz_status() const { //  type of surface (e.g. sphere, plane) that
 int Surface::patch() const { //  if a patch of the surface
   return repr->patch;
 }
-int Surface::nlabels() const { return repr->nlabels; }
+int              Surface::nlabels() const { return repr->nlabels; }
 PMRIS_AREA_LABEL Surface::labels() const { //  nlabels of these (may be null)
   return repr->labels;
 }
@@ -1140,17 +1140,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -1160,8 +1160,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -1261,15 +1261,15 @@ Face::Face(Analysis::Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
-PDMATRIX Face::norm() const { return repr->f_norm[idx]; }
+char       Face::ripflag() const { return repr->f_ripflag[idx]; }
+char       Face::oripflag() const { return repr->f_oripflag[idx]; }
+int        Face::marked() const { return repr->f_marked[idx]; }
+PDMATRIX   Face::norm() const { return repr->f_norm[idx]; }
 A3PDMATRIX Face::gradNorm() const { return repr->f_gradNorm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -1547,17 +1547,17 @@ float Vertex::mean_imag() const { //  imaginary part of complex statistic
   return repr->v_mean_imag[idx];
 }
 float Vertex::std_error() const { return repr->v_std_error[idx]; }
-uint Vertex::flags() const { return repr->v_flags[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+uint  Vertex::flags() const { return repr->v_flags[idx]; }
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
-int Vertex::cropped() const { return repr->v_cropped[idx]; }
+int   Vertex::cropped() const { return repr->v_cropped[idx]; }
 short Vertex::marked() const { //  for a variety of uses
   return repr->v_marked[idx];
 }
 short Vertex::marked2() const { return repr->v_marked2[idx]; }
 short Vertex::marked3() const { return repr->v_marked3[idx]; }
-char Vertex::neg() const { //  1 if the normal vector is inverted
+char  Vertex::neg() const { //  1 if the normal vector is inverted
   return repr->v_neg[idx];
 }
 char Vertex::border() const { //  flag
@@ -1848,8 +1848,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -1864,9 +1864,9 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -1886,32 +1886,32 @@ float Surface::zhi() const { return repr->zhi; }
 float Surface::x0() const { //  center of spherical expansion
   return repr->x0;
 }
-float Surface::y0() const { return repr->y0; }
-float Surface::z0() const { return repr->z0; }
-float Surface::max_curv() const { return repr->max_curv; }
-float Surface::min_curv() const { return repr->min_curv; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::y0() const { return repr->y0; }
+float  Surface::z0() const { return repr->z0; }
+float  Surface::max_curv() const { return repr->max_curv; }
+float  Surface::min_curv() const { return repr->min_curv; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 int Surface::zeros() const { return repr->zeros; }
 int Surface::hemisphere() const { //  which hemisphere
   return repr->hemisphere;
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -1948,7 +1948,7 @@ Surface::origxyz_status() const { //  type of surface (e.g. sphere, plane) that
 int Surface::patch() const { //  if a patch of the surface
   return repr->patch;
 }
-int Surface::nlabels() const { return repr->nlabels; }
+int              Surface::nlabels() const { return repr->nlabels; }
 PMRIS_AREA_LABEL Surface::labels() const { //  nlabels of these (may be null)
   return repr->labels;
 }
@@ -1984,17 +1984,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -2004,8 +2004,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -2103,15 +2103,15 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
-PDMATRIX Face::norm() const { return repr->f_norm[idx]; }
+char       Face::ripflag() const { return repr->f_ripflag[idx]; }
+char       Face::oripflag() const { return repr->f_oripflag[idx]; }
+int        Face::marked() const { return repr->f_marked[idx]; }
+PDMATRIX   Face::norm() const { return repr->f_norm[idx]; }
 A3PDMATRIX Face::gradNorm() const { return repr->f_gradNorm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -2387,17 +2387,17 @@ float Vertex::mean_imag() const { //  imaginary part of complex statistic
   return repr->v_mean_imag[idx];
 }
 float Vertex::std_error() const { return repr->v_std_error[idx]; }
-uint Vertex::flags() const { return repr->v_flags[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+uint  Vertex::flags() const { return repr->v_flags[idx]; }
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
-int Vertex::cropped() const { return repr->v_cropped[idx]; }
+int   Vertex::cropped() const { return repr->v_cropped[idx]; }
 short Vertex::marked() const { //  for a variety of uses
   return repr->v_marked[idx];
 }
 short Vertex::marked2() const { return repr->v_marked2[idx]; }
 short Vertex::marked3() const { return repr->v_marked3[idx]; }
-char Vertex::neg() const { //  1 if the normal vector is inverted
+char  Vertex::neg() const { //  1 if the normal vector is inverted
   return repr->v_neg[idx];
 }
 char Vertex::border() const { //  flag
@@ -2686,8 +2686,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -2702,9 +2702,9 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -2724,32 +2724,32 @@ float Surface::zhi() const { return repr->zhi; }
 float Surface::x0() const { //  center of spherical expansion
   return repr->x0;
 }
-float Surface::y0() const { return repr->y0; }
-float Surface::z0() const { return repr->z0; }
-float Surface::max_curv() const { return repr->max_curv; }
-float Surface::min_curv() const { return repr->min_curv; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::y0() const { return repr->y0; }
+float  Surface::z0() const { return repr->z0; }
+float  Surface::max_curv() const { return repr->max_curv; }
+float  Surface::min_curv() const { return repr->min_curv; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 int Surface::zeros() const { return repr->zeros; }
 int Surface::hemisphere() const { //  which hemisphere
   return repr->hemisphere;
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -2786,7 +2786,7 @@ Surface::origxyz_status() const { //  type of surface (e.g. sphere, plane) that
 int Surface::patch() const { //  if a patch of the surface
   return repr->patch;
 }
-int Surface::nlabels() const { return repr->nlabels; }
+int              Surface::nlabels() const { return repr->nlabels; }
 PMRIS_AREA_LABEL Surface::labels() const { //  nlabels of these (may be null)
   return repr->labels;
 }
@@ -2822,17 +2822,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -2842,8 +2842,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -2942,7 +2942,7 @@ Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 char Face::ripflag() const { return repr->f_ripflag[idx]; }
 char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
+int  Face::marked() const { return repr->f_marked[idx]; }
 
 void Face::set_ripflag(char to) { repr->f_ripflag[idx] = to; }
 void Face::set_oripflag(char to) { repr->f_oripflag[idx] = to; }
@@ -2988,12 +2988,12 @@ Surface::Surface(Representation *representation)
 Surface::Surface(Surface const &src) : Repr_Elt(src) {}
 Surface::Surface(AllM::Surface const &src) : Repr_Elt(src) {}
 
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -3027,17 +3027,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -3047,8 +3047,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -3099,9 +3099,9 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
+char   Face::ripflag() const { return repr->f_ripflag[idx]; }
+char   Face::oripflag() const { return repr->f_oripflag[idx]; }
+int    Face::marked() const { return repr->f_marked[idx]; }
 
 void Face::set_v(size_t i, Vertex to) {
   cheapAssert(repr == to.repr);
@@ -3259,8 +3259,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -3275,21 +3275,21 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -3323,17 +3323,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -3343,8 +3343,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -3378,9 +3378,9 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
+char   Face::ripflag() const { return repr->f_ripflag[idx]; }
+char   Face::oripflag() const { return repr->f_oripflag[idx]; }
+int    Face::marked() const { return repr->f_marked[idx]; }
 
 void Face::set_ripflag(char to) { repr->f_ripflag[idx] = to; }
 void Face::set_oripflag(char to) { repr->f_oripflag[idx] = to; }
@@ -3554,8 +3554,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -3570,21 +3570,21 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -3638,17 +3638,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -3658,8 +3658,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -3714,15 +3714,15 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
-PDMATRIX Face::norm() const { return repr->f_norm[idx]; }
+char       Face::ripflag() const { return repr->f_ripflag[idx]; }
+char       Face::oripflag() const { return repr->f_oripflag[idx]; }
+int        Face::marked() const { return repr->f_marked[idx]; }
+PDMATRIX   Face::norm() const { return repr->f_norm[idx]; }
 A3PDMATRIX Face::gradNorm() const { return repr->f_gradNorm[idx]; }
 
 void Face::set_area(float to) { repr->f_area[idx] = to; }
@@ -3910,8 +3910,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -3926,9 +3926,9 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -3948,32 +3948,32 @@ float Surface::zhi() const { return repr->zhi; }
 float Surface::x0() const { //  center of spherical expansion
   return repr->x0;
 }
-float Surface::y0() const { return repr->y0; }
-float Surface::z0() const { return repr->z0; }
-float Surface::max_curv() const { return repr->max_curv; }
-float Surface::min_curv() const { return repr->min_curv; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::y0() const { return repr->y0; }
+float  Surface::z0() const { return repr->z0; }
+float  Surface::max_curv() const { return repr->max_curv; }
+float  Surface::min_curv() const { return repr->min_curv; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 int Surface::zeros() const { return repr->zeros; }
 int Surface::hemisphere() const { //  which hemisphere
   return repr->hemisphere;
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -4010,7 +4010,7 @@ Surface::origxyz_status() const { //  type of surface (e.g. sphere, plane) that
 int Surface::patch() const { //  if a patch of the surface
   return repr->patch;
 }
-int Surface::nlabels() const { return repr->nlabels; }
+int              Surface::nlabels() const { return repr->nlabels; }
 PMRIS_AREA_LABEL Surface::labels() const { //  nlabels of these (may be null)
   return repr->labels;
 }
@@ -4046,17 +4046,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -4066,8 +4066,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -4176,15 +4176,15 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
-PDMATRIX Face::norm() const { return repr->f_norm[idx]; }
+char       Face::ripflag() const { return repr->f_ripflag[idx]; }
+char       Face::oripflag() const { return repr->f_oripflag[idx]; }
+int        Face::marked() const { return repr->f_marked[idx]; }
+PDMATRIX   Face::norm() const { return repr->f_norm[idx]; }
 A3PDMATRIX Face::gradNorm() const { return repr->f_gradNorm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -4460,17 +4460,17 @@ float Vertex::mean_imag() const { //  imaginary part of complex statistic
   return repr->v_mean_imag[idx];
 }
 float Vertex::std_error() const { return repr->v_std_error[idx]; }
-uint Vertex::flags() const { return repr->v_flags[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+uint  Vertex::flags() const { return repr->v_flags[idx]; }
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
-int Vertex::cropped() const { return repr->v_cropped[idx]; }
+int   Vertex::cropped() const { return repr->v_cropped[idx]; }
 short Vertex::marked() const { //  for a variety of uses
   return repr->v_marked[idx];
 }
 short Vertex::marked2() const { return repr->v_marked2[idx]; }
 short Vertex::marked3() const { return repr->v_marked3[idx]; }
-char Vertex::neg() const { //  1 if the normal vector is inverted
+char  Vertex::neg() const { //  1 if the normal vector is inverted
   return repr->v_neg[idx];
 }
 char Vertex::border() const { //  flag
@@ -4759,8 +4759,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -4775,9 +4775,9 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -4797,32 +4797,32 @@ float Surface::zhi() const { return repr->zhi; }
 float Surface::x0() const { //  center of spherical expansion
   return repr->x0;
 }
-float Surface::y0() const { return repr->y0; }
-float Surface::z0() const { return repr->z0; }
-float Surface::max_curv() const { return repr->max_curv; }
-float Surface::min_curv() const { return repr->min_curv; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::y0() const { return repr->y0; }
+float  Surface::z0() const { return repr->z0; }
+float  Surface::max_curv() const { return repr->max_curv; }
+float  Surface::min_curv() const { return repr->min_curv; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 int Surface::zeros() const { return repr->zeros; }
 int Surface::hemisphere() const { //  which hemisphere
   return repr->hemisphere;
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -4859,7 +4859,7 @@ Surface::origxyz_status() const { //  type of surface (e.g. sphere, plane) that
 int Surface::patch() const { //  if a patch of the surface
   return repr->patch;
 }
-int Surface::nlabels() const { return repr->nlabels; }
+int              Surface::nlabels() const { return repr->nlabels; }
 PMRIS_AREA_LABEL Surface::labels() const { //  nlabels of these (may be null)
   return repr->labels;
 }
@@ -4895,17 +4895,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -4915,8 +4915,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -5014,15 +5014,15 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
-PDMATRIX Face::norm() const { return repr->f_norm[idx]; }
+char       Face::ripflag() const { return repr->f_ripflag[idx]; }
+char       Face::oripflag() const { return repr->f_oripflag[idx]; }
+int        Face::marked() const { return repr->f_marked[idx]; }
+PDMATRIX   Face::norm() const { return repr->f_norm[idx]; }
 A3PDMATRIX Face::gradNorm() const { return repr->f_gradNorm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -5298,17 +5298,17 @@ float Vertex::mean_imag() const { //  imaginary part of complex statistic
   return repr->v_mean_imag[idx];
 }
 float Vertex::std_error() const { return repr->v_std_error[idx]; }
-uint Vertex::flags() const { return repr->v_flags[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+uint  Vertex::flags() const { return repr->v_flags[idx]; }
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
-int Vertex::cropped() const { return repr->v_cropped[idx]; }
+int   Vertex::cropped() const { return repr->v_cropped[idx]; }
 short Vertex::marked() const { //  for a variety of uses
   return repr->v_marked[idx];
 }
 short Vertex::marked2() const { return repr->v_marked2[idx]; }
 short Vertex::marked3() const { return repr->v_marked3[idx]; }
-char Vertex::neg() const { //  1 if the normal vector is inverted
+char  Vertex::neg() const { //  1 if the normal vector is inverted
   return repr->v_neg[idx];
 }
 char Vertex::border() const { //  flag
@@ -5597,8 +5597,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -5613,9 +5613,9 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -5635,32 +5635,32 @@ float Surface::zhi() const { return repr->zhi; }
 float Surface::x0() const { //  center of spherical expansion
   return repr->x0;
 }
-float Surface::y0() const { return repr->y0; }
-float Surface::z0() const { return repr->z0; }
-float Surface::max_curv() const { return repr->max_curv; }
-float Surface::min_curv() const { return repr->min_curv; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::y0() const { return repr->y0; }
+float  Surface::z0() const { return repr->z0; }
+float  Surface::max_curv() const { return repr->max_curv; }
+float  Surface::min_curv() const { return repr->min_curv; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 int Surface::zeros() const { return repr->zeros; }
 int Surface::hemisphere() const { //  which hemisphere
   return repr->hemisphere;
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -5697,7 +5697,7 @@ Surface::origxyz_status() const { //  type of surface (e.g. sphere, plane) that
 int Surface::patch() const { //  if a patch of the surface
   return repr->patch;
 }
-int Surface::nlabels() const { return repr->nlabels; }
+int              Surface::nlabels() const { return repr->nlabels; }
 PMRIS_AREA_LABEL Surface::labels() const { //  nlabels of these (may be null)
   return repr->labels;
 }
@@ -5733,17 +5733,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -5753,8 +5753,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }
@@ -5851,15 +5851,15 @@ Face::Face(Representation *representation, size_t idx)
 Face::Face(Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
-char Face::oripflag() const { return repr->f_oripflag[idx]; }
-int Face::marked() const { return repr->f_marked[idx]; }
-PDMATRIX Face::norm() const { return repr->f_norm[idx]; }
+char       Face::ripflag() const { return repr->f_ripflag[idx]; }
+char       Face::oripflag() const { return repr->f_oripflag[idx]; }
+int        Face::marked() const { return repr->f_marked[idx]; }
+PDMATRIX   Face::norm() const { return repr->f_norm[idx]; }
 A3PDMATRIX Face::gradNorm() const { return repr->f_gradNorm[idx]; }
 
 void Face::set_v(size_t i, Vertex to) {
@@ -6142,17 +6142,17 @@ float Vertex::mean_imag() const { //  imaginary part of complex statistic
   return repr->v_mean_imag[idx];
 }
 float Vertex::std_error() const { return repr->v_std_error[idx]; }
-uint Vertex::flags() const { return repr->v_flags[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+uint  Vertex::flags() const { return repr->v_flags[idx]; }
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
-int Vertex::cropped() const { return repr->v_cropped[idx]; }
+int   Vertex::cropped() const { return repr->v_cropped[idx]; }
 short Vertex::marked() const { //  for a variety of uses
   return repr->v_marked[idx];
 }
 short Vertex::marked2() const { return repr->v_marked2[idx]; }
 short Vertex::marked3() const { return repr->v_marked3[idx]; }
-char Vertex::neg() const { //  1 if the normal vector is inverted
+char  Vertex::neg() const { //  1 if the normal vector is inverted
   return repr->v_neg[idx];
 }
 char Vertex::border() const { //  flag
@@ -6482,8 +6482,8 @@ int Surface::nedges() const { //  # of edges on surface
 int Surface::ncorners() const { //  # of triangle corners
   return repr->ncorners;
 }
-int Surface::nstrips() const { return repr->nstrips; }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
+int      Surface::nstrips() const { return repr->nstrips; }
+Vertex   Surface::vertices(size_t i) const { return Vertex(repr, i); }
 p_p_void Surface::dist_storage()
     const { //  the malloced/realloced vertex dist fields, so those fields can
             //  be quickly nulled and restored
@@ -6498,9 +6498,9 @@ int Surface::tempsAssigned() const { //  State of various temp fields that can
                                      //  be borrowed if not already in use
   return repr->tempsAssigned;
 }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
-MRI_EDGE Surface::edges(size_t i) const { return repr->edges[i]; }
-MRI_CORNER Surface::corners(size_t i) const { return repr->corners[i]; }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
+MRI_EDGE           Surface::edges(size_t i) const { return repr->edges[i]; }
+MRI_CORNER         Surface::corners(size_t i) const { return repr->corners[i]; }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -6520,32 +6520,32 @@ float Surface::zhi() const { return repr->zhi; }
 float Surface::x0() const { //  center of spherical expansion
   return repr->x0;
 }
-float Surface::y0() const { return repr->y0; }
-float Surface::z0() const { return repr->z0; }
-float Surface::max_curv() const { return repr->max_curv; }
-float Surface::min_curv() const { return repr->min_curv; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::y0() const { return repr->y0; }
+float  Surface::z0() const { return repr->z0; }
+float  Surface::max_curv() const { return repr->max_curv; }
+float  Surface::min_curv() const { return repr->min_curv; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 int Surface::zeros() const { return repr->zeros; }
 int Surface::hemisphere() const { //  which hemisphere
   return repr->hemisphere;
 }
-int Surface::initialized() const { return repr->initialized; }
-PLTA Surface::lta() const { return repr->lta; }
+int     Surface::initialized() const { return repr->initialized; }
+PLTA    Surface::lta() const { return repr->lta; }
 PMATRIX Surface::SRASToTalSRAS_() const { return repr->SRASToTalSRAS_; }
 PMATRIX Surface::TalSRASToSRAS_() const { return repr->TalSRASToSRAS_; }
-int Surface::free_transform() const { return repr->free_transform; }
-double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
+int     Surface::free_transform() const { return repr->free_transform; }
+double  Surface::radius() const { //  radius (if status==MRIS_SPHERE)
   return repr->radius;
 }
 float Surface::a() const { return repr->a; }
@@ -6582,7 +6582,7 @@ Surface::origxyz_status() const { //  type of surface (e.g. sphere, plane) that
 int Surface::patch() const { //  if a patch of the surface
   return repr->patch;
 }
-int Surface::nlabels() const { return repr->nlabels; }
+int              Surface::nlabels() const { return repr->nlabels; }
 PMRIS_AREA_LABEL Surface::labels() const { //  nlabels of these (may be null)
   return repr->labels;
 }
@@ -6618,17 +6618,17 @@ MRIS_subject_name_t Surface::subject_name() const { //  name of the subject
   return repr->subject_name;
 }
 float Surface::canon_area() const { return repr->canon_area; }
-int Surface::noscale() const { //  don't scale by surface area if true
+int   Surface::noscale() const { //  don't scale by surface area if true
   return repr->noscale;
 }
 float Surface::dx2(
     size_t i) const { //  an extra set of gradient (not always alloced)
   return repr->dx2[i];
 }
-float Surface::dy2(size_t i) const { return repr->dy2[i]; }
-float Surface::dz2(size_t i) const { return repr->dz2[i]; }
+float        Surface::dy2(size_t i) const { return repr->dy2[i]; }
+float        Surface::dz2(size_t i) const { return repr->dz2[i]; }
 PCOLOR_TABLE Surface::ct() const { return repr->ct; }
-int Surface::useRealRAS()
+int          Surface::useRealRAS()
     const { //  if 0 (default), vertex position is a conformed volume RAS with
             //  c_(r,"a","s")=0.  else is a real RAS (volume stored RAS)
   return repr->useRealRAS;
@@ -6638,8 +6638,8 @@ VOL_GEOM Surface::vg() const { //  volume info from which this surface is
   return repr->vg;
 }
 MRIS_cmdlines_t Surface::cmdlines() const { return repr->cmdlines; }
-int Surface::ncmds() const { return repr->ncmds; }
-float Surface::group_avg_surface_area()
+int             Surface::ncmds() const { return repr->ncmds; }
+float           Surface::group_avg_surface_area()
     const { //  average of total surface area for group
   return repr->group_avg_surface_area;
 }

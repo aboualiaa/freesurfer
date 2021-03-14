@@ -1,17 +1,6 @@
-/**
- * @file  mris_translate_annotation.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:34 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,12 +16,9 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_translate_annotation.c,v 1.5 2011/03/02 00:04:34 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -46,7 +32,7 @@ static char subjects_dir[STRLEN] = "";
 int main(int argc, char *argv[]) {
   char *cp, fname[STRLEN], **av, *subject, *hemi, *in_annot, *trans_name,
       *out_annot;
-  int ac, nargs;
+  int          ac, nargs;
   MRI_SURFACE *mris;
 
   nargs = handleVersionOption(argc, argv, "mris_translate_annotation");
@@ -54,7 +40,7 @@ int main(int argc, char *argv[]) {
     exit(0);
   argc -= nargs;
 
-  Gdiag = DIAG_SHOW;
+  Gdiag    = DIAG_SHOW;
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
@@ -70,11 +56,11 @@ int main(int argc, char *argv[]) {
   if (argc < 6)
     usage_exit();
 
-  subject = argv[1];
-  hemi = argv[2];
-  in_annot = argv[3];
+  subject    = argv[1];
+  hemi       = argv[2];
+  in_annot   = argv[3];
   trans_name = argv[4];
-  out_annot = argv[5];
+  out_annot  = argv[5];
 
   if (strlen(subjects_dir) == 0) {
     cp = getenv("SUBJECTS_DIR");
@@ -109,7 +95,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -121,7 +107,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -157,15 +143,15 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 static void translate_annotation(MRI_SURFACE *mris, char *trans_name) {
-  FILE *fp;
-  int vno, in_annot, out_annot, rin, gin, bin, rout, gout, bout;
-  char *cp, line[STRLEN];
+  FILE *  fp;
+  int     vno, in_annot, out_annot, rin, gin, bin, rout, gout, bout;
+  char *  cp, line[STRLEN];
   VERTEX *v;
 
   fp = fopen(trans_name, "r");
@@ -175,7 +161,7 @@ static void translate_annotation(MRI_SURFACE *mris, char *trans_name) {
 
   while ((cp = fgetl(line, STRLEN - 1, fp)) != nullptr) {
     sscanf(cp, "%d %d %d %d %d %d", &rin, &gin, &bin, &rout, &gout, &bout);
-    in_annot = rin + (gin << 8) + (bin << 16);
+    in_annot  = rin + (gin << 8) + (bin << 16);
     out_annot = rout + (gout << 8) + (bout << 16);
 
     for (vno = 0; vno < mris->nvertices; vno++) {

@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_fill</name>
-	<synopsis>mri_fill [options] &lt;input MR directory&gt; &lt;output MR directory&gt;</synopsis>
-	<description>This program creates hemispheric cutting planes and fills white matter with specific values for subsequent surface tesselation.</description>
+  <name>mri_fill</name>
+  <synopsis>mri_fill [options] &lt;input MR directory&gt; &lt;output MR directory&gt;</synopsis>
+  <description>This program creates hemispheric cutting planes and fills white matter with specific values for subsequent surface tesselation.</description>
   <arguments>
     <positional>
       <argument>&lt;input MR directory&gt;</argument>
@@ -68,11 +67,10 @@
     <output>filled</output>
     <explanation>The filled volume for the cortical reconstruction- used for subsequent surface tesselation.</explanation>
   </outputs>
-	<example>mri_fill SUBJECT/mri/wm/. SUBJECT/mri/filled
+  <example>mri_fill SUBJECT/mri/wm/. SUBJECT/mri/filled
 
 Takes a subjects wm volume as input and uses this to find cutting planes to seperate the hemispheres and remove the brainstem, and fills hemispheres with specific values as filled volume output.</example>
   <bugs>None</bugs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mri_segment</see-also>
+  <see-also>mri_segment</see-also>
 </help>
-

@@ -1,17 +1,12 @@
 /**
- * @file RobustGaussian.cpp
  * @brief A class to esimate a robust Gaussian (using median and mad)
  *
  */
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2012/09/21 23:05:16 $
- *    $Revision: 1.17 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,8 +19,10 @@
  */
 #include "RobustGaussian.h"
 
-#include <cmath>
 #include <iostream>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "error.h"
 
@@ -34,25 +31,25 @@ using namespace std;
 #define ELEM_SWAPD(a, b)                                                       \
   {                                                                            \
     T t = a;                                                                   \
-    a = b;                                                                     \
-    b = t;                                                                     \
+    a   = b;                                                                   \
+    b   = t;                                                                   \
   }
 #define ELEM_SWAPI(a, b)                                                       \
   {                                                                            \
     int t = a;                                                                 \
-    a = b;                                                                     \
-    b = t;                                                                     \
+    a     = b;                                                                 \
+    b     = t;                                                                 \
   }
 /**
  This Quickselect routine is based on the algorithm described in
  "Numerical recipes in C", Second Edition,
  Cambridge University Press, 1992, Section 8.5, ISBN 0-521-43108-5 .
-
- This code is based on code by Nicolas Devillard - 1998. Public domain.
+ 
+ This code is based on code by Nicolas Devillard - 1998. Public domain.  
  See also http://ndevilla.free.fr/median/median.pdf
  or http://ndevilla.free.fr/median/median/index.html .
 
- Modifications:
+ Modifications: 
  - instead of only selecting the median, select the k-th smallest
  - additionally keep track of the index in the original array
  */
@@ -63,15 +60,15 @@ pair<T, int> RobustGaussian<T>::quick_selectI(T arr[], int n, int k) {
   int middle, ll, hh;
 
   int *pos = (int *)calloc(n, sizeof(int));
-  if (pos == nullptr)
+  if (pos == NULL)
     ErrorExit(
         ERROR_NO_MEMORY,
         "RobustGaussian<T>::quick_selectI could not allocate memory for pos");
   for (int i = 0; i < n; i++)
     pos[i] = i;
 
-  low = 0;
-  high = n - 1;
+  low    = 0;
+  high   = n - 1;
   median = k - 1;
   for (;;) {
     if (high <= low) /* One element only */
@@ -137,12 +134,12 @@ pair<T, int> RobustGaussian<T>::quick_selectI(T arr[], int n, int k) {
  This Quickselect routine is based on the algorithm described in
  "Numerical recipes in C", Second Edition,
  Cambridge University Press, 1992, Section 8.5, ISBN 0-521-43108-5 .
-
- This code is based on code by Nicolas Devillard - 1998. Public domain.
+ 
+ This code is based on code by Nicolas Devillard - 1998. Public domain.  
  See also http://ndevilla.free.fr/median/median.pdf
  or http://ndevilla.free.fr/median/median/index.html .
 
- Modifications:
+ Modifications: 
  - instead of only selecting the median, select the k-th smallest
  */
 template <class T> T RobustGaussian<T>::quick_select(T arr[], int n, int k) {
@@ -150,8 +147,8 @@ template <class T> T RobustGaussian<T>::quick_select(T arr[], int n, int k) {
   int median;
   int middle, ll, hh;
 
-  low = 0;
-  high = n - 1;
+  low    = 0;
+  high   = n - 1;
   median = k - 1;
   for (;;) {
     if (high <= low) /* One element only */
@@ -204,8 +201,7 @@ template <class T> T RobustGaussian<T>::quick_select(T arr[], int n, int k) {
 
 /**
  Find the kth smallest element in the array.
- Reorders a[] (of length n) and returns k_th smallest and original position in
- array.
+ Reorders a[] (of length n) and returns k_th smallest and original position in array.
 
  Reference:
  Niklaus Wirth, Algorithms + data structures = programs, Prentice-Hall, 1976
@@ -213,17 +209,16 @@ template <class T> T RobustGaussian<T>::quick_select(T arr[], int n, int k) {
  Implementation based on code by N.Devillard. Public Domain.
 
  Modification:
- - we keep track of the position inside the original array of the k_th smallest
- element.
+ - we keep track of the position inside the original array of the k_th smallest element.
  */
 template <class T>
 std::pair<T, int> RobustGaussian<T>::kth_smallestI(T a[], int n, int k) {
   int i, j, l, m;
   int kk = k - 1;
-  T x;
+  T   x;
 
   int *pos = (int *)calloc(n, sizeof(int));
-  if (pos == nullptr)
+  if (pos == NULL)
     ErrorExit(
         ERROR_NO_MEMORY,
         "RobustGaussian<T>::kth_smallestI could not allocate memory for pos");
@@ -270,7 +265,7 @@ std::pair<T, int> RobustGaussian<T>::kth_smallestI(T a[], int n, int k) {
 template <class T> T RobustGaussian<T>::kth_smallest(T a[], int n, int k) {
   int i, j, l, m;
   int kk = k - 1;
-  T x;
+  T   x;
 
   l = 0;
   m = n - 1;
@@ -301,17 +296,16 @@ template <class T> T RobustGaussian<T>::kth_smallest(T a[], int n, int k) {
 #undef ELEM_SWAPI
 
 /** Compute median in situ, t will be reordered.
- The index (return.second ) is type double or float because with even number of
- elements, we will lie between two indices.
+ The index (return.second ) is type double or float because with even number of elements, we will lie between two indices.
  */
 template <class T> pair<T, T> RobustGaussian<T>::medianI(T t[], int n) {
 
   pair<T, int> qs;
-  if (n % 2 == 1) // odd
+  if (n % 2 == 1) //odd
   {
     qs = kth_smallestI(t, n, (n + 1) / 2);
-    // cout << " n: " << n << "   " << qs << endl;
-    // free(t);
+    //cout << " n: " << n << "   " << qs << endl;
+    //free(t);
     return pair<T, T>(qs.first, (T)qs.second);
   }
 
@@ -321,7 +315,7 @@ template <class T> pair<T, T> RobustGaussian<T>::medianI(T t[], int n) {
   qs = quick_selectI(t, n, n / 2);
   // double qs2 = kth_smallest(t,n,n/2 + 1);
   pair<T, int> qs2 = quick_selectI(t, n, n / 2 + 1);
-  // cout << " n: " << n << "   " << qs << "   " << qs2 << endl;
+  //cout << " n: " << n << "   " << qs << "   " << qs2 << endl;
 
   return pair<T, T>(0.5 * (qs.first + qs2.first),
                     0.5 * (qs.second + qs2.second));
@@ -332,7 +326,7 @@ template <class T> pair<T, T> RobustGaussian<T>::medianI(T t[], int n) {
 template <class T> T RobustGaussian<T>::median(T t[], int n) {
 
   T q;
-  if (n % 2 == 1) // odd
+  if (n % 2 == 1) //odd
   {
     q = kth_smallest(t, n, (n + 1) / 2);
     return q;
@@ -344,7 +338,7 @@ template <class T> T RobustGaussian<T>::median(T t[], int n) {
   q = quick_select(t, n, n / 2);
   // double q2 = kth_smallest(t,n,n/2 + 1);
   T q2 = quick_select(t, n, n / 2 + 1);
-  // cout << " n: " << n << "   " << q << "   " << q2 << endl;
+  //cout << " n: " << n << "   " << q << "   " << q2 << endl;
 
   return 0.5 * (q + q2);
 }
@@ -353,8 +347,8 @@ template <class T> void mmm(T a[], int n) {
 
   if (n <= 0)
     return;
-  T min = a[0];
-  T max = a[0];
+  T      min  = a[0];
+  T      max  = a[0];
   double mean = 0.0;
   for (int i = 1; i < n; i++) {
     if (a[i] < min)

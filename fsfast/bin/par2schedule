@@ -4,12 +4,8 @@
 # par2schedule
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: nicks $
-#    $Date: 2007/01/09 22:41:18 $
-#    $Revision: 1.4 $
 #
-# Copyright (C) 2002-2007,
+# Copyright © 2021
 # The General Hospital Corporation (Boston, MA). 
 # All rights reserved.
 #
@@ -222,7 +218,7 @@ def check_args():
 #-----------------------------------------------------------
 
 ProgName = sys.argv[0];
-Version = '$Id: par2schedule,v 1.4 2007/01/09 22:41:18 nicks Exp $';
+Version = 'par2schedule @FS_VERSION@';
 parfile = ();
 nevent_types  = 0;
 eventtypes = [];

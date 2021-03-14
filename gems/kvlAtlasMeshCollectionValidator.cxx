@@ -16,18 +16,17 @@ AtlasMeshCollectionValidator ::~AtlasMeshCollectionValidator() {}
 //
 //
 void AtlasMeshCollectionValidator ::PrintSelf(std::ostream &os,
-                                              itk::Indent indent) const {}
+                                              itk::Indent   indent) const {}
 
 //
 //
 //
 bool AtlasMeshCollectionValidator ::Validate(
     const AtlasMeshCollection *meshCollection) {
-  // std::cout << "VALIDATOR: starting to inspect the meshCollection " <<
-  // meshCollection << std::endl;
+  //std::cout << "VALIDATOR: starting to inspect the meshCollection " << meshCollection << std::endl;
 
-  // Check correctness of meshCollection. Loop over all its cells, and check
-  // that all points to which they refer actually exist
+  // Check correctness of meshCollection. Loop over all its cells, and check that all points to which they refer
+  // actually exist
   for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt =
            meshCollection->GetCells()->Begin();
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
@@ -43,13 +42,15 @@ bool AtlasMeshCollectionValidator ::Validate(
     }
   }
 
-  // Check that every tetrahedron has all its 4 triangles, 6 lines, and 4
-  // vertices present
+#undef ITK_LEGACY_REMOVE
+
+  // Check that every tetrahedron has all its 4 triangles, 6 lines, and 4 vertices present
   bool isValid = true;
   for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt =
            meshCollection->GetCells()->Begin();
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() != AtlasMesh::CellType::TETRAHEDRON_CELL) {
+    if (cellIt.Value()->GetType() !=
+        itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       continue;
     }
 
@@ -63,8 +64,8 @@ bool AtlasMeshCollectionValidator ::Validate(
     ++pointIt;
     AtlasMesh::PointIdentifier p3 = *pointIt;
 
-    int numberOfVerticesFound = 0;
-    int numberOfLinesFound = 0;
+    int numberOfVerticesFound  = 0;
+    int numberOfLinesFound     = 0;
     int numberOfTrianglesFound = 0;
 
     // Loop over all cells, and check
@@ -84,13 +85,14 @@ bool AtlasMeshCollectionValidator ::Validate(
       }
 
       if (allThePointsAreGood) {
-        if (cellIt2.Value()->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
+        if (cellIt2.Value()->GetType() ==
+            itk::CommonEnums::CellGeometry::VERTEX_CELL) {
           numberOfVerticesFound++;
         } else if (cellIt2.Value()->GetType() ==
-                   AtlasMesh::CellType::LINE_CELL) {
+                   itk::CommonEnums::CellGeometry::LINE_CELL) {
           numberOfLinesFound++;
         } else if (cellIt2.Value()->GetType() ==
-                   AtlasMesh::CellType::TRIANGLE_CELL) {
+                   itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
           numberOfTrianglesFound++;
         }
       }
@@ -122,7 +124,8 @@ bool AtlasMeshCollectionValidator ::Validate(
   for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt =
            meshCollection->GetCells()->Begin();
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() != AtlasMesh::CellType::TRIANGLE_CELL) {
+    if (cellIt.Value()->GetType() !=
+        itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
       continue;
     }
 
@@ -135,7 +138,7 @@ bool AtlasMeshCollectionValidator ::Validate(
     AtlasMesh::PointIdentifier p2 = *pointIt;
 
     int numberOfVerticesFound = 0;
-    int numberOfLinesFound = 0;
+    int numberOfLinesFound    = 0;
 
     // Loop over all cells, and check
     for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt2 =
@@ -153,10 +156,11 @@ bool AtlasMeshCollectionValidator ::Validate(
       }
 
       if (allThePointsAreGood) {
-        if (cellIt2.Value()->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
+        if (cellIt2.Value()->GetType() ==
+            itk::CommonEnums::CellGeometry::VERTEX_CELL) {
           numberOfVerticesFound++;
         } else if (cellIt2.Value()->GetType() ==
-                   AtlasMesh::CellType::LINE_CELL) {
+                   itk::CommonEnums::CellGeometry::LINE_CELL) {
           numberOfLinesFound++;
         }
       }
@@ -182,7 +186,8 @@ bool AtlasMeshCollectionValidator ::Validate(
   for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt =
            meshCollection->GetCells()->Begin();
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() != AtlasMesh::CellType::LINE_CELL) {
+    if (cellIt.Value()->GetType() !=
+        itk::CommonEnums::CellGeometry::LINE_CELL) {
       continue;
     }
 
@@ -210,7 +215,8 @@ bool AtlasMeshCollectionValidator ::Validate(
       }
 
       if (allThePointsAreGood) {
-        if (cellIt2.Value()->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
+        if (cellIt2.Value()->GetType() ==
+            itk::CommonEnums::CellGeometry::VERTEX_CELL) {
           numberOfVerticesFound++;
         }
       }
@@ -255,7 +261,8 @@ bool AtlasMeshCollectionValidator ::Validate(
   for (AtlasMeshCollection::CellsContainerType::ConstIterator cellIt =
            meshCollection->GetCells()->Begin();
        cellIt != meshCollection->GetCells()->End(); ++cellIt) {
-    if (cellIt.Value()->GetType() != AtlasMesh::CellType::TETRAHEDRON_CELL) {
+    if (cellIt.Value()->GetType() !=
+        itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       continue;
     }
 
@@ -277,9 +284,9 @@ bool AtlasMeshCollectionValidator ::Validate(
     const float y3 = meshCollection->GetReferencePosition()->ElementAt(*pit)[1];
     const float z3 = meshCollection->GetReferencePosition()->ElementAt(*pit)[2];
 
-    // Calculate the volume of the tetrahedron in reference position. Lambda is
-    // the Jacobian of the transform from a standarizedized tetrahedron, which
-    // has volume 1/6, to the tethrahedron in reference position
+    // Calculate the volume of the tetrahedron in reference position. Lambda is the Jacobian of
+    // the transform from a standarizedized tetrahedron, which has volume 1/6, to the tethrahedron
+    // in reference position
     const float lambda11 = -x0 + x1;
     const float lambda21 = -y0 + y1;
     const float lambda31 = -z0 + z1;
@@ -304,5 +311,5 @@ bool AtlasMeshCollectionValidator ::Validate(
 
   return isValid;
 }
-
+#define ITK_LEGACY_REMOVE
 } // end namespace kvl

@@ -1,5 +1,4 @@
 /**
- * @file  vtkArrowPipeline.h
  * @brief A simple wrapper for a array source, transform, mapper, and actor.
  *
  * This lets you easily instantiate and place a 3D arrow. You can set
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -55,7 +50,7 @@ protected:
   virtual ~vtkArrowPipeline();
 
   vtkSmartPointer<vtkLandmarkTransform> mTransform;
-  vtkSmartPointer<vtkActor> mActor;
+  vtkSmartPointer<vtkActor>             mActor;
 
   double mStartPoint[3];
   double mEndPoint[3];

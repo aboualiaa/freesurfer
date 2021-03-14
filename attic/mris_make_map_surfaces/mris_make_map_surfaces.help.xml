@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_make_map_surfaces</name>
-	<synopsis>mris_make_map_surfaces [options] &lt;brain.mgz&gt; &lt;output directory&gt;</synopsis>
-	<description>Surface deformation that maximizes the likelihood of the underlying MRI data.</description>
+  <name>mris_make_map_surfaces</name>
+  <synopsis>mris_make_map_surfaces [options] &lt;brain.mgz&gt; &lt;output directory&gt;</synopsis>
+  <description>Surface deformation that maximizes the likelihood of the underlying MRI data.</description>
   <arguments>
     <positional>
       <argument>&lt;brain.mgz&gt;</argument>
@@ -40,4 +39,3 @@
   </arguments>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

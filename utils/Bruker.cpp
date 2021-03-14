@@ -1,17 +1,6 @@
-/**
- * @file  Bruker.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/07/13 19:44:49 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,9 +17,6 @@
 /* created by : y.tosa                    */
 /* date       :8/27/2003                  */
 // Warning: Do not edit the following four lines.  CVS maintains them.
-// Revision Author: $Author: rpwang $
-// Revision Date  : $Date: 2011/07/13 19:44:49 $
-// Revision       : $Revision: 1.12 $
 
 // there are many files present in Bruker directory
 //
@@ -142,8 +128,8 @@
 
 /* Martin Hoerrmann. */
 
-#include <math.h>
 #include <cstdio>
+#include <math.h>
 #include <sys/stat.h>
 
 #include "matrix.h"
@@ -157,16 +143,16 @@
    VECTOR_ELT(v, 4) = r);
 
 MRI *brukerRead(char *fname, int read_volume) {
-  char methodFile[1024];
-  char acqpFile[1024];
-  char dataFile[1024];
-  char d3procFile[1024];
-  char recoFile[1024];
+  char            methodFile[1024];
+  char            acqpFile[1024];
+  char            dataFile[1024];
+  char            d3procFile[1024];
+  char            recoFile[1024];
   BrukerTransform bTran;
-  double TR, TE, TI, flip_angle;
+  double          TR, TE, TI, flip_angle;
 
-  int succeed = 0;
-  MRI *mri = nullptr;
+  int  succeed = 0;
+  MRI *mri     = nullptr;
 
   int width, height, depth;
   int nframes;
@@ -196,11 +182,11 @@ MRI *brukerRead(char *fname, int read_volume) {
     return (MRI *)nullptr;
 
   // now allocate MRI
-  type = bTran.type;
-  mri = MRIalloc(width, height, depth, type);
-  mri->tr = TR;
-  mri->te = TE;
-  mri->ti = TI;
+  type            = bTran.type;
+  mri             = MRIalloc(width, height, depth, type);
+  mri->tr         = TR;
+  mri->te         = TE;
+  mri->ti         = TI;
   mri->flip_angle = flip_angle;
 
   // create voxToRas transform
@@ -323,9 +309,9 @@ int splitParameterValue(char *sWholeLine, char *sParameter, char *sValue) {
 int readBrukerD3proc(char *d3procFile, int *px, int *py, int *pz, int *ptype,
                      int *pnframes) {
   FILE *fp = nullptr;
-  char line[512];
-  char Value[128];
-  char Parameter[256];
+  char  line[512];
+  char  Value[128];
+  char  Parameter[256];
   // int lRead;
 
   fp = fopen(d3procFile, "r");
@@ -387,12 +373,12 @@ int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran) {
   MATRIX *voxInvMatrix;
   VECTOR *rcs, *ctr;
 
-  transposMatrix = MatrixAlloc(4, 4, MATRIX_REAL);
-  voxmmMatrix = MatrixAlloc(4, 4, MATRIX_REAL);
-  swapMatrix = MatrixAlloc(4, 4, MATRIX_REAL);
+  transposMatrix    = MatrixAlloc(4, 4, MATRIX_REAL);
+  voxmmMatrix       = MatrixAlloc(4, 4, MATRIX_REAL);
+  swapMatrix        = MatrixAlloc(4, 4, MATRIX_REAL);
   translationMatrix = MatrixAlloc(4, 4, MATRIX_REAL);
-  rotationMatrix = MatrixAlloc(4, 4, MATRIX_REAL);
-  voxInvMatrix = MatrixAlloc(4, 4, MATRIX_REAL);
+  rotationMatrix    = MatrixAlloc(4, 4, MATRIX_REAL);
+  voxInvMatrix      = MatrixAlloc(4, 4, MATRIX_REAL);
   //
   if (pTran->transposition)
     stuff_four_by_four(transposMatrix, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0,
@@ -498,9 +484,9 @@ int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran) {
 int readBrukerAcqp(char *acqpFile, double *pTR, double *pTE, double *pTI,
                    double *pflip_angle, BrukerTransform *bTran) {
   FILE *fp = nullptr;
-  char line[512];
-  char Parameter[256];
-  char Value[128];
+  char  line[512];
+  char  Parameter[256];
+  char  Value[128];
   // int lRead = 0;
   int dim = 0;
 
@@ -615,9 +601,9 @@ int readBrukerAcqp(char *acqpFile, double *pTR, double *pTE, double *pTI,
 
 int readBrukerReco(char *recoFile, BrukerTransform *pTran) {
   FILE *fp = nullptr;
-  char line[512];
-  char Parameter[256];
-  char Value[128];
+  char  line[512];
+  char  Parameter[256];
+  char  Value[128];
   // int lRead = 0;
   int dim = 0;
   int i;
@@ -727,16 +713,16 @@ int readBrukerReco(char *recoFile, BrukerTransform *pTran) {
   // calculate vox_size and offset
   for (i = 0; i < 3; ++i) {
     pTran->vox_size[i] = pTran->fov[i] * 10. / pTran->size[i];
-    pTran->offset[i] = -pTran->vox_size[i] * (pTran->ft_size[i] - 1) / 2.;
+    pTran->offset[i]   = -pTran->vox_size[i] * (pTran->ft_size[i] - 1) / 2.;
   }
   return 1;
 }
 
 int readBrukerVolume(MRI *mri, char *dataFile) {
   FILE *fp = nullptr;
-  int k, j;
-  int nread;
-  int swap_bytes_flag = 0;
+  int   k, j;
+  int   nread;
+  int   swap_bytes_flag = 0;
   //  int size;
 
   if (!mri) {
@@ -783,7 +769,9 @@ int readBrukerVolume(MRI *mri, char *dataFile) {
       }
       // this was not needed
       if (swap_bytes_flag) {
-        swab(mri->slices[k][j], mri->slices[k][j], mri->width * sizeof(short));
+        std::vector<short> tmp(mri->width);
+        swab(mri->slices[k][j], tmp.data(), mri->width * sizeof(short));
+        memcpy(mri->slices[k][j], tmp.data(), mri->width * sizeof(short));
       }
     }
     exec_progress_callback(k, mri->depth, 0, 1);
@@ -795,11 +783,11 @@ int readBrukerVolume(MRI *mri, char *dataFile) {
 
 int is_bruker(char *fname) {
   struct stat stat_buf;
-  char methodFile[512];
-  char acqpFile[512];
-  char dataFile[512];
-  char d3procFile[512];
-  char recoFile[512];
+  char        methodFile[512];
+  char        acqpFile[512];
+  char        dataFile[512];
+  char        d3procFile[512];
+  char        recoFile[512];
 
   if (stat(fname, &stat_buf) < 0)
     return (0);

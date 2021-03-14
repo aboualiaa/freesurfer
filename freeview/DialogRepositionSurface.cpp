@@ -1,16 +1,11 @@
 /**
- * @file  DialogRepositionSurface.cpp
  * @brief Dialog window to execute surface reposition.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2014/02/04 22:05:26 $
- *    $Revision: 1.13 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,11 +18,11 @@
  */
 
 #include "DialogRepositionSurface.h"
-#include "ui_DialogRepositionSurface.h"
-#include "MainWindow.h"
-#include "LayerSurface.h"
 #include "FSSurface.h"
 #include "LayerMRI.h"
+#include "LayerSurface.h"
+#include "MainWindow.h"
+#include "ui_DialogRepositionSurface.h"
 #include <QMessageBox>
 #include <QTimer>
 
@@ -94,8 +89,8 @@ void DialogRepositionSurface::OnComboTarget(int nSel) {
 }
 
 void DialogRepositionSurface::UpdateUI() {
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  LayerSurface *surf = (LayerSurface *)mainwnd->GetActiveLayer("Surface");
+  MainWindow *  mainwnd = MainWindow::GetMainWindow();
+  LayerSurface *surf    = (LayerSurface *)mainwnd->GetActiveLayer("Surface");
   ui->pushButtonSave->setEnabled(surf && surf->IsModified() &&
                                  !mainwnd->IsBusy());
   ui->pushButtonSaveAs->setEnabled(surf && !mainwnd->IsBusy());
@@ -187,7 +182,7 @@ void DialogRepositionSurface::OnUndo() {
 
 bool DialogRepositionSurface::ValidateAll() {
   QString name;
-  bool ok;
+  bool    ok;
   if (ui->tabWidget->currentIndex() == 0) {
     ui->lineEditVertex->text().toInt(&ok);
     if (!ok)

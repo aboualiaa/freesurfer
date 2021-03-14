@@ -1,17 +1,6 @@
-/**
- * @file  topo_parms.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:11 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,37 +16,37 @@
 #define TOPO_PARMS
 
 typedef struct {
-  int vno1, vno2;
+  int   vno1, vno2;
   float len;
   short used;
 } EDGE;
 
 typedef struct {
-  int **faces; /* array of pointer to list of ambiguous faces */
-  int *nfaces; /* array of ints specifying how many faces are ambigous */
+  int **faces;  /* array of pointer to list of ambiguous faces */
+  int * nfaces; /* array of ints specifying how many faces are ambigous */
 } FACE_DEFECT_LIST, FDL;
 
 typedef struct {
   float nx, ny, nz; /* average normal in the defect */
   float cx, cy, cz; /* centroid of the defect */
   float area;       /* total (original) area of the defect */
-  int *vertices;    /* vertices in the defect */
+  int * vertices;   /* vertices in the defect */
   char *status;     /* keep or discard */
-  int nvertices;    /* # of vertices in the defect */
-  int *border;
-  int nborder;
-  int *chull; /* vertices in the convex hull */
-  int nchull; /* # of vertices in the convex hull */
+  int   nvertices;  /* # of vertices in the defect */
+  int * border;
+  int   nborder;
+  int * chull;  /* vertices in the convex hull */
+  int   nchull; /* # of vertices in the convex hull */
 
-  EDGE *edges; /* the set of edges constituting the border of the defect */
-  int nedges;  /* inside is left of vn1->vn2 - outside is right */
+  EDGE *edges;  /* the set of edges constituting the border of the defect */
+  int   nedges; /* inside is left of vn1->vn2 - outside is right */
 
   int *vertex_trans;
-  int defect_number;
+  int  defect_number;
 
-  int intersect;       /* do final surface self-intersect ? */
-  int optimal_mapping; /* type of mapping */
-  float fitness;       /* fitness of the retessellated patch */
+  int   intersect;       /* do final surface self-intersect ? */
+  int   optimal_mapping; /* type of mapping */
+  float fitness;         /* fitness of the retessellated patch */
 
   /* intensity information */
   float white_mean, white_sigma, white_mean_ll;
@@ -79,22 +68,22 @@ typedef struct {
 #define MAX_DEFECTS 25000
 
 typedef struct {
-  int ndefects;
+  int    ndefects;
   DEFECT defects[MAX_DEFECTS];
 } DEFECT_LIST, DL;
 
 /* structure which contains the information about a specific retessellation */
 typedef struct {
-  int *vertices;  /* list of used vertices in the defect (first inside ones) */
-  int nvertices;  /* nvertices in the list */
-  int ninside;    /* # of inside vertices (not on the border) */
-  int ndiscarded; /* number of discarded vertices */
+  int *vertices;   /* list of used vertices in the defect (first inside ones) */
+  int  nvertices;  /* nvertices in the list */
+  int  ninside;    /* # of inside vertices (not on the border) */
+  int  ndiscarded; /* number of discarded vertices */
 
   int *faces; /* list of used faces in the defect */
-  int nfaces;
+  int  nfaces;
 
   int *edges; /* list of edges in the defect */
-  int nedges;
+  int  nedges;
 
   /* fitness information */
   float face_ll, vertex_ll, curv_ll, qcurv_ll, mri_ll, unmri_ll;

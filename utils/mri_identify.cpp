@@ -1,16 +1,11 @@
 /**
- * @file  mri_identify.c
  * @brief Identify MRI volume format based on filename extension.
  *
  */
 /*
  * Original Author: Christian Haselgrove
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2014/05/10 00:37:00 $
- *    $Revision: 1.75 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,9 +17,9 @@
  *
  */
 #include <cerrno>
-#include <libgen.h>
 #include <cstdio>
 #include <cstring>
+#include <libgen.h>
 #include <sys/stat.h>
 
 #include "mri.h"
@@ -49,9 +44,9 @@ int stricmp(char *str1, char *str2);
 #endif
 
 char *type_to_string(int type) {
-  char *typestring;
+  char *      typestring;
   const char *tmpstr;
-  int lentmp;
+  int         lentmp;
 
   switch (type) {
   case MRI_CORONAL_SLICE_DIRECTORY:
@@ -134,14 +129,14 @@ char *type_to_string(int type) {
     break;
   }
 
-  lentmp = strlen(tmpstr);
+  lentmp     = strlen(tmpstr);
   typestring = (char *)calloc(lentmp + 1, sizeof(char));
   memmove(typestring, tmpstr, lentmp);
   return (typestring);
 }
 
 int string_to_type(const char *string) {
-  int type = MRI_VOLUME_TYPE_UNKNOWN;
+  int  type = MRI_VOLUME_TYPE_UNKNOWN;
   char ls[STRLEN];
 
   // no extension, then return
@@ -228,8 +223,8 @@ int string_to_type(const char *string) {
 
 // why the routine does not check ANALYZE4D?
 int mri_identify(const char *fname_passed) {
-  char fname[STRLEN];
-  int type = 0;
+  char  fname[STRLEN];
+  int   type = 0;
   char *ext;
 
   // Before coming in here, @ and # have been processed
@@ -478,9 +473,9 @@ int IDtypeFromStem(const char *stem) {
   \brief Returns the file stem by looking for various extensions.
 */
 char *IDstemFromName(const char *name) {
-  char *stem = nullptr;
+  char *      stem = nullptr;
   const char *ext;
-  int len;
+  int         len;
 
   len = strlen(name);
   if (len < 3)
@@ -546,7 +541,7 @@ char *IDstemFromName(const char *name) {
   \brief Returns the file extension by looking for various extensions.
 */
 char *IDextensionFromName(const char *name) {
-  int len;
+  int   len;
   char *ext;
 
   len = strlen(name);
@@ -558,30 +553,38 @@ char *IDextensionFromName(const char *name) {
   // Does not do .w
 
   // Try extensions of length 3
-  if (len < 5)
-    return (nullptr); // cant be right
+  if (len < 5) {
+    free(ext);
+    return (NULL);
+  } // cant be right
   ext = strncpy(ext, &(name[len - 3]), 3);
   if (!strcmp(ext, "nii") || !strcmp(ext, "mgz") || !strcmp(ext, "mgh") ||
       !strcmp(ext, "img"))
     return (ext);
 
   // Try extensions of length 4
-  if (len < 6)
-    return (nullptr); // cant be right
+  if (len < 6) {
+    free(ext);
+    return (NULL);
+  } // cant be right
   ext = strncpy(ext, &(name[len - 4]), 4);
   if (!strcmp(ext, "bhdr"))
     return (ext);
 
   // Try extensions of length 6
-  if (len < 8)
-    return (nullptr); // cant be right
+  if (len < 8) {
+    free(ext);
+    return (NULL);
+  } // cant be right
   ext = strncpy(ext, &(name[len - 6]), 6);
   if (!strcmp(ext, "nii.gz"))
     return (ext);
 
   // Try _000.bfloat and _000.short
-  if (len < 12)
-    return (nullptr); // cant be right
+  if (len < 12) {
+    free(ext);
+    return (NULL);
+  } // cant be right
   ext = strncpy(ext, &(name[len - 11]), 11);
   if (!strcmp(ext, "_000.bfloat")) {
     sprintf(ext, "bfloat");
@@ -592,7 +595,8 @@ char *IDextensionFromName(const char *name) {
     return (ext);
   }
 
-  return (nullptr);
+  free(ext);
+  return (NULL);
 }
 
 /*
@@ -645,8 +649,8 @@ char *IDnameFromStem(const char *stem) {
 
 int is_cor(const char *fname) {
   struct stat stat_buf;
-  char *fname2, *base;
-  int iscor = 0;
+  char *      fname2, *base;
+  int         iscor = 0;
 
   if (stat(fname, &stat_buf) < 0)
     return (0);
@@ -657,7 +661,7 @@ int is_cor(const char *fname) {
 
   /* if the first four letters are COR- */
   fname2 = strdup(fname);
-  base = basename(fname2);
+  base   = basename(fname2);
   if (strncmp(base, "COR-", 4) == 0)
     iscor = 1;
 
@@ -683,8 +687,8 @@ int is_brik(const char *fname) {
 } /* end is_brik() */
 
 int is_siemens(const char *fname) {
-  FILE *fp;
-  char string[4];
+  FILE *      fp;
+  char        string[4];
   const char *dot;
 
   dot = strrchr(fname, '.');
@@ -739,8 +743,8 @@ int is_siemens(const char *fname) {
 } /* end is_siemens() */
 
 int is_genesis(const char *fname) {
-  FILE *fp;
-  long32 magic;
+  FILE *      fp;
+  long32      magic;
   const char *dot;
 
   if (!strncmp(fname, "I.", 2))
@@ -774,7 +778,7 @@ int is_genesis(const char *fname) {
 } /*  end is_genesis()  */
 
 int is_ge_lx(const char *fname) {
-  FILE *fp;
+  FILE * fp;
   long32 magic;
 
   if ((fp = fopen(fname, "r")) == nullptr) {
@@ -800,11 +804,11 @@ int is_ge_lx(const char *fname) {
 } /*  end is_ge_lx()  */
 
 int is_analyze(const char *fname) {
-  FILE *fp;
-  dsr hdr;
-  char hfname[STRLEN];
+  FILE *      fp;
+  dsr         hdr;
+  char        hfname[STRLEN];
   const char *dot;
-  long hdr_length;
+  long        hdr_length;
 
   strcpy(hfname, fname);
 
@@ -844,8 +848,8 @@ int is_analyze(const char *fname) {
 } /*  end is_analyze()  */
 
 int is_mnc(const char *fname) {
-  char buf[3];
-  FILE *fp;
+  char        buf[3];
+  FILE *      fp;
   const char *dot;
 
   dot = strrchr(fname, '.');
@@ -884,7 +888,7 @@ int is_mnc(const char *fname) {
 
 int is_mgh(const char *fname) {
   FILE *fp;
-  int width, height, depth, nframes;
+  int   width, height, depth, nframes;
   // int version, type, dof;
 
   if (strstr(fname, ".mgh") || strstr(fname, ".mgz") ||
@@ -898,9 +902,9 @@ int is_mgh(const char *fname) {
 
   // version =
   freadInt(fp);
-  width = freadInt(fp);
-  height = freadInt(fp);
-  depth = freadInt(fp);
+  width   = freadInt(fp);
+  height  = freadInt(fp);
+  depth   = freadInt(fp);
   nframes = freadInt(fp);
   // type =
   freadInt(fp);
@@ -960,11 +964,11 @@ int is_bhdr(const char *fname) {
 --------------------------------------*/
 char *bhdr_stem(const char *fname) {
   char *stem;
-  int i, len;
+  int   i, len;
 
   if (!is_bhdr(fname))
     return (nullptr);
-  len = strlen(fname);
+  len  = strlen(fname);
   stem = (char *)calloc(len + 1, sizeof(char));
   memmove(stem, fname, len);
   i = len - 1;
@@ -984,13 +988,13 @@ char *bhdr_stem(const char *fname) {
   --------------------------------------------*/
 char *bhdr_firstslicefname(const char *fname) {
   char *stem, *firstslicefname;
-  int len;
+  int   len;
 
   if (!is_bhdr(fname))
     return (nullptr);
   stem = bhdr_stem(fname);
 
-  len = strlen(stem) + 12;
+  len             = strlen(stem) + 12;
   firstslicefname = (char *)calloc(len, sizeof(char));
 
   sprintf(firstslicefname, "%s_000.bfloat", stem);
@@ -1015,7 +1019,7 @@ char *bhdr_firstslicefname(const char *fname) {
   --------------------------------------------------------------*/
 char *bhdr_precisionstring(const char *fname) {
   char *stem, *precision;
-  char tmpstr[2000];
+  char  tmpstr[2000];
 
   if (!is_bhdr(fname))
     return (nullptr);
@@ -1048,7 +1052,7 @@ char *bhdr_precisionstring(const char *fname) {
   ---------------------------------------------------------------------*/
 int bhdr_precision(const char *fname) {
   char *stem;
-  char tmpstr[2000];
+  char  tmpstr[2000];
 
   if (!is_bhdr(fname))
     return (0);
@@ -1072,7 +1076,7 @@ int bhdr_precision(const char *fname) {
 
 /*--------------------------------------*/
 int is_sdt(const char *fname) {
-  char header_fname[STR_LEN];
+  char  header_fname[STR_LEN];
   char *dot;
   FILE *fp;
 
@@ -1130,23 +1134,24 @@ int is_otl(const char *fname) {
 int is_ximg(const char *fname) { return (FALSE); } /* end is_ximg() */
 
 int is_nifti1(const char *fname) {
-  char fname_stem[STRLEN];
-  char hdr_fname[STRLEN];
-  char *dot;
-  FILE *fp;
-  char magic[4];
+  char        fname_stem[STRLEN];
+  std::string hdr_fname;
+  char *      dot;
+  FILE *      fp;
+  char        magic[4];
 
   // printf("Checking NIFTI1\n");
 
   strcpy(fname_stem, fname);
   dot = strrchr(fname_stem, '.');
-  if (dot != nullptr)
+  if (dot != NULL) {
     if (strcmp(dot, ".img") == 0 || strcmp(dot, ".hdr") == 0)
       *dot = '\0';
-  sprintf(hdr_fname, "%s.hdr", fname_stem);
+  }
+  hdr_fname = std::string(fname_stem) + ".hdr";
 
-  fp = fopen(hdr_fname, "r");
-  if (fp == nullptr) {
+  fp = fopen(hdr_fname.c_str(), "r");
+  if (fp == NULL) {
     errno = 0;
     return (FALSE);
   }
@@ -1176,8 +1181,8 @@ int is_nifti1(const char *fname) {
 
 int is_nii(const char *fname) {
   const char *dot;
-  FILE *fp;
-  char magic[4];
+  FILE *      fp;
+  char        magic[4];
 
   dot = strrchr(fname, '.');
 
@@ -1219,8 +1224,8 @@ int is_nii(const char *fname) {
 
 int is_nrrd(const char *fname) {
   const char *dot;
-  FILE *fp;
-  char magic[4];
+  FILE *      fp;
+  char        magic[4];
 
   // Check that the extension is .nrrd
   dot = strrchr(fname, '.');
@@ -1300,7 +1305,7 @@ END c++ version of is_nrrd()
   IDisCurv() - surface curve file format
   ----------------------------------------*/
 int IDisCurv(const char *curvfile) {
-  int magno;
+  int   magno;
   FILE *fp;
 
   fp = fopen(curvfile, "r");

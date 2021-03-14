@@ -1,17 +1,9 @@
-/**
- * @file  fs_lbfgs_observer.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
  *    $Author$
  *    $Date$
  *    $Revision$
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,8 +20,8 @@
 fs_lbfgs_observer::fs_lbfgs_observer() {
   mNumberOfOptimalUpdates = 0;
 
-  mStepFunction = nullptr;
-  mStepFunctionParms = nullptr;
+  mStepFunction         = nullptr;
+  mStepFunctionParms    = nullptr;
   mUserCallbackFunction = nullptr;
 }
 
@@ -69,7 +61,7 @@ int fs_lbfgs_observer::getNumberOfOptimalUpdates() {
 void fs_lbfgs_observer::setStepFunction(
     void (*stepFunction)(int itno, float sse, void *parms, float *p),
     void *parms) {
-  mStepFunction = stepFunction;
+  mStepFunction      = stepFunction;
   mStepFunctionParms = parms;
 }
 

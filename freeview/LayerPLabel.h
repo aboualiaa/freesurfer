@@ -1,16 +1,11 @@
 /**
- * @file  LayerPLabel.h
  * @brief Layer class for P-Label volumes.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:47 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -58,10 +53,10 @@ protected:
   //  wxCommandEvent& event );
   void UpdateColorMap();
 
-  FSVolume *m_volumeTemp;
-  QStringList m_sFilenames;
-  QString m_sFilenamePrefix;
-  QString m_sLUT;
+  FSVolume *                    m_volumeTemp;
+  QStringList                   m_sFilenames;
+  QString                       m_sFilenamePrefix;
+  QString                       m_sLUT;
   vtkSmartPointer<vtkImageData> m_imageIndex;
 };
 

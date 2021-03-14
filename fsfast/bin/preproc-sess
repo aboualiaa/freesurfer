@@ -4,12 +4,8 @@
 # preproc-sess - runs preprocessing (mc, spatsmooth, mkbrainmask, inorm)
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: greve $
-#    $Date: 2016/08/02 21:18:50 $
-#    $Revision: 1.65 $
 #
-# Copyright (C) 2002-2007,
+# Copyright © 2021
 # The General Hospital Corporation (Boston, MA). 
 # All rights reserved.
 #
@@ -27,7 +23,7 @@
 # This creates fmcpr.sm5, then
 # mkanalysis-sess -native -funcstem fmcpr.sm5 ...
 
-set VERSION = '$Id: preproc-sess,v 1.65 2016/08/02 21:18:50 greve Exp $';
+set VERSION = 'preproc-sess @FS_VERSION@';
 
 set inputargs = ($argv);
 set DateStr = "`date '+%y%m%d%H%M'`"

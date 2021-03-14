@@ -2,9 +2,8 @@
 
 /*
  * Original Author: Bevin R. Brett
- * CVS Revision Info:
  *
- * Copyright © 2019 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,7 +25,7 @@ MRIS_HASH_TABLE *
 MHTcreateFaceTable_Resolution(Minimal_Surface_MRIS::Surface surface, int which,
                               float res);
 MRIS_HASH_TABLE *MHTcreateVertexTable(Minimal_Surface_MRIS::Surface surface,
-                                      int which);
+                                      int                           which);
 MRIS_HASH_TABLE *
 MHTcreateVertexTable_Resolution(Minimal_Surface_MRIS::Surface surface,
                                 int which, float res);

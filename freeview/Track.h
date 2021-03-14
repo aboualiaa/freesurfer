@@ -1,16 +1,7 @@
-/**
- * @file  Track.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:48 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,15 +17,15 @@
 #include <QList>
 
 struct Track {
-  int nNum;
-  float *fPts;
+  int            nNum;
+  float *        fPts;
   QList<float *> fScalars;
-  float *fProperty;
+  float *        fProperty;
 
   float fLength;
 
-  short *nVoxels;
-  int nNumberOfVoxels;
+  short *       nVoxels;
+  int           nNumberOfVoxels;
   unsigned char charColor[3];
 
   Track() { Reset(); }

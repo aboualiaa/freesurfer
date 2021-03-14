@@ -16,18 +16,13 @@ function [p, gamma, gammavar, F] = fast_ffx(means,varmeans,dofs,X,C);
 % When X is the ones vector and C=1, then gives the same result as
 % fast_ffx_osgm.
 %
-% $Id: fast_ffx.m,v 1.3 2011/03/02 00:04:04 nicks Exp $
 
 %
 % fast_ffx.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:04 $
-%    $Revision: 1.3 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

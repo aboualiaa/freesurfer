@@ -1,5 +1,4 @@
 /**
- * @file  c_vertex.h
  * @brief The vertex related object API.
  *
  * Vertex type functions include conditional checks as well as functional
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Rudolph Pienaar / Christian Haselgrove
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/02/27 21:18:07 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,16 +22,15 @@
 #ifndef __C_VERTEX_H__
 #define __C_VERTEX_H__
 
-#include "general.h"
 #include "env.h"
+#include "general.h"
 
+#include "error.h"
+#include "label.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "label.h"
-#include "error.h"
 
 #include <string>
-using namespace std;
 
 /// This structure houses information pertaining to the signum count
 /// of curvature values for a particular surface.
@@ -57,16 +51,16 @@ typedef struct _rawCurve {
 /// of curvature minimum and maximum values for a particular surface.
 typedef struct _minMax {
   float f_min;
-  int minVertex;
+  int   minVertex;
   float f_max;
-  int maxVertex;
+  int   maxVertex;
 } s_minMax;
 
 /// This structure houses information pertaining to the integrated curvature
 /// for a particular surface.
 typedef struct _integratedCurve {
   e_CURVATURE e_curvature;
-  float f_sum;
+  float       f_sum;
 } s_integratedCurve;
 
 /// \fn bool vertex_valLTE(VERTEX* pvertex, void* pv_void)

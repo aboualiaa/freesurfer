@@ -4,12 +4,8 @@
 # clear_fs_env.csh
 #
 # Original Author: Nick Schmansky
-# CVS Revision Info:
-#    $Author: nicks $
-#    $Date: 2011/03/02 20:16:38 $
-#    $Revision: 1.6 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained

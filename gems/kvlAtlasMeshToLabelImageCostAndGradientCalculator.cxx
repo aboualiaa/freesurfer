@@ -1,8 +1,8 @@
 #include "kvlAtlasMeshToLabelImageCostAndGradientCalculator.h"
 
-#include <itkMath.h>
-#include "vnl/vnl_matrix_fixed.h"
 #include "kvlTetrahedronInteriorConstIterator.h"
+#include "vnl/vnl_matrix_fixed.h"
+#include <itkMath.h>
 
 namespace kvl {
 
@@ -12,8 +12,8 @@ namespace kvl {
 AtlasMeshToLabelImageCostAndGradientCalculator ::
     AtlasMeshToLabelImageCostAndGradientCalculator() {
 
-  m_LabelImage = nullptr;
-  m_CompressionLookupTable = nullptr;
+  m_LabelImage             = 0;
+  m_CompressionLookupTable = 0;
 }
 
 //
@@ -26,9 +26,9 @@ AtlasMeshToLabelImageCostAndGradientCalculator ::
 //
 //
 void AtlasMeshToLabelImageCostAndGradientCalculator ::SetLabelImage(
-    const LabelImageType *labelImage,
+    const LabelImageType *        labelImage,
     const CompressionLookupTable *lookupTable) {
-  m_LabelImage = labelImage;
+  m_LabelImage             = labelImage;
   m_CompressionLookupTable = lookupTable;
 }
 
@@ -39,14 +39,15 @@ void AtlasMeshToLabelImageCostAndGradientCalculator ::
     AddDataContributionOfTetrahedron(
         const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
         const AtlasMesh::PointType &p2, const AtlasMesh::PointType &p3,
-        const AtlasAlphasType &alphasInVertex0,
-        const AtlasAlphasType &alphasInVertex1,
-        const AtlasAlphasType &alphasInVertex2,
-        const AtlasAlphasType &alphasInVertex3, double &priorPlusDataCost,
-        AtlasPositionGradientType &gradientInVertex0,
-        AtlasPositionGradientType &gradientInVertex1,
-        AtlasPositionGradientType &gradientInVertex2,
-        AtlasPositionGradientType &gradientInVertex3) {
+        const AtlasAlphasType &               alphasInVertex0,
+        const AtlasAlphasType &               alphasInVertex1,
+        const AtlasAlphasType &               alphasInVertex2,
+        const AtlasAlphasType &               alphasInVertex3,
+        ThreadAccumDataType &                 priorPlusDataCost,
+        AtlasPositionGradientThreadAccumType &gradientInVertex0,
+        AtlasPositionGradientThreadAccumType &gradientInVertex1,
+        AtlasPositionGradientThreadAccumType &gradientInVertex2,
+        AtlasPositionGradientThreadAccumType &gradientInVertex3) {
 
   // Set up voxel iterator
   TetrahedronInteriorConstIterator<LabelImageType::PixelType> it(
@@ -84,13 +85,13 @@ void AtlasMeshToLabelImageCostAndGradientCalculator ::
 
   // Loop over all voxels within the tetrahedron and do The Right Thing
   for (; !it.IsAtEnd(); ++it) {
-    double alpha0 = 0.0;
-    double alpha1 = 0.0;
-    double alpha2 = 0.0;
-    double alpha3 = 0.0;
-    double xGradientBasis = 0.0;
-    double yGradientBasis = 0.0;
-    double zGradientBasis = 0.0;
+    double                  alpha0         = 0.0;
+    double                  alpha1         = 0.0;
+    double                  alpha2         = 0.0;
+    double                  alpha3         = 0.0;
+    double                  xGradientBasis = 0.0;
+    double                  yGradientBasis = 0.0;
+    double                  zGradientBasis = 0.0;
     const std::vector<int> &classNumbers =
         m_CompressionLookupTable->GetClassNumbers(it.Value());
     for (std::vector<int>::const_iterator classIt = classNumbers.begin();

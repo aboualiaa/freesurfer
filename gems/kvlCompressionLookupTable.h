@@ -1,9 +1,9 @@
 #ifndef __kvlCompressionLookupTable_h
 #define __kvlCompressionLookupTable_h
 
-#include "kvlAtlasMeshCollection.h"
 #include "itkImage.h"
 #include "itkRGBAPixel.h"
+#include "kvlAtlasMeshCollection.h"
 #if 0
 #include <unordered_map>
 #endif
@@ -13,10 +13,10 @@ namespace kvl {
 class CompressionLookupTable : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self = CompressionLookupTable;
-  using Superclass = itk::Object;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef CompressionLookupTable        Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -25,7 +25,7 @@ public:
   itkTypeMacro(CompressionLookupTable, itk::Object);
 
   //
-  using ImageType = itk::Image<unsigned short, 3>;
+  typedef itk::Image<unsigned short, 3> ImageType;
 
   //
   void Construct(const std::vector<ImageType::ConstPointer> &images);
@@ -40,7 +40,7 @@ public:
   bool Write(const std::string &fileName) const;
 
   //
-  using ColorType = itk::RGBAPixel<unsigned char>;
+  typedef itk::RGBAPixel<unsigned char> ColorType;
   const std::vector<int> &GetClassNumbers(ImageType::PixelType label) const {
     return m_CompressionLookupTable.find(label)->second;
   }
@@ -69,8 +69,8 @@ protected:
   void FillInMissingNamesAndColors();
 
 private:
-  CompressionLookupTable(const Self &); // purposely not implemented
-  void operator=(const Self &);         // purposely not implemented
+  CompressionLookupTable(const Self &); //purposely not implemented
+  void operator=(const Self &);         //purposely not implemented
 
   //
 #if 0  
@@ -86,17 +86,17 @@ private:
   typedef std::unordered_map< int, std::string >  LabelStringLookupTableType;
   typedef std::unordered_map< int, ColorType >  ColorLookupTableType;
 #else
-  using CompressionLookupTableType =
-      std::map<ImageType::PixelType, std::vector<int>>;
-  using LabelStringLookupTableType = std::map<int, std::string>;
-  using ColorLookupTableType = std::map<int, ColorType>;
+  typedef std::map<ImageType::PixelType, std::vector<int>>
+                                     CompressionLookupTableType;
+  typedef std::map<int, std::string> LabelStringLookupTableType;
+  typedef std::map<int, ColorType>   ColorLookupTableType;
 #endif
 
   // Data members
-  int m_NumberOfClasses;
+  int                        m_NumberOfClasses;
   CompressionLookupTableType m_CompressionLookupTable;
   LabelStringLookupTableType m_LabelStringLookupTable;
-  ColorLookupTableType m_ColorLookupTable;
+  ColorLookupTableType       m_ColorLookupTable;
 };
 
 } // end namespace kvl

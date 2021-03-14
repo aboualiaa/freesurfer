@@ -1,16 +1,11 @@
 /**
- * @file  matrix3d.h
  * @brief wrapper for 3d vnl_matrix operations
  *
  */
 /*
  * Original Author: Benjamin Lewin
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2014/09/03 20:31:32 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2014 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained

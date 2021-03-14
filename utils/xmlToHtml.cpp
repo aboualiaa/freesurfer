@@ -1,16 +1,11 @@
 /**
- * @file  xmlToHtml.c
  * @brief Reads an .xml file and outputs it in html format
  *
  */
 /*
  * Original Author: Greg Terrono
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2014/06/26 01:32:35 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011-2014 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -39,12 +34,12 @@ void printName(xmlNodePtr cur, FILE *f);
 void replaceUnderscore(char *c);
 void printContents(xmlDocPtr doc, xmlNodePtr cur, FILE *f);
 void printTableContents(xmlDocPtr doc, xmlNodePtr cur, FILE *f);
-int tagNameIs(char *c, xmlNodePtr cur);
-int wrdLen(char *c);
+int  tagNameIs(char *c, xmlNodePtr cur);
+int  wrdLen(char *c);
 
 //-------------------------------------------------------------------
 int main(int argc, char *argv[]) {
-  xmlDocPtr doc;
+  xmlDocPtr  doc;
   xmlNodePtr cur;
 
   // Checks for the .xml file name

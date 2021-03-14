@@ -1,14 +1,12 @@
 /**
- * @file  forrest.cxx
  * @brief Random forrest classifier for white-matter segmentation
  *
  * Random forrest classifier for white-matter segmentation
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
  *
- * Copyright © 2031 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -104,11 +102,11 @@ void Forrest::ReadTestSubject(const char *TestDir, const char *MaskFile,
 //
 void Forrest::ReadTrainingSubjects(const char *TrainListFile,
                                    const char *MaskFile, const char *AsegFile,
-                                   const char *OrientFile,
+                                   const char *   OrientFile,
                                    vector<char *> TractFileList) {
-  string dirname;
+  string         dirname;
   vector<string> dirlist;
-  ifstream listfile(TrainListFile, ios::in);
+  ifstream       listfile(TrainListFile, ios::in);
 
   if (!listfile) {
     cout << "ERROR: Could not open " << TrainListFile << endl;
@@ -122,10 +120,10 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
 
   for (vector<string>::const_iterator idir = dirlist.begin();
        idir < dirlist.end(); idir++) {
-    int nx, ny, nz;
-    MRI *maskvol = NULL, *asegvol = NULL, *orientvol = NULL;
+    int           nx, ny, nz;
+    MRI *         maskvol = NULL, *asegvol = NULL, *orientvol = NULL;
     vector<MRI *> tractvols;
-    string fname;
+    string        fname;
 
     //
     // Read volumes
@@ -214,7 +212,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
               for (vector<int>::const_iterator idir = mDirNear.begin();
                    idir < mDirNear.end(); idir += 3) {
                 int dist = 0, ix = ix0 + idir[0], iy = iy0 + idir[1],
-                    iz = iz0 + idir[2];
+                    iz    = iz0 + idir[2];
                 float seg = seg0;
 
                 while ((ix > -1) && (ix < nx) && (iy > -1) && (iy < ny) &&
@@ -228,7 +226,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
                 }
 
                 mTrainAsegIdsNear.push_back((unsigned int)seg);
-                // mTrainAsegDist.push_back(dist);
+                //mTrainAsegDist.push_back(dist);
               }
             }
 
@@ -315,7 +313,7 @@ vector<unsigned int> Forrest::GetTestAseg(int CoordX, int CoordY, int CoordZ) {
     for (vector<int>::const_iterator idir = mDirNear.begin();
          idir < mDirNear.end(); idir += 3) {
       int dist = 0, ix = CoordX + idir[0], iy = CoordY + idir[1],
-          iz = CoordZ + idir[2];
+          iz    = CoordZ + idir[2];
       float seg = seg0;
 
       while ((ix > -1) && (ix < mNx) && (iy > -1) && (iy < mNy) && (iz > -1) &&
@@ -355,7 +353,7 @@ vector<float> Forrest::GetTestOrient(int CoordX, int CoordY, int CoordZ) {
 //
 vector<int> Forrest::GetTrainXyz(int SampleIndex) {
   vector<int>::const_iterator itrain;
-  vector<int> sample;
+  vector<int>                 sample;
 
   if (SampleIndex >= mNumTrain || SampleIndex < 0) {
     cout << "ERROR: Cannot access sample " << SampleIndex
@@ -374,7 +372,7 @@ vector<int> Forrest::GetTrainXyz(int SampleIndex) {
 //
 vector<unsigned int> Forrest::GetTrainAseg(int SampleIndex) {
   vector<unsigned int>::const_iterator itrain;
-  vector<unsigned int> sample;
+  vector<unsigned int>                 sample;
 
   if (SampleIndex >= mNumTrain || SampleIndex < 0) {
     cout << "ERROR: Cannot access sample " << SampleIndex
@@ -400,7 +398,7 @@ vector<unsigned int> Forrest::GetTrainAseg(int SampleIndex) {
 //
 vector<float> Forrest::GetTrainOrient(int SampleIndex) {
   vector<float>::const_iterator itrain;
-  vector<float> sample;
+  vector<float>                 sample;
 
   if (SampleIndex >= mNumTrain || SampleIndex < 0) {
     cout << "ERROR: Cannot access sample " << SampleIndex

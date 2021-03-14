@@ -95,9 +95,9 @@ double PoistatsReplicas::GetPreviousMeanOfEnergies() const {
 
 double
 PoistatsReplicas::GetNormalizedMeanCurrentPreviousEnergiesDifference() const {
-  const double currentMean = GetCurrentMeanOfEnergies();
+  const double currentMean  = GetCurrentMeanOfEnergies();
   const double previousMean = GetPreviousMeanOfEnergies();
-  const double difference = currentMean - previousMean;
+  const double difference   = currentMean - previousMean;
 
   const double normalizedDifference = difference / currentMean;
 
@@ -108,7 +108,7 @@ double PoistatsReplicas::GetCurrentMeanEnergy(const int replica) {
   return m_Replicas[replica].GetCurrentMeanEnergy();
 }
 
-void PoistatsReplicas::SetCurrentMeanEnergy(const int replica,
+void PoistatsReplicas::SetCurrentMeanEnergy(const int    replica,
                                             const double energy) {
 
   m_Replicas[replica].SetCurrentMeanEnergy(energy);
@@ -133,12 +133,12 @@ void PoistatsReplicas::GetRandomSortedFirstSecondReplicas(int &first,
       static_cast<int>(floor(static_cast<double>(m_NumberOfReplicas - 1) *
                              this->m_PoistatsModel->GetRandomNumber()));
 
-  first = sortedReplicaIndices[randomIndex];
+  first  = sortedReplicaIndices[randomIndex];
   second = sortedReplicaIndices[randomIndex + 1];
 }
 
 void PoistatsReplicas::SortArray(itk::Array<double> *unsorted,
-                                 itk::Array<int> *sortedIndices) {
+                                 itk::Array<int> *   sortedIndices) {
 
   itk::Array<double> sorted(*unsorted);
 
@@ -174,7 +174,7 @@ double PoistatsReplicas::GetTemperature(const int replica) {
   return m_Replicas[replica].GetTemperature();
 }
 
-void PoistatsReplicas::SetTemperature(const int replica,
+void PoistatsReplicas::SetTemperature(const int    replica,
                                       const double temperature) {
 
   m_Replicas[replica].SetTemperature(temperature);
@@ -215,8 +215,8 @@ double PoistatsReplicas::CalculateProbablityExchange(const int replica1,
 
   const double delta = -betaDifference * energyDifference;
 
-  const double minProbablity = 1.0;
-  double exchangeProbablity = exp(-delta);
+  const double minProbablity      = 1.0;
+  double       exchangeProbablity = exp(-delta);
   if (minProbablity < exchangeProbablity) {
     exchangeProbablity = minProbablity;
   }
@@ -274,7 +274,7 @@ void PoistatsReplicas::SetInitialPoints(const MatrixPointer points) {
 
   SetPreviousTrialPaths(previousPath);
 
-  const int nSpatialDimensions = 3;
+  const int  nSpatialDimensions = 3;
   MatrixType zeroes(GetNumberOfSteps(), nSpatialDimensions);
   zeroes.Fill(0.0);
 
@@ -320,7 +320,7 @@ void PoistatsReplicas::InitializePaths() {
   }
 
   // set all the trial paths to zero
-  const int nSpatialDimensions = 3;
+  const int  nSpatialDimensions = 3;
   MatrixType zeroes(GetNumberOfSteps(), nSpatialDimensions);
   zeroes.Fill(0.0);
 
@@ -427,9 +427,9 @@ void PoistatsReplicas::GetPerturbedBasePath(
       perturbedPath, sigma, possibleStartPoints, possibleEndPoints);
 }
 
-void PoistatsReplicas::PerturbCurrentTrialPath(const int replica,
+void PoistatsReplicas::PerturbCurrentTrialPath(const int     replica,
                                                MatrixPointer lowTrialPath,
-                                               const int nSteps) {
+                                               const int     nSteps) {
 
   MatrixPointer perturbedTrialPath =
       m_PoistatsModel->RethreadPath(lowTrialPath, nSteps);
@@ -439,7 +439,7 @@ void PoistatsReplicas::PerturbCurrentTrialPath(const int replica,
   delete perturbedTrialPath;
 }
 
-void PoistatsReplicas::FoundBestPath(const int replica,
+void PoistatsReplicas::FoundBestPath(const int           replica,
                                      const MatrixPointer basePath) {
 
   m_Replicas[replica].FoundBestPath(basePath);

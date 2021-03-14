@@ -1,16 +1,7 @@
-/**
- * @file  DialogWriteMovieFrames.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/06/19 22:01:26 $
- *    $Revision: 1.16 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,18 +13,18 @@
  *
  */
 #include "DialogWriteMovieFrames.h"
-#include "ui_DialogWriteMovieFrames.h"
+#include "Layer.h"
+#include "LayerMRI.h"
 #include "MainWindow.h"
 #include "RenderView.h"
 #include "RenderView2D.h"
+#include "ui_DialogWriteMovieFrames.h"
+#include <QCloseEvent>
+#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QCloseEvent>
-#include "Layer.h"
-#include "LayerMRI.h"
-#include <vtkImageData.h>
-#include <QDebug>
 #include <QSettings>
+#include <vtkImageData.h>
 
 DialogWriteMovieFrames::DialogWriteMovieFrames(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogWriteMovieFrames) {
@@ -79,7 +70,7 @@ void DialogWriteMovieFrames::closeEvent(QCloseEvent *e) {
 void DialogWriteMovieFrames::UpdateUI(bool bUpdateNumbers) {
   if (bUpdateNumbers) {
     m_view = MainWindow::GetMainWindow()->GetMainView();
-    m_b3D = (MainWindow::GetMainWindow()->GetMainViewId() == 3);
+    m_b3D  = (MainWindow::GetMainWindow()->GetMainViewId() == 3);
     ui->comboBoxFlyThrough->setItemData(2, (m_b3D ? 33 : 0), Qt::UserRole - 1);
     if (!m_b3D && ui->comboBoxFlyThrough->currentIndex() == 2)
       ui->comboBoxFlyThrough->setCurrentIndex(0);
@@ -103,13 +94,13 @@ void DialogWriteMovieFrames::UpdateUI(bool bUpdateNumbers) {
 }
 
 void DialogWriteMovieFrames::OnComboBoxFlyThrough(int nIndex) {
-  int nPlane = MainWindow::GetMainWindow()->GetMainViewId();
+  int       nPlane = MainWindow::GetMainWindow()->GetMainViewId();
   LayerMRI *mri =
       (LayerMRI *)MainWindow::GetMainWindow()->GetActiveLayer("MRI");
   if (mri) {
     if (nIndex == 0) {
       vtkImageData *imagedata = mri->GetImageData();
-      int *dim = imagedata->GetDimensions();
+      int *         dim       = imagedata->GetDimensions();
       ui->spinBoxEnd->setValue(dim[nPlane] - 1);
     } else if (nIndex == 1) {
       ui->spinBoxEnd->setValue(mri->GetNumberOfFrames() - 1);
@@ -136,9 +127,9 @@ void DialogWriteMovieFrames::OnOpen() {
 }
 
 void DialogWriteMovieFrames::OnWrite() {
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  SettingsScreenshot ss = mainwnd->GetScreenShotSettings();
-  ss.HideCoords = !ui->checkBoxShowAnnotations->isChecked();
+  MainWindow *       mainwnd = MainWindow::GetMainWindow();
+  SettingsScreenshot ss      = mainwnd->GetScreenShotSettings();
+  ss.HideCoords              = !ui->checkBoxShowAnnotations->isChecked();
   mainwnd->SetScreenShotSettings(ss);
 
   m_strOutputDir = ui->lineEditOutputLocation->text().trimmed();
@@ -161,16 +152,16 @@ void DialogWriteMovieFrames::OnWrite() {
       m_strOutputDir[m_strOutputDir.length() - 1] != '\\') {
     m_strOutputDir += QDir::separator();
   }
-  m_nStepSize = ui->spinBoxStep->value();
-  m_dStepSize = ui->doubleSpinBoxStep->value();
+  m_nStepSize    = ui->spinBoxStep->value();
+  m_dStepSize    = ui->doubleSpinBoxStep->value();
   m_nStartNumber = ui->spinBoxStart->value();
-  m_nStepCount = 0;
-  m_nTotalSteps = 1;
-  int nIndex = ui->comboBoxFlyThrough->currentIndex();
+  m_nStepCount   = 0;
+  m_nTotalSteps  = 1;
+  int nIndex     = ui->comboBoxFlyThrough->currentIndex();
   if (nIndex == 0) // slice
   {
-    MainWindow *mwnd = MainWindow::GetMainWindow();
-    Layer *layer = mwnd->GetActiveLayer("MRI");
+    MainWindow *mwnd  = MainWindow::GetMainWindow();
+    Layer *     layer = mwnd->GetActiveLayer("MRI");
     if (!layer) {
       layer = mwnd->GetActiveLayer("Surface");
     }
@@ -182,8 +173,8 @@ void DialogWriteMovieFrames::OnWrite() {
     ((RenderView2D *)m_view)->SetSliceNumber(m_nStartNumber);
   } else if (nIndex == 1) // frame
   {
-    MainWindow *mwnd = MainWindow::GetMainWindow();
-    Layer *layer = mwnd->GetActiveLayer("MRI");
+    MainWindow *mwnd  = MainWindow::GetMainWindow();
+    Layer *     layer = mwnd->GetActiveLayer("MRI");
     if (layer) {
       m_nTotalSteps =
           (ui->spinBoxEnd->value() - ui->spinBoxStart->value()) / m_nStepSize +
@@ -213,15 +204,15 @@ void DialogWriteMovieFrames::OnAbort() {
 }
 
 void DialogWriteMovieFrames::OnTimeOut() {
-  QString fn;
+  QString            fn;
   SettingsScreenshot settings =
       MainWindow::GetMainWindow()->GetScreenShotSettings();
-  int nIndex = ui->comboBoxFlyThrough->currentIndex();
+  int nIndex      = ui->comboBoxFlyThrough->currentIndex();
   int nFieldWidth = qMax(3, QString::number(m_nTotalSteps).size());
   if (nIndex == 0) // slice
   {
     int nStart = m_nStartNumber + m_nStepSize * m_nStepCount;
-    fn = QString("%1%2%3.%4")
+    fn         = QString("%1%2%3.%4")
              .arg(m_strOutputDir)
              .arg(m_strPrefix)
              .arg(nStart, nFieldWidth, 10, QLatin1Char('0'))
@@ -234,7 +225,7 @@ void DialogWriteMovieFrames::OnTimeOut() {
   } else if (nIndex == 1) // frame
   {
     int nStart = m_nStartNumber + m_nStepSize * m_nStepCount;
-    fn = QString("%1%2%3.%4")
+    fn         = QString("%1%2%3.%4")
              .arg(m_strOutputDir)
              .arg(m_strPrefix)
              .arg(nStart, nFieldWidth, 10, QLatin1Char('0'))

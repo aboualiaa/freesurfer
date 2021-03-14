@@ -3,9 +3,7 @@
 
 #include "misc_maths.h"
 
-using namespace std;
-
-vector<double> gauss_kernel(double dSigma, int max_len) {
+std::vector<double> gauss_kernel(double dSigma, int max_len) {
   int len = (int)floor(8.0 * dSigma + 0.5) + 1;
 
   if (max_len > 0 && max_len < len)
@@ -16,9 +14,9 @@ vector<double> gauss_kernel(double dSigma, int max_len) {
 
   int half_len = len >> 1;
 
-  double norm = 0.0;
-  vector<double> kernel;
-  double k;
+  double              norm = 0.0;
+  std::vector<double> kernel;
+  double              k;
 
   for (int x = 0; x < len; x++) {
     double dx = (x - half_len);
@@ -33,7 +31,8 @@ vector<double> gauss_kernel(double dSigma, int max_len) {
     norm += k;
   }
 
-  for (vector<double>::iterator it = kernel.begin(); it != kernel.end(); it++)
+  for (std::vector<double>::iterator it = kernel.begin(); it != kernel.end();
+       it++)
     *it /= norm;
 
   return kernel;
@@ -42,13 +41,14 @@ vector<double> gauss_kernel(double dSigma, int max_len) {
 std::vector<double> smooth_kernel(std::vector<double> vin,
                                   std::vector<double> vker) {
 
-  map<int, int> lut; // to treat borders
+  std::map<int, int> lut; // to treat borders
 
   int alpha = (vker.size() - 1) >> 1;
 
   // warn user if kernel is even sized
   if (vker.size() % 2 == 0)
-    cout << " smooth_kernel -> even kernel size -> discarding last value\n";
+    std::cout
+        << " smooth_kernel -> even kernel size -> discarding last value\n";
 
   // build LUT to handle borders
   for (int i = -alpha; i < 0; i++)
@@ -61,7 +61,7 @@ std::vector<double> smooth_kernel(std::vector<double> vin,
     lut[i] = vin.size() - 1;
 
   // allocate ret vector
-  vector<double> vres(vin.size());
+  std::vector<double> vres(vin.size());
   fill(vres.begin(), vres.end(), 0.0);
 
   for (int i = 0; i < int(vin.size()); i++) {

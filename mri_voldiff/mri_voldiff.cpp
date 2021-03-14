@@ -1,17 +1,6 @@
-/**
- * @file  mri_voldiff.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:25 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,23 +17,23 @@
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
+#include "diag.h"
+#include "fio.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "version.h"
 
 // Exit codes. See dump_exit_codes.
-#define DIMENSION_EC 2
-#define PRECISION_EC 3
+#define DIMENSION_EC  2
+#define PRECISION_EC  3
 #define RESOLUTION_EC 4
-#define VOX2RAS_EC 5
-#define PIXEL_EC 6
+#define VOX2RAS_EC    5
+#define PIXEL_EC      6
 
 static void dump_exit_codes(FILE *fp);
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -52,34 +41,34 @@ static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
 
-int main(int argc, char *argv[]);
-static char vcid[] = "$Id: mri_voldiff.c,v 1.6 2011/03/02 00:04:25 nicks Exp $";
-const char *Progname = nullptr;
+int         main(int argc, char *argv[]);
+const char *Progname = NULL;
 
-char *vol1File = nullptr, *vol2File = nullptr;
-MRI *vol1 = nullptr, *vol2 = nullptr;
-MATRIX *vox2ras1, *vox2ras2;
+std::string vol1File, vol2File;
+MRI *       vol1 = NULL, *vol2 = NULL;
+MATRIX *    vox2ras1, *vox2ras2;
 
-int debug = 0, checkoptsonly = 0;
+int  debug = 0, checkoptsonly = 0;
 char tmpstr[2000];
 
 int AllowResolution = 0;
-int AllowPrecision = 0;
-int AllowVox2RAS = 0;
+int AllowPrecision  = 0;
+int AllowVox2RAS    = 0;
 
 double vox2ras_thresh = 0;
 double pixdiff_thresh = 0;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, r, c;
+  int            nargs, r, c;
   struct utsname uts;
-  char *cmdline, cwd[2000];
-  double maxdiff, d;
-  int cmax, rmax, smax, fmax;
+  char *         cmdline, cwd[2000];
+  double         maxdiff, d;
+  int            cmax, rmax, smax, fmax;
 
   nargs = handleVersionOption(argc, argv, "mri_voldiff");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -98,7 +87,7 @@ int main(int argc, char **argv) {
     return (0);
 
   printf("\n");
-  printf("%s\n", vcid);
+  printf("%s\n", getVersion().c_str());
   printf("cwd %s\n", cwd);
   printf("cmdline %s\n", cmdline);
   printf("sysname  %s\n", uts.sysname);
@@ -107,11 +96,11 @@ int main(int argc, char **argv) {
 
   dump_options(stdout);
 
-  vol1 = MRIread(vol1File);
-  if (vol1 == nullptr)
+  vol1 = MRIread(vol1File.c_str());
+  if (vol1 == NULL)
     exit(1);
-  vol2 = MRIread(vol2File);
-  if (vol2 == nullptr)
+  vol2 = MRIread(vol2File.c_str());
+  if (vol2 == NULL)
     exit(1);
 
   vox2ras1 = MRIxfmCRS2XYZ(vol1, 0);
@@ -174,7 +163,7 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -212,12 +201,12 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcmp(option, "--v1")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      vol1File = fio_fullpath(pargv[0]);
+      vol1File  = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (!strcmp(option, "--v2")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      vol2File = fio_fullpath(pargv[0]);
+      vol2File  = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (!strcmp(option, "--pix")) {
       if (nargc < 1)
@@ -264,7 +253,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* --------------------------------------------- */
@@ -288,17 +277,17 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */
-static void check_options() {
-  if (vol1File == nullptr) {
+static void check_options(void) {
+  if (vol1File.size() == 0) {
     printf("ERROR: must specify a vol1 file\n");
     exit(1);
   }
-  if (vol2File == nullptr) {
+  if (vol2File.size() == 0) {
     printf("ERROR: must specify a vol2 file\n");
     exit(1);
   }
@@ -307,8 +296,8 @@ static void check_options() {
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
-  fprintf(fp, "vol1    %s\n", vol1File);
-  fprintf(fp, "vol2    %s\n", vol2File);
+  fprintf(fp, "vol1    %s\n", vol1File.c_str());
+  fprintf(fp, "vol2    %s\n", vol2File.c_str());
   fprintf(fp, "pix thresh  %g\n", pixdiff_thresh);
   fprintf(fp, "vox2ras thresh %g\n", vox2ras_thresh);
   return;

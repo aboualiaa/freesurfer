@@ -2,8 +2,8 @@
 #define _h_tag_fio_h
 
 #include <fstream>
-#include <string>
 #include <sstream>
+#include <string>
 
 #include "streamIoMisc.h"
 
@@ -15,8 +15,8 @@ protected:
 
 public:
   char *m_data;
-  long m_len;
-  int m_tag;
+  long  m_len;
+  int   m_tag;
   TagReader(std::istream &is)
       : m_istream(is), m_data(NULL), m_len(0), m_tag(-1) {}
 

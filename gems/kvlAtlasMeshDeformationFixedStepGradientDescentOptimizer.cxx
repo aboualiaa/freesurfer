@@ -7,7 +7,7 @@ namespace kvl {
 //
 AtlasMeshDeformationFixedStepGradientDescentOptimizer ::
     AtlasMeshDeformationFixedStepGradientDescentOptimizer() {
-  m_StepSize = 1.0;
+  m_StepSize                = 1.0;
   m_LineSearchStopCriterion = 0.00005;
 }
 
@@ -30,10 +30,9 @@ double AtlasMeshDeformationFixedStepGradientDescentOptimizer ::
     return 0.0;
   }
 
-  // Try to add the scaled gradient to the current position to obtain the trial
-  // position
-  const double alpha = -(m_StepSize / maximumGradientMagnitude);
-  double maximalDeformation = 0.0;
+  // Try to add the scaled gradient to the current position to obtain the trial position
+  const double alpha              = -(m_StepSize / maximumGradientMagnitude);
+  double       maximalDeformation = 0.0;
   AtlasMesh::PointsContainer::Pointer trialPosition = nullptr;
   this->AddDeformation(m_Position, alpha, m_Gradient, trialPosition,
                        maximalDeformation);
@@ -44,7 +43,7 @@ double AtlasMeshDeformationFixedStepGradientDescentOptimizer ::
 
   // Try out this new position
   AtlasPositionGradientContainerType::Pointer trialGradient = nullptr;
-  double trialCost = 0.0;
+  double                                      trialCost     = 0.0;
   this->GetCostAndGradient(trialPosition, trialCost, trialGradient);
   if (m_Verbose) {
     std::cout << "m_Cost: " << m_Cost << std::endl;
@@ -58,7 +57,7 @@ double AtlasMeshDeformationFixedStepGradientDescentOptimizer ::
 
   // Successful move
   m_Position = trialPosition;
-  m_Cost = trialCost;
+  m_Cost     = trialCost;
   m_Gradient = trialGradient;
 
   return maximalDeformation;

@@ -1,17 +1,6 @@
-/**
- * @file  mris_divide_parcellation.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: maritza $
- *    $Date: 2012/10/24 19:50:06 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -112,24 +101,20 @@ ENDHELP ----------------------------------------------------------------
 
 */
 
-// $Id: mris_divide_parcellation.c,v 1.12 2012/10/24 19:50:06 maritza Exp $
-
 // double round(double x);
 
-#include "version.h"
-#include "diag.h"
 #include "annotation.h"
+#include "diag.h"
+#include "version.h"
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mris_divide_parcellation.c,v 1.12 2012/10/24 19:50:06 maritza Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 static char sdir[STRLEN] = "";
 
@@ -137,22 +122,22 @@ static int rgb_scale = 30;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int         ac, nargs, *nunits, index ;
-  MRI_SURFACE *mris ;
-  char        **av, fname[STRLEN], *annot_name, *out_fname, *cp,
-  *subject, *hemi ;
-  float       area_thresh ;
+  int          ac, nargs, *nunits, index;
+  MRI_SURFACE *mris;
+  char **      av, fname[STRLEN], *annot_name, *out_fname, *cp, *subject, *hemi;
+  float        area_thresh;
 
   nargs = handleVersionOption(argc, argv, "mris_divide_parcellation");
-  if (nargs && argc - nargs == 1)  exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
 
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
 
   Progname = argv[0];
-  ac = argc;
-  av = argv;
+  ac       = argc;
+  av       = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -161,11 +146,11 @@ int main(int argc, char *argv[]) {
 
   if (argc < 6)
     usage_exit();
-  subject = argv[1];
-  hemi = argv[2];
-  annot_name = argv[3];
+  subject     = argv[1];
+  hemi        = argv[2];
+  annot_name  = argv[3];
   area_thresh = atof(argv[4]);
-  out_fname = argv[5];
+  out_fname   = argv[5];
 
   if (!strlen(sdir)) {
     cp = getenv("SUBJECTS_DIR");
@@ -175,9 +160,14 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
 
-  sprintf(fname, "%s/%s/surf/%s.sphere", sdir, subject, hemi);
+  int req =
+      snprintf(fname, STRLEN, "%s/%s/surf/%s.sphere", sdir, subject, hemi);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mris = MRISread(fname);
-  if (mris == nullptr)
+  if (mris == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface from %s", Progname,
               fname);
   if (MRISreadAnnotation(mris, annot_name) != NO_ERROR)
@@ -195,9 +185,9 @@ int main(int argc, char *argv[]) {
   MRIScomputeMetricProperties(mris);
   if (isdigit(*argv[4])) // area threshold specified
   {
-    int vno;
+    int     vno;
     VERTEX *v;
-    float *area;
+    float * area;
     area = (float *)calloc(mris->ct->nentries, sizeof(float));
     if (!area)
       ErrorExit(ERROR_BADPARM, "%s: could not allocate %d area table", Progname,
@@ -214,9 +204,9 @@ int main(int argc, char *argv[]) {
     free(area);
   } else // interpret it as a file with parcellation names and # of units
   {
-    char line[STRLEN], *cp, name[STRLEN];
+    char  line[STRLEN], *cp, name[STRLEN];
     FILE *fp;
-    int num;
+    int   num;
 
     printf("interpreting 4th command line arg as split file name\n");
     fp = fopen(argv[4], "r");
@@ -254,7 +244,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -383,7 +373,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

@@ -1,12 +1,11 @@
 #pragma once
 /*
- * @file utilities common to mrisurf*.c but not used outside them
  *
  */
 /*
  * surfaces Author: Bruce Fischl, extracted from mrisurf.c by Bevin Brett
  *
- * $ © copyright-2014,2018 The General Hospital Corporation (Boston, MA) "MGH"
+ * $ Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,10 +26,10 @@
 
 #include "mrisurf_deform.h"
 
-#define MAX_MM (MAX_DIM / 10.0f)
-#define MAX_PLANE_MM (100 * 10.0f)
+#define MAX_MM          (MAX_DIM / 10.0f)
+#define MAX_PLANE_MM    (100 * 10.0f)
 #define MAX_MOMENTUM_MM 1
-#define MIN_MM 0.001
+#define MIN_MM          0.001
 
 int mrisClearMomentum(MRI_SURFACE *mris);
 

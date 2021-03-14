@@ -1,17 +1,6 @@
-/**
- * @file  mri_label_histo.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:22 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,29 +12,29 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-const char *Progname;
+const char * Progname;
 static char *log_fname = nullptr;
-static void usage_exit(int code);
+static void  usage_exit(int code);
 
-static int quiet = 0;
+static int quiet    = 0;
 static int all_flag = 0;
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int label, ac, nargs;
-  int msec, minutes, seconds /*, wrong, total, correct*/;
-  Timer start;
-  MRI *mri_T1, *mri_labeled;
-  FILE *log_fp;
+  char **    av;
+  int        label, ac, nargs;
+  int        msec, minutes, seconds /*, wrong, total, correct*/;
+  Timer      start;
+  MRI *      mri_T1, *mri_labeled;
+  FILE *     log_fp;
   HISTOGRAM *histo;
 
   nargs = handleVersionOption(argc, argv, "mri_label_histo");
@@ -93,7 +82,7 @@ int main(int argc, char *argv[]) {
 
   HISTOplot(histo, argv[4]);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -111,7 +100,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -124,7 +113,7 @@ static int get_option(int argc, char *argv[]) {
     break;
   case 'L':
     log_fname = argv[2];
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "logging results to %s\n", log_fname);
     break;
   case '?':

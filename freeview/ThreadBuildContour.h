@@ -1,16 +1,7 @@
-/**
- * @file  ThreadBuildContour.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:48 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,8 +15,8 @@
 #ifndef ThreadBuildContour_H
 #define ThreadBuildContour_H
 
-#include <QThread>
 #include <QMutex>
+#include <QThread>
 #include <QVariantMap>
 
 class LayerMRI;
@@ -46,8 +37,8 @@ protected:
   void run();
 
   LayerMRI *m_mri;
-  int m_nSegValue;
-  int m_nThreadID;
+  int       m_nSegValue;
+  int       m_nThreadID;
 };
 
 #endif // ThreadBuildContour_H

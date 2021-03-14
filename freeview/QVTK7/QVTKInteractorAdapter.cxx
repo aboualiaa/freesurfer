@@ -36,9 +36,9 @@
 #include "QVTKInteractor.h"
 
 #include <QEvent>
+#include <QResizeEvent>
 #include <QSignalMapper>
 #include <QTimer>
-#include <QResizeEvent>
 
 #include "vtkCommand.h"
 
@@ -52,7 +52,7 @@ QVTKInteractorAdapter::QVTKInteractorAdapter(QObject *parentObject)
 
 QVTKInteractorAdapter::~QVTKInteractorAdapter() {}
 
-bool QVTKInteractorAdapter::ProcessEvent(QEvent *e,
+bool QVTKInteractorAdapter::ProcessEvent(QEvent *                   e,
                                          vtkRenderWindowInteractor *iren) {
   if (iren == NULL || e == NULL)
     return false;
@@ -60,8 +60,8 @@ bool QVTKInteractorAdapter::ProcessEvent(QEvent *e,
   const QEvent::Type t = e->type();
 
   if (t == QEvent::Resize) {
-    QResizeEvent *e2 = static_cast<QResizeEvent *>(e);
-    QSize size = e2->size();
+    QResizeEvent *e2   = static_cast<QResizeEvent *>(e);
+    QSize         size = e2->size();
     iren->SetSize(size.width(), size.height());
     iren->InvokeEvent(vtkCommand::ConfigureEvent, e2);
     return true;

@@ -1,16 +1,11 @@
 /**
- * @file  Interactor3D.h
  * @brief Base Interactor class for 3D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/02/29 21:01:06 $
- *    $Revision: 1.17 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -46,15 +41,15 @@ public:
 
 protected:
   virtual void UpdateCursor(QEvent *event, QWidget *wnd);
-  bool IsInAction() { return m_bWindowLevel || m_bMoveSlice; }
+  bool         IsInAction() { return m_bWindowLevel || m_bMoveSlice; }
 
   int m_nMousePosX;
   int m_nMousePosY;
   int m_nPressedPosX;
   int m_nPressedPosY;
 
-  bool m_bWindowLevel;
-  bool m_bMoveSlice;
+  bool        m_bWindowLevel;
+  bool        m_bMoveSlice;
   SurfaceROI *m_surfaceROI;
 };
 

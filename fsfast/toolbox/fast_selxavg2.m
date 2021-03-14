@@ -1,6 +1,5 @@
 function r = fast_selxavg2(varargin)
 % r = fast_selxavg2(varargin)
-% '$Id: fast_selxavg2.m,v 1.9 2011/03/02 00:04:05 nicks Exp $
 %
 % For compatibility with version 1:
 %  DOF ignores tpexcl
@@ -47,12 +46,8 @@ function r = fast_selxavg2(varargin)
 % fast_selxavg2.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:05 $
-%    $Revision: 1.9 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -66,7 +61,7 @@ function r = fast_selxavg2(varargin)
 
 
 tic;
-version = '$Id: fast_selxavg2.m,v 1.9 2011/03/02 00:04:05 nicks Exp $';
+version = 'fast_selxavg2.m @FS_VERSION@';
 fprintf(1,'%s\n',version);
 r = 1;
 outfmt = 'nii';

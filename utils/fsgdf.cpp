@@ -1,5 +1,4 @@
 /**
- * @file  fsgdf.c
  * @brief Utilities for reading freesurfer group descriptor file format
  *
  * See:   http://surfer.nmr.mgh.harvard.edu/docs/fsgdf.txt
@@ -43,12 +42,8 @@
  */
 /*
  * Original Author: Doug Greve
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/08/21 17:58:54 $
- *    $Revision: 1.57 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -60,18 +55,27 @@
  *
  */
 
+#include <locale>
+#include <string>
+
+#include "fio.h"
+#include "fsenv.h"
+#include "matfile.h"
+#include "mri2.h"
+#include "proto.h"
+#include "utils.h"
+#include <cctype>
+#include <cfloat>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cctype>
-#include <cfloat>
-#include "mri2.h"
-#include "fio.h"
-#include "matfile.h"
-#include "fsenv.h"
-#include "utils.h"
-#include "proto.h"
-#include "diag.h"
+#include <ctype.h>
+#include <float.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #define FSGDF_SRC
 #include "fsgdf.h"
@@ -84,13 +88,13 @@ int isblank(int c);
 #endif
 #endif
 
-static FSGD *gdfReadV1(char *gdfname);
-static int gdfPrintV1(FILE *fp, FSGD *gd);
-static int gdfCheckVarRep(FSGD *gd);
-static int gdfCheckClassRep(FSGD *gd);
-static int gdfCheckAllClassesUsed(FSGD *gd);
-static int gdfCheckSubjRep(FSGD *gd);
-static int gdfGetDefVarLabelNo(FSGD *gd);
+static FSGD *gdfReadV1(const char *gdfname);
+static int   gdfPrintV1(FILE *fp, FSGD *gd);
+static int   gdfCheckVarRep(FSGD *gd);
+static int   gdfCheckClassRep(FSGD *gd);
+static int   gdfCheckAllClassesUsed(FSGD *gd);
+static int   gdfCheckSubjRep(FSGD *gd);
+static int   gdfGetDefVarLabelNo(FSGD *gd);
 
 /* RKT - hack to get the .so to have Progname declared. I hate this. */
 #ifdef DECLARE_PROGNAME
@@ -100,17 +104,17 @@ const char *Progname = "fsgdf";
 /*--------------------------------------------------*/
 FSGD *gdfAlloc(int version) {
   FSGD *gd;
-  gd = (FSGD *)calloc(sizeof(FSGD), 1);
+  gd          = (FSGD *)calloc(sizeof(FSGD), 1);
   gd->version = version;
   gd->ResFWHM = -1;
-  gd->LogY = 0;
+  gd->LogY    = 0;
   return (gd);
 }
 
 /*--------------------------------------------------*/
 int gdfFree(FSGD **ppgd) {
   FSGD *gd;
-  int n;
+  int   n;
   gd = *ppgd;
   if (gd->data)
     MRIfree(&gd->data);
@@ -128,7 +132,7 @@ int gdfFree(FSGD **ppgd) {
 }
 
 /*--------------------------------------------------*/
-int gdfWrite(char *gdfname, FSGD *gd) {
+int gdfWrite(const char *gdfname, FSGD *gd) {
   FILE *fp;
 
   fp = fopen(gdfname, "w");
@@ -249,16 +253,16 @@ static int gdfPrintV1(FILE *fp, FSGD *gd) {
 }
 
 /*--------------------------------------------------*/
-FSGD *gdfRead(char *gdfname, int LoadData) {
-  FSGD *gd;
-  FILE *fp;
-  char tmpstr[1000];
-  int version = 0;
-  int nv;
-  MRI *mritmp;
-  char *dirname, *basename;
-  char datafilename[1000];
-  MATRIX *Xt, *XtX, *iXtX;
+FSGD *gdfRead(const char *gdfname, int LoadData) {
+  FSGD *      gd;
+  FILE *      fp;
+  char        tmpstr[1000];
+  int         version = 0;
+  int         nv;
+  MRI *       mritmp;
+  char *      dirname, *basename;
+  std::string datafilename;
+  MATRIX *    Xt, *XtX, *iXtX;
 
   printf("gdfRead(): reading %s\n", gdfname);
 
@@ -316,33 +320,34 @@ FSGD *gdfRead(char *gdfname, int LoadData) {
   if (strlen(gd->DesignMatFile) != 0) {
     /* Look for DesignMatFile first. If doesn't exist, prepend the
        directory from the gdf file. */
-    strcpy(datafilename, gd->DesignMatFile);
-    if (!fio_FileExistsReadable(datafilename)) {
-      sprintf(datafilename, "%s/%s", dirname, gd->DesignMatFile);
-      if (!fio_FileExistsReadable(datafilename)) {
+    datafilename = gd->DesignMatFile;
+    if (!fio_FileExistsReadable(datafilename.c_str())) {
+      datafilename =
+          std::string(dirname) + "/" + std::string(gd->DesignMatFile);
+      if (!fio_FileExistsReadable(datafilename.c_str())) {
 
         /* If that doesn't work, try the path from the GDF file and the
            base of the file name. */
-        basename = fio_basename(gd->DesignMatFile, nullptr);
-        sprintf(datafilename, "%s/%s", dirname, basename);
+        basename     = fio_basename(gd->DesignMatFile, NULL);
+        datafilename = std::string(dirname) + "/" + std::string(basename);
         free(basename);
       }
 
-      if (!fio_FileExistsReadable(datafilename)) {
+      if (!fio_FileExistsReadable(datafilename.c_str())) {
         printf("ERROR: gdfRead: could not find file %s\n", gd->DesignMatFile);
-        return (nullptr);
+        return (NULL);
       }
     }
-    gd->X = ReadMatlabFileVariable(datafilename, "X");
-    if (gd->X == nullptr) {
+    gd->X = ReadMatlabFileVariable(datafilename.c_str(), "X");
+    if (gd->X == NULL) {
       printf("ERROR: gdfRead: could not read variable X from %s\n",
              gd->DesignMatFile);
       return (nullptr);
     }
-    Xt = MatrixTranspose(gd->X, nullptr);
-    XtX = MatrixMultiply(Xt, gd->X, NULL);  // X'*X
-    iXtX = MatrixInverse(XtX, nullptr);     // inv(X'*X)
-    gd->T = MatrixMultiply(iXtX, Xt, NULL); // T = inv(X'*X)*X'
+    Xt    = MatrixTranspose(gd->X, nullptr);
+    XtX   = MatrixMultiply(Xt, gd->X, NULL); // X'*X
+    iXtX  = MatrixInverse(XtX, nullptr);     // inv(X'*X)
+    gd->T = MatrixMultiply(iXtX, Xt, NULL);  // T = inv(X'*X)*X'
     MatrixFree(&Xt);
     MatrixFree(&XtX);
     MatrixFree(&iXtX);
@@ -358,25 +363,26 @@ FSGD *gdfRead(char *gdfname, int LoadData) {
   /* load the MRI containing our raw data. */
   if (LoadData && strlen(gd->datafile) > 0) {
 
-    if (fio_FileExistsReadable(gd->datafile))
-      strcpy(datafilename, gd->datafile);
-    else {
+    if (fio_FileExistsReadable(gd->datafile)) {
+      datafilename = gd->datafile;
+    } else {
       /* Construct the path of the data file by concat the
          path from the GDF file and the data file name */
-      if (nullptr != dirname)
-        sprintf(datafilename, "%s/%s", dirname, gd->datafile);
+      if (NULL != dirname) {
+        datafilename = std::string(dirname) + "/" + std::string(gd->datafile);
+      }
 
       /* If that doesn't work, try the path from the GDF file and the
          base of the file name. */
-      if (!fio_FileExistsReadable(datafilename)) {
-        basename = fio_basename(gd->datafile, nullptr);
-        sprintf(datafilename, "%s/%s", dirname, basename);
+      if (!fio_FileExistsReadable(datafilename.c_str())) {
+        basename     = fio_basename(gd->datafile, NULL);
+        datafilename = std::string(dirname) + "/" + std::string(basename);
         free(basename);
       }
     }
 
-    gd->data = MRIread(datafilename);
-    if (nullptr == gd->data) {
+    gd->data = MRIread(datafilename.c_str());
+    if (NULL == gd->data) {
       printf("ERROR: gdfRead: Couldn't read raw data at %s \n", gd->datafile);
       gdfFree(&gd);
       return (nullptr);
@@ -402,12 +408,12 @@ FSGD *gdfRead(char *gdfname, int LoadData) {
 }
 
 /*--------------------------------------------------*/
-static FSGD *gdfReadV1(char *gdfname) {
-  FSGD *gd;
+static FSGD *gdfReadV1(const char *gdfname) {
+  FSGD * gd;
   FSENV *env;
-  FILE *fp;
-  char *cp, tag[1000], tmpstr[1000], class_name[100];
-  int version, r, n, m, k, err, ncols, c;
+  FILE * fp;
+  char * cp, tag[1000], tmpstr[1000], class_name[100];
+  int    version, r, n, m, k, err, ncols, c;
   double d;
 
   env = FSENVgetenv();
@@ -432,10 +438,10 @@ static FSGD *gdfReadV1(char *gdfname) {
     return (nullptr);
   }
 
-  gd = gdfAlloc(1);
+  gd                = gdfAlloc(1);
   gd->nvarsfromfile = 0;
-  gd->DeMean = -1;
-  gd->ReScale = 0;
+  gd->DeMean        = -1;
+  gd->ReScale       = 0;
 
   /*------- begin input loop --------------*/
   while (true) {
@@ -562,7 +568,7 @@ static FSGD *gdfReadV1(char *gdfname) {
       if (r == EOF)
         goto formaterror;
       gd->ContrastName[gd->nContrasts] = strcpyalloc(tmpstr);
-      gd->IsFContrast[gd->nContrasts] = 0;
+      gd->IsFContrast[gd->nContrasts]  = 0;
       fgets(tmpstr, 1000, fp);
       r = gdfCountItemsInString(tmpstr);
       if (r < 1) {
@@ -583,7 +589,7 @@ static FSGD *gdfReadV1(char *gdfname) {
       r = fscanf(fp, "%s", tmpstr);
       if (r == EOF)
         goto formaterror;
-      gd->IsFContrast[gd->nContrasts] = 1;
+      gd->IsFContrast[gd->nContrasts]  = 1;
       gd->ContrastName[gd->nContrasts] = strcpyalloc(tmpstr);
       fgets(tmpstr, 1000, fp);
       r = gdfCountItemsInString(tmpstr);
@@ -592,7 +598,7 @@ static FSGD *gdfReadV1(char *gdfname) {
         goto formaterror;
       }
       gd->FContrastNSub[gd->nContrasts] = r;
-      gd->FContrastSub[gd->nContrasts] = (char **)calloc(r, sizeof(char *));
+      gd->FContrastSub[gd->nContrasts]  = (char **)calloc(r, sizeof(char *));
       for (n = 0; n < r; n++) {
         cp = gdfGetNthItemFromString(tmpstr, n);
         gd->FContrastSub[gd->nContrasts][n] = strcpyalloc(cp);
@@ -627,7 +633,7 @@ static FSGD *gdfReadV1(char *gdfname) {
         }
       }
       gd->nvariables = r;
-      r = gdfCheckVarRep(gd);
+      r              = gdfCheckVarRep(gd);
       if (r != -1) {
         printf("ERROR: gdfReadV1: variable label %s appears multiple times\n",
                gd->varlabel[r]);
@@ -650,12 +656,12 @@ static FSGD *gdfReadV1(char *gdfname) {
     }
     /*----------------- VariableFromASeg Line ---------------------*/
     if (!strcasecmp(tag, "VariableFromASeg")) {
-      m = gd->nvarsfromfile;
+      m                = gd->nvarsfromfile;
       gd->tablefile[m] = strcpyalloc("stats/aseg.stats");
       fscanf(fp, "%s", tmpstr);
       gd->varfield[m] = strcpyalloc(tmpstr);
       gd->fieldcol[m] = 5;
-      gd->datacol[m] = 4;
+      gd->datacol[m]  = 4;
       gd->nvarsfromfile++;
     }
     /*----------------- Input Line ---------------------*/
@@ -838,9 +844,9 @@ formaterror:
   information for the data in the given FSGD header
   file. This is only the header info, not the data.
   --------------------------------------------------*/
-MRI *gdfReadDataInfo(char *gdfname) {
-  FSGD *gd = nullptr;
-  MRI *info = nullptr;
+MRI *gdfReadDataInfo(const char *gdfname) {
+  FSGD *gd   = NULL;
+  MRI * info = NULL;
 
   /* Read this header file but don't load the data. */
   gd = gdfRead(gdfname, 0);
@@ -882,13 +888,13 @@ int gdfClassNo(FSGD *gd, char *class_number) {
   in the given string, where an item is defined as
   one or more contiguous non-blank characters.
   --------------------------------------------------*/
-int gdfCountItemsInString(char *str) {
+int gdfCountItemsInString(const char *str) {
   int len, n, nhits;
 
   len = strlen(str);
 
   nhits = 0;
-  n = 0;
+  n     = 0;
   while (n < len) {
     while (isblank(str[n]))
       n++;
@@ -912,30 +918,55 @@ int gdfCountItemsInString(char *str) {
   is -1, then it returns the last item. item is a string that
   must be freed by the caller.
   ------------------------------------------------------------------*/
-char *gdfGetNthItemFromString(char *str, int nth) {
+char *gdfGetNthItemFromString(const char *str, const int nth) {
   char *item;
-  int nitems, n;
-  static char fmt[2000], tmpstr[2000];
-
-  memset(fmt, '\0', 2000);
-  memset(tmpstr, '\0', 2000);
+  int   nitems;
 
   nitems = gdfCountItemsInString(str);
-  if (nth < 0)
-    nth = nitems - 1;
   if (nth >= nitems) {
     printf("ERROR: asking for item %d, only %d items in string\n", nth, nitems);
     printf("%s\n", str);
     return (nullptr);
   }
 
-  for (n = 0; n < nth; n++)
-    sprintf(fmt, "%s %%*s", fmt);
-  sprintf(fmt, "%s %%s", fmt);
-  // printf("fmt %s\n",fmt);
-  sscanf(str, fmt, tmpstr);
+  const std::string        src(str);
+  std::vector<std::string> items;
+  std::string              tmpstr;
+  bool                     inItem = !std::isspace(src.at(0));
+  for (auto it = src.begin(); it != src.end(); ++it) {
+    if (std::isspace(*it)) {
+      if (inItem) {
+        // We've just completed the next item
+        items.push_back(tmpstr);
+        tmpstr.clear();
+      } else {
+        // Nothing to do; we're just consuming blanks
+      }
+      inItem = false;
+    } else {
+      inItem = true;
+      // We're inside an item, so accumulate
+      tmpstr.push_back(*it);
+    }
+  }
 
-  item = strcpyalloc(tmpstr);
+  if (items.size() != static_cast<size_t>(nitems)) {
+    std::cerr << __FUNCTION__ << ": Length of items vector did not match nitems"
+              << std::endl;
+    std::cerr << "str: '" << str << std::endl;
+    std::cerr << "items: ";
+    for (auto it = items.begin(); it != items.end(); ++it) {
+      std::cerr << (*it) << " -|- ";
+    }
+    std::cerr << std::endl;
+    throw std::logic_error("Incorrect item count");
+  }
+
+  if (nth < 0) {
+    item = strcpyalloc(items.back().c_str());
+  } else {
+    item = strcpyalloc(items.at(nth).c_str());
+  }
   return (item);
 }
 
@@ -947,8 +978,8 @@ char *gdfGetNthItemFromString(char *str, int nth) {
   --------------------------------------------------*/
 int gdfCountItemsOnLine(FILE *fp) {
   fpos_t now;
-  char tmpstr[10000];
-  int nitems;
+  char   tmpstr[10000];
+  int    nitems;
 
   fgetpos(fp, &now);
   fgets(tmpstr, 10000, fp);
@@ -999,7 +1030,7 @@ static int gdfCheckVarRep(FSGD *gd) {
   returns -1 (ie, no reps).
   --------------------------------------------------*/
 static int gdfCheckSubjRep(FSGD *gd) {
-  int n, m;
+  int        n, m;
   extern int fsgdf_AllowSubjRep;
 
   if (fsgdf_AllowSubjRep)
@@ -1108,7 +1139,7 @@ int gdfVarMeans(FSGD *gd) {
   // Init
   for (vno = 0; vno < gd->nvariables; vno++) {
     gd->VarMeans[vno] = 0;
-    gd->VarStds[vno] = 0;
+    gd->VarStds[vno]  = 0;
   }
 
   // Sum over all inputs regardless of class
@@ -1191,7 +1222,7 @@ int gdfClassVarMeans(FSGD *gd) {
   Same Slope
   ---------------------------------------------------------*/
 MATRIX *gdfMatrixDOSS(FSGD *gd, MATRIX *X) {
-  int nrows, ncols, r, v, c;
+  int    nrows, ncols, r, v, c;
   double mn;
 
   nrows = gd->ninputs;
@@ -1203,7 +1234,7 @@ MATRIX *gdfMatrixDOSS(FSGD *gd, MATRIX *X) {
 
   for (r = 0; r < nrows; r++) {
 
-    c = gd->subjclassno[r];
+    c                     = gd->subjclassno[r];
     X->rptr[r + 1][c + 1] = 1;
 
     for (v = 0; v < gd->nvariables; v++) {
@@ -1211,7 +1242,7 @@ MATRIX *gdfMatrixDOSS(FSGD *gd, MATRIX *X) {
         mn = gd->VarMeans[v];
       else
         mn = 0;
-      c = v + gd->nclasses;
+      c                     = v + gd->nclasses;
       X->rptr[r + 1][c + 1] = gd->varvals[r][v] - mn;
       if (gd->ReScale)
         X->rptr[r + 1][c + 1] /= gd->VarStds[v];
@@ -1231,7 +1262,7 @@ MATRIX *gdfMatrixDOSS(FSGD *gd, MATRIX *X) {
   columns will be the first variable, etc.
   ---------------------------------------------------------*/
 MATRIX *gdfMatrixDODS(FSGD *gd, MATRIX *X) {
-  int nrows, ncols, n, r, v, c;
+  int    nrows, ncols, n, r, v, c;
   double mn;
 
   nrows = gd->ninputs;
@@ -1243,8 +1274,8 @@ MATRIX *gdfMatrixDODS(FSGD *gd, MATRIX *X) {
 
   for (r = 0; r < nrows; r++) {
 
-    n = gd->subjclassno[r]; // 0-based class number
-    c = n;
+    n                     = gd->subjclassno[r]; // 0-based class number
+    c                     = n;
     X->rptr[r + 1][c + 1] = 1;
 
     for (v = 0; v < gd->nvariables; v++) {
@@ -1265,7 +1296,7 @@ MATRIX *gdfMatrixDODS(FSGD *gd, MATRIX *X) {
 }
 
 /*---------------------------------------------------*/
-int gdfCheckMatrixMethod(char *gd2mtx_method) {
+int gdfCheckMatrixMethod(const char *gd2mtx_method) {
   if (strcmp(gd2mtx_method, "doss") == 0 ||
       strcmp(gd2mtx_method, "dods") == 0 || strcmp(gd2mtx_method, "none") == 0)
     return (0);
@@ -1276,9 +1307,9 @@ int gdfCheckMatrixMethod(char *gd2mtx_method) {
 }
 
 /*---------------------------------------------------*/
-MATRIX *gdfMatrix(FSGD *gd, char *gd2mtx_method, MATRIX *X) {
+MATRIX *gdfMatrix(FSGD *gd, const char *gd2mtx_method, MATRIX *X) {
   if (gdfCheckMatrixMethod(gd2mtx_method))
-    return (nullptr);
+    return (NULL);
 
   if (strcmp(gd2mtx_method, "none") == 0) {
     printf("ERROR: gdfMatrix: cannot create matrix when method is none\n");
@@ -1309,8 +1340,8 @@ MATRIX *gdfMatrix(FSGD *gd, char *gd2mtx_method, MATRIX *X) {
 int gdfOffsetSlope(FSGD *gd, int classno, int varno, int c, int r, int s,
                    float *offset, float *slope) {
   MATRIX *y, *b;
-  int n, nf;
-  int nslope = 0;
+  int     n, nf;
+  int     nslope = 0;
 
   if (strlen(gd->DesignMatMethod) == 0 ||
       strcmp(gd->DesignMatMethod, "none") == 0) {
@@ -1656,7 +1687,7 @@ int gdfGetNthSubjectNthValue(FSGD *gd, int nsubject, int nvariable,
 int gdfGetNthSubjectMeasurement(FSGD *gd, int nsubject, int x, int y, int z,
                                 float *value) {
   float v;
-  int errs = 0;
+  int   errs = 0;
 
   if (nullptr == gd)
     return (-1);
@@ -1706,23 +1737,23 @@ int gdfGetNthSubjectMeasurement(FSGD *gd, int nsubject, int x, int y, int z,
 
   switch (gd->data->type) {
   case MRI_UCHAR:
-    v = MRIseq_vox(gd->data, x, y, z, nsubject);
+    v      = MRIseq_vox(gd->data, x, y, z, nsubject);
     *value = v;
     break;
   case MRI_INT:
-    v = MRIIseq_vox(gd->data, x, y, z, nsubject);
+    v      = MRIIseq_vox(gd->data, x, y, z, nsubject);
     *value = v;
     break;
   case MRI_LONG:
-    v = MRILseq_vox(gd->data, x, y, z, nsubject);
+    v      = MRILseq_vox(gd->data, x, y, z, nsubject);
     *value = v;
     break;
   case MRI_FLOAT:
-    v = MRIFseq_vox(gd->data, x, y, z, nsubject);
+    v      = MRIFseq_vox(gd->data, x, y, z, nsubject);
     *value = v;
     break;
   case MRI_SHORT:
-    v = MRISseq_vox(gd->data, x, y, z, nsubject);
+    v      = MRISseq_vox(gd->data, x, y, z, nsubject);
     *value = v;
     break;
   default:
@@ -1740,7 +1771,7 @@ int gdfGetNthSubjectMeasurement(FSGD *gd, int nsubject, int x, int y, int z,
 FSGD *gdfSubSet(FSGD *infsgd, int nClasses, char **ClassList, int nVars,
                 char **VarList) {
   FSGD *fsgd;
-  int n, nCUse, nVUse, c, ic, v, iv, ninputs, ok;
+  int   n, nCUse, nVUse, c, ic, v, iv, ninputs, ok;
 
   if (nClasses > 0) {
     nCUse = nClasses;
@@ -1840,11 +1871,11 @@ int gdfStringIndex(char *str, char **list, int nlist) {
   ---------------------------------------------------------*/
 char **gdfCopySubjIdppc(FSGD *fsgd) {
   char **ppc;
-  int n, len;
+  int    n, len;
 
   ppc = (char **)calloc(sizeof(char *), fsgd->ninputs);
   for (n = 0; n < fsgd->ninputs; n++) {
-    len = strlen(fsgd->subjid[n]);
+    len    = strlen(fsgd->subjid[n]);
     ppc[n] = (char *)calloc(sizeof(char), len + 1);
     memmove(ppc[n], fsgd->subjid[n], len);
     // printf("n=%d, %s\n",n,ppc[n]);
@@ -1864,8 +1895,8 @@ char **gdfCopySubjIdppc(FSGD *fsgd) {
 */
 MATRIX *gdfContrastDODS(FSGD *fsgd, float *wClass, float *wCovar) {
   MATRIX *C;
-  float w;
-  int c, v, n;
+  float   w;
+  int     c, v, n;
 
   if (strcasecmp(fsgd->DesignMatMethod, "dods") != 0) {
     printf("ERROR: gdfContrastDODS() cannot be used with %s\n",
@@ -1902,8 +1933,8 @@ MATRIX *gdfContrastDODS(FSGD *fsgd, float *wClass, float *wCovar) {
 */
 MATRIX *gdfContrastDOSS(FSGD *fsgd, float *wClass, float *wCovar) {
   MATRIX *C;
-  float w;
-  int c, v, n;
+  float   w;
+  int     c, v, n;
 
   if (strcasecmp(fsgd->DesignMatMethod, "doss") != 0) {
     printf("ERROR: gdfContrastDOSS() cannot be used with %s\n",
@@ -1942,7 +1973,7 @@ MATRIX *gdfContrastDOSS(FSGD *fsgd, float *wClass, float *wCovar) {
 char *gdfGetSDataFromTable(char *tablefile, char *field, int fieldcol,
                            int datacol) {
   FILE *fp;
-  int ncols;
+  int   ncols;
   char *pc, line[2000], tmpstr[2000];
   char *sfield, *sdata;
 

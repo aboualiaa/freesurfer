@@ -1,9 +1,9 @@
 #include "DialogLabelStats.h"
-#include "ui_DialogLabelStats.h"
-#include "MainWindow.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
 #include "LayerROI.h"
+#include "MainWindow.h"
+#include "ui_DialogLabelStats.h"
 #include <QDebug>
 
 DialogLabelStats::DialogLabelStats(QWidget *parent)
@@ -18,9 +18,9 @@ void DialogLabelStats::UpdateStats() {
   if (!isVisible())
     return;
 
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  QList<Layer *> layers = mainwnd->GetLayers("MRI");
-  LayerMRI *label = NULL, *mri = NULL;
+  MainWindow *   mainwnd = MainWindow::GetMainWindow();
+  QList<Layer *> layers  = mainwnd->GetLayers("MRI");
+  LayerMRI *     label = NULL, *mri = NULL;
   foreach (Layer *layer, layers) {
     LayerMRI *mri_layer = (LayerMRI *)layer;
     if (!label &&
@@ -49,9 +49,9 @@ void DialogLabelStats::UpdateStats() {
   } else
     ui->labelVolume->clear();
 
-  float fLabel, fArea = 0;
+  float  fLabel, fArea = 0;
   double mean, sd;
-  int nCount = 0;
+  int    nCount = 0;
   if (label && label->IsVisible()) {
     label->GetCurrentLabelStats(mainwnd->GetMainViewId(), &fLabel, &nCount,
                                 &fArea, mri, &mean, &sd);

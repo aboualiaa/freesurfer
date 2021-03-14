@@ -28,12 +28,8 @@ function [vol, M, mr_parms, volsz] = load_mgh(fname,slices,frames,headeronly)
 % load_mgh.m
 %
 % Original Author: Bruce Fischl
-% CVS Revision Info:
-%    $Author: greve $
-%    $Date: 2016/01/19 21:18:27 $
-%    $Revision: 1.22 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

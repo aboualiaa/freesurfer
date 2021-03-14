@@ -1,17 +1,6 @@
-/**
- * @file  mri_ca_sparse2DMatrix.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:10 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,12 +15,10 @@
 #ifndef sparse2DMatrix_h
 #define sparse2DMatrix_h
 
-#include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <map>
-
-using namespace std;
 
 /*
 
@@ -63,9 +50,9 @@ using namespace std;
 */
 
 typedef map<unsigned short, float> TypeFloatMap;
-typedef TypeFloatMap *TypeFloatMapPtr;
+typedef TypeFloatMap *             TypeFloatMapPtr;
 
-typedef unsigned long ulong;
+typedef unsigned long  ulong;
 typedef unsigned short ushort;
 /* STL map methods
 map<key type, value type>
@@ -102,14 +89,14 @@ public:
 
   // declare the null ctor to satisfy map<> class. Do not use directly
   CSparse2DMatrix() {
-    nXMAX = 0;
-    nYMAX = 0;
+    nXMAX  = 0;
+    nYMAX  = 0;
     arrMap = NULL;
   }
 
   CSparse2DMatrix(ushort nXDim, ushort nYDim) {
-    nXMAX = nXDim;
-    nYMAX = nYDim; // you could alter the yDim Size but not the XDim size
+    nXMAX  = nXDim;
+    nYMAX  = nYDim; // you could alter the yDim Size but not the XDim size
     arrMap = new TypeFloatMap[nXMAX];
     for (int i = 0; i < nXMAX; i++) {
       arrMap[i].clear();
@@ -124,8 +111,8 @@ public:
   // increment values at specific location
   float increment(ushort x, ushort y, float fIncrementAmount = 1.0) {
     TypeFloatMap::iterator it;
-    float fValue = 0;
-    float fOldValue;
+    float                  fValue = 0;
+    float                  fOldValue;
     if (x <= nXMAX - 1) {
       if ((it = arrMap[x].find(y)) != arrMap[x].end()) {
         fOldValue = arrMap[x][y];
@@ -153,7 +140,7 @@ public:
 
   // retrieve values at specific location
   float operator()(ushort x, ushort y) {
-    float fValue = 0;
+    float                  fValue = 0;
     TypeFloatMap::iterator it;
 
     if (x <= nXMAX - 1) {
@@ -165,7 +152,7 @@ public:
   }
 
 private:
-  ushort nXMAX, nYMAX;
+  ushort        nXMAX, nYMAX;
   TypeFloatMap *arrMap;
 
   friend istream &operator>>(istream &, CSparse2DMatrix &);
@@ -198,7 +185,7 @@ istream &operator>>(istream &is, CSparse2DMatrix &mat) {
   ushort nMapIndex;
   ushort x;
   ushort nKey;
-  float fValue;
+  float  fValue;
   for (x = 0; x < mat.nXMAX; x++) {
     ulong nMapSize;
     is.read(&nMapSize, sizeof(nMapSize));
@@ -219,7 +206,7 @@ ostream &operator<<(ostream &os, CSparse2DMatrix &mat) {
   os.write((unsigned char *)&(mat.nYMAX), sizeof(mat.nYMAX));
 
   TypeFloatMap::iterator it;
-  ushort x;
+  ushort                 x;
   for (x = 0; x < mat.nXMAX; x++) {
     ulong nMapSize = mat.arrMap[x].size();
     os.write((unsigned char *)&nMapSize, sizeof(nMapSize));
@@ -237,7 +224,7 @@ ostream &print(ostream &os, CSparse2DMatrix &mat) {
   os << "Dimensions: (x,y) = (" << mat.nXMAX << ", " << mat.nYMAX << ")  \n";
 
   TypeFloatMap::iterator it;
-  ushort x;
+  ushort                 x;
   for (x = 0; x < mat.nXMAX; x++) {
     ulong nMapSize = mat.arrMap[x].size();
     os << "  (" << x << ") has " << nMapSize << "  {y, val} elements:";

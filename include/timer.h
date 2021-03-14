@@ -1,9 +1,9 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include <chrono>
 #include <iostream>
 #include <string>
-#include <chrono>
 
 /// \class Timer
 ///
@@ -18,8 +18,8 @@ public:
   Timer() : begin(clock::now()) {}
 
   // retrieves elapsed time
-  long nanoseconds();
-  long milliseconds();
+  long   nanoseconds();
+  long   milliseconds();
   double seconds();
   double minutes();
   double hours();

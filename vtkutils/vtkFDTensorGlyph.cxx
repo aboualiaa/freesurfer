@@ -4,24 +4,24 @@
 #include <vtkCellArray.h>
 #include <vtkDataSet.h>
 #include <vtkFloatArray.h>
-#include <vtkUnsignedCharArray.h>
+#include <vtkImageData.h>
+#include <vtkLookupTable.h>
 #include <vtkMath.h>
 #include <vtkObjectFactory.h>
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
 #include <vtkTransform.h>
-#include <vtkImageData.h>
-#include <vtkLookupTable.h>
+#include <vtkUnsignedCharArray.h>
 
 vtkStandardNewMacro(vtkFDTensorGlyph);
 
 // Construct object with scaling
 vtkFDTensorGlyph::vtkFDTensorGlyph() {
 
-  this->UniformScaling = 0;
-  this->FAScaling = 0;
-  this->ScaleFactor = 2;
-  this->ColorTable = vtkLookupTable::New();
+  this->UniformScaling                   = 0;
+  this->FAScaling                        = 0;
+  this->ScaleFactor                      = 2;
+  this->ColorTable                       = vtkLookupTable::New();
   this->VoxelToMeasurementFrameTransform = vtkTransform::New();
 
   this->VoxelToSliceTransform = vtkTransform::New();
@@ -35,15 +35,15 @@ vtkFDTensorGlyph::~vtkFDTensorGlyph() {
 }
 
 void vtkFDTensorGlyph::Execute() {
-  vtkImageData *input = static_cast<vtkImageData *>(this->GetInput());
-  vtkPolyData *output = this->GetOutput();
+  vtkImageData *input  = static_cast<vtkImageData *>(this->GetInput());
+  vtkPolyData * output = this->GetOutput();
 
   double inputSpacing[3];
   input->GetSpacing(inputSpacing);
-  int *dim = input->GetDimensions();
-  int *extent = input->GetExtent();
-  int indexArray[3];
-  int maxGlyphs = dim[0] * dim[1] * dim[2];
+  int *  dim    = input->GetDimensions();
+  int *  extent = input->GetExtent();
+  int    indexArray[3];
+  int    maxGlyphs = dim[0] * dim[1] * dim[2];
   float *tensorComponents, pt[3];
   double translate[3];
   double eigvec1[3], eigvec2[3], eigvec3[3];
@@ -56,14 +56,14 @@ void vtkFDTensorGlyph::Execute() {
   const int cubePolys[6][4] = {{0, 1, 2, 3}, {0, 1, 5, 4}, {4, 5, 6, 7},
                                {6, 7, 3, 2}, {2, 1, 5, 6}, {3, 0, 4, 7}};
 
-  float uniformScaleFactors[3] = {1, .25, .25};
-  float faval;
+  float  uniformScaleFactors[3] = {1, .25, .25};
+  float  faval;
   double normalizedFA;
   double normalizedEigenValues[3];
 
-  vtkMatrix4x4 *matrix = vtkMatrix4x4::New();
+  vtkMatrix4x4 *matrix    = vtkMatrix4x4::New();
   vtkTransform *transform = vtkTransform::New();
-  vtkPoints *points = vtkPoints::New();
+  vtkPoints *   points    = vtkPoints::New();
 
   vtkFloatArray *pointsArray = vtkFloatArray::New();
   pointsArray->SetNumberOfComponents(3);
@@ -76,7 +76,7 @@ void vtkFDTensorGlyph::Execute() {
   colorScalars->SetNumberOfValues(maxGlyphs * 8);
 
   vtkUnsignedCharArray *colors = vtkUnsignedCharArray::New();
-  double wxyz[4];
+  double                wxyz[4];
   static_cast<vtkTransform *>(
       this->VoxelToMeasurementFrameTransform->GetInverse())
       ->GetOrientationWXYZ(wxyz);
@@ -146,9 +146,9 @@ void vtkFDTensorGlyph::Execute() {
         // 	indexArray[2] = z + extent[4];
         // 	this->VoxelToMeasurementFrameTransform->TransformPoint(indexArray,
         // translate);
-        // cout << "image x: " << x << ", y: " << y << ", z: " << z << endl;
-        // cout << "world x: " << translate[0] << ", y: " << translate[1] << ",
-        // z: " << translate[2] << endl;
+        // std::cout << "image x: " << x << ", y: " << y << ", z: " << z << std::endl;
+        // std::cout << "world x: " << translate[0] << ", y: " << translate[1] << ",
+        // z: " << translate[2] << std::endl;
 
         // this should no longer work:
         // for incorrect dtreg output, uncomment these and swap y and z in
@@ -222,27 +222,27 @@ void vtkFDTensorGlyph::Execute() {
     this->ColorTable->SetNumberOfTableValues(colorCount);
     this->ColorTable->SetTableRange(0, colorCount);
     //     unsigned char *outPtr = this->ColorTable->GetPointer(0);
-    //     //cout << "out: " << outPtr[1500 * 4] << endl;
+    //     //cout << "out: " << outPtr[1500 * 4] << std::endl;
     //     unsigned char *inPtr = colors->GetPointer(0);
-    //     //cout << "in: " << inPtr[1500 * 4] << endl;
+    //     //cout << "in: " << inPtr[1500 * 4] << std::endl;
     //     memmove(outPtr, inPtr, colorCount * 4 - 4);
-    //     //cout << "new out: " << outPtr[1500 * 4] << endl;
+    //     //cout << "new out: " << outPtr[1500 * 4] << std::endl;
     for (int i = 0; i < colorCount; i++) {
       double *tuple = colors->GetTuple(i);
       this->ColorTable->SetTableValue(i, tuple[0] / 255.0, tuple[1] / 255.0,
                                       tuple[2] / 255.0, tuple[3] / 255.0);
     }
-    //     cout << "colors: " << colors->GetComponent(1500, 0) << endl;
-    //     cout << "colortable: " << ((int
-    //     *)(this->ColorTable->MapValue(1500)))[1] << endl; cout <<
+    //     std::cout << "colors: " << colors->GetComponent(1500, 0) << std::endl;
+    //     std::cout << "colortable: " << ((int
+    //     *)(this->ColorTable->MapValue(1500)))[1] << std::endl; std::cout <<
     //     "colortable: " << ((int *)(this->ColorTable->MapValue(1501)))[1] <<
-    //     endl; cout << "colortable: " << ((int
-    //     *)(this->ColorTable->MapValue(1502)))[1] << endl; cout <<
+    //     endl; std::cout << "colortable: " << ((int
+    //     *)(this->ColorTable->MapValue(1502)))[1] << std::endl; std::cout <<
     //     "colortable: " << ((int *)(this->ColorTable->MapValue(1503)))[1] <<
-    //     endl; cout << "colortable: " << ((int
-    //     *)(this->ColorTable->MapValue(1504)))[1] << endl; cout << "table #
-    //     vals: " << this->ColorTable->GetNumberOfTableValues() << endl; cout
-    //     << "table range: " << this->ColorTable->GetRange()[1] << endl;
+    //     endl; std::cout << "colortable: " << ((int
+    //     *)(this->ColorTable->MapValue(1504)))[1] << std::endl; std::cout << "table #
+    //     vals: " << this->ColorTable->GetNumberOfTableValues() << std::endl; cout
+    //     << "table range: " << this->ColorTable->GetRange()[1] << std::endl;
   }
 
   matrix->Delete();
@@ -255,17 +255,17 @@ void vtkFDTensorGlyph::Execute() {
 }
 
 void vtkFDTensorGlyph::ComputeScalarRangeGreaterThanZero(const int component,
-                                                         double range[2]) {
-  vtkImageData *input = this->GetInput();
-  float *scalarPointer = static_cast<float *>(input->GetScalarPointer());
-  int numberOfComponents = input->GetNumberOfScalarComponents();
+                                                         double    range[2]) {
+  vtkImageData *input         = this->GetInput();
+  float *       scalarPointer = static_cast<float *>(input->GetScalarPointer());
+  int           numberOfComponents = input->GetNumberOfScalarComponents();
   if (component >= numberOfComponents) {
     vtkErrorMacro("The component index requested is out of bounds of the "
                   "number of components: "
                   << component << " >= " << numberOfComponents);
     return;
   }
-  int numberOfTuples = input->GetNumberOfPoints();
+  int numberOfTuples  = input->GetNumberOfPoints();
   int numberOfScalars = numberOfComponents * numberOfTuples;
 
   range[0] = VTK_DOUBLE_MAX;

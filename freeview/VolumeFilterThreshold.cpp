@@ -1,16 +1,11 @@
 /**
- * @file  VolumeFilterThreshold.cpp
  * @brief Base VolumeFilterThreshold class.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/06/03 20:56:14 $
- *    $Revision: 1.1 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,14 +19,14 @@
  */
 
 #include "VolumeFilterThreshold.h"
-#include <math.h>
 #include "LayerMRI.h"
-#include <vtkImageData.h>
-#include <vtkImageThreshold.h>
-#include <vtkImageCast.h>
-#include <vtkPointData.h>
+#include <math.h>
 #include <vtkDataArray.h>
+#include <vtkImageCast.h>
+#include <vtkImageData.h>
 #include <vtkImageShiftScale.h>
+#include <vtkImageThreshold.h>
+#include <vtkPointData.h>
 
 VolumeFilterThreshold::VolumeFilterThreshold(LayerMRI *input, LayerMRI *output,
                                              QObject *parent)

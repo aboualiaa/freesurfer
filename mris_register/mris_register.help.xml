@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_register</name>
-	<synopsis>mris_register [options] &lt;surf_fname&gt; &lt;target&gt; &lt;out_fname&gt;</synopsis>
-	<description>This program registers a surface to an average surface template.</description>
+  <name>mris_register</name>
+  <synopsis>mris_register [options] &lt;surf_fname&gt; &lt;target&gt; &lt;out_fname&gt;</synopsis>
+  <description>This program registers a surface to an average surface template.</description>
   <arguments>
     <positional>
       <argument>&lt;surf_fname&gt;</argument>
@@ -125,6 +124,8 @@
       <explanation>Mirror image reverse brain before morphing</explanation>
       <argument>-rotate &lt;dalpha, dbeta, dgamma (floats)&gt;</argument>
       <explanation>Rotates brain by dalpha, dbeta, dgamma</explanation>
+      <argument>-reg regfile.lta</argument>
+      <explanation>Extract rotational components from registration and rotates brain</explanation>
       <argument>-S &lt;scale (float)&gt;</argument>
       <explanation>Scales distances by {scale}</explanation>
       <argument>-search</argument>
@@ -154,4 +155,3 @@
   </arguments>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

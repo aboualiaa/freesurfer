@@ -1,17 +1,6 @@
-/**
- * @file  repair_siemens_file.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:35 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,15 +12,15 @@
  *
  */
 
+#include "const.h"
+#include "error.h"
+#include "version.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h> // for swab on linux
-#include "const.h"
-#include "error.h"
-#include "version.h"
 
-#define OLD_APPEND ".orig"
+#define OLD_APPEND    ".orig"
 #define HEADER_LENGTH 6144
 
 const char *Progname;
@@ -76,11 +65,11 @@ int repair_file(char *fname) {
   FILE *fp;
   short rows, cols;
   short bits_per_voxel, bytes_per_voxel;
-  int file_length;
-  char header[HEADER_LENGTH];
+  int   file_length;
+  char  header[HEADER_LENGTH];
   char *data;
-  int data_bytes;
-  char new_fname[STRLEN];
+  int   data_bytes;
+  char  new_fname[STRLEN];
 
   if ((fp = fopen(fname, "r")) == NULL) {
     fprintf(stderr, "can't open file %s for reading\n", fname);

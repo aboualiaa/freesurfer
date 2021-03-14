@@ -1,7 +1,7 @@
 #include "kvlAtlasMeshCollectionModelLikelihoodCalculator.h"
 
-#include "kvlAtlasMeshLabelImageStatisticsCollector.h"
 #include "itkTimeProbe.h"
+#include "kvlAtlasMeshLabelImageStatisticsCollector.h"
 
 namespace kvl {
 
@@ -10,7 +10,7 @@ namespace kvl {
 //
 AtlasMeshCollectionModelLikelihoodCalculator ::
     AtlasMeshCollectionModelLikelihoodCalculator() {
-  m_MeshCollection = 0;
+  m_MeshCollection         = 0;
   m_CompressionLookupTable = 0;
 }
 
@@ -25,8 +25,8 @@ AtlasMeshCollectionModelLikelihoodCalculator ::
 //
 void AtlasMeshCollectionModelLikelihoodCalculator ::SetLabelImages(
     const std::vector<LabelImageType::ConstPointer> &labelImages,
-    const CompressionLookupTable *compressionLookupTable) {
-  m_LabelImages = labelImages;
+    const CompressionLookupTable *                   compressionLookupTable) {
+  m_LabelImages            = labelImages;
   m_CompressionLookupTable = compressionLookupTable;
 }
 
@@ -40,17 +40,16 @@ void AtlasMeshCollectionModelLikelihoodCalculator ::GetDataCostAndAlphasCost(
     itkExceptionMacro(<< "No mesh collection or label images set.");
   }
 
-  // Allocate a container to hold the total amount of pixels assigned to each
-  // vertex, summed over all label images
+  // Allocate a container to hold the total amount of pixels assigned to each vertex,
+  // summed over all label images
   itk::TimeProbe probe;
   if (verbose) {
     probe.Start();
-    // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: allocating
-    // pixel count container..." << std::flush;
+    // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: allocating pixel count container..." << std::flush;
   }
 
   typedef itk::MapContainer<AtlasMesh::PointIdentifier, double>
-      PixelCountContainerType;
+                                   PixelCountContainerType;
   PixelCountContainerType::Pointer pixelCounts = PixelCountContainerType::New();
   for (AtlasMesh::PointDataContainer::ConstIterator pointParamIt =
            m_MeshCollection->GetPointParameters()->Begin();
@@ -64,11 +63,11 @@ void AtlasMeshCollectionModelLikelihoodCalculator ::GetDataCostAndAlphasCost(
     // std::cout << "done (" << probe.GetMeanTime() << " seconds)" << std::endl;
   }
 
-  // Loop over all label images, adding each image's contribution to the data
-  // cost and to the total amount of pixels assigned to each vertex
+  // Loop over all label images, adding each image's contribution to the data cost and to
+  // the total amount of pixels assigned to each vertex
   dataCost = 0;
   typedef AtlasMeshLabelImageStatisticsCollector::StatisticsContainerType
-      StatisticsContainerType;
+                                                  StatisticsContainerType;
   AtlasMeshLabelImageStatisticsCollector::Pointer statisticsCollector =
       AtlasMeshLabelImageStatisticsCollector::New();
   for (int labelImageNumber = 0; labelImageNumber < m_LabelImages.size();
@@ -79,25 +78,19 @@ void AtlasMeshCollectionModelLikelihoodCalculator ::GetDataCostAndAlphasCost(
     if (verbose) {
       probe = itk::TimeProbe();
       probe.Start();
-      // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: calculating
-      // statistics for label image " << labelImageNumber << "..." <<
-      // std::flush;
+      // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: calculating statistics for label image " << labelImageNumber << "..." << std::flush;
     }
 
     statisticsCollector->Rasterize(m_MeshCollection->GetMesh(labelImageNumber));
 
     if (verbose) {
       probe.Stop();
-      // std::cout << "done (" << probe.GetMeanTime() << " seconds)" <<
-      // std::endl; std::cout << "AtlasMeshCollectionModelLikelihoodCalculator:
-      // number of threads used was " <<
-      // statisticsCollector->GetNumberOfThreads() << std::endl;
+      // std::cout << "done (" << probe.GetMeanTime() << " seconds)" << std::endl;
+      // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: number of threads used was " << statisticsCollector->GetNumberOfThreads() << std::endl;
 
       probe = itk::TimeProbe();
       probe.Start();
-      // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: addition
-      // likelihood contribution from label image " << labelImageNumber << "..."
-      // << std::flush;
+      // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: addition likelihood contribution from label image " << labelImageNumber << "..." << std::flush;
     }
 
     // Add contribution to data cost of this label image
@@ -105,14 +98,11 @@ void AtlasMeshCollectionModelLikelihoodCalculator ::GetDataCostAndAlphasCost(
 
     if (verbose) {
       probe.Stop();
-      // std::cout << "done (" << probe.GetMeanTime() << " seconds)" <<
-      // std::endl;
+      // std::cout << "done (" << probe.GetMeanTime() << " seconds)" << std::endl;
 
       probe = itk::TimeProbe();
       probe.Start();
-      // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: retreiving
-      // statistics from label image " << labelImageNumber << "..." <<
-      // std::flush;
+      // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: retreiving statistics from label image " << labelImageNumber << "..." << std::flush;
     }
 
     // Add pixel counts
@@ -120,14 +110,11 @@ void AtlasMeshCollectionModelLikelihoodCalculator ::GetDataCostAndAlphasCost(
         statisticsCollector->GetLabelStatistics()->Begin();
     if (verbose) {
       probe.Stop();
-      // std::cout << "done (" << probe.GetMeanTime() << " seconds)" <<
-      // std::endl;
+      // std::cout << "done (" << probe.GetMeanTime() << " seconds)" << std::endl;
 
       probe = itk::TimeProbe();
       probe.Start();
-      // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: adding
-      // statistics from label image " << labelImageNumber << "..." <<
-      // std::flush;
+      // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: adding statistics from label image " << labelImageNumber << "..." << std::flush;
     }
 
     PixelCountContainerType::Iterator pixelCountIt = pixelCounts->Begin();
@@ -138,31 +125,26 @@ void AtlasMeshCollectionModelLikelihoodCalculator ::GetDataCostAndAlphasCost(
 
     if (verbose) {
       probe.Stop();
-      // std::cout << "done (" << probe.GetMeanTime() << " seconds)" <<
-      // std::endl;
+      // std::cout << "done (" << probe.GetMeanTime() << " seconds)" << std::endl;
     }
 
   } // End loop over all images
 
-  // Loop over all vertices, each time adding each contribution to the alphas
-  // cost
+  // Loop over all vertices, each time adding each contribution to the alphas cost
   if (verbose) {
     probe = itk::TimeProbe();
     probe.Start();
-    // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: computing
-    // alphas cost..." << std::flush;
+    // std::cout << "AtlasMeshCollectionModelLikelihoodCalculator: computing alphas cost..." << std::flush;
   }
 
   alphasCost = 0;
   unsigned int numberOfLabels =
       m_MeshCollection->GetPointParameters()->Begin().Value().m_Alphas.Size();
 
-  // We don't "allow" more than three labels simultaneously to have non-zero
-  // alpha. The alpha cost is therefore the cost of sending three alpha values,
-  // PLUS the cost of sending which combination we are sending. The last cost is
-  // simply -log( 1/C ), with C the number of combinations of three classes in
-  // the total amount of classes: C = numberOfLabels! / 3! / ( numberOfLabels -
-  // 3)!
+  // We don't "allow" more than three labels simultaneously to have non-zero alpha. The alpha cost is therefore
+  // the cost of sending three alpha values, PLUS the cost of sending which combination we are sending. The last
+  // cost is simply -log( 1/C ), with C the number of combinations of three classes in the total amount of classes:
+  // C = numberOfLabels! / 3! / ( numberOfLabels - 3)!
   double combinationSelectionCost = 0.0f;
   if (numberOfLabels > 3) {
     for (unsigned int i = numberOfLabels - 2; i <= numberOfLabels; i++) {
@@ -173,8 +155,7 @@ void AtlasMeshCollectionModelLikelihoodCalculator ::GetDataCostAndAlphasCost(
     }
     numberOfLabels = 3;
   }
-  //// std::cout << "combinationSelectionCost: " << combinationSelectionCost <<
-  ///std::endl;
+  //// std::cout << "combinationSelectionCost: " << combinationSelectionCost << std::endl;
 
   PixelCountContainerType::ConstIterator pixelCountIt = pixelCounts->Begin();
   AtlasMesh::PointDataContainer::ConstIterator pointParamIt =

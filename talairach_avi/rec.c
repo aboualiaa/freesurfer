@@ -1,14 +1,6 @@
-/**
- * @file  rec.c
- *
- */
 /*
  * Original Author: Avi Z. Snyder, Washington University
- *
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2007/05/05 00:00:07 $
- *    $Revision: 1.2 $
+ * 
  *
  * Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
  * Washington University, Mallinckrodt Institute of Radiology.
@@ -23,13 +15,13 @@
  *
  */
 
+#include <endianio.h>
+#include <pwd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h> /* R_OK and W_OK */
-#include <time.h>
-#include <pwd.h>
 #include <sys/utsname.h>
-#include <endianio.h>
+#include <time.h>
+#include <unistd.h> /* R_OK and W_OK */
 
 #include "rec.h"
 
@@ -39,12 +31,11 @@
 /* global variables */
 /********************/
 static char recfile[MAXL] = "";
-static char rcsid[] = "$Id: rec.c,v 1.2 2007/05/05 00:00:07 nicks Exp $";
 
-void rec_rcsid(void) { printf("%s\n", rcsid); }
+void rec_rcsid(void) { printf("%s\n", "freesurfer rec.c"); }
 
 const char *current_date_time() {
-  time_t tt = time(&tt);
+  time_t      tt       = time(&tt);
   const char *time_str = ctime(&tt);
   const char *override_time_str =
       getenv("FREESURFER_REPLACEMENT_FOR_CREATION_TIME_STRING");
@@ -55,7 +46,7 @@ const char *current_date_time() {
 
 int get_machine_info(char *string) {
   struct utsname u_name;
-  int rtn = 1, r;
+  int            rtn = 1, r;
 
   r = uname(&u_name);
   if (r >= 0) {
@@ -81,16 +72,16 @@ int printrec(char *string) {
 
 int catrec(char *file) {
   FILE *recfp;
-  char filerec[MAXL], command[MAXL];
-  int k, debug = 0;
-  int isimg;
+  char  filerec[MAXL], command[MAXL];
+  int   k, debug = 0;
+  int   isimg;
 
   if (access(recfile, W_OK)) {
     fprintf(stderr, "catrec: recfile not initialized\n");
     return -1;
   }
   strcpy(filerec, file);
-  k = strlen(filerec);
+  k     = strlen(filerec);
   isimg = (!strcmp(filerec + k - 4, ".img")) ||
           (!strcmp(filerec + k - 4, ".trk")) ||
           (!strcmp(filerec + k - 5, ".conc"));
@@ -115,9 +106,9 @@ int catrec(char *file) {
 
 int startrec(char *outfile, int argc, char *argv[], char *rcsid) {
   extern void get_time_usr(char *string);
-  FILE *recfp;
-  char *str, string[MAXL];
-  int k;
+  FILE *      recfp;
+  char *      str, string[MAXL];
+  int         k;
 
   strcpy(string, outfile);
   while ((str = strrchr(string, '.'))) {
@@ -144,9 +135,9 @@ int startrec(char *outfile, int argc, char *argv[], char *rcsid) {
 
 int startrecl(char *outfile, int argc, char *argv[], char *rcsid) {
   extern void get_time_usr(char *string);
-  FILE *recfp;
-  char *str, string[MAXL];
-  int k;
+  FILE *      recfp;
+  char *      str, string[MAXL];
+  int         k;
 
   strcpy(string, outfile);
   while ((str = strrchr(string, '.'))) {
@@ -175,9 +166,9 @@ int startrecl(char *outfile, int argc, char *argv[], char *rcsid) {
 int startrece(char *outfile, int argc, char *argv[], char *rcsid,
               char control) {
   extern void get_time_usr(char *string);
-  FILE *recfp;
-  char *str, string[MAXL];
-  int k, osbig;
+  FILE *      recfp;
+  char *      str, string[MAXL];
+  int         k, osbig;
 
   strcpy(string, outfile);
   while ((str = strrchr(string, '.'))) {
@@ -224,9 +215,9 @@ int startrece(char *outfile, int argc, char *argv[], char *rcsid,
 int startrecle(char *outfile, int argc, char *argv[], char *rcsid,
                char control) {
   extern void get_time_usr(char *string);
-  FILE *recfp;
-  char *str, string[MAXL];
-  int k, osbig;
+  FILE *      recfp;
+  char *      str, string[MAXL];
+  int         k, osbig;
 
   strcpy(string, outfile);
   while ((str = strrchr(string, '.'))) {
@@ -273,8 +264,8 @@ int startrecle(char *outfile, int argc, char *argv[], char *rcsid,
 
 int endrec(void) {
   extern void get_time_usr(char *string);
-  FILE *recfp;
-  char string[MAXL];
+  FILE *      recfp;
+  char        string[MAXL];
 
   if (!(recfp = fopen(recfile, "a"))) {
     fprintf(stderr, "endrec: recfile write error\n");

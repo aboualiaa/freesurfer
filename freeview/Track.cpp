@@ -1,16 +1,7 @@
-/**
- * @file  Track.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:48 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -38,12 +29,12 @@ void Track::Delete() {
 }
 
 void Track::Reset() {
-  nNum = 0;
-  fPts = 0;
-  nVoxels = 0;
+  nNum            = 0;
+  fPts            = 0;
+  nVoxels         = 0;
   nNumberOfVoxels = 0;
-  fLength = 0;
-  fProperty = 0;
+  fLength         = 0;
+  fProperty       = 0;
   fScalars.clear();
 }
 
@@ -52,7 +43,7 @@ bool Track::Update(const short *dim, const float *voxel_size) {
 
   if (nVoxels) {
     delete[] nVoxels;
-    nVoxels = NULL;
+    nVoxels         = NULL;
     nNumberOfVoxels = 0;
   }
 
@@ -64,7 +55,7 @@ bool Track::Update(const short *dim, const float *voxel_size) {
 bool Track::AddScalars(const short *dim, const float *voxel_size,
                        const float *value_ptr) {
   float *p = fPts;
-  int x, y, z;
+  int    x, y, z;
   float *v_ptr = new float[nNum];
 
   for (int i = 0; i < nNum; i++) {
@@ -137,7 +128,7 @@ void GetVoxels(short *n1, short *n2, QList<short> &indices_out) {
 void Track::GetVoxels(const float *track_pts_in, int n_pts_in, const short *dim,
                       const float *voxel_size, short **indices_out,
                       int *n_out) {
-  short n[3], m[3];
+  short        n[3], m[3];
   QList<short> indices;
   for (int i = 0; i < n_pts_in - 1; i++) {
     for (int j = 0; j < 3; j++) {
@@ -148,7 +139,7 @@ void Track::GetVoxels(const float *track_pts_in, int n_pts_in, const short *dim,
     }
     ::GetVoxels(n, m, indices);
   }
-  *n_out = indices.size() / 3;
+  *n_out       = indices.size() / 3;
   *indices_out = new short[indices.size()];
   for (int i = 0; i < indices.size(); i++) {
     (*indices_out)[i] = indices[i];
@@ -231,8 +222,8 @@ angle_start);
 */
 
 float Track::GetMeanScalar(int nIndex) {
-  float *p = fScalars[nIndex];
-  double len = 0;
+  float *p     = fScalars[nIndex];
+  double len   = 0;
   double dMean = 0;
   for (int i = 0; i < nNum - 1; i++) {
     //  qDebug() << p[i] << p[i+1];

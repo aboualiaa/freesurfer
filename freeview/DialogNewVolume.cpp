@@ -1,16 +1,7 @@
-/**
- * @file  DialogNewVolume.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2012/01/19 20:35:05 $
- *    $Revision: 1.18 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,10 +13,10 @@
  *
  */
 #include "DialogNewVolume.h"
-#include "ui_DialogNewVolume.h"
-#include "LayerMRI.h"
 #include "LayerCollection.h"
+#include "LayerMRI.h"
 #include "MainWindow.h"
+#include "ui_DialogNewVolume.h"
 #include <QMessageBox>
 
 DialogNewVolume::DialogNewVolume(QWidget *parent)
@@ -35,7 +26,7 @@ DialogNewVolume::DialogNewVolume(QWidget *parent)
   LayerCollection *col_mri =
       MainWindow::GetMainWindow()->GetLayerCollection("MRI");
   QList<Layer *> layers = col_mri->GetLayers();
-  int nSel = 0;
+  int            nSel   = 0;
   for (int i = 0; i < layers.size(); i++) {
     ui->comboBoxTemplate->addItem(layers[i]->GetName(),
                                   QVariant::fromValue((QObject *)layers[i]));

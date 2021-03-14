@@ -127,8 +127,8 @@ class VTKGUISUPPORTQT_EXPORT QVTKOpenGLNativeWidget : public QOpenGLWidget {
   typedef QOpenGLWidget Superclass;
 
 public:
-  QVTKOpenGLNativeWidget(QWidget *parent = Q_NULLPTR,
-                         Qt::WindowFlags f = Qt::WindowFlags());
+  QVTKOpenGLNativeWidget(QWidget *       parent = Q_NULLPTR,
+                         Qt::WindowFlags f      = Qt::WindowFlags());
   ~QVTKOpenGLNativeWidget() override;
 
   //@{
@@ -137,8 +137,8 @@ public:
    * GetRenderWindow() creates and returns a new vtkGenericOpenGLRenderWindow
    * if it is not already provided.
    */
-  void SetRenderWindow(vtkGenericOpenGLRenderWindow *win);
-  void SetRenderWindow(vtkRenderWindow *win);
+  void                     SetRenderWindow(vtkGenericOpenGLRenderWindow *win);
+  void                     SetRenderWindow(vtkRenderWindow *win);
   virtual vtkRenderWindow *GetRenderWindow();
   //@}
 
@@ -159,7 +159,7 @@ public:
    * Sets up vtkRenderWindow ivars using QSurfaceFormat.
    */
   static void copyFromFormat(const QSurfaceFormat &format,
-                             vtkRenderWindow *win);
+                             vtkRenderWindow *     win);
 
   /**
    * Using the vtkRenderWindow, setup QSurfaceFormat.
@@ -263,10 +263,10 @@ protected:
 
 protected:
   vtkSmartPointer<vtkGenericOpenGLRenderWindow> RenderWindow;
-  QVTKInteractorAdapter *InteractorAdapter;
+  QVTKInteractorAdapter *                       InteractorAdapter;
 
   bool EnableHiDPI;
-  int OriginalDPI;
+  int  OriginalDPI;
 
   static const double DevicePixelRatioTolerance;
 
@@ -279,9 +279,9 @@ private:
    */
   void windowFrameEventCallback();
 
-  QOpenGLFramebufferObject *FBO;
-  bool InPaintGL;
-  bool DoVTKRenderInPaintGL;
+  QOpenGLFramebufferObject *             FBO;
+  bool                                   InPaintGL;
+  bool                                   DoVTKRenderInPaintGL;
   vtkNew<QVTKOpenGLNativeWidgetObserver> Observer;
   friend class QVTKOpenGLNativeWidgetObserver;
   QOpenGLDebugLogger *Logger;

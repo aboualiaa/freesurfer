@@ -9,19 +9,14 @@ function [par,t0avg] = fmri_synthpar3(npercond,tpercond,nruns,trun,tres,tprescan
 % tprescan - time of first stimulus prior to scanning (not included
 %            in trun).
 %
-% '$Id: fmri_synthpar3.m,v 1.3 2011/03/02 00:04:06 nicks Exp $'
 
 
 %
 % fmri_synthpar3.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:06 $
-%    $Revision: 1.3 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

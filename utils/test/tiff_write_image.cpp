@@ -1,5 +1,4 @@
 /**
- * @file  tiff_write_image.c
  * @brief Tests a call to MRItoImageView, ImageWrite, and TiffWriteImage
  *
  * This is meant to generate a TIFF from a volume. It can be used to
@@ -9,12 +8,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,37 +21,37 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
+#include "mri_circulars.h"
+#include "mrimorph.h"
 #include "proto.h"
 #include "version.h"
-#include "mrimorph.h"
-#include "mri_circulars.h"
 
 const char *Progname;
 
 int main(int argc, char **argv) {
 
-  int nargs;
-  char mri_fname[STRLEN];
-  char tiff_fname[STRLEN];
-  MRI *mri;
-  int slice;
+  int    nargs;
+  char   mri_fname[STRLEN];
+  char   tiff_fname[STRLEN];
+  MRI *  mri;
+  int    slice;
   IMAGE *image;
 
   Progname = argv[0];
 
   nargs = handleVersionOption(argc, argv, "tiff_write_image");
-  argc -= nargs ;
+  argc -= nargs;
   if (1 == argc)
     exit(0);
 

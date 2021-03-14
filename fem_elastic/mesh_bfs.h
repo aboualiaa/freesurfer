@@ -20,9 +20,9 @@ template <class TMesh> class TMeshBfs {
 public:
   typedef TMesh MeshType;
 
-  typedef typename MeshType::tNode NodeType;
+  typedef typename MeshType::tNode    NodeType;
   typedef typename MeshType::tElement ElementType;
-  typedef typename MeshType::tCoords CoordsType;
+  typedef typename MeshType::tCoords  CoordsType;
 
   typedef std::vector<unsigned int> IndexContainerType;
 
@@ -50,10 +50,10 @@ template <class T, unsigned int n> class CircularArray {
 public:
   CircularArray() : m_counter(0) {}
 
-  inline T &current() { return m_data[m_counter % n]; }
+  inline T &      current() { return m_data[m_counter % n]; }
   inline const T &current() const { return m_data[m_counter % n]; }
 
-  inline T &getIncrement(int i) { return m_data[(m_counter + i) % n]; }
+  inline T &      getIncrement(int i) { return m_data[(m_counter + i) % n]; }
   inline const T &getIncrement(int i) const {
     return m_data[(m_counter + i) % n];
   }
@@ -61,7 +61,7 @@ public:
 
 protected:
   int m_counter;
-  T m_data[n];
+  T   m_data[n];
 };
 
 template <class T> class BiCircularArray : public CircularArray<T, 2> {
@@ -73,7 +73,7 @@ public:
     else
       this->shift(1);
   }
-  inline T &other() { return this->getIncrement(1); }
+  inline T &      other() { return this->getIncrement(1); }
   inline const T &other() const { return this->getIncrement(1); }
 };
 
@@ -86,9 +86,9 @@ template <class TMesh>
 template <class OutputIterator>
 void TMeshBfs<TMesh>::Visit(unsigned int seed, unsigned int radius,
                             OutputIterator oit) {
-  typedef std::set<unsigned int> IndexSetType;
+  typedef std::set<unsigned int>    IndexSetType;
   typedef std::vector<unsigned int> IndexVectorType;
-  typedef std::queue<unsigned int> IndexQueueType;
+  typedef std::queue<unsigned int>  IndexQueueType;
 
   typename NodeType::tElt_citer eltBegin, eltEnd;
   IndexSetType nodeSet; // contains the nodes which have already been visited
@@ -97,7 +97,7 @@ void TMeshBfs<TMesh>::Visit(unsigned int seed, unsigned int radius,
   BiCircularArray<IndexQueueType> queueSwitch;
 
   const ElementType *cpElt;
-  NodeType *pnode;
+  NodeType *         pnode;
 
   if (!m_pmesh)
     throw std::string(" NULL mesh in TMeshBfs");
@@ -108,7 +108,7 @@ void TMeshBfs<TMesh>::Visit(unsigned int seed, unsigned int radius,
   // the radius refers to the ELEMENT graph
   //
   while (radius-- && !queueSwitch.current().empty()) {
-    IndexSetType eltWave;
+    IndexSetType                       eltWave;
     std::insert_iterator<IndexSetType> iiSet(eltWave, eltWave.begin());
 
     while (!queueSwitch.current().empty()) {
@@ -143,7 +143,7 @@ void TMeshBfs<TMesh>::Visit(unsigned int seed, unsigned int radius,
 
     // the next queue will be made up from the set difference
     // between the nodes already visited and the current candidates
-    IndexVectorType vec;
+    IndexVectorType                       vec;
     std::insert_iterator<IndexVectorType> iiVec(vec, vec.begin());
     std::set_difference(eltWave.begin(), eltWave.end(), elementSet.begin(),
                         elementSet.end(), iiVec);

@@ -17,8 +17,8 @@
 #ifndef __itkPointSetToImageFilter_h
 #define __itkPointSetToImageFilter_h
 
-#include "itkImageSource.h"
 #include "itkConceptChecking.h"
+#include "itkImageSource.h"
 
 namespace itk {
 
@@ -32,13 +32,13 @@ template <class TInputPointSet, class TOutputImage>
 class ITK_EXPORT PointSetToImageFilter : public ImageSource<TOutputImage> {
 public:
   /** Standard class typedefs. */
-  typedef PointSetToImageFilter Self;
-  typedef ImageSource<TOutputImage> Superclass;
-  typedef SmartPointer<Self> Pointer;
-  typedef SmartPointer<const Self> ConstPointer;
-  typedef typename TOutputImage::SizeType SizeType;
-  typedef TOutputImage OutputImageType;
-  typedef typename OutputImageType::Pointer OutputImagePointer;
+  typedef PointSetToImageFilter               Self;
+  typedef ImageSource<TOutputImage>           Superclass;
+  typedef SmartPointer<Self>                  Pointer;
+  typedef SmartPointer<const Self>            ConstPointer;
+  typedef typename TOutputImage::SizeType     SizeType;
+  typedef TOutputImage                        OutputImageType;
+  typedef typename OutputImageType::Pointer   OutputImagePointer;
   typedef typename OutputImageType::ValueType ValueType;
 
   /** Method for creation through the object factory. */
@@ -51,8 +51,8 @@ public:
   typedef typename Superclass::OutputImageRegionType OutputImageRegionType;
 
   /** Some convenient typedefs. */
-  typedef TInputPointSet InputPointSetType;
-  typedef typename InputPointSetType::Pointer InputPointSetPointer;
+  typedef TInputPointSet                           InputPointSetType;
+  typedef typename InputPointSetType::Pointer      InputPointSetPointer;
   typedef typename InputPointSetType::ConstPointer InputPointSetConstPointer;
 
   /** Dimension constants */
@@ -63,7 +63,7 @@ public:
 
   /** Image spacing and origin typedefs */
   typedef typename TOutputImage::SpacingType SpacingType;
-  typedef typename TOutputImage::PointType PointType;
+  typedef typename TOutputImage::PointType   PointType;
 
   /** Set/Get the input point-set of this process object.  */
   virtual void SetInput(const InputPointSetType *pointset);
@@ -128,11 +128,11 @@ protected:
   virtual void GenerateOutputInformation(){}; // do nothing
   virtual void GenerateData();
 
-  SizeType m_Size;
+  SizeType    m_Size;
   SpacingType m_Spacing;
-  PointType m_Origin;
-  ValueType m_InsideValue;
-  ValueType m_OutsideValue;
+  PointType   m_Origin;
+  ValueType   m_InsideValue;
+  ValueType   m_OutsideValue;
 
   virtual void PrintSelf(std::ostream &os, Indent indent) const;
 

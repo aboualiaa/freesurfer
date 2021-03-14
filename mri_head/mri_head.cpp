@@ -1,17 +1,6 @@
-/**
- * @file  mri_head.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:16 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,10 +18,10 @@
 #include "mri_identify.h"
 #include "version.h"
 
-#define ACTION_NONE 0
-#define ACTION_USAGE 1
+#define ACTION_NONE     0
+#define ACTION_USAGE    1
 #define ACTION_IDENTIFY 2
-#define ACTION_READ 3
+#define ACTION_READ     3
 
 void get_options(int argc, char *argv[]);
 void usage(int exit_val);
@@ -54,7 +43,7 @@ int main(int argc, char *argv[]) {
     exit(0);
   argc -= nargs;
 
-  prog_name = argv[0];
+  prog_name       = argv[0];
   short_prog_name = strrchr(prog_name, '/');
   short_prog_name =
       (short_prog_name == nullptr ? prog_name : short_prog_name + 1);
@@ -109,7 +98,7 @@ void usage(int exit_val) {
 
 void dummy_identify() {
 
-  int type;
+  int         type;
   struct stat stat_buf;
 
   if (fname == nullptr)

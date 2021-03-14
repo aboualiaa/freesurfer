@@ -4,8 +4,8 @@
 
 #include "atlasmeshvisitcounter.hpp"
 
-#include "dimensioncuda.hpp"
 #include "cudaimage.hpp"
+#include "dimensioncuda.hpp"
 #include "stopwatch.hpp"
 
 #include "visitcountersimplecudaimpl.hpp"
@@ -52,7 +52,7 @@ public:
 
     // Extract co-ordinates
     Dimension<3, unsigned long> tetArrDims;
-    std::vector<T> tetrahedra;
+    std::vector<T>              tetrahedra;
     tetArrDims[0] = tetrahedronIds.size();
     tetArrDims[1] = nVertices;
     tetArrDims[2] = nDims;
@@ -62,7 +62,7 @@ public:
       AtlasMesh::CellAutoPointer cell;
       mesh->GetCell(tetrahedronIds.at(iTet), cell);
 
-      auto pit = cell->PointIdsBegin();
+      auto          pit     = cell->PointIdsBegin();
       unsigned long iVertex = 0;
       for (auto pit = cell->PointIdsBegin(); pit != cell->PointIdsEnd();
            ++pit) {
@@ -95,7 +95,7 @@ public:
 
   virtual const VisitCounterSimple<T, Internal>::ImageType *
   GetImage() const override {
-    std::vector<int> tmp;
+    std::vector<int>                                 tmp;
     CudaImage<int, 3, unsigned short>::DimensionType dims;
 
     this->tGetImage.Start();
@@ -109,7 +109,7 @@ public:
     for (unsigned short k = 0; k < dims[0]; k++) {
       for (unsigned short j = 0; j < dims[1]; j++) {
         for (unsigned short i = 0; i < dims[2]; i++) {
-          auto result = tmp.at(dims.GetLinearIndex(k, j, i));
+          auto                 result = tmp.at(dims.GetLinearIndex(k, j, i));
           ImageType::IndexType idx;
           idx[0] = i;
           idx[1] = j;
@@ -133,10 +133,10 @@ public:
   mutable kvl::Stopwatch tGetImageTransfer, tGetImageUnpack;
 
 private:
-  const int nDims = 3;
+  const int nDims     = 3;
   const int nVertices = 4;
 
-  CudaImage<int, 3, unsigned short> d_Output;
+  CudaImage<int, 3, unsigned short>                   d_Output;
   VisitCounterSimple<T, Internal>::ImageType::Pointer image;
 };
 } // namespace cuda

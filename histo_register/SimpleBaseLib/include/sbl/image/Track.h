@@ -47,7 +47,7 @@ public:
 
 private:
   // the track data
-  int m_startFrameIndex;
+  int     m_startFrameIndex;
   VectorF m_x;
   VectorF m_y;
 
@@ -71,7 +71,7 @@ public:
   inline int count() const { return m_tracks.count(); }
 
   /// access a track
-  inline Track &track(int index) { return m_tracks[index]; }
+  inline Track &      track(int index) { return m_tracks[index]; }
   inline const Track &track(int index) const { return m_tracks[index]; }
 
   /// add a track to the set; takes ownership of pointer (don't deallocate

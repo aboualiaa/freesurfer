@@ -1,16 +1,11 @@
 /**
- * @file  RenderView2D.cpp
  * @brief 2D slice view
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/02 16:40:06 $
- *    $Revision: 1.79 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,54 +18,55 @@
  */
 #include "RenderView2D.h"
 #include "LayerCollection.h"
-#include "MainWindow.h"
 #include "LayerLineProfile.h"
-#include "LayerSurface.h"
 #include "LayerMRI.h"
+#include "LayerSurface.h"
+#include "MainWindow.h"
+#include "ui_MainWindow.h"
 // #undef isfinite
-#include "LayerPropertyMRI.h"
-#include "Contour2D.h"
-#include "VolumeCropper.h"
-#include <vtkRenderer.h>
-#include <vtkCamera.h>
-#include <vtkImageActor.h>
-#include <vtkTextActor.h>
 #include "Annotation2D.h"
-#include "Interactor2DNavigate.h"
-#include "Interactor2DMeasure.h"
-#include "Interactor2DVoxelEdit.h"
-#include "Interactor2DROIEdit.h"
-#include "Interactor2DPointSetEdit.h"
-#include "Interactor2DVolumeCrop.h"
-#include <vtkActor2D.h>
-#include <vtkScalarBarActor.h>
-#include "Region2DRectangle.h"
+#include "Contour2D.h"
 #include "Cursor2D.h"
+#include "Interactor2DMeasure.h"
+#include "Interactor2DNavigate.h"
+#include "Interactor2DPointSetEdit.h"
+#include "Interactor2DROIEdit.h"
+#include "Interactor2DVolumeCrop.h"
+#include "Interactor2DVoxelEdit.h"
+#include "LayerPropertyMRI.h"
 #include "MyUtils.h"
+#include "Region2DRectangle.h"
+#include "VolumeCropper.h"
 #include <QActionGroup>
-#include <QMessageBox>
-#include <QMenu>
-#include <QDebug>
 #include <QApplication>
 #include <QClipboard>
+#include <QDebug>
+#include <QMenu>
+#include <QMessageBox>
+#include <vtkActor2D.h>
+#include <vtkCamera.h>
+#include <vtkImageActor.h>
+#include <vtkRenderer.h>
+#include <vtkScalarBarActor.h>
+#include <vtkTextActor.h>
 
 RenderView2D::RenderView2D(QWidget *parent) : RenderView(parent) {
   m_renderer->GetActiveCamera()->ParallelProjectionOn();
-  m_contour2D = new Contour2D(this);
-  m_cursor2D = new Cursor2D(this);
+  m_contour2D    = new Contour2D(this);
+  m_cursor2D     = new Cursor2D(this);
   m_annotation2D = new Annotation2D(this);
-  m_selection2D = new Region2DRectangle(this);
+  m_selection2D  = new Region2DRectangle(this);
   m_selection2D->SetEnableStats(false);
   connect(m_cursor2D, SIGNAL(Updated()), this, SLOT(RequestRedraw()));
   connect(m_annotation2D, SIGNAL(Updated()), this, SLOT(RequestRedraw()));
   connect(this, SIGNAL(ViewChanged()), this, SLOT(Update2DOverlay()));
 
-  m_interactorNavigate = new Interactor2DNavigate(this);
-  m_interactorMeasure = new Interactor2DMeasure(this);
-  m_interactorVoxelEdit = new Interactor2DVoxelEdit(this);
-  m_interactorROIEdit = new Interactor2DROIEdit(this);
+  m_interactorNavigate     = new Interactor2DNavigate(this);
+  m_interactorMeasure      = new Interactor2DMeasure(this);
+  m_interactorVoxelEdit    = new Interactor2DVoxelEdit(this);
+  m_interactorROIEdit      = new Interactor2DROIEdit(this);
   m_interactorPointSetEdit = new Interactor2DPointSetEdit(this);
-  m_interactorVolumeCrop = new Interactor2DVolumeCrop(this);
+  m_interactorVolumeCrop   = new Interactor2DVolumeCrop(this);
   connect(m_interactorMeasure, SIGNAL(Error(QString)), this,
           SLOT(OnInteractorError(QString)));
   connect(m_interactorVoxelEdit, SIGNAL(Error(QString)), this,
@@ -117,9 +113,9 @@ void RenderView2D::SetInteractionMode(int nMode) {
 }
 
 void RenderView2D::RefreshAllActors(bool bForScreenShot) {
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
+  MainWindow *       mainwnd = MainWindow::GetMainWindow();
   SettingsScreenshot setting = mainwnd->GetScreenShotSettings();
-  LayerCollection *lc = mainwnd->GetLayerCollection("MRI");
+  LayerCollection *  lc      = mainwnd->GetLayerCollection("MRI");
   m_renderer->RemoveAllViewProps();
   lc->Append2DProps(m_renderer, m_nViewPlane);
 
@@ -156,6 +152,7 @@ void RenderView2D::RefreshAllActors(bool bForScreenShot) {
   mainwnd->GetLayerCollection("FCD")->Append2DProps(m_renderer, m_nViewPlane);
   mainwnd->GetLayerCollection("Surface")->Append2DProps(m_renderer,
                                                         m_nViewPlane);
+  mainwnd->GetLayerCollection("ODF")->Append2DProps(m_renderer, m_nViewPlane);
   mainwnd->GetLayerCollection("PointSet")
       ->Append2DProps(m_renderer, m_nViewPlane);
   mainwnd->GetLayerCollection("Supplement")
@@ -187,7 +184,7 @@ void RenderView2D::RefreshAllActors(bool bForScreenShot) {
 
 void RenderView2D::UpdateViewByWorldCoordinate() {
   vtkCamera *cam = m_renderer->GetActiveCamera();
-  double wcenter[3];
+  double     wcenter[3];
   for (int i = 0; i < 3; i++) {
     wcenter[i] = m_dWorldOrigin[i] + m_dWorldSize[i] / 2;
   }
@@ -385,7 +382,7 @@ void RenderView2D::StopSelection() {
       m_selection2D->GetWorldPoint(0, m_dPt0);
       m_selection2D->GetWorldPoint(2, m_dPt2);
       int nColorMap = layer->GetProperty()->GetColorMap();
-      if (layer->IsVisible() && nColorMap != LayerPropertyMRI::LUT &&
+      if (nColorMap != LayerPropertyMRI::LUT &&
           nColorMap != LayerPropertyMRI::DirectionCoded &&
           layer->GetVoxelValueRange(m_dPt0, m_dPt2, m_nViewPlane, range)) {
         switch (nColorMap) {
@@ -439,10 +436,10 @@ void RenderView2D::DeleteRegion(Region2D *region) {
 }
 
 void RenderView2D::MoveSlice(int nStep) {
-  MainWindow *mainWnd = MainWindow::GetMainWindow();
-  LayerCollection *lc_mri = mainWnd->GetLayerCollection("MRI");
-  double *voxelSize = lc_mri->GetWorldVoxelSize();
-  LayerMRI *mri = qobject_cast<LayerMRI *>(lc_mri->GetActiveLayer());
+  MainWindow *     mainWnd   = MainWindow::GetMainWindow();
+  LayerCollection *lc_mri    = mainWnd->GetLayerCollection("MRI");
+  double *         voxelSize = lc_mri->GetWorldVoxelSize();
+  LayerMRI *       mri = qobject_cast<LayerMRI *>(lc_mri->GetActiveLayer());
   if (mri) {
     if (!mri->IsVisible()) {
       for (int i = 0; i < lc_mri->GetNumberOfLayers(); i++) {
@@ -472,7 +469,7 @@ void RenderView2D::SyncZoomTo(RenderView2D *view) {
 
 bool RenderView2D::EnsureCursor2DVisible() {
   double *pos = GetCursor2D()->GetPosition();
-  double x = pos[0], y = pos[1], z = pos[2];
+  double  x = pos[0], y = pos[1], z = pos[2];
   m_renderer->WorldToView(x, y, z);
   m_renderer->ViewToNormalizedViewport(x, y, z);
   if (x < 0 || x > 1 || y < 0 || y > 1) {
@@ -546,20 +543,20 @@ bool RenderView2D::SetSliceNumber(int nNum) {
   }
 
   vtkImageData *imagedata = mri->GetImageData();
-  int nPlane = GetViewPlane();
-  int *dim = imagedata->GetDimensions();
+  int           nPlane    = GetViewPlane();
+  int *         dim       = imagedata->GetDimensions();
   if (nNum < 0 || nNum >= dim[nPlane]) {
     return false;
   }
 
-  int slice[3];
+  int    slice[3];
   double pos[3];
   lc_mri->GetSlicePosition(pos);
   mri->TargetToRAS(pos, pos);
   mri->RASToOriginalIndex(pos, slice);
-  QString ostr = mri->GetOrientationString();
-  int nOrigPlane = nPlane;
-  char ch[3][3] = {"RL", "AP", "IS"};
+  QString ostr       = mri->GetOrientationString();
+  int     nOrigPlane = nPlane;
+  char    ch[3][3]   = {"RL", "AP", "IS"};
   for (int i = 0; i < 3; i++) {
     if (ostr[i] == ch[nPlane][0] || ostr[i] == ch[nPlane][1]) {
       nOrigPlane = i;
@@ -576,9 +573,14 @@ bool RenderView2D::SetSliceNumber(int nNum) {
 }
 
 void RenderView2D::TriggerContextMenu(QMouseEvent *event) {
-  QMenu menu;
-  bool bShowBar = this->GetShowScalarBar();
-  QList<Layer *> layers = MainWindow::GetMainWindow()->GetLayers("MRI");
+  QMenu          menu;
+  bool           bShowBar = this->GetShowScalarBar();
+  MainWindow *   mainwnd  = MainWindow::GetMainWindow();
+  QList<Layer *> layers   = mainwnd->GetLayers("MRI");
+  foreach (Layer *layer, layers) {
+    if (!layer->IsVisible())
+      layers.removeOne(layer);
+  }
   Region2D *reg = GetRegion(event->x(), event->y());
   if (reg) {
     QAction *act = new QAction("Duplicate", this);
@@ -587,8 +589,8 @@ void RenderView2D::TriggerContextMenu(QMouseEvent *event) {
     menu.addAction(act);
   }
   if (layers.size() > 1) {
-    QMenu *menu2 = menu.addMenu("Show Color Bar");
-    QActionGroup *ag = new QActionGroup(this);
+    QMenu *       menu2 = menu.addMenu("Show Color Bar");
+    QActionGroup *ag    = new QActionGroup(this);
     ag->setExclusive(true);
     foreach (Layer *layer, layers) {
       QAction *act = new QAction(layer->GetName(), this);
@@ -608,18 +610,25 @@ void RenderView2D::TriggerContextMenu(QMouseEvent *event) {
 
     if (layers.size() == 1) {
       LayerMRI *mri = (LayerMRI *)layers.first();
-      double val = mri->GetVoxelValue(mri->GetSlicePosition());
-      QAction *act =
+      double    val = mri->GetVoxelValue(mri->GetSlicePosition());
+      QAction * act =
           new QAction(QString("Copy Voxel Value  (%1)").arg(val), this);
       act->setProperty("voxel_value", val);
       connect(act, SIGNAL(triggered()), SLOT(OnCopyVoxelValue()));
       menu.addAction(act);
+      if (((LayerMRI *)layers[0])->GetProperty()->GetColorMap() ==
+          LayerPropertyMRI::LUT) {
+        act = new QAction("Copy Label Volume", this);
+        act->setData(QVariant::fromValue((QObject *)mri));
+        connect(act, SIGNAL(triggered()), SLOT(OnCopyLabelVolume()));
+        menu.addAction(act);
+      }
     } else {
       QMenu *menu2 = menu.addMenu("Copy Voxel Value");
       foreach (Layer *layer, layers) {
         LayerMRI *mri = (LayerMRI *)layer;
-        double val = mri->GetVoxelValue(layer->GetSlicePosition());
-        QAction *act = new QAction(
+        double    val = mri->GetVoxelValue(layer->GetSlicePosition());
+        QAction * act = new QAction(
             layer->GetName() + "  (" + QString::number(val) + ")", this);
         act->setProperty("voxel_value", val);
         connect(act, SIGNAL(triggered()), SLOT(OnCopyVoxelValue()));
@@ -628,16 +637,23 @@ void RenderView2D::TriggerContextMenu(QMouseEvent *event) {
     }
   }
 
-  LayerSurface *surf =
-      (LayerSurface *)MainWindow::GetMainWindow()->GetActiveLayer("Surface");
+  LayerSurface *surf = (LayerSurface *)mainwnd->GetActiveLayer("Surface");
   if (surf && surf->IsContralateralPossible()) {
     if (!menu.actions().isEmpty())
       menu.addSeparator();
     QAction *act = new QAction("Go To Contralateral Point", this);
     menu.addAction(act);
-    connect(act, SIGNAL(triggered()), MainWindow::GetMainWindow(),
-            SLOT(GoToContralateralPoint()));
+    connect(act, SIGNAL(triggered()), mainwnd, SLOT(GoToContralateralPoint()));
   }
+
+  if (!mainwnd->IsEmpty() && mainwnd->GetMainView() == this) {
+    menu.addSeparator();
+    QAction *action = new QAction("Copy", this);
+    connect(action, SIGNAL(triggered(bool)), mainwnd, SLOT(OnCopyView()));
+    menu.addAction(action);
+    menu.addAction(mainwnd->ui->actionSaveScreenshot);
+  }
+
   if (!menu.actions().isEmpty())
     menu.exec(event->globalPos());
 }
@@ -690,4 +706,19 @@ void RenderView2D::OnCopyVoxelValue() {
   if (sender())
     QApplication::clipboard()->setText(
         sender()->property("voxel_value").toString());
+}
+
+void RenderView2D::OnCopyLabelVolume() {
+  QAction *act = qobject_cast<QAction *>(sender());
+  if (act) {
+    LayerMRI *mri = qobject_cast<LayerMRI *>(act->data().value<QObject *>());
+    if (mri) {
+      double          val   = mri->GetVoxelValue(mri->GetSlicePosition());
+      QVector<double> vlist = mri->GetVoxelList(val, true);
+      double          vs[3];
+      mri->GetWorldVoxelSize(vs);
+      QApplication::clipboard()->setText(
+          QString::number(vlist.size() / 3 * vs[0] * vs[1] * vs[2]));
+    }
+  }
 }

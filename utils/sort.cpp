@@ -7,7 +7,7 @@
 #ifdef SORT_TEST
 int main() {
   size_t capacity = 100000000;
-  int *elts = (int *)malloc(capacity * sizeof(int));
+  int *  elts     = (int *)malloc(capacity * sizeof(int));
   size_t size;
   for (size = 0; size < capacity; size = size * 3 + 7) {
     size_t i;

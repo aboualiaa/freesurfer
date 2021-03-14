@@ -26,7 +26,7 @@ protected slots:
 
 private:
   Ui::DialogLoadSurfaceOverlay *ui;
-  QString m_strLastDir;
+  QString                       m_strLastDir;
 };
 
 #endif // DIALOGLOADSURFACEOVERLAY_H

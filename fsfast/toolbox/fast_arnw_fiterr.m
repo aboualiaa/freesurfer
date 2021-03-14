@@ -37,12 +37,8 @@ function [err, racfexp] = fast_arnw_fiterr(p,racf,R,w,modeltype)
 % fast_arnw_fiterr.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:03 $
-%    $Revision: 1.7 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

@@ -1,16 +1,11 @@
 /**
- * @file  Interactor2DPointSetEdit.cpp
  * @brief Interactor for editing way points in 2D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/08/24 19:16:46 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,14 +19,14 @@
  */
 
 #include "Interactor2DPointSetEdit.h"
-#include "RenderView2D.h"
 #include "Cursor2D.h"
-#include "MainWindow.h"
-#include "LayerCollection.h"
-#include "LayerPropertyMRI.h"
-#include "LayerPointSet.h"
-#include "LayerMRI.h"
 #include "CursorFactory.h"
+#include "LayerCollection.h"
+#include "LayerMRI.h"
+#include "LayerPointSet.h"
+#include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "RenderView2D.h"
 #include <vtkRenderer.h>
 
 Interactor2DPointSetEdit::Interactor2DPointSetEdit(QObject *parent)
@@ -40,7 +35,7 @@ Interactor2DPointSetEdit::Interactor2DPointSetEdit(QObject *parent)
 Interactor2DPointSetEdit::~Interactor2DPointSetEdit() {}
 
 bool Interactor2DPointSetEdit::ProcessMouseDownEvent(QMouseEvent *event,
-                                                     RenderView *renderview) {
+                                                     RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   if (event->button() == Qt::LeftButton) {
@@ -61,7 +56,7 @@ bool Interactor2DPointSetEdit::ProcessMouseDownEvent(QMouseEvent *event,
       wp->SaveForUndo();
       m_nMousePosX = event->x();
       m_nMousePosY = event->y();
-      m_bEditing = true;
+      m_bEditing   = true;
 
       double ras[3];
       view->MousePositionToRAS(m_nMousePosX, m_nMousePosY, ras);
@@ -69,9 +64,11 @@ bool Interactor2DPointSetEdit::ProcessMouseDownEvent(QMouseEvent *event,
         m_nCurrentIndex = wp->FindPoint(ras);
         if (m_nCurrentIndex < 0) {
           m_nCurrentIndex = wp->AddPoint(ras);
+          m_bEditing      = false;
         }
-      } else {
-        wp->RemovePoint(ras);
+      } else if (wp->RemovePoint(ras)) {
+        m_nCurrentIndex = wp->GetNumberOfPoints() - 1;
+        m_bEditing      = false;
       }
     }
 
@@ -83,7 +80,7 @@ bool Interactor2DPointSetEdit::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor2DPointSetEdit::ProcessMouseUpEvent(QMouseEvent *event,
-                                                   RenderView *renderview) {
+                                                   RenderView * renderview) {
   // RenderView2D* view = ( RenderView2D* )renderview;
   UpdateCursor(event, renderview);
 
@@ -94,12 +91,12 @@ bool Interactor2DPointSetEdit::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor2DPointSetEdit::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                     RenderView *renderview) {
+                                                     RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
   if (m_bEditing) {
     UpdateCursor(event, view);
-    int posX = event->x();
-    int posY = event->y();
+    int posX     = event->x();
+    int posY     = event->y();
     m_nMousePosX = posX;
     m_nMousePosY = posY;
     if (m_nCurrentIndex >= 0) {
@@ -117,7 +114,7 @@ bool Interactor2DPointSetEdit::ProcessMouseMoveEvent(QMouseEvent *event,
   }
 }
 
-bool Interactor2DPointSetEdit::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor2DPointSetEdit::ProcessKeyDownEvent(QKeyEvent * event,
                                                    RenderView *renderview) {
   UpdateCursor(event, renderview);
 

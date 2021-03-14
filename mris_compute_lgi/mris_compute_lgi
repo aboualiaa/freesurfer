@@ -12,10 +12,6 @@
 # Schaer M. et al., IEEE Transactions on Medical Imaging, 2007, TMI-2007-0180
 #
 # Original Author: Marie Schaer
-# CVS Revision Info:
-#    $Author: nicks $
-#    $Date: 2009/01/26 22:14:05 $
-#    $Revision: 1.23 $
 #
 # Copyright (C) 2007-2008,
 # The General Hospital Corporation (Boston, MA).
@@ -30,7 +26,7 @@
 # Bug reports: analysis-bugs@nmr.mgh.harvard.edu
 #
 
-set VERSION = '$Id: mris_compute_lgi,v 1.23 2009/01/26 22:14:05 nicks Exp $'
+set VERSION = 'mris_compute_lgi @FS_VERSION@';
 set PrintHelp = 0;
 set RunIt = 1;
 set cmdargs = ($argv);
@@ -94,7 +90,7 @@ endif
 # make_outer_surface.m
 #
 # create the outer surface from the filled volume
-set MLF = /tmp/mos"_$$_".m
+set MLF = `fs_temp_file --suffix .m`
 set arg1 = ${tmpdir}/${input}.filled.mgz
 set arg2 = ${closespheresize}
 set arg3 =  ${tmpdir}/${input}-outer
@@ -190,7 +186,7 @@ endif
 # find_corresponding_center_FSformat.m
 #
 # create ROI center files
-set MLF = /tmp/mrc"_$$_".m
+set MLF = `fs_temp_file --suffix .m`
 set arg1 = ${input}
 set arg2 = ${input}-outer-smoothed
 set arg3 = ${stepsize}
@@ -214,7 +210,7 @@ endif
 # make_roi_paths.m
 #
 # create ROI path files
-set MLF = /tmp/mrp"_$$_".m
+set MLF = `fs_temp_file --suffix .m`
 set arg1 = ${input}
 set arg2 = ${input}-outer-smoothed
 set arg3 = ${radius}
@@ -270,7 +266,7 @@ endif
 #
 # finally, compute lGI measurements
 compute_lgi:
-set MLF = /tmp/clgi"_$$_".m
+set MLF = `fs_temp_file --suffix .m`
 set arg1 = ${input}
 set arg2 = ${input}-outer-smoothed
 set arg3 = ${tmpdir}/${input}-outer-smoothed-normals.asc

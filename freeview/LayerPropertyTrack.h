@@ -1,16 +1,7 @@
-/**
- * @file  LayerPropertyTrack.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/12/05 20:03:33 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -72,12 +63,12 @@ public slots:
   void SetOpacity(double val);
 
 private:
-  int m_nColorCode;
-  int m_nDirectionScheme;
-  int m_nDirectionMapping;
-  int m_nRenderRep;
+  int    m_nColorCode;
+  int    m_nDirectionScheme;
+  int    m_nDirectionMapping;
+  int    m_nRenderRep;
   double m_dTubeRadius;
-  int m_nNumberOfSides;
+  int    m_nNumberOfSides;
   double m_dOpacity;
   QColor m_color;
 };

@@ -1,5 +1,4 @@
 /**
- * @file  LayerPropertyPointSet.cxx
  * @brief Implementation for ROI layer properties.
  *
  * In 2D, the MRI is viewed as a single slice, and controls are
@@ -9,12 +8,8 @@
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/06/19 18:21:50 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,43 +23,43 @@
  */
 
 #include "LayerPropertyPointSet.h"
-#include "vtkRGBAColorTransferFunction.h"
-#include "LayerMRI.h"
 #include "FSVolume.h"
+#include "LayerMRI.h"
+#include "vtkRGBAColorTransferFunction.h"
+#include <QDebug>
 #include <QFile>
+#include <QSettings>
 #include <QStringList>
 #include <QTextStream>
-#include <QSettings>
-#include <QDebug>
 
-// using namespace std;
+//
 
 LayerPropertyPointSet::LayerPropertyPointSet(QObject *parent)
     : LayerProperty(parent) {
   mOpacity = 0.7;
-  mRGB[0] = 1;
-  mRGB[1] = 0.1;
-  mRGB[2] = 0.1;
+  mRGB[0]  = 1;
+  mRGB[1]  = 0.1;
+  mRGB[2]  = 0.1;
 
   mRGBSpline[0] = 1;
   mRGBSpline[1] = 1;
   mRGBSpline[2] = 0;
 
-  m_dRadius = 1;
+  m_dRadius       = 1;
   m_dSplineRadius = 0.5;
-  m_nColorMap = SolidColor;
-  m_layerScalar = NULL;
-  m_nScalarSet = -1;
+  m_nColorMap     = SolidColor;
+  m_layerScalar   = NULL;
+  m_nScalarSet    = -1;
 
-  m_dHeatScaleMin = 0;
-  m_dHeatScaleMid = 0.5;
-  m_dHeatScaleMax = 1;
+  m_dHeatScaleMin    = 0;
+  m_dHeatScaleMid    = 0.5;
+  m_dHeatScaleMax    = 1;
   m_dHeatScaleOffset = 0;
 
   m_nScalarType = ScalarStat;
-  m_nType = WayPoint;
+  m_nType       = WayPoint;
 
-  m_bShowSpline = true;
+  m_bShowSpline        = true;
   m_bSnapToVoxelCenter = false;
 
   m_lutHeatScale = vtkSmartPointer<vtkRGBAColorTransferFunction>::New();
@@ -93,7 +88,7 @@ LayerPropertyPointSet::~LayerPropertyPointSet() {
 }
 
 void LayerPropertyPointSet::LoadSettings() {
-  QSettings s;
+  QSettings   s;
   QVariantMap map = s.value("DataSettings/PointSet").toMap();
   if (map.contains("Radius"))
     m_dRadius = map["Radius"].toDouble();
@@ -104,11 +99,11 @@ void LayerPropertyPointSet::LoadSettings() {
 }
 
 void LayerPropertyPointSet::SaveSettings() {
-  QSettings s;
-  QVariantMap map = s.value("DataSettings/PointSet").toMap();
-  map["Radius"] = m_dRadius;
+  QSettings   s;
+  QVariantMap map     = s.value("DataSettings/PointSet").toMap();
+  map["Radius"]       = m_dRadius;
   map["SplineRadius"] = m_dSplineRadius;
-  map["ShowSpline"] = m_bShowSpline;
+  map["ShowSpline"]   = m_bShowSpline;
   s.setValue("DataSettings/PointSet", map);
   s.sync();
 }
@@ -257,7 +252,7 @@ void LayerPropertyPointSet::SetScalarSet(int n) {
   if (n < (int)m_scalarSets.size() && n >= 0) {
     SaveHeatscaleSettings();
     m_nScalarType = ScalarSet;
-    m_nScalarSet = n;
+    m_nScalarSet  = n;
     if (!RestoreHeatscaleSettings(m_scalarSets[n].strName))
       UpdateScalarValues();
     this->SetColorMapChanged();
@@ -273,10 +268,10 @@ void LayerPropertyPointSet::SaveHeatscaleSettings() {
     name = m_layerScalar->GetName();
   if (!name.isEmpty()) {
     QVariantMap map;
-    map["Min"] = m_dHeatScaleMin;
-    map["Mid"] = m_dHeatScaleMid;
-    map["Max"] = m_dHeatScaleMax;
-    map["Offset"] = m_dHeatScaleOffset;
+    map["Min"]                   = m_dHeatScaleMin;
+    map["Mid"]                   = m_dHeatScaleMid;
+    map["Max"]                   = m_dHeatScaleMax;
+    map["Offset"]                = m_dHeatScaleOffset;
     m_mapHeatscaleSettings[name] = map;
   }
 }
@@ -285,21 +280,21 @@ bool LayerPropertyPointSet::RestoreHeatscaleSettings(const QString &name) {
   if (!m_mapHeatscaleSettings.contains(name))
     return false;
   else {
-    QVariantMap map = m_mapHeatscaleSettings[name].toMap();
-    m_dHeatScaleMin = map["Min"].toDouble();
-    m_dHeatScaleMid = map["Mid"].toDouble();
-    m_dHeatScaleMax = map["Max"].toDouble();
+    QVariantMap map    = m_mapHeatscaleSettings[name].toMap();
+    m_dHeatScaleMin    = map["Min"].toDouble();
+    m_dHeatScaleMid    = map["Mid"].toDouble();
+    m_dHeatScaleMax    = map["Max"].toDouble();
     m_dHeatScaleOffset = map["Offset"].toDouble();
     return true;
   }
 }
 
 void LayerPropertyPointSet::UpdateScalarValues() {
-  double fMin = GetScalarMinValue();
-  double fMax = GetScalarMaxValue();
-  m_dHeatScaleMin = fMin;
-  m_dHeatScaleMid = (fMax - fMin) / 2;
-  m_dHeatScaleMax = fMax;
+  double fMin        = GetScalarMinValue();
+  double fMax        = GetScalarMaxValue();
+  m_dHeatScaleMin    = fMin;
+  m_dHeatScaleMid    = (fMax - fMin) / 2;
+  m_dHeatScaleMax    = fMax;
   m_dHeatScaleOffset = 0;
 }
 
@@ -332,11 +327,11 @@ double LayerPropertyPointSet::GetScalarMaxValue() {
 bool LayerPropertyPointSet::LoadScalarsFromFile(const QString &filename) {
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    cerr << qPrintable(file.errorString()) << "\n";
+    std::cerr << qPrintable(file.errorString()) << "\n";
     return false;
   }
 
-  QTextStream in(&file);
+  QTextStream         in(&file);
   std::vector<double> values;
   while (!in.atEnd()) {
     QStringList strgs = in.readLine().split(" ", QString::SkipEmptyParts);
@@ -346,10 +341,10 @@ bool LayerPropertyPointSet::LoadScalarsFromFile(const QString &filename) {
   }
 
   ScalarValues sv;
-  sv.nNum = values.size();
+  sv.nNum   = values.size();
   sv.dValue = new double[sv.nNum];
-  sv.dMin = 1e8;
-  sv.dMax = -1e8;
+  sv.dMin   = 1e8;
+  sv.dMax   = -1e8;
   for (int i = 0; i < sv.nNum; i++) {
     sv.dValue[i] = values[i];
     if (sv.dValue[i] < sv.dMin) {

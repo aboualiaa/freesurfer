@@ -1,16 +1,11 @@
 /**
- * @file  tags.c
  * @brief utils for adding tags (meta info) to mgz/h files
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/11/21 19:07:43 $
- *    $Revision: 1.17 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -34,7 +29,7 @@
 int TAGskip(FILE *fp, int tag, long long len) {
 #if 1
   unsigned char *buf;
-  int ret;
+  int            ret;
 
   buf = (unsigned char *)calloc(len, sizeof(unsigned char));
   if (buf == nullptr)
@@ -77,7 +72,7 @@ int TAGwriteStart(FILE *fp, int tag, long long *phere, long long len) {
 
   fwriteInt(tag, fp);
 
-  here = ftell(fp);
+  here   = ftell(fp);
   *phere = (long long)here;
   fwriteLong(len, fp);
 
@@ -128,7 +123,7 @@ int TAGwriteCommandLine(FILE *fp, char *cmd_line) {
 
 int TAGwriteAutoAlign(FILE *fp, MATRIX *M) {
   long long here;
-  char buf[16 * 100];
+  char      buf[16 * 100];
   long long len;
 
   bzero(buf, 16 * 100);
@@ -148,8 +143,8 @@ int TAGwriteAutoAlign(FILE *fp, MATRIX *M) {
 }
 
 MATRIX *TAGreadAutoAlign(FILE *fp) {
-  int c, r;
-  char buf[1000];
+  int     c, r;
+  char    buf[1000];
   MATRIX *M;
 
   M = MatrixAlloc(4, 4, MATRIX_REAL);
@@ -167,7 +162,7 @@ MATRIX *TAGreadAutoAlign(FILE *fp) {
 int znzTAGskip(znzFile fp, int tag, long long len) {
 #if 1
   unsigned char *buf;
-  int ret;
+  int            ret;
 
   buf = (unsigned char *)calloc(len, sizeof(unsigned char));
   if (buf == nullptr)
@@ -213,7 +208,7 @@ int znzTAGwriteStart(znzFile fp, int tag, long long *phere, long long len) {
 
   znzwriteInt(tag, fp);
 
-  here = znztell(fp);
+  here   = znztell(fp);
   *phere = (long long)here;
   znzwriteLong(len, fp);
 
@@ -256,19 +251,19 @@ int znzTAGwriteCommandLine(znzFile fp, char *cmd_line) {
 }
 
 #define MATRIX_STRLEN (4 * 4 * 100)
-int znzWriteMatrix(znzFile fp, MATRIX *M) {
+int znzWriteMatrix(znzFile fp, MATRIX *M, int tag) {
   long long here, len;
-  char buf[MATRIX_STRLEN];
+  char      buf[MATRIX_STRLEN];
 
   bzero(buf, MATRIX_STRLEN);
   sprintf(buf,
-          "AutoAlign %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf "
-          "%10lf %10lf %10lf %10lf %10lf %10lf %10lf",
+          "Matrix %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf %10lf "
+          "%10lf %10lf %10lf %10lf %10lf %10lf",
           M->rptr[1][1], M->rptr[1][2], M->rptr[1][3], M->rptr[1][4],
           M->rptr[2][1], M->rptr[2][2], M->rptr[2][3], M->rptr[2][4],
           M->rptr[3][1], M->rptr[3][2], M->rptr[3][3], M->rptr[3][4],
           M->rptr[4][1], M->rptr[4][2], M->rptr[4][3], M->rptr[4][4]);
-  znzTAGwriteStart(fp, TAG_AUTO_ALIGN, &len, MATRIX_STRLEN);
+  znzTAGwriteStart(fp, tag, &len, MATRIX_STRLEN);
   here = znztell(fp);
   znzwrite(buf, sizeof(char), MATRIX_STRLEN, fp);
   here = znztell(fp);
@@ -300,17 +295,17 @@ int znzTAGreadFloat(float *pf, znzFile fp) {
   included in znzReadAutoAlignMatrix()
  */
 MATRIX *znzReadMatrix(znzFile fp) {
-  char buf[MATRIX_STRLEN];
-  MATRIX *M;
-  char ch[100];
-  int ret;
+  char      buf[MATRIX_STRLEN];
+  MATRIX *  M;
+  char      ch[100];
+  int       ret;
   long long here, len;
 
   /* no fscanf equivalent in zlib!! have to hack it */
   znzTAGreadStart(fp, &len);
-  M = MatrixAlloc(4, 4, MATRIX_REAL);
+  M    = MatrixAlloc(4, 4, MATRIX_REAL);
   here = znztell(fp); // not used?
-  ret = znzread(buf, sizeof(unsigned char), MATRIX_STRLEN, fp);
+  ret  = znzread(buf, sizeof(unsigned char), MATRIX_STRLEN, fp);
   here = znztell(fp); // not used?
   sscanf(buf, "%s %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f", ch,
          &(M->rptr[1][1]), &(M->rptr[1][2]), &(M->rptr[1][3]), &(M->rptr[1][4]),
@@ -325,7 +320,7 @@ MATRIX *znzReadMatrix(znzFile fp) {
 int znzWriteAutoAlignMatrix(znzFile fp, MATRIX *M) {
   // This does not appear to be used
   long long here;
-  char buf[16 * 100];
+  char      buf[16 * 100];
   long long len;
 
   bzero(buf, 16 * 100);
@@ -350,7 +345,7 @@ int znzWriteAutoAlignMatrix(znzFile fp, MATRIX *M) {
 */
 MATRIX *znzReadAutoAlignMatrix(znzFile fp) {
   MATRIX *M;
-  char buf[MATRIX_STRLEN];
+  char    buf[MATRIX_STRLEN];
 
   /* no fscanf equivalent in zlib!! have to hack it */
   znzread(buf, sizeof(unsigned char), MATRIX_STRLEN, fp);

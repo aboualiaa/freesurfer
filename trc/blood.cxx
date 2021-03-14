@@ -1,14 +1,12 @@
 /**
- * @file  blood.cxx
  * @brief Training data and methods that probabilistic tractography feeds on
  *
  * Training data and methods that probabilistic tractography feeds on
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,25 +22,27 @@
 
 using namespace std;
 
-const int Blood::mDistThresh = 4, Blood::mEndDilation = 2;
-const unsigned int Blood::mDiffStep = 3;
-const float Blood::mLengthCutoff = 0.05, Blood::mLengthRatio = 3.0,
+const int          Blood::mDistThresh = 4, Blood::mEndDilation = 2;
+const unsigned int Blood::mDiffStep     = 3;
+const float        Blood::mLengthCutoff = 0.05, Blood::mLengthRatio = 3.0,
             Blood::mHausStepRatio = 0.05, Blood::mControlStepRatio = 0.8,
             Blood::mTangentBinSize = 1 / 3.0, // 0.1,
-    Blood::mCurvatureBinSize = 0.01;          // 0.002;
+    Blood::mCurvatureBinSize       = 0.01;    // 0.002;
 
-Blood::Blood(const char *TrainListFile, const char *TrainTrkFile,
-             const char *TrainRoi1File, const char *TrainRoi2File,
-             const char *TrainAsegFile, const char *TrainMaskFile,
-             float TrainMaskLabel, const char *ExcludeFile,
-             const vector<char *> &TestMaskList,
-             const vector<char *> &TestFaList, const char *TestAffineXfmFile,
-             const char *TestNonlinXfmFile, const char *TestNonlinRefFile,
-             const vector<char *> &TestBaseXfmList,
-             const char *TestBaseMaskFile, bool UseTruncated,
+Blood::Blood(const std::string TrainListFile, const std::string TrainTrkFile,
+             const std::string TrainRoi1File, const std::string TrainRoi2File,
+             const std::string TrainAsegFile, const std::string TrainMaskFile,
+             float TrainMaskLabel, const std::string ExcludeFile,
+             const vector<std::string> &TestMaskList,
+             const vector<std::string> &TestFaList,
+             const std::string          TestAffineXfmFile,
+             const std::string          TestNonlinXfmFile,
+             const std::string          TestNonlinRefFile,
+             const vector<std::string> &TestBaseXfmList,
+             const std::string TestBaseMaskFile, bool UseTruncated,
              vector<int> &NumControls, bool Debug)
     : mDebug(Debug), mUseTruncated(UseTruncated), mMaskLabel(TrainMaskLabel) {
-  int dirs[45] = {0,  0,  0, 1, 0, 0,  -1, 0, 0,  0,  1,  0,  0,  -1, 0,
+  int  dirs[45] = {0,  0,  0, 1, 0, 0,  -1, 0, 0,  0,  1,  0,  0,  -1, 0,
                   0,  0,  1, 0, 0, -1, 1,  1, 1,  -1, 1,  1,  1,  -1, 1,
                   -1, -1, 1, 1, 1, -1, -1, 1, -1, 1,  -1, -1, -1, -1, -1};
   MRI *testvol;
@@ -55,10 +55,9 @@ Blood::Blood(const char *TrainListFile, const char *TrainTrkFile,
   mDirNear.insert(mDirNear.begin(), dirs + 3, dirs + 45);
 
   // Read brain mask
-  for (vector<char *>::const_iterator ifile = TestMaskList.begin();
-       ifile < TestMaskList.end(); ifile++) {
+  for (auto ifile = TestMaskList.begin(); ifile < TestMaskList.end(); ifile++) {
     cout << "Loading brain mask of output subject from " << *ifile << endl;
-    testvol = MRIread(*ifile);
+    testvol = MRIread((*ifile).c_str());
     if (!testvol) {
       cout << "ERROR: Could not read " << *ifile << endl;
       exit(1);
@@ -75,10 +74,9 @@ Blood::Blood(const char *TrainListFile, const char *TrainTrkFile,
   mDx = mTestMask[0]->xsize;
 
   // Read FA map
-  for (vector<char *>::const_iterator ifile = TestFaList.begin();
-       ifile < TestFaList.end(); ifile++) {
+  for (auto ifile = TestFaList.begin(); ifile < TestFaList.end(); ifile++) {
     cout << "Loading FA map of output subject from " << *ifile << endl;
-    testvol = MRIread(*ifile);
+    testvol = MRIread((*ifile).c_str());
     if (!testvol) {
       cout << "ERROR: Could not read " << *ifile << endl;
       exit(1);
@@ -87,49 +85,55 @@ Blood::Blood(const char *TrainListFile, const char *TrainTrkFile,
   }
 
   // Read base reference volume, if any
-  if (TestBaseMaskFile) {
+  if (!TestBaseMaskFile.empty()) {
     cout << "Loading base mask of output subject from " << TestBaseMaskFile
          << endl;
-    mTestBaseMask = MRIread(TestBaseMaskFile);
+    mTestBaseMask = MRIread(TestBaseMaskFile.c_str());
     if (!mTestBaseMask) {
       cout << "ERROR: Could not read " << TestBaseMaskFile << endl;
       exit(1);
     }
-  } else if (!mTestFa.empty())
+  } else if (!mTestFa.empty()) {
     mTestBaseMask = mTestFa[0];
-  else
+  } else {
     mTestBaseMask = mTestMask[0];
+  }
 
-    // Read atlas-to-base registration files
+  // Read atlas-to-base registration files
 #ifndef NO_CVS_UP_IN_HERE
-  if (TestNonlinXfmFile) {
-    mTestNonlinReg.ReadXfm(TestNonlinXfmFile, mTestMask[0]);
+  if (!TestNonlinXfmFile.empty()) {
+    mTestNonlinReg.ReadXfm(TestNonlinXfmFile.c_str(), mTestMask[0]);
 
-    if (TestAffineXfmFile) {
+    if (!TestAffineXfmFile.empty()) {
       MRI *refvol;
 
       cout << "Loading non-linear registration source for output subject from "
            << TestNonlinRefFile << endl;
-      refvol = MRIread(TestNonlinRefFile);
+      refvol = MRIread(TestNonlinRefFile.c_str());
       if (!refvol) {
         cout << "ERROR: Could not read " << TestNonlinRefFile << endl;
         exit(1);
       }
 
-      mTestAffineReg.ReadXfm(TestAffineXfmFile, refvol, mTestBaseMask);
+      mTestAffineReg.ReadXfm(TestAffineXfmFile.c_str(), refvol, mTestBaseMask);
     }
-  } else
+  } else {
 #endif
-      if (TestAffineXfmFile)
-    mTestAffineReg.ReadXfm(TestAffineXfmFile, mTestMask[0], mTestBaseMask);
+    if (!TestAffineXfmFile.empty()) {
+      mTestAffineReg.ReadXfm(TestAffineXfmFile.c_str(), mTestMask[0],
+                             mTestBaseMask);
+    }
+#ifndef NO_CVS_UP_IN_HERE
+  }
+#endif
 
   // Read base-to-DWI registration files
-  for (vector<char *>::const_iterator ifile = TestBaseXfmList.begin();
-       ifile < TestBaseXfmList.end(); ifile++) {
+  for (auto ifile = TestBaseXfmList.begin(); ifile < TestBaseXfmList.end();
+       ifile++) {
     const unsigned int iframe = ifile - TestBaseXfmList.begin();
-    AffineReg basereg;
+    AffineReg          basereg;
 
-    basereg.ReadXfm(*ifile, mTestBaseMask, mTestFa[iframe]);
+    basereg.ReadXfm((*ifile).c_str(), mTestBaseMask, mTestFa[iframe]);
     mTestBaseReg.push_back(basereg);
   }
 
@@ -144,22 +148,22 @@ Blood::Blood(const char *TrainListFile, const char *TrainTrkFile,
   ReadAnatomy(TrainListFile, TrainAsegFile, TrainMaskFile);
 
   // Allocate space for histograms
-  mHistoStr = MRIclone(mTestMask[0], NULL);
+  mHistoStr  = MRIclone(mTestMask[0], NULL);
   mHistoSubj = MRIclone(mTestMask[0], NULL);
 }
 
-Blood::Blood(const char *TrainTrkFile, const char *TrainRoi1File,
-             const char *TrainRoi2File, bool Debug)
+Blood::Blood(const std::string TrainTrkFile, const std::string TrainRoi1File,
+             const std::string TrainRoi2File, bool Debug)
     : mDebug(Debug), mUseTruncated(false), mNx(0), mNy(0), mNz(0) {
   // Read single input streamline file
   ReadStreamlines(0, TrainTrkFile, TrainRoi1File, TrainRoi2File, 0, 0);
 
-  if (TrainRoi1File) {
+  if (!TrainRoi1File.c_str()) {
     // Allocate space for histograms
-    mHistoStr = MRIclone(mRoi1[0], NULL);
+    mHistoStr  = MRIclone(mRoi1[0], NULL);
     mHistoSubj = MRIclone(mRoi1[0], NULL);
   } else {
-    mHistoStr = 0;
+    mHistoStr  = 0;
     mHistoSubj = 0;
   }
 }
@@ -209,16 +213,18 @@ void Blood::SetNumControls(vector<int> &NumControls) {
 // Read streamlines of training subjects
 // (and the ROIs that were used to label them)
 //
-void Blood::ReadStreamlines(const char *TrainListFile, const char *TrainTrkFile,
-                            const char *TrainRoi1File,
-                            const char *TrainRoi2File, float TrainMaskLabel,
-                            const char *ExcludeFile) {
-  int nrejmask = 0, nrejrev = 0;
-  vector<string> dirlist;
+void Blood::ReadStreamlines(const std::string TrainListFile,
+                            const std::string TrainTrkFile,
+                            const std::string TrainRoi1File,
+                            const std::string TrainRoi2File,
+                            float             TrainMaskLabel,
+                            const std::string ExcludeFile) {
+  int                     nrejmask = 0, nrejrev = 0;
+  vector<string>          dirlist;
   vector<MRI *>::iterator ivol;
 
-  if (TrainListFile) { // Read multiple inputs from a list
-    string dirname;
+  if (!TrainListFile.empty()) { // Read multiple inputs from a list
+    string   dirname;
     ifstream listfile(TrainListFile, ios::in);
 
     if (!listfile) {
@@ -292,24 +298,24 @@ void Blood::ReadStreamlines(const char *TrainListFile, const char *TrainTrkFile,
     MRIfree(&(*ivol));
   mRoi2.clear();
 
-  mVolume = 0;
-  mNumStr = 0;
-  mLengthMin = 0;
-  mLengthMax = 0;
-  mLengthAvg = 0;
-  mNumStrEnds = 0;
+  mVolume        = 0;
+  mNumStr        = 0;
+  mLengthMin     = 0;
+  mLengthMax     = 0;
+  mLengthAvg     = 0;
+  mNumStrEnds    = 0;
   mLengthMinEnds = 0;
   mLengthMaxEnds = 0;
   mLengthAvgEnds = 0;
 
   for (vector<string>::const_iterator idir = dirlist.begin();
        idir != dirlist.end(); idir++) {
-    int npts, nlines = 0;
+    int          npts, nlines = 0;
     CTrackReader trkreader;
     TRACK_HEADER trkheader;
-    string fname;
+    string       fname;
 
-    if (TrainRoi1File) {
+    if (!TrainRoi1File.empty()) {
       fname = *idir + TrainRoi1File;
       cout << "Loading streamline start ROI from " << fname << endl;
       mRoi1.push_back(MRIread(fname.c_str()));
@@ -319,7 +325,7 @@ void Blood::ReadStreamlines(const char *TrainListFile, const char *TrainTrkFile,
       }
     }
 
-    if (TrainRoi2File) {
+    if (!TrainRoi2File.empty()) {
       fname = *idir + TrainRoi2File;
       cout << "Loading streamline end ROI from " << fname << endl;
       mRoi2.push_back(MRIread(fname.c_str()));
@@ -353,12 +359,12 @@ void Blood::ReadStreamlines(const char *TrainListFile, const char *TrainTrkFile,
     cout << "Loading streamlines from " << fname << endl;
 
     while (trkreader.GetNextPointCount(&npts)) {
-      bool isinmask = true;
-      int nptsmask = npts, xroi1 = 0, xroi2 = 0, xroi12 = 0, xroi21 = 0;
-      float forwback1 = 0, forw1 = 0, forwback2 = 0, forw2 = 0;
+      bool        isinmask = true;
+      int         nptsmask = npts, xroi1 = 0, xroi2 = 0, xroi12 = 0, xroi21 = 0;
+      float       forwback1 = 0, forw1 = 0, forwback2 = 0, forw2 = 0;
       vector<int> pts;
       vector<float> dir1(3), dir2(3);
-      float *rawpts = new float[npts * 3], *rawptsmask = rawpts, *iraw;
+      float *       rawpts = new float[npts * 3], *rawptsmask = rawpts, *iraw;
 
       // Read a streamline from input file
       trkreader.GetNextTrackData(npts, rawpts);
@@ -617,15 +623,16 @@ void Blood::ReadStreamlines(const char *TrainListFile, const char *TrainTrkFile,
 
   ComputeStats();
 
-  if (ExcludeFile)
+  if (!ExcludeFile.empty()) {
     ReadExcludedStreamlines(ExcludeFile);
+  }
 }
 
 //
 // Read list of streamlines to be excluded from search for center streamline
 //
-void Blood::ReadExcludedStreamlines(const char *ExcludeFile) {
-  string excline;
+void Blood::ReadExcludedStreamlines(const std::string ExcludeFile) {
+  string   excline;
   ifstream excfile;
 
   mExcludedStreamlines.clear();
@@ -642,7 +649,7 @@ void Blood::ReadExcludedStreamlines(const char *ExcludeFile) {
       vector<int> points;
 
       while (getline(excfile, excline) && excline.compare("exclude") != 0) {
-        float coord;
+        float         coord;
         istringstream excstr(excline);
 
         while (excstr >> coord)
@@ -697,7 +704,7 @@ void Blood::ComputeStats() {
        << round(mLengthAvg) << "/" << mLengthMax << ")" << endl;
 
   if (mMask.empty() && mRoi1.empty() && mRoi2.empty()) {
-    mNumStrEnds = mNumStr;
+    mNumStrEnds    = mNumStr;
     mLengthMinEnds = mLengthMin;
     mLengthMaxEnds = mLengthMax;
     mLengthAvgEnds = mLengthAvg;
@@ -711,11 +718,11 @@ void Blood::ComputeStats() {
 //
 void Blood::ComputeStatsEnds() {
   if (!mIsInEnd1.empty() && !mIsInEnd2.empty()) {
-    int lsum = 0;
+    int                          lsum    = 0;
     vector<bool>::const_iterator ivalid1 = mIsInEnd1.begin(),
                                  ivalid2 = mIsInEnd2.begin();
 
-    mNumStrEnds = 0;
+    mNumStrEnds    = 0;
     mLengthMinEnds = mLengthMax;
     mLengthMaxEnds = 0;
 
@@ -756,7 +763,7 @@ void Blood::ComputeStatsEnds() {
 // Compute center of mass of end points to constrain center streamline selection
 //
 void Blood::ComputeEndPointCoM() {
-  vector<int>::iterator imidpts;
+  vector<int>::iterator        imidpts;
   vector<bool>::const_iterator ivalid1 = mIsInEnd1.begin(),
                                ivalid2 = mIsInEnd2.begin();
   vector<MRI *>::const_iterator iroi1 = mRoi1.begin(), iroi2 = mRoi2.begin();
@@ -778,7 +785,7 @@ void Blood::ComputeEndPointCoM() {
        inum != mNumLines.end(); inum++) {
     for (int k = *inum; k > 0; k--) {
       if (*ivalid1 && *ivalid2) {
-        vector<int>::const_iterator itop = istr->begin(),
+        vector<int>::const_iterator itop    = istr->begin(),
                                     ibottom = istr->end() - 3, ipt1, ipt2,
                                     imiddle;
 
@@ -794,7 +801,7 @@ void Blood::ComputeEndPointCoM() {
 
         // Midpoint of streamline between start and end ROI
         *imidpts = (int)(ipt1 - itop) + (int)round(float(ipt2 - ipt1) / 6) * 3;
-        imiddle = itop + *imidpts;
+        imiddle  = itop + *imidpts;
 
         for (int k = 0; k < 3; k++) {
           sum1[k] += itop[k];
@@ -821,7 +828,7 @@ void Blood::ComputeEndPointCoM() {
     for (int k = 0; k < 3; k++) {
       mMeanEnd1[k] = (float)sum1[k];
       mMeanEnd2[k] = (float)sum2[k];
-      mMeanMid[k] = (float)summ[k];
+      mMeanMid[k]  = (float)summ[k];
     }
 
     fill(mVarEnd1.begin(), mVarEnd1.end(), 0.0);
@@ -830,13 +837,13 @@ void Blood::ComputeEndPointCoM() {
   } else
     for (int k = 0; k < 3; k++) {
       mMeanEnd1[k] = sum1[k] / float(mNumStrEnds);
-      mVarEnd1[k] = (sumsq1[k] - mNumStrEnds * mMeanEnd1[k] * mMeanEnd1[k]) /
+      mVarEnd1[k]  = (sumsq1[k] - mNumStrEnds * mMeanEnd1[k] * mMeanEnd1[k]) /
                     (mNumStrEnds - 1);
       mMeanEnd2[k] = sum2[k] / float(mNumStrEnds);
-      mVarEnd2[k] = (sumsq2[k] - mNumStrEnds * mMeanEnd2[k] * mMeanEnd2[k]) /
+      mVarEnd2[k]  = (sumsq2[k] - mNumStrEnds * mMeanEnd2[k] * mMeanEnd2[k]) /
                     (mNumStrEnds - 1);
       mMeanMid[k] = summ[k] / float(mNumStrEnds);
-      mVarMid[k] = (sumsqm[k] - mNumStrEnds * mMeanMid[k] * mMeanMid[k]) /
+      mVarMid[k]  = (sumsqm[k] - mNumStrEnds * mMeanMid[k] * mMeanMid[k]) /
                    (mNumStrEnds - 1);
     }
 
@@ -878,7 +885,7 @@ bool Blood::IsInMask(float *Point) {
     return true;
   else {
     const int ix = (int)Point[0], iy = (int)Point[1], iz = (int)Point[2];
-    bool isinmask = (ix > -1) && (ix < mNx) && (iy > -1) && (iy < mNy) &&
+    bool      isinmask = (ix > -1) && (ix < mNx) && (iy > -1) && (iy < mNy) &&
                     (iz > -1) && (iz < mNz);
 
     for (vector<MRI *>::const_iterator imask = mTestMask.begin();
@@ -911,13 +918,14 @@ bool Blood::IsInCortex(vector<int>::const_iterator Point, MRI *Mask,
 //
 // Read segmentations and cortical masks of training subjects
 //
-void Blood::ReadAnatomy(const char *TrainListFile, const char *TrainAsegFile,
-                        const char *TrainMaskFile) {
-  vector<string> dirlist;
+void Blood::ReadAnatomy(const std::string TrainListFile,
+                        const std::string TrainAsegFile,
+                        const std::string TrainMaskFile) {
+  vector<string>          dirlist;
   vector<MRI *>::iterator ivol;
 
-  if (TrainListFile) { // Read multiple inputs from a list
-    string dirname;
+  if (!TrainListFile.empty()) { // Read multiple inputs from a list
+    string   dirname;
     ifstream listfile(TrainListFile, ios::in);
 
     if (!listfile) {
@@ -968,7 +976,7 @@ void Blood::ReadAnatomy(const char *TrainListFile, const char *TrainAsegFile,
       exit(1);
     }
 
-    if (TrainMaskFile) {
+    if (!TrainMaskFile.empty()) {
       fname = *idir + TrainMaskFile;
       cout << "Loading cortex mask from " << fname << endl;
       mMask.push_back(MRIread(fname.c_str()));
@@ -992,14 +1000,14 @@ void Blood::ReadAnatomy(const char *TrainListFile, const char *TrainAsegFile,
 // Remove very short and very long streamlines
 //
 void Blood::RemoveLengthOutliers() {
-  const int nlen = mLengths.size();
-  int nrejlen = 0;
+  const int nlen    = mLengths.size();
+  int       nrejlen = 0;
 
   if (nlen > 2) {
-    const int lmin = *min_element(mLengths.begin(), mLengths.end()),
-              lmax = *max_element(mLengths.begin(), mLengths.end());
-    int lsum = 0, l2sum = 0, hthresh, llow = lmin, lhigh = lmax;
-    float lmean, lstd;
+    const int lmin   = *min_element(mLengths.begin(), mLengths.end()),
+              lmax   = *max_element(mLengths.begin(), mLengths.end());
+    int         lsum = 0, l2sum = 0, hthresh, llow = lmin, lhigh = lmax;
+    float       lmean, lstd;
     vector<int> lhisto(lmax - lmin + 1, 0);
     vector<int>::const_iterator ihisto;
 
@@ -1011,7 +1019,7 @@ void Blood::RemoveLengthOutliers() {
     }
 
     lmean = lsum / (float)nlen;
-    lstd = sqrt((l2sum - nlen * lmean * lmean) / (nlen - 1));
+    lstd  = sqrt((l2sum - nlen * lmean * lmean) / (nlen - 1));
 
     // Calculate histogram of lengths
     for (vector<int>::const_iterator ilen = mLengths.begin();
@@ -1026,7 +1034,7 @@ void Blood::RemoveLengthOutliers() {
 
     while (ihisto > lhisto.begin()) {
       if (*ihisto < hthresh) {
-        int ngap = 1;
+        int                         ngap    = 1;
         vector<int>::const_iterator ithresh = ihisto;
 
         while (*(ihisto--) < hthresh && ihisto > lhisto.begin())
@@ -1046,7 +1054,7 @@ void Blood::RemoveLengthOutliers() {
 
     while (ihisto < lhisto.end()) {
       if (*ihisto < hthresh) {
-        int ngap = 1;
+        int                         ngap    = 1;
         vector<int>::const_iterator ithresh = ihisto;
 
         while (*(ihisto++) < hthresh && ihisto < lhisto.end())
@@ -1128,8 +1136,8 @@ void Blood::ComputePriors() {
     for (vector<int>::const_iterator incpt = mNumControls.begin();
          incpt < mNumControls.end(); incpt++) {
       cout << "Selecting " << *incpt << " points on center streamline" << endl;
-      // FindPointsOnStreamline(mCenterStreamline, *incpt);
-      // if (!FindPointsOnStreamlineComb(mCenterStreamline, *incpt)) {
+      //FindPointsOnStreamline(mCenterStreamline, *incpt);
+      //if (!FindPointsOnStreamlineComb(mCenterStreamline, *incpt)) {
       if (!FindPointsOnStreamlineLS(mCenterStreamline, *incpt)) {
         cout << "WARN: Could not find satisfactory control point fit - try "
              << itry << endl;
@@ -1152,8 +1160,8 @@ void Blood::ComputePriors() {
 // and identify those that are within (a small distance of) the cortical mask
 //
 void Blood::MatchStreamlineEnds() {
-  vector<bool>::iterator ivalid1, ivalid2;
-  vector<int>::iterator itrlen;
+  vector<bool>::iterator        ivalid1, ivalid2;
+  vector<int>::iterator         itrlen;
   vector<vector<int>>::iterator istr;
   vector<MRI *>::const_iterator imask, iaseg, iroi1, iroi2;
 
@@ -1161,14 +1169,14 @@ void Blood::MatchStreamlineEnds() {
   mIsInEnd2.resize(mStreamlines.size());
 
   if (mRoi1.empty() || mRoi2.empty()) { // Don't have labeling ROIs
-    int imin;
+    int                         imin;
     vector<int>::const_iterator ishort1, ishort2;
 
     fill(mIsInEnd1.begin(), mIsInEnd1.end(), true);
     fill(mIsInEnd2.begin(), mIsInEnd2.end(), true);
 
     // Find the shortest streamline
-    imin = min_element(mLengths.begin(), mLengths.end()) - mLengths.begin();
+    imin    = min_element(mLengths.begin(), mLengths.end()) - mLengths.begin();
     ishort1 = mStreamlines[imin].begin();
     ishort2 = mStreamlines[imin].end() - 3;
 
@@ -1183,16 +1191,16 @@ void Blood::MatchStreamlineEnds() {
         FlipStreamline(istr);
     }
 
-    imask = mMask.begin();
-    iaseg = mAseg.begin();
-    istr = mStreamlines.begin();
+    imask   = mMask.begin();
+    iaseg   = mAseg.begin();
+    istr    = mStreamlines.begin();
     ivalid1 = mIsInEnd1.begin();
     ivalid2 = mIsInEnd2.begin();
 
     for (vector<int>::const_iterator inum = mNumLines.begin();
          inum != mNumLines.end(); inum++) {
       for (int k = *inum; k > 0; k--) {
-        double dist1 = 0, dist2 = 0;
+        double                      dist1 = 0, dist2 = 0;
         vector<int>::const_iterator iend1 = istr->begin(),
                                     iend2 = istr->end() - 3;
         vector<vector<int>>::const_iterator jstr;
@@ -1246,9 +1254,9 @@ void Blood::MatchStreamlineEnds() {
     fill(mIsInEnd1.begin(), mIsInEnd1.end(), false);
     fill(mIsInEnd2.begin(), mIsInEnd2.end(), false);
 
-    iroi1 = mRoi1.begin();
-    iroi2 = mRoi2.begin();
-    istr = mStreamlines.begin();
+    iroi1   = mRoi1.begin();
+    iroi2   = mRoi2.begin();
+    istr    = mStreamlines.begin();
     ivalid1 = mIsInEnd1.begin();
     ivalid2 = mIsInEnd2.begin();
 
@@ -1298,9 +1306,9 @@ void Blood::MatchStreamlineEnds() {
 
     // Align truncated streamlines to the ones that go through both ROIs
     for (istr = mStreamlines.begin(); istr != mStreamlines.end(); istr++) {
-      int dist1 = 0, dist2 = 0;
-      vector<int>::const_iterator iend1 = istr->begin(),
-                                  iend2 = istr->end() - 3;
+      int                         dist1 = 0, dist2 = 0;
+      vector<int>::const_iterator iend1    = istr->begin(),
+                                  iend2    = istr->end() - 3;
       vector<bool>::const_iterator jvalid1 = mIsInEnd1.begin(),
                                    jvalid2 = mIsInEnd2.begin();
       vector<vector<int>>::const_iterator jstr;
@@ -1356,9 +1364,9 @@ void Blood::MatchStreamlineEnds() {
 
     // Check if end points are (within a distance of) the cortical mask
     if (!mMask.empty()) {
-      imask = mMask.begin();
-      iaseg = mAseg.begin();
-      istr = mStreamlines.begin();
+      imask   = mMask.begin();
+      iaseg   = mAseg.begin();
+      istr    = mStreamlines.begin();
       ivalid1 = mIsInEnd1.begin();
       ivalid2 = mIsInEnd2.begin();
 
@@ -1393,11 +1401,11 @@ void Blood::MatchStreamlineEnds() {
 
     ivalid1 = mIsInEnd1.begin();
     ivalid2 = mIsInEnd2.begin();
-    itrlen = mTruncatedLengths.begin();
+    itrlen  = mTruncatedLengths.begin();
 
     for (istr = mStreamlines.begin(); istr < mStreamlines.end(); istr++) {
       if ((*ivalid1 && !*ivalid2) || (!*ivalid1 && *ivalid2)) {
-        double hdmin = numeric_limits<double>::infinity();
+        double                 hdmin   = numeric_limits<double>::infinity();
         vector<bool>::iterator jvalid1 = mIsInEnd1.begin(),
                                jvalid2 = mIsInEnd2.begin();
         vector<vector<int>>::const_iterator jstr, jstrnear;
@@ -1414,7 +1422,7 @@ void Blood::MatchStreamlineEnds() {
               for (vector<int>::const_iterator jpt = jstr->begin();
                    jpt < jstr->end(); jpt += lag) {
                 const int dx = ipt[0] - jpt[0], dy = ipt[1] - jpt[1],
-                          dz = ipt[2] - jpt[2],
+                          dz   = ipt[2] - jpt[2],
                           dist = dx * dx + dy * dy + dz * dz;
 
                 if (dist < dmin)
@@ -1425,7 +1433,7 @@ void Blood::MatchStreamlineEnds() {
             }
 
             if (hd < hdmin) {
-              hdmin = hd;
+              hdmin    = hd;
               jstrnear = jstr;
             }
           }
@@ -1435,18 +1443,18 @@ void Blood::MatchStreamlineEnds() {
         }
 
         if (*ivalid1) {
-          int dmin = 1000000;
+          int                         dmin = 1000000;
           vector<int>::const_iterator jptnear, iend2 = istr->end() - 3;
 
           // Find point on whole streamline nearest to truncated end point
           for (vector<int>::const_iterator jpt = jstrnear->begin();
                jpt < jstrnear->end(); jpt += 3) {
             const int dx = iend2[0] - jpt[0], dy = iend2[1] - jpt[1],
-                      dz = iend2[2] - jpt[2],
+                      dz   = iend2[2] - jpt[2],
                       dist = dx * dx + dy * dy + dz * dz;
 
             if (dist < dmin) {
-              dmin = dist;
+              dmin    = dist;
               jptnear = jpt;
             }
           }
@@ -1456,18 +1464,18 @@ void Blood::MatchStreamlineEnds() {
         }
 
         if (*ivalid2) {
-          int dmin = 1000000;
+          int                         dmin = 1000000;
           vector<int>::const_iterator jptnear, iend1 = istr->begin();
 
           // Find point on whole streamline nearest to truncated start point
           for (vector<int>::const_iterator jpt = jstrnear->begin();
                jpt < jstrnear->end(); jpt += 3) {
             const int dx = iend1[0] - jpt[0], dy = iend1[1] - jpt[1],
-                      dz = iend1[2] - jpt[2],
+                      dz   = iend1[2] - jpt[2],
                       dist = dx * dx + dy * dy + dz * dz;
 
             if (dist < dmin) {
-              dmin = dist;
+              dmin    = dist;
               jptnear = jpt;
             }
           }
@@ -1488,14 +1496,14 @@ void Blood::MatchStreamlineEnds() {
 // Invert the order of points in a streamline
 //
 void Blood::FlipStreamline(vector<vector<int>>::iterator Streamline) {
-  vector<int>::iterator itop = Streamline->begin(),
+  vector<int>::iterator itop    = Streamline->begin(),
                         ibottom = Streamline->end() - 3;
 
   while (itop < ibottom) {
     for (int k = 0; k < 3; k++) {
       const int tmp = itop[k];
-      itop[k] = ibottom[k];
-      ibottom[k] = tmp;
+      itop[k]       = ibottom[k];
+      ibottom[k]    = tmp;
     }
 
     itop += 3;
@@ -1519,7 +1527,7 @@ bool Blood::IsEnd1InMask(vector<vector<int>>::iterator Streamline, MRI *Mask,
   if (itop < Streamline->end() - 3) { // If more than one voxel in streamline
     // Extend the streamline by a few voxels if that gets it inside the mask
     int newpt[3] = {itop[0], itop[1], itop[2]};
-    int diff[3] = {itop[0] - itop[3], itop[1] - itop[4], itop[2] - itop[5]};
+    int diff[3]  = {itop[0] - itop[3], itop[1] - itop[4], itop[2] - itop[5]};
     vector<int> extend;
 
     for (int d = mDistThresh; d > 0; d--) {
@@ -1559,8 +1567,8 @@ bool Blood::IsEnd2InMask(vector<vector<int>>::iterator Streamline, MRI *Mask,
 
   if (ibottom > Streamline->begin()) { // If more than one voxel in streamline
     // Extend the streamline by a few voxels if that gets it inside the mask
-    int newpt[3] = {ibottom[0], ibottom[1], ibottom[2]};
-    int diff[3] = {ibottom[0] - ibottom[-3], ibottom[1] - ibottom[-2],
+    int         newpt[3] = {ibottom[0], ibottom[1], ibottom[2]};
+    int         diff[3]  = {ibottom[0] - ibottom[-3], ibottom[1] - ibottom[-2],
                    ibottom[2] - ibottom[-1]};
     vector<int> extend;
 
@@ -1590,11 +1598,11 @@ bool Blood::IsEnd2InMask(vector<vector<int>>::iterator Streamline, MRI *Mask,
 // Determine number of arc length segments for priors
 //
 void Blood::SetArcSegments() {
-  int cutoff, count = 0;
+  int                          cutoff, count = 0;
   vector<bool>::const_iterator ivalid1 = mIsInEnd1.begin(),
                                ivalid2 = mIsInEnd2.begin();
-  vector<int>::const_iterator ilen = mLengths.begin();
-  vector<int> lengths;
+  vector<int>::const_iterator ilen     = mLengths.begin();
+  vector<int>                 lengths;
 
   // Find lengths of streamlines with valid end points
   for (vector<int>::const_iterator ilen = mLengths.begin();
@@ -1620,9 +1628,9 @@ void Blood::SetArcSegments() {
   // Set the number of arc segments to a fraction of the shortest length
   mNumArc = max(1, (int)round(*ilen / mLengthRatio));
   /*
-    mNumArc = max(1, (int) round(*min_element(lengths.begin(), lengths.end())
-                          / mLengthRatio));
-  */
+  mNumArc = max(1, (int) round(*min_element(lengths.begin(), lengths.end())
+                        / mLengthRatio));
+*/
 
   cout << "INFO: Split streamlines into " << mNumArc << " segments" << endl;
 }
@@ -1632,7 +1640,7 @@ void Blood::SetArcSegments() {
 //
 void Blood::ComputeHistogram() {
   vector<vector<int>>::const_iterator istr;
-  MRI *tmp;
+  MRI *                               tmp;
 
   if (!mHistoStr || !mHistoSubj)
     return;
@@ -1656,7 +1664,7 @@ void Blood::ComputeHistogram() {
 
   // Compute subject-wise histogram
   MRIclear(mHistoSubj);
-  tmp = MRIclone(mHistoSubj, NULL);
+  tmp  = MRIclone(mHistoSubj, NULL);
   istr = mStreamlines.begin();
 
   for (vector<int>::const_iterator inum = mNumLines.begin();
@@ -1680,14 +1688,14 @@ void Blood::ComputeHistogram() {
 // Compute prior on underlying anatomy by streamline arc length
 //
 void Blood::ComputeAnatomyPrior(bool UseTruncated) {
-  vector<bool>::const_iterator ivalid1 = mIsInEnd1.begin(),
-                               ivalid2 = mIsInEnd2.begin();
-  vector<int>::const_iterator ilen = mLengths.begin(),
-                              itrlen = mTruncatedLengths.begin();
-  vector<vector<int>>::const_iterator istr = mStreamlines.begin();
-  vector<MRI *>::const_iterator iaseg = mAseg.begin();
-  vector<vector<int>> distbyarc;
-  vector<vector<unsigned int>> localbyarc, nearbyarc;
+  vector<bool>::const_iterator ivalid1      = mIsInEnd1.begin(),
+                               ivalid2      = mIsInEnd2.begin();
+  vector<int>::const_iterator ilen          = mLengths.begin(),
+                              itrlen        = mTruncatedLengths.begin();
+  vector<vector<int>>::const_iterator istr  = mStreamlines.begin();
+  vector<MRI *>::const_iterator       iaseg = mAseg.begin();
+  vector<vector<int>>                 distbyarc;
+  vector<vector<unsigned int>>        localbyarc, nearbyarc;
 
   localbyarc.resize(mNumLocal * mNumArc);
   nearbyarc.resize(mNumNear * mNumArc);
@@ -1700,22 +1708,22 @@ void Blood::ComputeAnatomyPrior(bool UseTruncated) {
       if ((UseTruncated && (*ivalid1 || *ivalid2)) || (*ivalid1 && *ivalid2)) {
         unsigned int ilocal, inear;
         const double darc = mNumArc / (double)(*ilen + *itrlen);
-        double larc;
+        double       larc;
 
         if (*ivalid1) {
-          larc = 0;
+          larc   = 0;
           ilocal = 0;
-          inear = 0;
+          inear  = 0;
         } else { // Skip ahead to truncated start point
           double intpart;
-          larc = modf((*itrlen) * darc, &intpart); // decimal part
-          ilocal = (unsigned int)intpart;          // integer part
-          inear = ilocal;
+          larc   = modf((*itrlen) * darc, &intpart); // decimal part
+          ilocal = (unsigned int)intpart;            // integer part
+          inear  = ilocal;
         }
 
         for (vector<int>::const_iterator ipt = istr->begin();
              ipt != istr->end(); ipt += 3) {
-          const int ix0 = ipt[0], iy0 = ipt[1], iz0 = ipt[2];
+          const int   ix0 = ipt[0], iy0 = ipt[1], iz0 = ipt[2];
           const float seg0 = MRIgetVoxVal(*iaseg, ix0, iy0, iz0, 0);
 
           // Save local neighbor labels
@@ -1737,7 +1745,7 @@ void Blood::ComputeAnatomyPrior(bool UseTruncated) {
           for (vector<int>::const_iterator idir = mDirNear.begin();
                idir != mDirNear.end(); idir += 3) {
             int dist = 0, ix = ix0 + idir[0], iy = iy0 + idir[1],
-                iz = iz0 + idir[2];
+                iz    = iz0 + idir[2];
             float seg = seg0;
 
             while ((ix > -1) && (ix < mNx) && (iy > -1) && (iy < mNy) &&
@@ -1800,12 +1808,12 @@ void Blood::ComputeAnatomyPrior(bool UseTruncated) {
   // Compute priors on neighboring anatomical labels by arc length
   for (vector<vector<unsigned int>>::const_iterator iseg = localbyarc.begin();
        iseg != localbyarc.end(); iseg++) {
-    set<unsigned int> idlist(iseg->begin(), iseg->end());
-    vector<int> histo(idlist.size());
-    vector<float> prior(idlist.size() + 1);
-    vector<int>::iterator ihisto = histo.begin();
+    set<unsigned int>       idlist(iseg->begin(), iseg->end());
+    vector<int>             histo(idlist.size());
+    vector<float>           prior(idlist.size() + 1);
+    vector<int>::iterator   ihisto = histo.begin();
     vector<float>::iterator iprior = prior.begin();
-    const float denom = iseg->size() + idlist.size() + 1;
+    const float             denom  = iseg->size() + idlist.size() + 1;
 
     for (set<unsigned int>::const_iterator iid = idlist.begin();
          iid != idlist.end(); iid++) {
@@ -1836,13 +1844,13 @@ void Blood::ComputeAnatomyPrior(bool UseTruncated) {
   for (vector<vector<unsigned int>>::const_iterator iseg = nearbyarc.begin();
        iseg != nearbyarc.end(); iseg++) {
     set<unsigned int> idlist(iseg->begin(), iseg->end());
-    vector<int> histo(idlist.size());
-    vector<float> prior(idlist.size() + 1), dmean(idlist.size(), 0),
+    vector<int>       histo(idlist.size());
+    vector<float>     prior(idlist.size() + 1), dmean(idlist.size(), 0),
         dstd(idlist.size(), 0);
-    vector<int>::iterator ihisto = histo.begin();
+    vector<int>::iterator   ihisto = histo.begin();
     vector<float>::iterator iprior = prior.begin(), idmean = dmean.begin(),
                             idstd = dstd.begin();
-    const float denom = iseg->size() + idlist.size() + 1;
+    const float denom             = iseg->size() + idlist.size() + 1;
 
     for (set<unsigned int>::const_iterator iid = idlist.begin();
          iid != idlist.end(); iid++) {
@@ -1899,15 +1907,15 @@ void Blood::ComputeAnatomyPrior(bool UseTruncated) {
 // Compute prior on tangent vector and curvature by streamline arc length
 //
 void Blood::ComputeShapePrior(bool UseTruncated) {
-  const int nbin = (int)ceil(2 / mTangentBinSize);
-  float tangx, tangy, curv;
+  const int                    nbin = (int)ceil(2 / mTangentBinSize);
+  float                        tangx, tangy, curv;
   vector<bool>::const_iterator ivalid1 = mIsInEnd1.begin(),
                                ivalid2 = mIsInEnd2.begin();
-  vector<int>::const_iterator ilen = mLengths.begin(),
-                              itrlen = mTruncatedLengths.begin();
-  vector<float>::const_iterator id1, id2;
+  vector<int>::const_iterator ilen     = mLengths.begin(),
+                              itrlen   = mTruncatedLengths.begin();
+  vector<float>::const_iterator         id1, id2;
   vector<vector<float>>::const_iterator itangx, itangy, icurv;
-  vector<int> tanghisto(nbin * nbin), curvhisto;
+  vector<int>                           tanghisto(nbin * nbin), curvhisto;
   vector<float> strsmooth, diff1, diff2, tangprior(tanghisto.size()), curvprior;
   vector<vector<float>> tangxbyarc, tangybyarc, curvbyarc;
 
@@ -1922,7 +1930,7 @@ void Blood::ComputeShapePrior(bool UseTruncated) {
         *ilen >= (int)mDiffStep) {
       unsigned int iarc;
       const double darc = mNumArc / (double)(*ilen + *itrlen);
-      double larc;
+      double       larc;
 
       strsmooth.resize(istr->size());
       diff1.resize(istr->size());
@@ -1972,7 +1980,7 @@ void Blood::ComputeShapePrior(bool UseTruncated) {
         } else {
           tangx = 0;
           tangy = 0;
-          curv = 0;
+          curv  = 0;
         }
 
         tangxbyarc[iarc].push_back(tangx);
@@ -2013,11 +2021,11 @@ void Blood::ComputeShapePrior(bool UseTruncated) {
   itangy = tangybyarc.begin();
 
   for (icurv = curvbyarc.begin(); icurv < curvbyarc.end(); icurv++) {
-    int nclass;
+    int                nclass;
     const unsigned int nsamp = icurv->size();
-    float denom;
-    const float curvmax = *max_element(icurv->begin(), icurv->end());
-    vector<int>::const_iterator ihisto;
+    float              denom;
+    const float        curvmax = *max_element(icurv->begin(), icurv->end());
+    vector<int>::const_iterator   ihisto;
     vector<float>::const_iterator isampx = itangx->begin();
 
     // Tangent vector histogram (defined over [-1, 1]^2)
@@ -2036,7 +2044,7 @@ void Blood::ComputeShapePrior(bool UseTruncated) {
 
     // Tangent vector prior
     nclass = tanghisto.size() - count(tanghisto.begin(), tanghisto.end(), 0);
-    denom = (float)(nsamp + nclass + 1);
+    denom  = (float)(nsamp + nclass + 1);
 
     ihisto = tanghisto.begin();
 
@@ -2056,7 +2064,7 @@ void Blood::ComputeShapePrior(bool UseTruncated) {
 
     // Curvature prior
     nclass = curvhisto.size() - count(curvhisto.begin(), curvhisto.end(), 0);
-    denom = (float)(nsamp + nclass + 1);
+    denom  = (float)(nsamp + nclass + 1);
 
     curvprior.resize(curvhisto.size());
     ihisto = curvhisto.begin();
@@ -2109,11 +2117,11 @@ void Blood::ComputeShapePrior(bool UseTruncated) {
 //
 void Blood::FindCenterStreamline(bool CheckOverlap, bool CheckDeviation,
                                  bool CheckFa) {
-  const int lag = max(1, (int)round(mHausStepRatio * mLengthAvgEnds)) * 3;
-  double hdmin = numeric_limits<double>::infinity();
-  vector<bool>::const_iterator ivalid1 = mIsInEnd1.begin(),
-                               ivalid2 = mIsInEnd2.begin();
-  vector<int>::const_iterator imidpts = mMidPoints.begin();
+  const int lag   = max(1, (int)round(mHausStepRatio * mLengthAvgEnds)) * 3;
+  double    hdmin = numeric_limits<double>::infinity();
+  vector<bool>::const_iterator ivalid1        = mIsInEnd1.begin(),
+                               ivalid2        = mIsInEnd2.begin();
+  vector<int>::const_iterator         imidpts = mMidPoints.begin();
   vector<vector<int>>::const_iterator icenter;
 
   if (mStreamlines.empty() || mNumStrEnds == 0)
@@ -2142,10 +2150,10 @@ void Blood::FindCenterStreamline(bool CheckOverlap, bool CheckDeviation,
     if (*ivalid1 && *ivalid2) {
       bool isexcluded = false, okhist = true, okfa = true, okend1 = true,
            okend2 = true, okmid = true;
-      double hdtot = 0;
+      double                       hdtot   = 0;
       vector<bool>::const_iterator jvalid1 = mIsInEnd1.begin(),
                                    jvalid2 = mIsInEnd2.begin();
-      vector<int>::const_iterator jlen = mLengths.begin();
+      vector<int>::const_iterator jlen     = mLengths.begin();
 
       // Check if this is one of the excluded streamlines, if any
       for (vector<vector<int>>::const_iterator ixstr =
@@ -2175,7 +2183,7 @@ void Blood::FindCenterStreamline(bool CheckOverlap, bool CheckDeviation,
 
           for (vector<int>::const_iterator ipt = istr->begin();
                ipt < istr->end(); ipt += 3) {
-            vector<int>::iterator infzeros;
+            vector<int>::iterator       infzeros;
             vector<int>::const_iterator iptbase, iptdwi;
 
             // Map point to base space if needed
@@ -2245,23 +2253,23 @@ void Blood::FindCenterStreamline(bool CheckOverlap, bool CheckDeviation,
         }
 
         if (CheckDeviation) { // Check endpoint deviation from center of mass
-          vector<int>::const_iterator itop = istr->begin(),
+          vector<int>::const_iterator itop    = istr->begin(),
                                       ibottom = istr->end() - 3,
                                       imiddle = itop + *imidpts;
 
           for (int k = 0; k < 3; k++) {
             const float dist = itop[k] - mMeanEnd1[k];
-            okend1 = okend1 && (dist * dist < mVarEnd1[k]);
+            okend1           = okend1 && (dist * dist < mVarEnd1[k]);
           }
 
           for (int k = 0; k < 3; k++) {
             const float dist = ibottom[k] - mMeanEnd2[k];
-            okend2 = okend2 && (dist * dist < mVarEnd2[k]);
+            okend2           = okend2 && (dist * dist < mVarEnd2[k]);
           }
 
           for (int k = 0; k < 3; k++) {
             const float dist = imiddle[k] - mMeanMid[k];
-            okmid = okmid && (dist * dist < mVarMid[k]);
+            okmid            = okmid && (dist * dist < mVarMid[k]);
           }
         }
       }
@@ -2279,7 +2287,7 @@ void Blood::FindCenterStreamline(bool CheckOverlap, bool CheckDeviation,
               for (vector<int>::const_iterator ipt = istr->begin();
                    ipt < istr->end(); ipt += lag) {
                 const int dx = ipt[0] - jpt[0], dy = ipt[1] - jpt[1],
-                          dz = ipt[2] - jpt[2],
+                          dz   = ipt[2] - jpt[2],
                           dist = dx * dx + dy * dy + dz * dz;
 
                 if (dist < dmin)
@@ -2300,7 +2308,7 @@ void Blood::FindCenterStreamline(bool CheckOverlap, bool CheckDeviation,
         }
 
         if (hdtot < hdmin) {
-          hdmin = hdtot;
+          hdmin   = hdtot;
           icenter = istr;
         }
       }
@@ -2339,17 +2347,17 @@ void Blood::FindCenterStreamline(bool CheckOverlap, bool CheckDeviation,
 // Select a representative subset of uniformly spaced points on a streamline
 //
 void Blood::FindPointsOnStreamline(vector<int> &Streamline, int NumPoints) {
-  bool sign1, sign2;
-  const int nptot = Streamline.size() / 3;
-  int kmax, nseg = 1, npthave = 1;
-  double lentot = 0;
-  vector<bool>::iterator iturn;
-  vector<int>::const_iterator ipt;
-  vector<int>::iterator inpt;
-  vector<double>::iterator ilen, inptdec;
+  bool                           sign1, sign2;
+  const int                      nptot = Streamline.size() / 3;
+  int                            kmax, nseg = 1, npthave = 1;
+  double                         lentot = 0;
+  vector<bool>::iterator         iturn;
+  vector<int>::const_iterator    ipt;
+  vector<int>::iterator          inpt;
+  vector<double>::iterator       ilen, inptdec;
   vector<double>::const_iterator idist;
-  vector<bool> isturnpt(nptot, true);
-  vector<int> sum(3, 0), nptseg, cpts(NumPoints * 3);
+  vector<bool>                   isturnpt(nptot, true);
+  vector<int>                    sum(3, 0), nptseg, cpts(NumPoints * 3);
   vector<double> sumsq(3, 0), ptdist(nptot - 1, 0), lenseg, nptsegdec;
   vector<vector<int>::const_iterator> cptopt;
 
@@ -2383,7 +2391,7 @@ void Blood::FindPointsOnStreamline(vector<int> &Streamline, int NumPoints) {
   }
 
   // Find turning points along the dimension of greatest variance
-  ipt = Streamline.begin() + kmax;
+  ipt   = Streamline.begin() + kmax;
   sign2 = (*(ipt + 3) > *ipt);
   ipt += 3;
   for (iturn = isturnpt.begin() + 1; iturn != isturnpt.end() - 1; iturn++) {
@@ -2406,10 +2414,10 @@ void Blood::FindPointsOnStreamline(vector<int> &Streamline, int NumPoints) {
   nptsegdec.resize(nseg);
   fill(nptsegdec.begin(), nptsegdec.end(), 0);
 
-  ipt = Streamline.begin();
+  ipt   = Streamline.begin();
   iturn = isturnpt.begin() + 1;
-  ilen = lenseg.begin();
-  inpt = nptseg.begin();
+  ilen  = lenseg.begin();
+  inpt  = nptseg.begin();
 
   for (vector<double>::iterator idist = ptdist.begin(); idist != ptdist.end();
        idist++) {
@@ -2468,7 +2476,7 @@ void Blood::FindPointsOnStreamline(vector<int> &Streamline, int NumPoints) {
 
   // Determine how many points to choose over each segment between turn points
   // based on length of segments
-  inpt = nptseg.begin();
+  inpt    = nptseg.begin();
   inptdec = nptsegdec.begin();
 
   for (vector<double>::const_iterator ilen = lenseg.begin();
@@ -2476,7 +2484,7 @@ void Blood::FindPointsOnStreamline(vector<int> &Streamline, int NumPoints) {
     const double n = (NumPoints - nseg - 1) * (*ilen) / lentot + 1;
 
     if (n < *inpt) {
-      *inpt = (int)round(n);
+      *inpt    = (int)round(n);
       *inptdec = n - *inpt;
     }
 
@@ -2507,16 +2515,16 @@ void Blood::FindPointsOnStreamline(vector<int> &Streamline, int NumPoints) {
   }
 
   // Find uniformly spaced points over each segment between turn points
-  ipt = Streamline.begin();
+  ipt   = Streamline.begin();
   idist = ptdist.begin();
-  ilen = lenseg.begin();
+  ilen  = lenseg.begin();
 
   cptopt.push_back(ipt);
 
   for (vector<int>::const_iterator inpt = nptseg.begin(); inpt != nptseg.end();
        inpt++) {
-    const double inc = *ilen / *inpt;
-    double targetlen = 0, runlen = 0, runlen0 = 0;
+    const double inc       = *ilen / *inpt;
+    double       targetlen = 0, runlen = 0, runlen0 = 0;
 
     for (int k = *inpt; k > 0; k--) {
       targetlen += inc;
@@ -2542,7 +2550,7 @@ void Blood::FindPointsOnStreamline(vector<int> &Streamline, int NumPoints) {
 
   for (int iter = 0; iter < 100; iter++) {
     vector<int>::iterator icpt = cpts.begin();
-    vector<float> overlap(NumPoints - 1, 0);
+    vector<float>         overlap(NumPoints - 1, 0);
 
     // Fit spline to current control points
     for (vector<vector<int>::const_iterator>::const_iterator iopt =
@@ -2557,7 +2565,7 @@ void Blood::FindPointsOnStreamline(vector<int> &Streamline, int NumPoints) {
     }
 
     // Find overlap of fitted spline segments between controls with histogram
-    ipt = spline.GetAllPointsBegin() + 3;
+    ipt  = spline.GetAllPointsBegin() + 3;
     icpt = cpts.begin() + 3;
 
     for (vector<float>::iterator iover = overlap.begin(); iover < overlap.end();
@@ -2576,22 +2584,22 @@ void Blood::FindPointsOnStreamline(vector<int> &Streamline, int NumPoints) {
     }
 
     // Move a control point towards the segment with the least overlap
-    int iworst = min_element(overlap.begin(), overlap.end()) - overlap.begin();
-    int imove;
+    int  iworst = min_element(overlap.begin(), overlap.end()) - overlap.begin();
+    int  imove;
     bool moveback;
 
     if (iworst == 0) {
-      imove = 1;
+      imove    = 1;
       moveback = true;
     } else if (iworst == NumPoints - 2) {
-      imove = NumPoints - 2;
+      imove    = NumPoints - 2;
       moveback = false;
     } else {
       if (overlap[iworst - 1] > overlap[iworst + 1]) {
-        imove = iworst;
+        imove    = iworst;
         moveback = false;
       } else {
-        imove = iworst + 1;
+        imove    = iworst + 1;
         moveback = true;
       }
     }
@@ -2618,9 +2626,9 @@ void Blood::ComputeStreamlineSpread(vector<int> &ControlPoints) {
   vector<float> cstd(ControlPoints.size(), 0);
 
   if (mNumStrEnds > 1) {
-    bool isinbase = true;
-    vector<bool>::const_iterator ivalid1 = mIsInEnd1.begin(),
-                                 ivalid2 = mIsInEnd2.begin();
+    bool                         isinbase = true;
+    vector<bool>::const_iterator ivalid1  = mIsInEnd1.begin(),
+                                 ivalid2  = mIsInEnd2.begin();
     vector<int>::const_iterator isum = sum.begin(), isumsq = sumsq.begin();
 
     for (vector<vector<int>>::const_iterator istr = mStreamlines.begin();
@@ -2697,17 +2705,17 @@ void Blood::ComputeStreamlineSpread(vector<int> &ControlPoints) {
 // to maximize overlap of the fitted spline with the streamline histogram
 //
 bool Blood::FindPointsOnStreamlineComb(vector<int> &Streamline, int NumPoints) {
-  bool success = true;
-  const int strlen = (int)Streamline.size() / 3,
-            strdiv = (int)round((strlen - 1) / (NumPoints - 1)),
+  bool      success = true;
+  const int strlen  = (int)Streamline.size() / 3,
+            strdiv  = (int)round((strlen - 1) / (NumPoints - 1)),
             lag = max(1, min((int)round(mControlStepRatio * NumPoints / mDx),
                              strdiv)) *
                   3;
-  double hdmin = numeric_limits<double>::infinity();
-  vector<int> cpts(NumPoints * 3);
+  double                      hdmin = numeric_limits<double>::infinity();
+  vector<int>                 cpts(NumPoints * 3);
   vector<int>::const_iterator ipt;
   vector<vector<int>::const_iterator> cptopt(NumPoints);
-  Spline spline(Streamline, mTestMask[0]);
+  Spline                              spline(Streamline, mTestMask[0]);
 
   if (NumPoints > strlen) {
     cout << "ERROR: Selected streamline has fewer than " << NumPoints
@@ -2727,7 +2735,7 @@ bool Blood::FindPointsOnStreamlineComb(vector<int> &Streamline, int NumPoints) {
   cout << "INFO: Step is " << lag / 3 << " voxels" << endl;
 
   // Keep first and last control points fixed
-  cptopt[0] = Streamline.begin();
+  cptopt[0]             = Streamline.begin();
   cptopt[NumPoints - 1] = Streamline.end() - 3;
 
   // Try combinations of intermediate control points
@@ -2760,7 +2768,7 @@ bool Blood::FindPointsOnStreamlineComb(vector<int> &Streamline, int NumPoints) {
 
   // Map control points to base space if needed
   if (!mTestAffineReg.IsEmpty() || !mTestNonlinReg.IsEmpty()) {
-    vector<int> cptsout(cpts.size()), point(3);
+    vector<int>           cptsout(cpts.size()), point(3);
     vector<int>::iterator icptout = cptsout.begin();
 
     for (vector<int>::const_iterator icpt = cpts.begin(); icpt < cpts.end();
@@ -2816,11 +2824,11 @@ void Blood::TryControlPoint(double &HausDistMin, int IndexPoint, int SearchLag,
     for (ControlPoints[IndexPoint] = ControlPoints[IndexPoint - 1] + SearchLag;
          ControlPoints[IndexPoint] < Streamline.end() - SearchLag;
          ControlPoints[IndexPoint] += SearchLag) {
-      bool okfa = true;
-      int splen, dmin = 1000000, dminmax = 0, nhzeros = 0;
-      double hd = 0.0;
+      bool        okfa = true;
+      int         splen, dmin = 1000000, dminmax = 0, nhzeros = 0;
+      double      hd = 0.0;
       vector<int> cpts, nfzeros(mTestFa.size(), 0), point(3);
-      Spline basespline, *checkspline;
+      Spline      basespline, *checkspline;
 
       // Fit spline to current control points
       for (vector<vector<int>::const_iterator>::const_iterator icpt =
@@ -2838,7 +2846,7 @@ void Blood::TryControlPoint(double &HausDistMin, int IndexPoint, int SearchLag,
       for (vector<int>::const_iterator ipt = TrySpline.GetAllPointsBegin();
            ipt < TrySpline.GetAllPointsEnd(); ipt += 3) {
         const float h = MRIgetVoxVal(mHistoStr, ipt[0], ipt[1], ipt[2], 0);
-        dmin = 1000000;
+        dmin          = 1000000;
 
         // Point distance from true streamline
         for (vector<int>::const_iterator iptrue = Streamline.begin();
@@ -2867,7 +2875,7 @@ void Blood::TryControlPoint(double &HausDistMin, int IndexPoint, int SearchLag,
 
       // Map control points and fit spline in base space if needed
       if (!mTestAffineReg.IsEmpty() || !mTestNonlinReg.IsEmpty()) {
-        vector<int> basecpts(cpts.size());
+        vector<int>           basecpts(cpts.size());
         vector<int>::iterator icptout = basecpts.begin();
 
         for (vector<int>::const_iterator icpt = cpts.begin(); icpt < cpts.end();
@@ -2899,7 +2907,7 @@ void Blood::TryControlPoint(double &HausDistMin, int IndexPoint, int SearchLag,
       // Check anisotropy along spline
       for (vector<int>::const_iterator ipt = checkspline->GetAllPointsBegin();
            ipt < checkspline->GetAllPointsEnd(); ipt += 3) {
-        vector<int>::iterator infzeros = nfzeros.begin();
+        vector<int>::iterator       infzeros = nfzeros.begin();
         vector<int>::const_iterator iptdwi;
 
         for (vector<MRI *>::const_iterator ifa = mTestFa.begin();
@@ -2957,11 +2965,11 @@ void Blood::TryControlPoint(double &HausDistMin, int IndexPoint, int SearchLag,
 // Least-squares fit of spline control points to streamline
 //
 bool Blood::FindPointsOnStreamlineLS(vector<int> &Streamline, int NumPoints) {
-  bool success;
-  const int strlen = (int)Streamline.size() / 3;
-  vector<int> cpts(NumPoints * 3), cptsout;
+  bool                        success;
+  const int                   strlen = (int)Streamline.size() / 3;
+  vector<int>                 cpts(NumPoints * 3), cptsout;
   vector<int>::const_iterator ipt;
-  Spline spline(NumPoints, mTestMask[0]);
+  Spline                      spline(NumPoints, mTestMask[0]);
 
   if (NumPoints > strlen) {
     cout << "ERROR: Selected streamline has fewer than " << NumPoints
@@ -2982,8 +2990,8 @@ bool Blood::FindPointsOnStreamlineLS(vector<int> &Streamline, int NumPoints) {
     // Find Hausdorff distance of true streamline from fitted spline
     for (vector<int>::const_iterator ipt = spline.GetAllPointsBegin();
          ipt < spline.GetAllPointsEnd(); ipt += 3) {
-      const float h = MRIgetVoxVal(mHistoStr, ipt[0], ipt[1], ipt[2], 0);
-      int dmin = 1000000;
+      const float h    = MRIgetVoxVal(mHistoStr, ipt[0], ipt[1], ipt[2], 0);
+      int         dmin = 1000000;
 
       // Point distance from true streamline
       for (vector<int>::const_iterator iptrue = Streamline.begin();
@@ -3011,7 +3019,7 @@ bool Blood::FindPointsOnStreamlineLS(vector<int> &Streamline, int NumPoints) {
   // Don't allow spline if more than 3 contiguous points are in low FA
   if (success) {
     vector<int> nfzeros(mTestFa.size(), 0), point(3);
-    Spline basespline, *checkspline;
+    Spline      basespline, *checkspline;
 
     // Map control points and fit spline in base space if needed
     if (!mTestAffineReg.IsEmpty() || !mTestNonlinReg.IsEmpty()) {
@@ -3046,7 +3054,7 @@ bool Blood::FindPointsOnStreamlineLS(vector<int> &Streamline, int NumPoints) {
     if (success)
       for (vector<int>::const_iterator ipt = checkspline->GetAllPointsBegin();
            ipt < checkspline->GetAllPointsEnd(); ipt += 3) {
-        vector<int>::iterator infzeros = nfzeros.begin();
+        vector<int>::iterator       infzeros = nfzeros.begin();
         vector<int>::const_iterator iptdwi;
 
         for (vector<MRI *>::const_iterator ifa = mTestFa.begin();
@@ -3109,7 +3117,7 @@ bool Blood::FindPointsOnStreamlineLS(vector<int> &Streamline, int NumPoints) {
 
     // Map control points to base space if needed
     if (!mTestAffineReg.IsEmpty() || !mTestNonlinReg.IsEmpty()) {
-      vector<int> point(3);
+      vector<int>           point(3);
       vector<int>::iterator icptout;
 
       cptsout.resize(cpts.size());
@@ -3171,7 +3179,7 @@ bool Blood::FindPointsOnStreamlineLS(vector<int> &Streamline, int NumPoints) {
 //
 // Map point coordinates from atlas space to base space
 //
-bool Blood::MapPointToBase(vector<int>::iterator OutPoint,
+bool Blood::MapPointToBase(vector<int>::iterator       OutPoint,
                            vector<int>::const_iterator InPoint) {
   vector<float> point(InPoint, InPoint + 3);
 
@@ -3193,9 +3201,9 @@ bool Blood::MapPointToBase(vector<int>::iterator OutPoint,
 //
 // Map point coordinates from base space to diffusion space
 //
-bool Blood::MapPointToNative(vector<int>::iterator OutPoint,
+bool Blood::MapPointToNative(vector<int>::iterator       OutPoint,
                              vector<int>::const_iterator InPoint,
-                             unsigned int FrameIndex) {
+                             unsigned int                FrameIndex) {
   vector<float> point(InPoint, InPoint + 3);
 
   mTestBaseReg[FrameIndex].ApplyXfm(point, point.begin());
@@ -3213,10 +3221,10 @@ bool Blood::MapPointToNative(vector<int>::iterator OutPoint,
 //
 void Blood::WriteOutputs(const char *OutTrainBase, const char *OutTestBase) {
   const int nstr2 = (int)mStreamlines.size() + 2, nsubj2 = mNumTrain + 2;
-  char fname[PATH_MAX];
-  MRI *out1 = MRIclone(mTestMask[0], NULL);
-  MRI *out2 = MRIclone(mTestMask[0], NULL);
-  ofstream outfile;
+  char      fname[PATH_MAX];
+  MRI *     out1 = MRIclone(mTestMask[0], NULL);
+  MRI *     out2 = MRIclone(mTestMask[0], NULL);
+  ofstream  outfile;
 
   cout << "Writing output files to " << OutTrainBase << "_*" << endl;
 
@@ -3404,22 +3412,22 @@ void Blood::WriteOutputs(const char *OutTrainBase, const char *OutTestBase) {
 // Save prior information on anatomy and curvature to text files
 //
 void Blood::WritePriors(const char *OutBase, bool UseTruncated) {
-  char fname[PATH_MAX], pfix[5];
-  vector<float>::const_iterator ithisto, itprior, ichisto, icprior;
-  vector<vector<int>>::const_iterator ihisto;
-  vector<vector<float>>::const_iterator iprior, idmean, idstd;
+  char                                      fname[PATH_MAX], pfix[5];
+  vector<float>::const_iterator             ithisto, itprior, ichisto, icprior;
+  vector<vector<int>>::const_iterator       ihisto;
+  vector<vector<float>>::const_iterator     iprior, idmean, idstd;
   vector<set<unsigned int>>::const_iterator iids;
-  ofstream outfile;
+  ofstream                                  outfile;
 
   // Save anatomical label IDs found in training set, histograms and priors
   if (UseTruncated) {
     strcpy(pfix, "_all");
-    iids = mIdsLocalAll.begin();
+    iids   = mIdsLocalAll.begin();
     ihisto = mHistoLocalAll.begin();
     iprior = mPriorLocalAll.begin();
   } else {
     strcpy(pfix, "");
-    iids = mIdsLocal.begin();
+    iids   = mIdsLocal.begin();
     ihisto = mHistoLocal.begin();
     iprior = mPriorLocal.begin();
   }
@@ -3427,9 +3435,9 @@ void Blood::WritePriors(const char *OutBase, bool UseTruncated) {
   for (vector<int>::const_iterator idir = mDirLocal.begin();
        idir < mDirLocal.end(); idir += 3) {
     const int idx = idir[0], idy = idir[1], idz = idir[2];
-    vector<set<unsigned int>>::const_iterator iidsarc = iids;
-    vector<vector<int>>::const_iterator ihistoarc = ihisto;
-    vector<vector<float>>::const_iterator ipriorarc = iprior;
+    vector<set<unsigned int>>::const_iterator iidsarc   = iids;
+    vector<vector<int>>::const_iterator       ihistoarc = ihisto;
+    vector<vector<float>>::const_iterator     ipriorarc = iprior;
 
     sprintf(fname, "%s_fsids%s_%d_%d_%d.txt", OutBase, pfix, idx, idy, idz);
     outfile.open(fname, ios::out);
@@ -3479,27 +3487,27 @@ void Blood::WritePriors(const char *OutBase, bool UseTruncated) {
   }
 
   if (UseTruncated) {
-    iids = mIdsNearAll.begin();
+    iids   = mIdsNearAll.begin();
     ihisto = mHistoNearAll.begin();
     iprior = mPriorNearAll.begin();
     idmean = mAsegDistMeanAll.begin();
-    idstd = mAsegDistStdAll.begin();
+    idstd  = mAsegDistStdAll.begin();
   } else {
-    iids = mIdsNear.begin();
+    iids   = mIdsNear.begin();
     ihisto = mHistoNear.begin();
     iprior = mPriorNear.begin();
     idmean = mAsegDistMean.begin();
-    idstd = mAsegDistStd.begin();
+    idstd  = mAsegDistStd.begin();
   }
 
   for (vector<int>::const_iterator idir = mDirNear.begin();
        idir < mDirNear.end(); idir += 3) {
     const int idx = idir[0], idy = idir[1], idz = idir[2];
-    vector<set<unsigned int>>::const_iterator iidsarc = iids;
-    vector<vector<int>>::const_iterator ihistoarc = ihisto;
-    vector<vector<float>>::const_iterator ipriorarc = iprior;
-    vector<vector<float>>::const_iterator idmeanarc = idmean;
-    vector<vector<float>>::const_iterator idstdarc = idstd;
+    vector<set<unsigned int>>::const_iterator iidsarc   = iids;
+    vector<vector<int>>::const_iterator       ihistoarc = ihisto;
+    vector<vector<float>>::const_iterator     ipriorarc = iprior;
+    vector<vector<float>>::const_iterator     idmeanarc = idmean;
+    vector<vector<float>>::const_iterator     idstdarc  = idstd;
 
     sprintf(fname, "%s_fsnnids%s_%d_%d_%d.txt", OutBase, pfix, idx, idy, idz);
     outfile.open(fname, ios::out);
@@ -3654,17 +3662,17 @@ void Blood::WritePriors(const char *OutBase, bool UseTruncated) {
   // In debug mode, save all samples of the tangent vector and curvature
   // found in the training data by arc length
   if (mDebug) {
-    vector<float>::const_iterator isamp;
+    vector<float>::const_iterator         isamp;
     vector<vector<float>>::const_iterator itangx, itangy, icurv;
 
     if (UseTruncated) {
       itangx = mTangentXByArcAll.begin();
       itangy = mTangentYByArcAll.begin();
-      icurv = mCurvatureByArcAll.begin();
+      icurv  = mCurvatureByArcAll.begin();
     } else {
       itangx = mTangentXByArc.begin();
       itangy = mTangentYByArc.begin();
-      icurv = mCurvatureByArc.begin();
+      icurv  = mCurvatureByArc.begin();
     }
 
     sprintf(fname, "%s_tangx%s.txt", OutBase, pfix);
@@ -3711,26 +3719,26 @@ void Blood::WritePriors(const char *OutBase, bool UseTruncated) {
 //
 // Save central streamline to .trk file
 //
-void Blood::WriteCenterStreamline(const char *CenterTrkFile,
-                                  const char *RefTrkFile) {
-  float *icent, *centpts = new float[mCenterStreamline.size()];
+void Blood::WriteCenterStreamline(const std::string CenterTrkFile,
+                                  const std::string RefTrkFile) {
+  float *      icent, *centpts = new float[mCenterStreamline.size()];
   CTrackReader trkreader;
   CTrackWriter trkwriter;
   TRACK_HEADER trkheadin, trkheadout;
 
   // Open reference .trk file
-  if (!trkreader.Open(RefTrkFile, &trkheadin)) {
+  if (!trkreader.Open(RefTrkFile.c_str(), &trkheadin)) {
     cout << "ERROR: Cannot open input " << RefTrkFile << endl;
     cout << "ERROR: " << trkreader.GetLastErrorMessage() << endl;
     exit(1);
   }
 
   // Set output .trk header
-  trkheadout = trkheadin;
+  trkheadout         = trkheadin;
   trkheadout.n_count = 1; // Single streamline
 
   // Open output .trk file
-  if (!trkwriter.Initialize(CenterTrkFile, trkheadout)) {
+  if (!trkwriter.Initialize(CenterTrkFile.c_str(), trkheadout)) {
     cout << "ERROR: Cannot open output " << CenterTrkFile << endl;
     cout << "ERROR: " << trkwriter.GetLastErrorMessage() << endl;
     exit(1);
@@ -3754,13 +3762,13 @@ void Blood::WriteCenterStreamline(const char *CenterTrkFile,
 //
 // Save streamline end points to volumes
 //
-void Blood::WriteEndPoints(const char *OutBase, MRI *RefVol) {
-  char fname[PATH_MAX];
+void Blood::WriteEndPoints(const std::string OutBase, MRI *RefVol) {
+  std::string                  fname;
   vector<bool>::const_iterator ivalid1 = mIsInEnd1.begin(),
                                ivalid2 = mIsInEnd2.begin();
   vector<vector<int>>::const_iterator istr;
-  MRI *out1 = MRIclone(RefVol, NULL);
-  MRI *out2 = MRIclone(RefVol, NULL);
+  MRI *                               out1 = MRIclone(RefVol, NULL);
+  MRI *                               out2 = MRIclone(RefVol, NULL);
 
   // Write end ROIs to volumes
   for (istr = mStreamlines.begin(); istr != mStreamlines.end(); istr++) {
@@ -3782,21 +3790,21 @@ void Blood::WriteEndPoints(const char *OutBase, MRI *RefVol) {
     ivalid2++;
   }
 
-  sprintf(fname, "%s_end1.nii.gz", OutBase);
-  MRIwrite(out1, fname);
+  fname = OutBase + "_end1.nii.gz";
+  MRIwrite(out1, fname.c_str());
 
-  sprintf(fname, "%s_end2.nii.gz", OutBase);
-  MRIwrite(out2, fname);
+  fname = OutBase + "_end2.nii.gz";
+  MRIwrite(out2, fname.c_str());
 
   // Write dilated end ROIs to volumes
   if (!mMask.empty()) {
     vector<MRI *>::const_iterator imask = mMask.begin(), iaseg = mAseg.begin();
-    vector<int> dilpt(3);
+    vector<int>                   dilpt(3);
 
     MRIclear(out1);
     MRIclear(out2);
 
-    istr = mStreamlines.begin();
+    istr    = mStreamlines.begin();
     ivalid1 = mIsInEnd1.begin();
     ivalid2 = mIsInEnd2.begin();
 
@@ -3846,11 +3854,11 @@ void Blood::WriteEndPoints(const char *OutBase, MRI *RefVol) {
       iaseg++;
     }
 
-    sprintf(fname, "%s_end1_dil.nii.gz", OutBase);
-    MRIwrite(out1, fname);
+    fname = OutBase + "_end1_dil.nii.gz";
+    MRIwrite(out1, fname.c_str());
 
-    sprintf(fname, "%s_end2_dil.nii.gz", OutBase);
-    MRIwrite(out2, fname);
+    fname = OutBase + "_end2_dil.nii.gz";
+    MRIwrite(out2, fname.c_str());
   }
 }
 
@@ -3858,7 +3866,7 @@ void Blood::WriteEndPoints(const char *OutBase, MRI *RefVol) {
 // Print coordinates of all points of a streamline
 //
 void Blood::PrintStreamline(int SubjIndex, int LineIndex) {
-  vector<int>::const_iterator inum = mNumLines.begin();
+  vector<int>::const_iterator         inum = mNumLines.begin();
   vector<vector<int>>::const_iterator istr = mStreamlines.begin();
 
   if ((SubjIndex < 0) || (SubjIndex >= mNumTrain))
@@ -3883,8 +3891,8 @@ void Blood::PrintStreamline(int SubjIndex, int LineIndex) {
 // Average values of input volumes over all streamline voxels
 //
 vector<float> Blood::ComputeAvgPath(vector<MRI *> &ValueVolumes) {
-  int nvox = 0;
-  vector<float> avg(ValueVolumes.size(), 0);
+  int                     nvox = 0;
+  vector<float>           avg(ValueVolumes.size(), 0);
   vector<float>::iterator iavg;
 
   if (mHistoStr) {
@@ -3918,8 +3926,8 @@ vector<float> Blood::ComputeAvgPath(vector<MRI *> &ValueVolumes) {
 // Weighted average values of input volumes over all streamline voxels
 //
 vector<float> Blood::ComputeWeightAvgPath(vector<MRI *> &ValueVolumes) {
-  float wtot = 0;
-  vector<float> avg(ValueVolumes.size(), 0);
+  float                   wtot = 0;
+  vector<float>           avg(ValueVolumes.size(), 0);
   vector<float>::iterator iavg;
 
   if (mHistoStr) {
@@ -3953,8 +3961,8 @@ vector<float> Blood::ComputeWeightAvgPath(vector<MRI *> &ValueVolumes) {
 // Average values of input volumes over center streamline
 //
 vector<float> Blood::ComputeAvgCenter(vector<MRI *> &ValueVolumes) {
-  int nvox = (int)mCenterStreamline.size() / 3;
-  vector<float> avg(ValueVolumes.size(), 0);
+  int                     nvox = (int)mCenterStreamline.size() / 3;
+  vector<float>           avg(ValueVolumes.size(), 0);
   vector<float>::iterator iavg;
 
   for (vector<int>::const_iterator ipt = mCenterStreamline.begin();
@@ -3978,11 +3986,11 @@ vector<float> Blood::ComputeAvgCenter(vector<MRI *> &ValueVolumes) {
 //
 // Write values of input volumes point-wise along streamlines
 //
-void Blood::WriteValuesPointwise(vector<MRI *> &ValueVolumes,
-                                 const char *TextFile) {
-  vector<float> valsum(ValueVolumes.size());
+void Blood::WriteValuesPointwise(vector<MRI *> &   ValueVolumes,
+                                 const std::string TextFile) {
+  vector<float>           valsum(ValueVolumes.size());
   vector<float>::iterator ivalsum;
-  ofstream outfile(TextFile, ios::app);
+  ofstream                outfile(TextFile, ios::app);
   if (!outfile) {
     cout << "ERROR: Could not open " << TextFile << " for writing" << endl;
     exit(1);
@@ -4007,7 +4015,7 @@ void Blood::WriteValuesPointwise(vector<MRI *> &ValueVolumes,
 
     for (vector<vector<int>>::const_iterator ipath = mStreamlines.begin();
          ipath < mStreamlines.end(); ipath++) {
-      int dmin = 1000000;
+      int                         dmin   = 1000000;
       vector<int>::const_iterator iptmin = ipath->begin();
 
       for (vector<int>::const_iterator ipathpt = ipath->begin();
@@ -4020,7 +4028,7 @@ void Blood::WriteValuesPointwise(vector<MRI *> &ValueVolumes,
         }
 
         if (dist < dmin) {
-          dmin = dist;
+          dmin   = dist;
           iptmin = ipathpt;
         }
       }

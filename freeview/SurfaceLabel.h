@@ -1,5 +1,4 @@
 /**
- * @file  SurfaceLabel.h
  * @brief The common properties available to surface label
  *
  * An interface implemented by a collection. Layers will get
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/12/08 17:41:15 $
- *    $Revision: 1.15 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,9 +24,9 @@
 #ifndef SurfaceLabel_h
 #define SurfaceLabel_h
 
+#include <QList>
 #include <QObject>
 #include <vtkSmartPointer.h>
-#include <QList>
 
 #include "label.h"
 
@@ -118,21 +113,21 @@ private:
   void UpdateOutline();
   void UpdateLut();
 
-  LABEL *m_label;
-  QString m_strName;
-  LayerSurface *m_surface;
-  double m_rgbColor[3];
-  bool m_bTkReg;
-  bool m_bShowOutline;
-  bool m_bVisible;
-  int *m_nOutlineIndices;
-  double m_dThreshold;
-  int m_nColorCode;
-  double m_dHeatscaleMin;
-  double m_dHeatscaleMax;
-  double m_dOpacity;
-  QString m_strFilename;
-  bool m_bModified;
+  LABEL *        m_label;
+  QString        m_strName;
+  LayerSurface * m_surface;
+  double         m_rgbColor[3];
+  bool           m_bTkReg;
+  bool           m_bShowOutline;
+  bool           m_bVisible;
+  int *          m_nOutlineIndices;
+  double         m_dThreshold;
+  int            m_nColorCode;
+  double         m_dHeatscaleMin;
+  double         m_dHeatscaleMax;
+  double         m_dOpacity;
+  QString        m_strFilename;
+  bool           m_bModified;
   QList<LABEL *> m_undoBuffer;
   QList<LABEL *> m_redoBuffer;
 

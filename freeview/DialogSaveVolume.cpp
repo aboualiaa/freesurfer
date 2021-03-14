@@ -1,16 +1,11 @@
 /**
- * @file  DialogSaveVolume.cpp
  * @brief Dialog to save volume
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/07/08 17:28:51 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,9 +18,9 @@
  */
 #include "DialogSaveVolume.h"
 #include "ui_DialogSaveVolume.h"
-#include <QMessageBox>
-#include <QFileDialog>
 #include <QFile>
+#include <QFileDialog>
+#include <QMessageBox>
 
 DialogSaveVolume::DialogSaveVolume(QWidget *parent, const QString &filepath)
     : QDialog(parent), ui(new Ui::DialogSaveVolume) {

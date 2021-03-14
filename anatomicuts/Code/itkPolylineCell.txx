@@ -9,8 +9,8 @@
   Copyright (c) Insight Software Consortium. All rights reserved.
   See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     This software is distributed WITHOUT ANY WARRANTY; without even 
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -96,7 +96,7 @@ bool PolylineCell<TCellInterface>::GetBoundaryFeature(
 /**
  * Standard CellInterface:
  * Set the point id list used by the cell.  It is assumed that the given
- * iterator can be incremented and safely de-referenced enough times to
+ * iterator can be incremented and safely de-referenced enough times to 
  * get all the point ids needed by the cell.
  */
 template <typename TCellInterface>
@@ -118,7 +118,7 @@ void PolylineCell<TCellInterface>::SetPointIds(PointIdConstIterator first) {
 template <typename TCellInterface>
 void PolylineCell<TCellInterface>::SetPointIds(PointIdConstIterator first,
                                                PointIdConstIterator last) {
-  int localId = 0;
+  int                  localId = 0;
   PointIdConstIterator ii(first);
 
   m_PointIds->Initialize();
@@ -133,7 +133,7 @@ void PolylineCell<TCellInterface>::SetPointIds(PointIdConstIterator first,
  * Set an individual point identifier in the cell.
  */
 template <typename TCellInterface>
-void PolylineCell<TCellInterface>::SetPointId(int localId,
+void PolylineCell<TCellInterface>::SetPointId(int             localId,
                                               PointIdentifier ptId) {
   m_PointIds->CreateIndex(localId);
   m_PointIds->SetElement(localId, ptId);

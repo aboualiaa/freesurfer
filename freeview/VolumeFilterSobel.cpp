@@ -1,16 +1,11 @@
 /**
- * @file  VolumeFilterSobel.cpp
  * @brief Base VolumeFilterSobel class.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/10/18 18:13:24 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,12 +20,12 @@
 
 #include "VolumeFilterSobel.h"
 #include "LayerMRI.h"
-#include <vtkImageData.h>
-#include <vtkImageSobel3D.h>
-#include <vtkImageMagnitude.h>
-#include <vtkPointData.h>
 #include <vtkDataArray.h>
+#include <vtkImageData.h>
+#include <vtkImageMagnitude.h>
 #include <vtkImageShiftScale.h>
+#include <vtkImageSobel3D.h>
+#include <vtkPointData.h>
 
 VolumeFilterSobel::VolumeFilterSobel(LayerMRI *input, LayerMRI *output,
                                      QObject *parent)
@@ -51,9 +46,9 @@ bool VolumeFilterSobel::Execute() {
   mag->Update();
   double *orig_range =
       m_volumeInput->GetImageData()->GetPointData()->GetScalars()->GetRange();
-  vtkImageData *img = mag->GetOutput();
-  double *range = img->GetPointData()->GetScalars()->GetRange();
-  double scale = orig_range[1] / range[1];
+  vtkImageData *img   = mag->GetOutput();
+  double *      range = img->GetPointData()->GetScalars()->GetRange();
+  double        scale = orig_range[1] / range[1];
   if (scale < 0) {
     scale = -scale;
   }

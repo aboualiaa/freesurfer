@@ -1,21 +1,18 @@
 #ifndef __kvlAtlasMeshMultiAlphaDrawer_h
 #define __kvlAtlasMeshMultiAlphaDrawer_h
 
-#include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshRasterizor.h"
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshMultiAlphaDrawer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshMultiAlphaDrawer;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshMultiAlphaDrawer     Self;
+  typedef AtlasMeshRasterizor           Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -24,7 +21,7 @@ public:
   itkTypeMacro(AtlasMeshMultiAlphaDrawer, itk::Object);
 
   /** Some typedefs */
-  using ImageType = itk::Image<AtlasAlphasType, 3>;
+  typedef itk::Image<AtlasAlphasType, 3> ImageType;
 
   /** */
   void SetRegions(const ImageType::RegionType &region) {
@@ -44,13 +41,13 @@ protected:
   virtual ~AtlasMeshMultiAlphaDrawer();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
 private:
-  AtlasMeshMultiAlphaDrawer(const Self &); // purposely not implemented
-  void operator=(const Self &);            // purposely not implemented
+  AtlasMeshMultiAlphaDrawer(const Self &); //purposely not implemented
+  void operator=(const Self &);            //purposely not implemented
 
   ImageType::Pointer m_Image;
 };

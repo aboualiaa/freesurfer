@@ -24,31 +24,31 @@ public:
   void set_material(const VMaterial *cpMaterial) { m_cpMaterial = cpMaterial; }
   const VMaterial *material() const { return m_cpMaterial; }
 
-  int get_id() const { return m_id; }
-  int id() const { return m_id; }
+  int  get_id() const { return m_id; }
+  int  id() const { return m_id; }
   void set_id(int id);
 
   bool get_node(int index, TNode<n> **ppNode) const;
-  int no_nodes() const { return (int)m_vpNodes.size(); }
+  int  no_nodes() const { return (int)m_vpNodes.size(); }
 
-  void add_node(TNode<n> *pNode);
+  void                add_node(TNode<n> *pNode);
   virtual SmallMatrix get_matrix() const = 0; // compute the stiffness matrix
 
   int no_dofs() const { return n * m_vpNodes.size(); }
 
   //--
-  virtual bool dst_contains(const tCoords &c) const = 0;
-  void dst_box(tCoords &c_min, tCoords &c_max) const;
+  virtual bool    dst_contains(const tCoords &c) const = 0;
+  void            dst_box(tCoords &c_min, tCoords &c_max) const;
   virtual tCoords inv_img(const tCoords &dst_coords) const = 0;
-  virtual double dst_volume() const = 0; // returns the volume
+  virtual double  dst_volume() const = 0; // returns the volume
   // element (=area in 2D)
   //--
 
   //---
-  virtual bool src_contains(const tCoords &c) const = 0;
-  void src_box(tCoords &c_min, tCoords &c_max) const;
+  virtual bool    src_contains(const tCoords &c) const = 0;
+  void            src_box(tCoords &c_min, tCoords &c_max) const;
   virtual tCoords dir_img(const tCoords &src_coords) const = 0;
-  virtual double src_volume() const = 0; //  volume element (=area in 2D)
+  virtual double  src_volume() const = 0; //  volume element (=area in 2D)
   //---
 
   virtual bool orientation_pb(Frame f = both) const = 0; // returns 1 if
@@ -107,14 +107,14 @@ void TElement<n>::dst_box(tCoords &c_min, tCoords &c_max) const {
   }
 
   typename std::vector<TNode<n> *>::const_iterator cit = m_vpNodes.begin();
-  c_min = (*cit)->dst_coords();
-  c_max = c_min;
+  c_min                                                = (*cit)->dst_coords();
+  c_max                                                = c_min;
 
   tCoords tc_buf;
   for (++cit; cit != m_vpNodes.end(); ++cit) {
     tc_buf = (*cit)->dst_coords();
-    c_min = min(c_min, tc_buf);
-    c_max = max(c_max, tc_buf);
+    c_min  = min(c_min, tc_buf);
+    c_max  = max(c_max, tc_buf);
   }
 }
 
@@ -126,14 +126,14 @@ void TElement<n>::src_box(tCoords &c_min, tCoords &c_max) const {
     return;
   }
   typename std::vector<TNode<n> *>::const_iterator cit = m_vpNodes.begin();
-  c_min = (*cit)->coords();
-  c_max = c_min;
+  c_min                                                = (*cit)->coords();
+  c_max                                                = c_min;
 
   tCoords tc_buf;
   for (++cit; cit != m_vpNodes.end(); ++cit) {
     tc_buf = (*cit)->coords();
-    c_min = min(c_min, tc_buf);
-    c_max = max(c_max, tc_buf);
+    c_min  = min(c_min, tc_buf);
+    c_max  = max(c_max, tc_buf);
   }
 }
 

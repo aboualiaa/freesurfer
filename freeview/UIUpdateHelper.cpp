@@ -1,16 +1,7 @@
-/**
- * @file  UIUpdateHelper.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/03/16 19:24:28 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,8 +13,8 @@
  *
  */
 #include "UIUpdateHelper.h"
-#include <QLineEdit>
 #include <QDoubleSpinBox>
+#include <QLineEdit>
 
 UIUpdateHelper::UIUpdateHelper() {}
 
@@ -56,7 +47,7 @@ void UIUpdateHelper::ChangeLineEditNumber(QLineEdit *w, double val, int precise,
   if (w->hasFocus() && !ignoreFocus)
     return;
 
-  bool bOK;
+  bool   bOK;
   double temp_val = w->text().toDouble(&bOK);
   if (bOK && temp_val == val) {
     return;

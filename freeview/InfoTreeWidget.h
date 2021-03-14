@@ -1,16 +1,7 @@
-/**
- * @file  InfoTreeWidget.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/02/09 21:22:39 $
- *    $Revision: 1.10 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -65,13 +56,13 @@ protected:
   void mousePressEvent(QMouseEvent *event);
 
 private:
-  double m_dRAS[3];
-  bool m_bShowSurfaceNormal;
-  bool m_bShowSurfaceCurvature;
-  bool m_bShowTkRegRAS;
-  QLineEdit *m_editor;
+  double           m_dRAS[3];
+  bool             m_bShowSurfaceNormal;
+  bool             m_bShowSurfaceCurvature;
+  bool             m_bShowTkRegRAS;
+  QLineEdit *      m_editor;
   QTreeWidgetItem *m_itemEdited;
-  bool m_bForCursor;
+  bool             m_bForCursor;
 };
 
 #endif // INFOTREEWIDGET_H

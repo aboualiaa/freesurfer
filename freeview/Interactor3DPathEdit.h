@@ -8,9 +8,9 @@ public:
   Interactor3DPathEdit(QObject *parent);
 
   virtual bool ProcessMouseDownEvent(QMouseEvent *event, RenderView *view);
-  //  virtual bool ProcessMouseMoveEvent( QMouseEvent* event, RenderView* view
-  //  );
+  //  virtual bool ProcessMouseMoveEvent( QMouseEvent* event, RenderView* view );
   virtual bool ProcessMouseUpEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessKeyDownEvent(QKeyEvent *event, RenderView *renderview);
 
 protected:
   bool m_bEditAttempted;

@@ -14,6 +14,7 @@ TODO: see
 # we'll need python's ini parser: 'configparser'
 import configparser
 
+
 def ini_to_struct(file):
     """
     very simple ini parser that expands on configparser
@@ -35,7 +36,7 @@ def ini_to_struct(file):
     # read the file via config.
     conf = configparser.ConfigParser()
     confout = conf.read(file)
-    assert len(confout) > 0, 'Cannot read file %s ' % file
+    assert len(confout) > 0, "Cannot read file %s " % file
 
     # prepare the Struct
     strct = Struct()
@@ -82,7 +83,7 @@ def ini_to_struct(file):
     return strct
 
 
-class Struct():
+class Struct:
     """
     a simple struct class to allow for the following syntax:
     data = Struct()
@@ -105,7 +106,7 @@ def str_to_none(val):
         casted val: the casted value if successful, or None
         success: None if casting was successful
     """
-    if val == 'None':
+    if val == "None":
         return (None, True)
     else:
         return (None, False)
@@ -124,7 +125,7 @@ def str_to_type(val, ctype):
         casted val: the casted value if successful, or None
         success: bool if casting was successful
     """
-    assert ctype is not bool, 'use str_to_bull() for casting to bool'
+    assert ctype is not bool, "use str_to_bull() for casting to bool"
 
     ret = None
     success = True
@@ -147,9 +148,9 @@ def str_to_bool(val):
         casted val: the casted value if successful, or None
         success: bool if casting was successful
     """
-    if val == 'True':
+    if val == "True":
         return (True, True)
-    elif val == 'False':
+    elif val == "False":
         return (False, True)
     else:
         return (None, False)
@@ -166,13 +167,13 @@ def str_to_list(val):
     Returns:
         casted_dst: the casted list
     """
-    val = val.replace('[', '')
-    val = val.replace('(', '')
-    val = val.replace(']', '')
-    val = val.replace(')', '')
+    val = val.replace("[", "")
+    val = val.replace("(", "")
+    val = val.replace("]", "")
+    val = val.replace(")", "")
 
-    if ',' in val:
-        lst = val.split(',')
+    if "," in val:
+        lst = val.split(",")
     else:
         lst = val.split()
 
@@ -208,4 +209,3 @@ def str_convert_single(val):
         ret, done = str_to_none(val)
 
     return (ret, done)
-

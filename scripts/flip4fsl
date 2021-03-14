@@ -5,12 +5,8 @@
 # Flip NIfTI image data and change orientation in header to please FSL
 #
 # Original Author: Anastasia Yendiki
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/03/29 21:40:13 $
-#    $Revision: 1.5 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained

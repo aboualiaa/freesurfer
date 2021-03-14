@@ -1,16 +1,11 @@
 /**
- * @file  testcolortab.c
  * @brief check the FreeSurferColorLUT.txt for problems
  *
  */
 /*
  * Original Author: Nick Schmansky
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -33,8 +28,8 @@ const char *Progname = "testcolortab";
 int main(int argc, char *argv[]) {
   int errs = ctabDuplicates = 0; // CTABreadASCII will increment ctabDuplicates
   fprintf(stdout, "Colortable test...\n");
-  char defaultfname[] = "../../distribution/FreeSurferColorLUT.txt";
-  char *fname = argv[1];
+  char  defaultfname[] = "../../distribution/FreeSurferColorLUT.txt";
+  char *fname          = argv[1];
   if (NULL == fname)
     fname = defaultfname;
   COLOR_TABLE *ct = CTABreadASCII(fname);

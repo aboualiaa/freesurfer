@@ -1,17 +1,6 @@
-/**
- * @file  mris_seg2annot.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/11/15 00:07:19 $
- *    $Revision: 1.10 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,8 +11,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
-// $Id: mris_seg2annot.c,v 1.10 2014/11/15 00:07:19 greve Exp $
 
 /*
   BEGINHELP
@@ -60,6 +47,11 @@ Output annotation file. By default, it will be stored in the subject's
 label directory. If you do not want it there, then supply some path
 in front of it (eg, './'). This is a file like lh.aparc.annot.
 
+--seg2annot seg surf ctab output
+
+This gives the same result but does not rely on recon-all directory structure
+
+
 EXAMPLE:
 
   mris_seg2annot --seg lh.FL_002.sig.th8.mgh \\
@@ -75,27 +67,25 @@ parcellation/annotation.
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
+#include "cmdargs.h"
 #include "diag.h"
 #include "mri2.h"
+#include "mrisutils.h"
 #include "version.h"
-#include "cmdargs.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mris_seg2annot.c,v 1.10 2014/11/15 00:07:19 greve Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 static int annot = 0;
@@ -105,20 +95,21 @@ char *subject = nullptr, *hemi = nullptr;
 char *ctabfile = nullptr, *annotfile = nullptr;
 char *SUBJECTS_DIR;
 
-COLOR_TABLE *ctab = nullptr;
-int AutoCTab = 0;
-char *outctabfile = nullptr;
+COLOR_TABLE *ctab        = nullptr;
+int          AutoCTab    = 0;
+char *       outctabfile = nullptr;
 MRI_SURFACE *mris;
-MRI *surfseg, *mritmp;
-char *surfname = "white";
+MRI *        surfseg, *mritmp;
+const char * surfname = "white";
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, nv;
+  int  nargs, nv;
   char tmpstr[2000];
 
   nargs = handleVersionOption(argc, argv, "mris_seg2annot");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -196,7 +187,7 @@ int main(int argc, char *argv[]) {
     for (vno = 0; vno < mris->nvertices; vno++) {
       annot = MRIgetVoxVal(surfseg, vno, 0, 0, 0);
       if (vno == Gdiag_no) {
-        int index, r, g, b;
+        int         index, r, g, b;
         const char *name;
         AnnotToRGB(annot, r, g, b);
         printf("annot %x = %d  %d  %d\n", annot, r, g, b);
@@ -221,7 +212,7 @@ int main(int argc, char *argv[]) {
 }
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -253,43 +244,64 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--s")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--seg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       surfsegfile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--annot")) {
-      annot = 1;
+      annot     = 1;
       nargsused = 0;
     } else if (!strcasecmp(option, "--h") || !strcasecmp(option, "--hemi")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      surfname = pargv[0];
+      surfname  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--ctab")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      ctabfile = pargv[0];
+      ctabfile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--ctab-auto")) {
-      AutoCTab = 1;
+      AutoCTab  = 1;
       nargsused = 0;
       if (CMDnthIsArg(nargc, pargv, 0)) {
         outctabfile = pargv[0];
-        nargsused = 1;
+        nargsused   = 1;
       }
     } else if (!strcasecmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       annotfile = pargv[0];
       nargsused = 1;
+    } else if (!strcasecmp(option, "--seg2annot")) {
+      // --seg2annot seg surf ctab output
+      if (nargc < 4)
+        CMDargNErr(option, 3);
+      MRI *seg = MRIread(pargv[0]);
+      if (seg == NULL)
+        exit(1);
+      MRIS *surf = MRISread(pargv[1]);
+      if (surf == NULL)
+        exit(1);
+      COLOR_TABLE *ctab = CTABreadASCII(pargv[2]);
+      if (ctab == NULL) {
+        printf("ERROR: reading %s\n", pargv[2]);
+        exit(1);
+      }
+      int err = MRISseg2annot(surf, seg, ctab);
+      if (err)
+        exit(1);
+      printf("Writing annot to %s\n", pargv[3]);
+      err = MRISwriteAnnotation(surf, pargv[3]);
+      exit(err);
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))
@@ -324,7 +336,11 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  printf("   --seg2annot seg surf ctab output\n");
+  printf("     This gives the same result but does not rely on recon-all "
+         "directory structure\n");
+  printf("\n");
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* --------------------------------------------- */
@@ -386,8 +402,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */
@@ -418,7 +434,7 @@ static void check_options() {
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

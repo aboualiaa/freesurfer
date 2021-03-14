@@ -1,17 +1,6 @@
-/**
- * @file  corio.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:42 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -62,7 +51,7 @@ extern int errno;
 /*-------------------------------------*/
 unsigned char **alloc_cor() {
   unsigned char **COR;
-  int n;
+  int             n;
 
   COR = (unsigned char **)calloc(256, sizeof(unsigned char *));
   if (COR == nullptr) {
@@ -81,7 +70,7 @@ unsigned char **alloc_cor() {
 }
 /*-------------------------------------*/
 int free_cor(unsigned char ***pppCOR) {
-  int n;
+  int             n;
   unsigned char **COR;
 
   COR = *pppCOR;
@@ -96,10 +85,10 @@ int free_cor(unsigned char ***pppCOR) {
 /*-------------------------------------*/
 unsigned char **ld_cor(char *cordir) {
   unsigned char **COR;
-  int n;
-  char fname[1000];
-  FILE *fp;
-  int nread, n_to_be_read = 256 * 256;
+  int             n;
+  char            fname[1000];
+  FILE *          fp;
+  int             nread, n_to_be_read = 256 * 256;
 
   COR = alloc_cor();
   if (COR == nullptr)
@@ -132,7 +121,7 @@ unsigned char **ld_cor(char *cordir) {
 }
 /*-------------------------------------------------*/
 int cordir_iswritable(char *cordir) {
-  char tmpstr[2000];
+  char  tmpstr[2000];
   FILE *fp;
 
   sprintf(tmpstr, "%s/junk-tmp.huh", cordir);
@@ -150,10 +139,10 @@ int cordir_iswritable(char *cordir) {
 
 /*-------------------------------------------------*/
 int sv_cor(unsigned char **COR, char *cordir) {
-  int n;
-  char fname[1000];
+  int   n;
+  char  fname[1000];
   FILE *fp;
-  int nwritten, n_to_be_written = 256 * 256;
+  int   nwritten, n_to_be_written = 256 * 256;
 
   if (!cordir_iswritable(cordir))
     return (1);

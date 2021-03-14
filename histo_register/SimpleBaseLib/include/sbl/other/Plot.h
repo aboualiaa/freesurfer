@@ -1,12 +1,12 @@
 #ifndef _SBL_PLOT_H_
 #define _SBL_PLOT_H_
 #include <sbl/core/Array.h>
-#include <sbl/core/String.h>
 #include <sbl/core/Pointer.h>
-#include <sbl/math/Vector.h>
+#include <sbl/core/String.h>
 #include <sbl/math/Matrix.h>
-#include <sbl/other/TaggedFile.h>
+#include <sbl/math/Vector.h>
 #include <sbl/other/SVG.h>
+#include <sbl/other/TaggedFile.h>
 namespace sbl {
 
 /*! \file Plot.h
@@ -48,26 +48,26 @@ public:
 
 private:
   // the data to plot
-  VectorD m_x;
-  VectorD m_y;
+  VectorD       m_x;
+  VectorD       m_y;
   Array<String> m_labels;
 
   // appearance: color/style
-  String m_caption;
-  int m_r;
-  int m_g;
-  int m_b;
+  String    m_caption;
+  int       m_r;
+  int       m_g;
+  int       m_b;
   PlotStyle m_plotStyle;
 
   // file format tags
   enum {
-    TAG_X = 1101,
-    TAG_Y = 1102,
-    TAG_LABELS = 1103,
-    TAG_CAPTION = 1201,
-    TAG_R = 1301,
-    TAG_G = 1302,
-    TAG_B = 1303,
+    TAG_X          = 1101,
+    TAG_Y          = 1102,
+    TAG_LABELS     = 1103,
+    TAG_CAPTION    = 1201,
+    TAG_R          = 1301,
+    TAG_G          = 1302,
+    TAG_B          = 1303,
     TAG_PLOT_STYLE = 1304
   };
 
@@ -84,7 +84,7 @@ public:
   explicit Plot(const String &title = "");
 
   /// plot data
-  inline int itemCount() const { return m_plotItems.count(); }
+  inline int             itemCount() const { return m_plotItems.count(); }
   inline const PlotItem &item(int index) const { return m_plotItems[index]; }
 
   /// the visible data bounds
@@ -169,15 +169,15 @@ private:
   double m_xMax;
   double m_yMin;
   double m_yMax;
-  bool m_boundSet;
-  float m_xLabelWidth;
-  float m_xLabelHeight;
-  float m_yLabelWidth;
-  float m_yLabelHeight;
-  float m_titleWidth;
-  float m_titleHeight;
-  bool m_timeAxis;
-  bool m_zeroLines;
+  bool   m_boundSet;
+  float  m_xLabelWidth;
+  float  m_xLabelHeight;
+  float  m_yLabelWidth;
+  float  m_yLabelHeight;
+  float  m_titleWidth;
+  float  m_titleHeight;
+  bool   m_timeAxis;
+  bool   m_zeroLines;
 
   // labels and titles
   String m_title;
@@ -190,9 +190,9 @@ private:
 
   // item appearance (used for next item added)
   PlotStyle m_plotStyle;
-  int m_r;
-  int m_g;
-  int m_b;
+  int       m_r;
+  int       m_g;
+  int       m_b;
 
   // convert data coord to image coord
   void toImageCoord(double x, double y, float &xImg, float &yImg, int width,
@@ -203,21 +203,21 @@ private:
 
   // file format tags
   enum {
-    TAG_TITLE = 101,
-    TAG_X_LABEL = 102,
-    TAG_Y_LABEL = 103,
+    TAG_TITLE       = 101,
+    TAG_X_LABEL     = 102,
+    TAG_Y_LABEL     = 103,
     TAG_X_MIN_LABEL = 104,
     TAG_X_MAX_LABEL = 105,
     TAG_Y_MIN_LABEL = 106,
     TAG_Y_MAX_LABEL = 107,
-    TAG_X_MIN = 301,
-    TAG_X_MAX = 302,
-    TAG_Y_MIN = 303,
-    TAG_Y_MAX = 304,
-    TAG_BOUND_SET = 305,
-    TAG_TIME_AXIS = 401,
-    TAG_ZERO_LINES = 402,
-    TAG_ITEMS = 1000
+    TAG_X_MIN       = 301,
+    TAG_X_MAX       = 302,
+    TAG_Y_MIN       = 303,
+    TAG_Y_MAX       = 304,
+    TAG_BOUND_SET   = 305,
+    TAG_TIME_AXIS   = 401,
+    TAG_ZERO_LINES  = 402,
+    TAG_ITEMS       = 1000
   };
 
   // disable copy constructor and assignment operator

@@ -1,16 +1,11 @@
 /**
- * @file  Region2DRectangle.h
  * @brief Region2DRectangle data object.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/10/07 20:01:59 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,8 +22,8 @@
 #define Region2DRectangle_h
 
 #include "Region2D.h"
-#include <vector>
 #include "vtkSmartPointer.h"
+#include <vector>
 
 class vtkTextActor;
 class vtkActor2D;
@@ -73,11 +68,11 @@ public:
 
 protected:
   void UpdateWorldCoords();
-  int GetRange(double[3][2]);
+  int  GetRange(double[3][2]);
 
   vtkSmartPointer<vtkActor2D> m_actorRect;
-  int m_nX1, m_nX2, m_nY1, m_nY2;
-  double m_dPt[4][3]; // rect in world coordinate
+  int                         m_nX1, m_nX2, m_nY1, m_nY2;
+  double                      m_dPt[4][3]; // rect in world coordinate
 
   bool m_bEnableStats;
 };

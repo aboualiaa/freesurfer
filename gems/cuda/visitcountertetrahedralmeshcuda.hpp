@@ -49,7 +49,7 @@ public:
 
   virtual const VisitCounterTetrahedralMesh::ImageType *
   GetImage() const override {
-    std::vector<int> tmp;
+    std::vector<int>                                 tmp;
     CudaImage<int, 3, unsigned short>::DimensionType dims;
 
     this->tGetImage.Start();
@@ -63,7 +63,7 @@ public:
     for (unsigned short k = 0; k < dims[0]; k++) {
       for (unsigned short j = 0; j < dims[1]; j++) {
         for (unsigned short i = 0; i < dims[2]; i++) {
-          auto result = tmp.at(dims.GetLinearIndex(k, j, i));
+          auto                 result = tmp.at(dims.GetLinearIndex(k, j, i));
           ImageType::IndexType idx;
           idx[0] = i;
           idx[1] = j;
@@ -87,7 +87,7 @@ public:
   mutable kvl::Stopwatch tGetImageTransfer, tGetImageUnpack;
 
 private:
-  CudaImage<int, 3, unsigned short> d_Output;
+  CudaImage<int, 3, unsigned short>               d_Output;
   VisitCounterTetrahedralMesh::ImageType::Pointer image;
 };
 } // namespace cuda

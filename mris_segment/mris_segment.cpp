@@ -1,17 +1,11 @@
 /**
- * @file  mris_segment.c
- * @brief segments cortical areas based on connectivity/correlation/intensity
- * profiles
+ * @brief segments cortical areas based on connectivity/correlation/intensity profiles
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2016/12/11 14:33:41 $
- *    $Revision: 1.10 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,45 +17,58 @@
  *
  */
 
-#include "mri2.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "const.h"
 #include "diag.h"
+#include "error.h"
+#include "label.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri2.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "timer.h"
+#include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static char data_name[STRLEN] = "cormat.mgz";
+static char data_name[STRLEN]  = "cormat.mgz";
 static char label_name[STRLEN] = "MT.fsaverage5.label";
 static char prior_name[STRLEN] = "invivo.MT.logodds.mgz";
 
-static int ico_no = 5;
+static int  ico_no       = 5;
 static char sdir[STRLEN] = "";
 
-#define CLASSIFY_GAUSSIAN 0
-#define CLASSIFY_SIMILARITY 1
+#define CLASSIFY_GAUSSIAN     0
+#define CLASSIFY_SIMILARITY   1
 #define CLASSIFY_LABEL_FUSION 2
 
-static int prior_number_of_vertices = 30;
-static int nsmooth = 1;
-static int nclose = 1;
-static int classifier = CLASSIFY_GAUSSIAN;
-static char *hemi_name = "lh";
+static int         prior_number_of_vertices = 30;
+static int         nsmooth                  = 1;
+static int         nclose                   = 1;
+static int         classifier               = CLASSIFY_GAUSSIAN;
+static const char *hemi_name                = "lh";
 
-static int prior_only = 0;
-static double cor_thresh = 0.6;
-static double logodds_thresh = .001;
-static char *data_dir = "fmri";
+static int         prior_only     = 0;
+static double      cor_thresh     = 0.6;
+static double      logodds_thresh = .001;
+static const char *data_dir       = "fmri";
 
 #define MAX_SUBJECTS 1500
 
 VECTOR *VectorFromMRIcol(MRI *mri_cmat, VECTOR *v, int col, int frame) {
   int row;
 
-  if (v == nullptr) {
+  if (v == NULL) {
     v = VectorAlloc(mri_cmat->height, MATRIX_REAL);
   }
 
@@ -74,7 +81,7 @@ VECTOR *VectorFromMRIcol(MRI *mri_cmat, VECTOR *v, int col, int frame) {
 MATRIX *MatrixFromMRI(MRI *mri_cmat, MATRIX *cmat, int frame) {
   int r, c;
 
-  if (cmat == nullptr) {
+  if (cmat == NULL) {
     cmat = MatrixAlloc(mri_cmat->height, mri_cmat->width, MATRIX_REAL);
   }
 
@@ -90,7 +97,7 @@ MATRIX *MatrixFromMRI(MRI *mri_cmat, MATRIX *cmat, int frame) {
 MRI *MatrixToMRI(MATRIX *cmat, MRI *mri_cmat, int frame) {
   int r, c;
 
-  if (mri_cmat == nullptr) {
+  if (mri_cmat == NULL) {
     mri_cmat = MRIalloc(cmat->cols, cmat->rows, 1, MATRIX_REAL);
   }
 
@@ -104,10 +111,10 @@ MRI *MatrixToMRI(MATRIX *cmat, MRI *mri_cmat, int frame) {
 
 VECTOR *MRIcmatDotProductFrames(MRI *mri1, int frame1, MRI *mri2, int frame2,
                                 VECTOR *v_dot) {
-  int r1, c1;
+  int    r1, c1;
   double dot;
 
-  if (v_dot == nullptr) {
+  if (v_dot == NULL) {
     v_dot = VectorAlloc(mri1->height, MATRIX_REAL);
   }
 
@@ -122,7 +129,7 @@ VECTOR *MRIcmatDotProductFrames(MRI *mri1, int frame1, MRI *mri2, int frame2,
 }
 
 int MRIcmatNormalizeRows(MRI *mri_cmat) {
-  int row, col, frame;
+  int    row, col, frame;
   double norm;
 
   for (frame = 0; frame < mri_cmat->nframes; frame++) {
@@ -142,24 +149,24 @@ int MRIcmatNormalizeRows(MRI *mri_cmat) {
   return (NO_ERROR);
 }
 int MatrixMaxRowIndex(MATRIX *m, int row) {
-  int c, max_c;
+  int    c, max_c;
   double max_val;
 
   max_val = *MATRIX_RELT(m, row, 1);
-  max_c = 1;
+  max_c   = 1;
   for (c = 2; c <= m->cols; c++)
     if (*MATRIX_RELT(m, row, c) > max_val) {
       max_val = *MATRIX_RELT(m, row, c);
-      max_c = c;
+      max_c   = c;
     }
   return (max_c);
 }
 
 VECTOR *MatrixRowNorm(MATRIX *cmat, VECTOR *v_norm) {
   double norm, val;
-  int r, c;
+  int    r, c;
 
-  if (v_norm == nullptr) {
+  if (v_norm == NULL) {
     v_norm = VectorAlloc(cmat->cols, MATRIX_REAL);
   }
 
@@ -179,19 +186,18 @@ VECTOR *MatrixRowNorm(MATRIX *cmat, VECTOR *v_norm) {
 */
 double VectorLogLikelihood(VECTOR *v, VECTOR *v_mean, VECTOR *v_var) {
   double ll, val, mean, var, total_ll;
-  int row;
+  int    row;
 
   for (total_ll = 0.0, row = 1; row <= v->rows; row++) {
-    val = VECTOR_ELT(v, row);
+    val  = VECTOR_ELT(v, row);
     mean = VECTOR_ELT(v_mean, row);
-    var = VECTOR_ELT(v_var, row);
+    var  = VECTOR_ELT(v_var, row);
     if (DZERO(var)) {
       var = 1.0;
     }
-    ll = SQR(val-mean) / (2*var) ;
-    if (!std::isfinite(ll) || !std::isfinite(total_ll))
-    {
-      DiagBreak() ;
+    ll = SQR(val - mean) / (2 * var);
+    if (!std::isfinite(ll) || !std::isfinite(total_ll)) {
+      DiagBreak();
     }
     total_ll += ll;
   }
@@ -203,9 +209,9 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
                               int prior_only) {
   int start_index, end_index, sno, vno, ind, vno2, nvertices, nevals, nin, nout,
       *in_label[MAX_SUBJECTS];
-  MRI *mri_out;
-  MATRIX *m_train = nullptr, *m_trains[MAX_SUBJECTS];
-  double dot, max_dot, val = 0.0, val2, ll_in, ll_out, prior;
+  MRI *   mri_out;
+  MATRIX *m_train = NULL, *m_trains[MAX_SUBJECTS];
+  double  dot, max_dot, val = 0.0, val2, ll_in, ll_out, prior;
   VECTOR *v_test, *v_in_vars, *v_in_means, *v_out_means, *v_out_vars;
   VERTEX *v;
 
@@ -213,18 +219,18 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
 
   if (mris->hemisphere == LEFT_HEMISPHERE) {
     start_index = 0;
-    end_index = mris->nvertices - 1;
+    end_index   = mris->nvertices - 1;
   } else // processing rh
   {
     start_index = mris->nvertices;
-    end_index = 2 * mris->nvertices - 1;
+    end_index   = 2 * mris->nvertices - 1;
   }
 
-  v_in_vars = VectorAlloc(mri_cmat->width, MATRIX_REAL);
-  v_in_means = VectorAlloc(mri_cmat->width, MATRIX_REAL);
-  v_out_vars = VectorAlloc(mri_cmat->width, MATRIX_REAL);
+  v_in_vars   = VectorAlloc(mri_cmat->width, MATRIX_REAL);
+  v_in_means  = VectorAlloc(mri_cmat->width, MATRIX_REAL);
+  v_out_vars  = VectorAlloc(mri_cmat->width, MATRIX_REAL);
   v_out_means = VectorAlloc(mri_cmat->width, MATRIX_REAL);
-  m_train = MatrixAlloc(mri_cmat->width, mri_cmat->width, MATRIX_REAL);
+  m_train     = MatrixAlloc(mri_cmat->width, mri_cmat->width, MATRIX_REAL);
 
   if (prior_only <= 0) {
     MRIthreshold(mri_cmat, mri_cmat, cor_thresh);
@@ -268,16 +274,16 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
       val2 = VECTOR_ELT(v_out_vars, vno2 + 1);
       val2 = (val2 / nout - (val * val)); // variance
       VECTOR_ELT(v_out_means, vno2 + 1) = val;
-      VECTOR_ELT(v_out_vars, vno2 + 1) = val2;
+      VECTOR_ELT(v_out_vars, vno2 + 1)  = val2;
     }
     // normalize MT distribution
     for (vno2 = 0; vno2 < mri_cmat->height; vno2++) {
       val = VECTOR_ELT(v_in_means, vno2 + 1);
       val /= nin; // mean
-      val2 = VECTOR_ELT(v_in_vars, vno2 + 1);
-      val2 = (val2 / nin - (val * val)); // variance
+      val2                             = VECTOR_ELT(v_in_vars, vno2 + 1);
+      val2                             = (val2 / nin - (val * val)); // variance
       VECTOR_ELT(v_in_means, vno2 + 1) = val;
-      VECTOR_ELT(v_in_vars, vno2 + 1) = val2;
+      VECTOR_ELT(v_in_vars, vno2 + 1)  = val2;
     }
 
     for (nvertices = 0, vno = 0; vno < mris->nvertices; vno++) {
@@ -304,7 +310,7 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
       for (ind = 0; ind < labels[sno]->n_points; ind++) {
         in_label[sno][labels[sno]->lv[ind].vno] = 1;
       }
-      m_trains[sno] = MatrixFromMRI(mri_cmat, nullptr, sno);
+      m_trains[sno] = MatrixFromMRI(mri_cmat, NULL, sno);
     }
   }
 
@@ -317,7 +323,7 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
              end_index - start_index, nevals);
       fflush(stdout);
     }
-    v = &mris->vertices[vno];
+    v     = &mris->vertices[vno];
     prior = MRIgetVoxVal(mri_prior, vno, 0, 0, 0);
     if (v->ripflag || prior < logodds_thresh) {
       continue;
@@ -325,14 +331,13 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
     nevals++;
 
     // extract correlation pattern for test subject at this vertex
-    v_test =
-        VectorFromMRIcol(mri_cmat, nullptr, vno + start_index, nsubjects - 1);
+    v_test = VectorFromMRIcol(mri_cmat, NULL, vno + start_index, nsubjects - 1);
 
     // use gaussian classifier for in and out of area
     if (classifier == CLASSIFY_GAUSSIAN) {
-      ll_in = VectorLogLikelihood(v_test, v_in_means, v_in_vars);
-      ll_out = VectorLogLikelihood(v_test, v_out_means, v_out_vars);
-      v->val2 = ll_in;
+      ll_in      = VectorLogLikelihood(v_test, v_in_means, v_in_vars);
+      ll_out     = VectorLogLikelihood(v_test, v_out_means, v_out_vars);
+      v->val2    = ll_in;
       v->val2bak = ll_out;
       if (vno == Gdiag_no)
         printf("v %d: ll_in = %2.4f, ll_out = %2.4f, prior = %2.4f\n", Gdiag_no,
@@ -351,9 +356,9 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
       }
 
       v->imag_val = ll_in;
-      v->stat = ll_out;
-      val = exp(ll_in) / (exp(ll_in) + exp(ll_out));
-      val = exp(ll_in);
+      v->stat     = ll_out;
+      val         = exp(ll_in) / (exp(ll_in) + exp(ll_out));
+      val         = exp(ll_in);
       MRIsetVoxVal(mri_out, vno, 0, 0, 0, val);
     } else if (classifier == CLASSIFY_LABEL_FUSION) {
       int nsubj_at_this_vertex;
@@ -387,12 +392,12 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
       // compute dot product with every vertex in training subject
       // and find max
       max_dot = -1e10;
-      ind = -1;
+      ind     = -1;
       for (vno2 = 0; vno2 < mris->nvertices; vno2++) {
         dot = MatrixRowDotProduct(m_train, vno2 + 1, v_test);
         if (dot > max_dot) {
           max_dot = dot;
-          ind = vno2;
+          ind     = vno2;
         }
       }
 
@@ -423,41 +428,41 @@ static MRI *classify_vertices(MRI_SURFACE *mris, MRI *mri_prior, MRI *mri_cmat,
 
 static LABEL *segment_area(MRI_SURFACE *mris, MRI *mri, LABEL *area,
                            int nvertices) {
-  int vno, max_vno, vno2, n, m;
-  double max_p, p;
+  int           vno, max_vno, vno2, n, m;
+  double        max_p, p;
   LABEL_VERTEX *lv;
 
-  area = LabelAlloc(nvertices, nullptr, "segmented area");
+  area = LabelAlloc(nvertices, NULL, "segmented area");
 
-  max_p = MRIgetVoxVal(mri, 0, 0, 0, 0);
+  max_p   = MRIgetVoxVal(mri, 0, 0, 0, 0);
   max_vno = 0;
   for (vno = 1; vno < mris->nvertices; vno++) {
     p = MRIgetVoxVal(mri, vno, 0, 0, 0);
     if (p > max_p) {
-      max_p = p;
+      max_p   = p;
       max_vno = vno;
     }
   }
 
   area->n_points = 1;
-  lv = &area->lv[0];
+  lv             = &area->lv[0];
   {
     VERTEX const *const v = &mris->vertices[max_vno];
-    lv->x = v->x;
-    lv->y = v->y;
-    lv->z = v->z;
-    lv->stat = max_p;
-    lv->vno = max_vno;
+    lv->x                 = v->x;
+    lv->y                 = v->y;
+    lv->z                 = v->z;
+    lv->stat              = max_p;
+    lv->vno               = max_vno;
   }
   mris->vertices[max_vno].marked = 1;
 
   do {
     max_vno = -1;
-    max_p = -100000;
+    max_p   = -100000;
     MRISclearMarks(mris);
     LabelMark(area, mris);
     for (n = 0; n < area->n_points; n++) {
-      vno = area->lv[n].vno;
+      vno                             = area->lv[n].vno;
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
       for (m = 0; m < vt->vnum; m++) {
         vno2 = vt->v[m];
@@ -466,7 +471,7 @@ static LABEL *segment_area(MRI_SURFACE *mris, MRI *mri, LABEL *area,
         }
         p = MRIgetVoxVal(mri, vno2, 0, 0, 0);
         if (p > max_p || max_vno < 0) {
-          max_p = p;
+          max_p   = p;
           max_vno = vno2;
         }
       }
@@ -474,11 +479,11 @@ static LABEL *segment_area(MRI_SURFACE *mris, MRI *mri, LABEL *area,
     lv = &area->lv[area->n_points++];
     {
       VERTEX const *const v = &mris->vertices[max_vno];
-      lv->vno = max_vno;
-      lv->x = v->x;
-      lv->y = v->y;
-      lv->z = v->z;
-      lv->stat = max_p;
+      lv->vno               = max_vno;
+      lv->x                 = v->x;
+      lv->y                 = v->y;
+      lv->z                 = v->z;
+      lv->stat              = max_p;
     }
     mris->vertices[max_vno].marked = 1;
   } while (area->n_points < nvertices);
@@ -486,24 +491,23 @@ static LABEL *segment_area(MRI_SURFACE *mris, MRI *mri, LABEL *area,
 }
 
 int main(int argc, char *argv[]) {
-  char **av, *out_fname, *subject, fname[STRLEN], *cp;
-  int ac, nargs, sno;
-  int msec, minutes, seconds, nsubjects;
-  Timer start;
+  char **      av, *out_fname, *subject, fname[STRLEN], *cp;
+  int          ac, nargs, sno;
+  int          msec, minutes, seconds, nsubjects;
+  Timer        start;
   MRI_SURFACE *mris;
-  MRI *mri_frame, *mri, *mri_out, *mri_prior;
-  LABEL *labels[MAX_SUBJECTS], *area;
+  MRI *        mri_frame, *mri, *mri_out, *mri_prior;
+  LABEL *      labels[MAX_SUBJECTS], *area;
 
   nargs = handleVersionOption(argc, argv, "mris_segment");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
@@ -521,7 +525,7 @@ int main(int argc, char *argv[]) {
 
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
-    if (cp == nullptr)
+    if (cp == NULL)
       ErrorExit(ERROR_UNSUPPORTED, "%s: must define SUBJECTS_DIR in env",
                 Progname);
     strcpy(sdir, cp);
@@ -531,16 +535,26 @@ int main(int argc, char *argv[]) {
   printf("processing %d subjects and writing output to %s\n", nsubjects,
          out_fname);
 
-  sprintf(fname, "%s/fsaverage%d/surf/%s.inflated", sdir, ico_no, hemi_name);
+  int req = snprintf(fname, STRLEN, "%s/fsaverage%d/surf/%s.inflated", sdir,
+                     ico_no, hemi_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mris = MRISread(fname);
-  if (mris == nullptr) {
+  if (mris == NULL) {
     ErrorExit(ERROR_NOFILE, "%s: could not load surface %s", Progname, fname);
   }
-  mri = nullptr; // get rid of compiler warning
+  mri = NULL; // get rid of compiler warning
   for (sno = 0; sno < nsubjects; sno++) {
     subject = argv[sno + 1];
     printf("processing subject %s, %d of %d\n", subject, sno + 1, nsubjects);
-    sprintf(fname, "%s/%s/%s/%s", sdir, subject, data_dir, data_name);
+    int req = snprintf(fname, STRLEN, "%s/%s/%s/%s", sdir, subject, data_dir,
+                       data_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     if (prior_only <= 0) {
       mri_frame = MRIread(fname);
     } else {
@@ -548,7 +562,7 @@ int main(int argc, char *argv[]) {
           MRIalloc(2 * mris->nvertices, 2 * mris->nvertices, 1, MRI_FLOAT);
       MRIsetValues(mri_frame, .5); // 0 and 1 are used as indicator values
     }
-    if (mri_frame == nullptr)
+    if (mri_frame == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load correlation matrix from %s",
                 Progname, fname);
     if (mri_frame->height == 1 && mri_frame->nframes == mri_frame->width) {
@@ -561,7 +575,7 @@ int main(int argc, char *argv[]) {
     if (sno == 0) {
       mri = MRIallocSequence(mri_frame->width, mri_frame->height,
                              mri_frame->depth, mri_frame->type, nsubjects);
-      if (mri == nullptr)
+      if (mri == NULL)
         ErrorExit(
             ERROR_NOMEMORY, "%s: could not allocate (%d x %d x %d x %d) array",
             mri_frame->width, mri_frame->height, mri_frame->depth, nsubjects);
@@ -575,16 +589,26 @@ int main(int argc, char *argv[]) {
     MRIcopyFrame(mri_frame, mri, 0, sno);
     MRIfree(&mri_frame);
 
-    sprintf(fname, "%s/%s/label/%s.%s", sdir, subject, hemi_name, label_name);
-    labels[sno] = LabelRead(nullptr, fname);
-    if (labels[sno] == nullptr)
+    req = snprintf(fname, STRLEN, "%s/%s/label/%s.%s", sdir, subject, hemi_name,
+                   label_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+    labels[sno] = LabelRead(NULL, fname);
+    if (labels[sno] == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load label from %s", Progname,
                 fname);
   }
-  sprintf(fname, "%s/fsaverage%d/label/%s.%s", sdir, ico_no, hemi_name,
-          prior_name);
+  req = snprintf(fname, STRLEN, "%s/fsaverage%d/label/%s.%s", sdir, ico_no,
+                 hemi_name, prior_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   mri_prior = MRIread(fname);
-  if (mri_prior == nullptr) {
+  if (mri_prior == NULL) {
     ErrorExit(ERROR_NOFILE, "%s: could not load prior from %s", Progname,
               fname);
   }
@@ -592,13 +616,13 @@ int main(int argc, char *argv[]) {
                               cor_thresh, prior_only);
   printf("writing output to %s\n", out_fname);
   MRIwrite(mri_out, out_fname);
-  MRISsmoothMRI(mris, mri_out, nsmooth, nullptr, mri_out);
-  area = segment_area(mris, mri_out, nullptr, prior_number_of_vertices);
+  MRISsmoothMRI(mris, mri_out, nsmooth, NULL, mri_out);
+  area = segment_area(mris, mri_out, NULL, prior_number_of_vertices);
   LabelDilate(area, mris, nclose, CURRENT_VERTICES);
   LabelErode(area, mris, nclose);
   FileNameRemoveExtension(out_fname, out_fname);
   LabelWrite(area, out_fname);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -613,7 +637,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -623,7 +647,7 @@ static int get_option(int argc, char *argv[]) {
     strcpy(data_name, argv[2]);
     printf("using fmri/%s as name of correlation matrices\n", data_name);
   } else if (!stricmp(option, "smooth")) {
-    nargs = 1;
+    nargs   = 1;
     nsmooth = atoi(argv[2]);
     printf("smoothing posterior %d times\n", nsmooth);
   } else if (!stricmp(option, "prior")) {
@@ -653,7 +677,7 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "lthresh")) {
     logodds_thresh = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     printf("using log odds thresh = %2.3f\n", logodds_thresh);
   } else
     switch (toupper(*option)) {
@@ -667,7 +691,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       cor_thresh = atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("using correlation threshold %2.3f\n", cor_thresh);
       break;
     case 'V':

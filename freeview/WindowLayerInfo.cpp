@@ -1,11 +1,11 @@
 #include "WindowLayerInfo.h"
-#include "ui_WindowLayerInfo.h"
-#include <QLayoutItem>
-#include <QLabel>
-#include "LayerMRI.h"
-#include "FSVolume.h"
-#include "LayerSurface.h"
 #include "FSSurface.h"
+#include "FSVolume.h"
+#include "LayerMRI.h"
+#include "LayerSurface.h"
+#include "ui_WindowLayerInfo.h"
+#include <QLabel>
+#include <QLayoutItem>
 #include <QSettings>
 
 WindowLayerInfo::WindowLayerInfo(QWidget *parent)
@@ -55,7 +55,7 @@ void WindowLayerInfo::UpdateInfo(Layer *layer) {
   QString type = layer->GetPrimaryType();
   if (type == "MRI") {
     LayerMRI *layer_mri = qobject_cast<LayerMRI *>(layer);
-    MRI *mri = layer_mri->GetSourceVolume()->GetMRI();
+    MRI *     mri       = layer_mri->GetSourceVolume()->GetMRI();
     Clear();
     setWindowTitle("Volume Information");
     SetCaption(
@@ -73,31 +73,23 @@ void WindowLayerInfo::UpdateInfo(Layer *layer) {
                                 .arg(mri->ysize, 0, 'f', 6)
                                 .arg(mri->zsize, 0, 'f', 6));
     AddLine("number of frames:", QString("%1 ").arg(mri->nframes));
-    AddLine("type:",
-            QString("%1 (%2)")
-                .arg(mri->type == MRI_UCHAR
-                         ? "UCHAR"
-                         : mri->type == MRI_SHORT
-                               ? "SHORT"
-                               : mri->type == MRI_INT
-                                     ? "INT"
-                                     : mri->type == MRI_LONG
-                                           ? "LONG"
-                                           : mri->type == MRI_BITMAP
-                                                 ? "BITMAP"
-                                                 : mri->type == MRI_TENSOR
-                                                       ? "TENSOR"
-                                                       : mri->type == MRI_FLOAT
-                                                             ? "FLOAT"
-                                                             : "UNKNOWN")
-                .arg(mri->type));
+    AddLine("type:", QString("%1 (%2)")
+                         .arg(mri->type == MRI_UCHAR    ? "UCHAR"
+                              : mri->type == MRI_SHORT  ? "SHORT"
+                              : mri->type == MRI_INT    ? "INT"
+                              : mri->type == MRI_LONG   ? "LONG"
+                              : mri->type == MRI_BITMAP ? "BITMAP"
+                              : mri->type == MRI_TENSOR ? "TENSOR"
+                              : mri->type == MRI_FLOAT  ? "FLOAT"
+                                                        : "UNKNOWN")
+                         .arg(mri->type));
     AddLine("TR:", QString("%1 msec").arg(mri->tr));
     AddLine("TE:", QString("%1 msec").arg(mri->te));
     AddLine("TI:", QString("%1 msec").arg(mri->ti));
     AddLine("flip angle:", QString("%1 degrees").arg(mri->flip_angle));
   } else if (type == "Surface") {
     LayerSurface *surf = qobject_cast<LayerSurface *>(layer);
-    MRIS *mris = surf->GetSourceSurface()->GetMRIS();
+    MRIS *        mris = surf->GetSourceSurface()->GetMRIS();
     Clear();
     setWindowTitle("Surface Information");
     SetCaption(QString("Surface information for %1").arg(surf->GetFileName()));

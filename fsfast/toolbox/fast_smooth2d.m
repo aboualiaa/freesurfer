@@ -15,12 +15,8 @@ function [volsm, G] = fast_smooth2d(vol,cfwhm,rfwhm)
 % fast_smooth2d.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: greve $
-%    $Date: 2012/11/19 22:19:45 $
-%    $Revision: 1.4 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

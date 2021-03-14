@@ -77,7 +77,7 @@ MaskExe::MaskExe(int inArgs, char **iaArgs)
     : FreeSurferExecutable(inArgs, iaArgs) {
 
   m_EigenVectorFileName = NULL;
-  m_OutputDir = NULL;
+  m_OutputDir           = NULL;
 
   SetName("dmri_mask", "masked based on eigenvector and path");
 
@@ -92,7 +92,7 @@ MaskExe::MaskExe(int inArgs, char **iaArgs)
                           "must specify a path input");
 
   std::string output = "";
-  output = output + "MaskedPath.mgz - binarized path";
+  output             = output + "MaskedPath.mgz - binarized path";
 
   SetOutput(output);
 
@@ -108,9 +108,9 @@ bool MaskExe::FillArguments() {
   try {
     std::string *requiredArguments = GetRequiredArguments();
 
-    m_OutputDir = requiredArguments[0].c_str();
+    m_OutputDir           = requiredArguments[0].c_str();
     m_EigenVectorFileName = requiredArguments[1].c_str();
-    m_PathFileName = requiredArguments[2].c_str();
+    m_PathFileName        = requiredArguments[2].c_str();
 
     isFilled = true;
   } catch (...) {
@@ -141,7 +141,7 @@ void MaskExe::Run() {
 
   // save out mask
   const std::string imageFileExtension = ".mgz";
-  std::string maskFileName = (std::string)m_OutputDir +
+  std::string       maskFileName       = (std::string)m_OutputDir +
                              (std::string) "/MaskedPath" + imageFileExtension;
   MRIwrite(maskedPath, (char *)maskFileName.c_str());
 
@@ -231,7 +231,7 @@ MRI *MaskExe::MaskPath(MRI *iEigenVectors, std::vector<double *> *iPathPoints,
 
     // for a vector associated with a point, search around it and compare the
     // eigenvectors
-    double *pathPoint = (*iPathPoints)[n];
+    double *pathPoint  = (*iPathPoints)[n];
     double *pathVector = (*iPathVectors)[n];
 
     // round the point to an int, so it can be an index into the eigen vector
@@ -253,7 +253,7 @@ MRI *MaskExe::MaskPath(MRI *iEigenVectors, std::vector<double *> *iPathPoints,
 
           // get the eigen vector at the coordinate
           double eigenVector[3];
-          int index[3] = {x, y, z};
+          int    index[3] = {x, y, z};
           this->GetEigenVector(iEigenVectors, index, eigenVector);
 
           // compare the path vector to the eigenvector

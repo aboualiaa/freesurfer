@@ -1,16 +1,11 @@
 /**
- * @file  Region2DPolyline.cpp
  * @brief Region2DPolyline.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/10/07 20:01:59 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,26 +19,26 @@
  */
 
 #include "Region2DPolyline.h"
+#include "LayerMRI.h"
 #include "RenderView2D.h"
 #include <vtkActor2D.h>
-#include <vtkProperty2D.h>
-#include <vtkRenderer.h>
-#include <vtkPlaneSource.h>
-#include <vtkPolyDataMapper2D.h>
-#include <vtkPoints.h>
 #include <vtkCellArray.h>
 #include <vtkCoordinate.h>
+#include <vtkLine.h>
+#include <vtkMath.h>
+#include <vtkParametricSpline.h>
+#include <vtkPlaneSource.h>
+#include <vtkPoints.h>
+#include <vtkPolyDataMapper2D.h>
+#include <vtkProperty2D.h>
+#include <vtkRenderer.h>
+#include <vtkSplineFilter.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
-#include <vtkSplineFilter.h>
-#include <vtkMath.h>
-#include <vtkLine.h>
-#include <vtkParametricSpline.h>
-#include "LayerMRI.h"
 
 Region2DPolyline::Region2DPolyline(RenderView2D *view, bool bSpline)
     : Region2D(view) {
-  m_bSpline = bSpline;
+  m_bSpline       = bSpline;
   m_actorPolyline = vtkSmartPointer<vtkActor2D>::New();
   m_actorPolyline->GetProperty()->SetOpacity(0.75);
   double ratio = 1;
@@ -96,8 +91,8 @@ void Region2DPolyline::Update() {
     return;
   }
 
-  double pt[3];
-  vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
+  double                        pt[3];
+  vtkSmartPointer<vtkPoints>    pts   = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
   lines->InsertNextCell(m_worldPts.size());
   for (int i = 0; i < m_worldPts.size(); i++) {
@@ -169,8 +164,8 @@ void Region2DPolyline::UpdateStats() {
     return;
   }
 
-  double dist = 0;
-  char ch[1000];
+  double    dist = 0;
+  char      ch[1000];
   LayerMRI *layer = m_view->GetFirstNonLabelVolume();
   m_strsLongStats.clear();
   if (m_bSpline) {
@@ -182,9 +177,9 @@ void Region2DPolyline::UpdateStats() {
         vtkSmartPointer<vtkParametricSpline>::New();
     spline->SetPoints(pts);
 
-    int nSteps = 100;
-    double *values = NULL;
-    int *indices = NULL;
+    int     nSteps  = 100;
+    double *values  = NULL;
+    int *   indices = NULL;
     for (int i = 0; i < nSteps; i++) {
       double pt1[3], pt2[3], u[3], du[9];
       double uvalue = ((double)i) / nSteps;
@@ -208,8 +203,8 @@ void Region2DPolyline::UpdateStats() {
       }
     }
   } else {
-    double *values = NULL;
-    int *indices = NULL;
+    double *values  = NULL;
+    int *   indices = NULL;
     for (int i = 1; i < m_worldPts.size(); i++) {
       dist += sqrt(vtkMath::Distance2BetweenPoints(m_worldPts[i - 1].pos,
                                                    m_worldPts[i].pos));
@@ -346,7 +341,7 @@ QString Region2DPolyline::DataToString() {
   return strg;
 }
 
-Region2D *Region2DPolyline::ObjectFromString(RenderView2D *view,
+Region2D *Region2DPolyline::ObjectFromString(RenderView2D * view,
                                              const QString &text) {
   QString head = "FreeView:Region2DPolyline:";
   if (text.indexOf(head) != 0)
@@ -373,7 +368,7 @@ Region2D *Region2DPolyline::ObjectFromString(RenderView2D *view,
     pts << wp;
   }
   Region2DPolyline *reg = new Region2DPolyline(view);
-  reg->m_worldPts = pts;
+  reg->m_worldPts       = pts;
   reg->Update();
 
   return reg;

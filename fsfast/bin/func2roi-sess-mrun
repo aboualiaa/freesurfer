@@ -5,12 +5,8 @@
 # multiple runs (ie, on the output of a jackknife or perrun selxavg)
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2015/12/10 22:51:29 $
-#    $Revision: 1.5 $
 #
-# Copyright (C) 2002-2007,
+# Copyright © 2021
 # The General Hospital Corporation (Boston, MA). 
 # All rights reserved.
 #
@@ -24,7 +20,7 @@
 #
 
 
-set VERSION = '$Id: func2roi-sess-mrun,v 1.5 2015/12/10 22:51:29 zkaufman Exp $';
+set VERSION = 'func2roi-sess-mrun @FS_VERSION@';
 
 set inputargs = ($argv);
 set func2roiargs = ();

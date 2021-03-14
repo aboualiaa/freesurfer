@@ -1,16 +1,11 @@
 /**
- * @file  Interactor3DMeasure.cpp
  * @brief Interactor for measurement in 3D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/02 18:41:17 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,13 +19,13 @@
  */
 
 #include "Interactor3DMeasure.h"
-#include "RenderView3D.h"
-#include "MainWindow.h"
-#include "LayerCollection.h"
-#include "LayerPropertyMRI.h"
-#include "LayerMRI.h"
-#include "SurfaceRegion.h"
 #include "CursorFactory.h"
+#include "LayerCollection.h"
+#include "LayerMRI.h"
+#include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "RenderView3D.h"
+#include "SurfaceRegion.h"
 #include <QDebug>
 
 Interactor3DMeasure::Interactor3DMeasure(QObject *parent)
@@ -39,7 +34,7 @@ Interactor3DMeasure::Interactor3DMeasure(QObject *parent)
 Interactor3DMeasure::~Interactor3DMeasure() {}
 
 bool Interactor3DMeasure::ProcessMouseDownEvent(QMouseEvent *event,
-                                                RenderView *renderview) {
+                                                RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   bool ret = Interactor3D::ProcessMouseDownEvent(event, renderview);
@@ -86,7 +81,7 @@ bool Interactor3DMeasure::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor3DMeasure::ProcessMouseUpEvent(QMouseEvent *event,
-                                              RenderView *renderview) {
+                                              RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   if (m_bSelectRegion) {
@@ -98,7 +93,7 @@ bool Interactor3DMeasure::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor3DMeasure::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                RenderView *renderview) {
+                                                RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   if (m_bSelectRegion) {
@@ -109,7 +104,7 @@ bool Interactor3DMeasure::ProcessMouseMoveEvent(QMouseEvent *event,
   }
 }
 
-bool Interactor3DMeasure::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor3DMeasure::ProcessKeyDownEvent(QKeyEvent * event,
                                               RenderView *renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 

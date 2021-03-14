@@ -31,10 +31,9 @@ namespace itk {
  * \ingroup ITKFiltering
  */
 
-template<typename TInputImage, typename TOutputImage = TInputImage>
-class NonLocalPatchBasedImageFilter :
-  public ImageToImageFilter<TInputImage, TOutputImage>
-{
+template <typename TInputImage, typename TOutputImage = TInputImage>
+class NonLocalPatchBasedImageFilter
+    : public ImageToImageFilter<TInputImage, TOutputImage> {
 public:
   /** Standard class typedefs. */
   typedef NonLocalPatchBasedImageFilter                 Self;
@@ -43,139 +42,141 @@ public:
   typedef SmartPointer<const Self>                      ConstPointer;
 
   /** Runtime information support. */
-  itkTypeMacro( NonLocalPatchBasedImageFilter, ImageToImageFilter );
+  itkTypeMacro(NonLocalPatchBasedImageFilter, ImageToImageFilter);
 
   /** Standard New method. */
-  itkNewMacro( Self );
+  itkNewMacro(Self);
 
   /** ImageDimension constants */
-  itkStaticConstMacro( ImageDimension, unsigned int,
-                       TInputImage::ImageDimension );
+  itkStaticConstMacro(ImageDimension, unsigned int,
+                      TInputImage::ImageDimension);
 
   /** Some convenient typedefs. */
-  typedef TInputImage                                    InputImageType;
-  typedef typename InputImageType::PixelType             InputPixelType;
-  typedef typename InputImageType::Pointer               InputImagePointer;
-  typedef std::vector<InputImagePointer>                 InputImageList;
-  typedef std::vector<InputImageList>                    InputImageSetList;
-  typedef typename InputImageType::RegionType            RegionType;
+  typedef TInputImage                         InputImageType;
+  typedef typename InputImageType::PixelType  InputPixelType;
+  typedef typename InputImageType::Pointer    InputImagePointer;
+  typedef std::vector<InputImagePointer>      InputImageList;
+  typedef std::vector<InputImageList>         InputImageSetList;
+  typedef typename InputImageType::RegionType RegionType;
 
-  typedef TOutputImage                                   OutputImageType;
-  typedef typename OutputImageType::PixelType            OutputPixelType;
+  typedef TOutputImage                        OutputImageType;
+  typedef typename OutputImageType::PixelType OutputPixelType;
 
-  typedef std::vector<InputPixelType>                    InputImagePixelVectorType;
+  typedef std::vector<InputPixelType> InputImagePixelVectorType;
 
-  typedef float                                          RealType;
-  typedef Image<RealType, ImageDimension>                RealImageType;
-  typedef typename RealImageType::Pointer                RealImagePointer;
-  typedef typename RealImageType::IndexType              IndexType;
+  typedef float                             RealType;
+  typedef Image<RealType, ImageDimension>   RealImageType;
+  typedef typename RealImageType::Pointer   RealImagePointer;
+  typedef typename RealImageType::IndexType IndexType;
 
-  typedef Neighborhood<InputPixelType, ImageDimension>         NeighborhoodType;
-  typedef SizeValueType                                        NeighborhoodSizeType;
+  typedef Neighborhood<InputPixelType, ImageDimension> NeighborhoodType;
+  typedef SizeValueType                                NeighborhoodSizeType;
 
-  typedef ConstNeighborhoodIterator<InputImageType>            ConstNeighborhoodIteratorType;
-  typedef typename ConstNeighborhoodIteratorType::RadiusType   NeighborhoodRadiusType;
-  typedef typename ConstNeighborhoodIteratorType::OffsetType   NeighborhoodOffsetType;
+  typedef ConstNeighborhoodIterator<InputImageType>
+      ConstNeighborhoodIteratorType;
+  typedef
+      typename ConstNeighborhoodIteratorType::RadiusType NeighborhoodRadiusType;
+  typedef
+      typename ConstNeighborhoodIteratorType::OffsetType NeighborhoodOffsetType;
 
-  typedef std::vector<NeighborhoodOffsetType>                  NeighborhoodOffsetListType;
+  typedef std::vector<NeighborhoodOffsetType> NeighborhoodOffsetListType;
   /**
    * Neighborhood patch similarity metric enumerated type
    */
-  enum SimilarityMetricType {
-    PEARSON_CORRELATION,
-    MEAN_SQUARES
-  };
+  enum SimilarityMetricType { PEARSON_CORRELATION, MEAN_SQUARES };
 
   /**
    * Get/set neighborhood search radius.
    * Default = 3x3x...
    */
-  itkSetMacro( NeighborhoodSearchRadius, NeighborhoodRadiusType );
-  itkGetConstMacro( NeighborhoodSearchRadius, NeighborhoodRadiusType );
+  itkSetMacro(NeighborhoodSearchRadius, NeighborhoodRadiusType);
+  itkGetConstMacro(NeighborhoodSearchRadius, NeighborhoodRadiusType);
 
   /**
    * Get/set neighborhood search size.
    */
-  itkSetMacro( NeighborhoodSearchSize, NeighborhoodSizeType );
-  itkGetConstMacro( NeighborhoodSearchSize, NeighborhoodSizeType );
+  itkSetMacro(NeighborhoodSearchSize, NeighborhoodSizeType);
+  itkGetConstMacro(NeighborhoodSearchSize, NeighborhoodSizeType);
 
   /**
    * Get/set neighborhood search offset list.
    */
-  virtual void SetNeighborhoodSearchOffsetList( const NeighborhoodOffsetListType list )
-    {
+  virtual void
+  SetNeighborhoodSearchOffsetList(const NeighborhoodOffsetListType list) {
     this->m_NeighborhoodSearchOffsetList = list;
     this->Modified();
-    }
-  itkGetConstMacro( NeighborhoodSearchOffsetList, NeighborhoodOffsetListType );
+  }
+  itkGetConstMacro(NeighborhoodSearchOffsetList, NeighborhoodOffsetListType);
 
   /**
    * Get/set neighborhood patch radius.
    * Default = 1x1x...
    */
-  itkSetMacro( NeighborhoodPatchRadius, NeighborhoodRadiusType );
-  itkGetConstMacro( NeighborhoodPatchRadius, NeighborhoodRadiusType );
+  itkSetMacro(NeighborhoodPatchRadius, NeighborhoodRadiusType);
+  itkGetConstMacro(NeighborhoodPatchRadius, NeighborhoodRadiusType);
 
   /**
    * Get/set neighborhood patch size.
    */
-  itkSetMacro( NeighborhoodPatchSize, NeighborhoodSizeType );
-  itkGetConstMacro( NeighborhoodPatchSize, NeighborhoodSizeType );
+  itkSetMacro(NeighborhoodPatchSize, NeighborhoodSizeType);
+  itkGetConstMacro(NeighborhoodPatchSize, NeighborhoodSizeType);
 
   /**
    * Get/set neighborhood patch offset list.
    */
-  virtual void SetNeighborhoodPatchOffsetList( const NeighborhoodOffsetListType list )
-    {
+  virtual void
+  SetNeighborhoodPatchOffsetList(const NeighborhoodOffsetListType list) {
     this->m_NeighborhoodPatchOffsetList = list;
     this->Modified();
-    }
-  itkGetConstMacro( NeighborhoodPatchOffsetList, NeighborhoodOffsetListType );
+  }
+  itkGetConstMacro(NeighborhoodPatchOffsetList, NeighborhoodOffsetListType);
 
   /**
    * Enumerated type for neighborhood similarity.  Default = MEAN_SQUARES
    */
-  itkSetMacro( SimilarityMetric, SimilarityMetricType );
-  itkGetConstMacro( SimilarityMetric, SimilarityMetricType );
+  itkSetMacro(SimilarityMetric, SimilarityMetricType);
+  itkGetConstMacro(SimilarityMetric, SimilarityMetricType);
 
 protected:
-
   NonLocalPatchBasedImageFilter();
   ~NonLocalPatchBasedImageFilter() override = default;
 
   void BeforeThreadedGenerateData() override;
 
-  void PrintSelf( std::ostream & os, Indent indent ) const override;
+  void PrintSelf(std::ostream &os, Indent indent) const override;
 
-  RealType ComputeNeighborhoodPatchSimilarity( const InputImageList &, const IndexType, const InputImagePixelVectorType &, const bool );
+  RealType ComputeNeighborhoodPatchSimilarity(const InputImageList &,
+                                              const IndexType,
+                                              const InputImagePixelVectorType &,
+                                              const bool);
 
-  InputImagePixelVectorType VectorizeImageListPatch( const InputImageList &, const IndexType, const bool );
+  InputImagePixelVectorType
+  VectorizeImageListPatch(const InputImageList &, const IndexType, const bool);
 
-  InputImagePixelVectorType VectorizeImagePatch( const InputImagePointer, const IndexType, const bool );
+  InputImagePixelVectorType VectorizeImagePatch(const InputImagePointer,
+                                                const IndexType, const bool);
 
-  void GetMeanAndStandardDeviationOfVectorizedImagePatch( const InputImagePixelVectorType &, RealType &, RealType & );
+  void GetMeanAndStandardDeviationOfVectorizedImagePatch(
+      const InputImagePixelVectorType &, RealType &, RealType &);
 
-  itkSetMacro( TargetImageRegion, RegionType );
-  itkGetConstMacro( TargetImageRegion, RegionType );
+  itkSetMacro(TargetImageRegion, RegionType);
+  itkGetConstMacro(TargetImageRegion, RegionType);
 
-  SimilarityMetricType                                 m_SimilarityMetric;
+  SimilarityMetricType m_SimilarityMetric;
 
-  SizeValueType                                        m_NeighborhoodSearchSize;
-  NeighborhoodRadiusType                               m_NeighborhoodSearchRadius;
-  NeighborhoodOffsetListType                           m_NeighborhoodSearchOffsetList;
+  SizeValueType              m_NeighborhoodSearchSize;
+  NeighborhoodRadiusType     m_NeighborhoodSearchRadius;
+  NeighborhoodOffsetListType m_NeighborhoodSearchOffsetList;
 
-  SizeValueType                                        m_NeighborhoodPatchSize;
-  NeighborhoodRadiusType                               m_NeighborhoodPatchRadius;
-  NeighborhoodOffsetListType                           m_NeighborhoodPatchOffsetList;
+  SizeValueType              m_NeighborhoodPatchSize;
+  NeighborhoodRadiusType     m_NeighborhoodPatchRadius;
+  NeighborhoodOffsetListType m_NeighborhoodPatchOffsetList;
 
-  RegionType                                           m_TargetImageRegion;
-
+  RegionType m_TargetImageRegion;
 
 private:
-
-  NonLocalPatchBasedImageFilter( const Self& ) = delete;
-  void operator=( const Self& ) = delete;
-
+  NonLocalPatchBasedImageFilter(const Self &) = delete;
+  void operator=(const Self &) = delete;
 };
 
 } // end namespace itk

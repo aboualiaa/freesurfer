@@ -42,9 +42,9 @@ public:
     assertDebug(i >= 0 && i < m_rows && j >= 0 && j < m_cols);
     return m_data[i][j];
   }
-  inline T **dataPtr() const { return m_data; }
-  inline T **dataPtr() { return m_data; }
-  inline T *dataVectPtr() { return m_dataVect; }
+  inline T **     dataPtr() const { return m_data; }
+  inline T **     dataPtr() { return m_data; }
+  inline T *      dataVectPtr() { return m_dataVect; }
   inline const T *dataVectPtr() const { return m_dataVect; }
   inline const T *dataRow(int i) const {
     assertDebug(i >= 0 && i < m_rows);
@@ -59,8 +59,8 @@ public:
   void clear(T val);
 
   /// extract a row or column
-  Vector<T> row(int row) const;
-  Vector<T> col(int col) const;
+  std::vector<T> row(int row) const;
+  std::vector<T> col(int col) const;
 
   /// matrix element statistics
   T min() const;
@@ -85,7 +85,7 @@ private:
 
   /// the matrix data
   T **m_data;
-  T *m_dataVect;
+  T * m_dataVect;
 
   // disable assignment operator
   Matrix &operator=(const Matrix &m);
@@ -94,8 +94,8 @@ private:
 // basic constructor
 template <typename T> Matrix<T>::Matrix(int rows, int cols, bool contiguous) {
   assertDebug(rows >= 0 && cols >= 1);
-  m_rows = rows;
-  m_cols = cols;
+  m_rows       = rows;
+  m_cols       = cols;
   m_contiguous = contiguous;
 
   // allocate as single block with pointer to each row
@@ -110,7 +110,7 @@ template <typename T> Matrix<T>::Matrix(int rows, int cols, bool contiguous) {
     // allocate each row seperately
   } else {
     m_dataVect = NULL;
-    m_data = new T *[m_rows];
+    m_data     = new T *[m_rows];
     assertDebug(m_data);
     for (int i = 0; i < m_rows; i++) {
       m_data[i] = new T[m_cols];
@@ -121,8 +121,8 @@ template <typename T> Matrix<T>::Matrix(int rows, int cols, bool contiguous) {
 
 // copy constructor
 template <typename T> Matrix<T>::Matrix(const Matrix<T> &matrix) {
-  m_rows = matrix.rows();
-  m_cols = matrix.cols();
+  m_rows       = matrix.rows();
+  m_cols       = matrix.cols();
   m_contiguous = true; // fix(later): create non-contiguous copies if source is
                        // non-contiguous
   m_dataVect = new T[m_rows * m_cols];
@@ -154,17 +154,17 @@ template <typename T> void Matrix<T>::clear(T val) {
 }
 
 /// extract a row
-template <typename T> Vector<T> Matrix<T>::row(int row) const {
+template <typename T> std::vector<T> Matrix<T>::row(int row) const {
   assertDebug(row >= 0 && row < m_rows);
-  Vector<T> vector(m_cols);
+  std::vector<T> vector(m_cols);
   memcpy(vector.dataPtr(), m_data[row], m_cols * sizeof(T));
   return vector;
 }
 
 /// extract a column
-template <typename T> Vector<T> Matrix<T>::col(int col) const {
+template <typename T> std::vector<T> Matrix<T>::col(int col) const {
   assertDebug(col >= 0 && col < m_cols);
-  Vector<T> vector(m_rows);
+  std::vector<T> vector(m_rows);
   for (int i = 0; i < m_rows; i++)
     vector.data(i) = m_data[i][col];
   return vector;
@@ -232,9 +232,9 @@ template <typename T> T Matrix<T>::sum() const {
 
 // common matrix types
 typedef Matrix<unsigned char> MatrixU;
-typedef Matrix<int> MatrixI;
-typedef Matrix<float> MatrixF;
-typedef Matrix<double> MatrixD;
+typedef Matrix<int>           MatrixI;
+typedef Matrix<float>         MatrixF;
+typedef Matrix<double>        MatrixD;
 
 } // end namespace sbl
 #endif // _SBL_MATRIX_H_

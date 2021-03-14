@@ -38,8 +38,8 @@ public slots:
   void OnButtonSaveFCDLabels();
 
 protected:
-  void DoUpdateWidgets();
-  void DoIdle();
+  void         DoUpdateWidgets();
+  void         DoIdle();
   virtual void ConnectLayer(Layer *layer);
 
 private:

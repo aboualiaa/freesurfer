@@ -1,5 +1,4 @@
 /**
- * @file  SurfaceAnnotation.h
  * @brief Data handler for surface annotation
  *
  * An interface implemented by a collection. Layers will get
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2014/04/11 20:06:39 $
- *    $Revision: 1.17 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,11 +24,11 @@
 #ifndef SurfaceAnnotation_h
 #define SurfaceAnnotation_h
 
-#include <QObject>
-#include <vtkSmartPointer.h>
-#include <QMap>
 #include <QColor>
+#include <QMap>
+#include <QObject>
 #include <QVector>
+#include <vtkSmartPointer.h>
 
 #include "colortab.h"
 
@@ -49,30 +44,27 @@ class vtkPolyData;
 
 struct NewAnnotationLabel {
   QString name;
-  QColor color;
-  int id;
+  QColor  color;
+  int     id;
 };
 
-struct AnnotUndoRedoBufferItem
-{
-  AnnotUndoRedoBufferItem()
-  {
+struct AnnotUndoRedoBufferItem {
+  AnnotUndoRedoBufferItem() {
     m_data = NULL;
     m_ctab = NULL;
   }
 
-  void Free()
-  {
+  void Free() {
     if (m_data)
       delete[] m_data;
     m_data = NULL;
     CTABfree(&m_ctab);
   }
 
-  int*          m_data;
-  QList<int>    m_listVisibleLabels;
+  int *                         m_data;
+  QList<int>                    m_listVisibleLabels;
   QMap<int, NewAnnotationLabel> m_mapNewLabels;
-  COLOR_TABLE*  m_ctab;
+  COLOR_TABLE *                 m_ctab;
 };
 
 class SurfaceAnnotation : public QObject {
@@ -88,6 +80,10 @@ public:
   void SetName(const QString &name);
 
   bool LoadAnnotation(const QString &fn);
+
+  bool LoadFromSegmentation(const QString &fn);
+
+  bool LoadColorTable(const QString &fn);
 
   bool InitializeNewAnnotation(const QString &ctab_fn);
 
@@ -136,11 +132,12 @@ public:
   void EditLabel(const QVector<int> &verts, int fill_index,
                  const QVariantMap &options);
 
-  void ReassignNewLabel(int old_id, int new_id, const QString& name = "", const QColor& color = QColor());
+  void ReassignNewLabel(int old_id, int new_id, const QString &name = "",
+                        const QColor &color = QColor());
 
   QMap<int, NewAnnotationLabel> GetNewLabels() { return m_mapNewLabels; }
-  void UpdateLabelInfo(int i, const QString &name,
 
+  void UpdateLabelInfo(int i, const QString &name,
                        const QColor &color = QColor());
 
   bool HasColor(const QColor &color) { return m_listColors.contains(color); }
@@ -160,10 +157,7 @@ signals:
   void Modified();
 
 public slots:
-  void SetModified()
-  {
-    emit Modified();
-  }
+  void SetModified() { emit Modified(); }
 
   void Undo();
   void Redo();
@@ -174,33 +168,33 @@ protected:
   void UpdateData();
 
 private:
-  QColor GenerateNewColor();
-  void UpdateColorList();
-  int ColorToAnnotation(const QColor &c);
+  QColor                  GenerateNewColor();
+  void                    UpdateColorList();
+  int                     ColorToAnnotation(const QColor &c);
   AnnotUndoRedoBufferItem SaveCurrentUndoRedoBuffer();
-  void RestoreFromUndoRedoBuffer(const AnnotUndoRedoBufferItem& item);
-  void UpdateColorTable(int nIndex, const QString& name, const QColor& color);
+  void RestoreFromUndoRedoBuffer(const AnnotUndoRedoBufferItem &item);
+  void UpdateColorTable(int nIndex, const QString &name, const QColor &color);
 
-  int *m_nIndices;
-  int *m_nOutlineIndices;
-  int m_nIndexSize;
-  int *m_nCenterVertices; // center vertex of each annotation
-  int *m_data;
+  int *      m_nIndices;
+  int *      m_nOutlineIndices;
+  int        m_nIndexSize;
+  int *      m_nCenterVertices; // center vertex of each annotation
+  int *      m_data;
   QList<int> m_listAnnotations;
 
-  QString m_strName;
-  COLOR_TABLE *m_lut;
-  LayerSurface *m_surface;
-  bool m_bShowOutline;
-  double m_dOpacity;
-  QString m_strFilename;
-  QList<int> m_listVisibleLabels;
-  int m_nHighlightedLabel;
+  QString                       m_strName;
+  COLOR_TABLE *                 m_lut;
+  LayerSurface *                m_surface;
+  bool                          m_bShowOutline;
+  double                        m_dOpacity;
+  QString                       m_strFilename;
+  QList<int>                    m_listVisibleLabels;
+  int                           m_nHighlightedLabel;
   QMap<int, NewAnnotationLabel> m_mapNewLabels;
-  QVector<QColor> m_listColors;
+  QVector<QColor>               m_listColors;
 
-  QVector<AnnotUndoRedoBufferItem>  m_bufferUndo;
-  QVector<AnnotUndoRedoBufferItem>  m_bufferRedo;
+  QVector<AnnotUndoRedoBufferItem> m_bufferUndo;
+  QVector<AnnotUndoRedoBufferItem> m_bufferRedo;
 };
 
 #endif

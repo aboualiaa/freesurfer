@@ -1,10 +1,10 @@
 #ifndef _SBL_TABLE_H_
 #define _SBL_TABLE_H_
-#include <sbl/core/String.h>
 #include <sbl/core/Array.h>
 #include <sbl/core/Pointer.h>
-#include <sbl/other/TaggedFile.h>
+#include <sbl/core/String.h>
 #include <sbl/math/Vector.h>
+#include <sbl/other/TaggedFile.h>
 namespace sbl {
 
 //-------------------------------------------
@@ -38,9 +38,9 @@ public:
   inline const VectorI &dataI() const {
     return m_dataInt;
   } // fix(clean): do we need these vector versions?
-  inline const VectorD &dataD() const { return m_dataDouble; }
+  inline const VectorD &      dataD() const { return m_dataDouble; }
   inline const Array<String> &dataStr() const { return m_dataString; }
-  inline Array<String> &dataStr() { return m_dataString; }
+  inline Array<String> &      dataStr() { return m_dataString; }
 
   /// the number of items in the column
   int pointCount() const;
@@ -65,9 +65,9 @@ public:
   //-------------------------------------------
 
   /// get stats about data
-  inline int minInt() const { return m_minInt; }
-  inline int maxInt() const { return m_maxInt; }
-  inline int meanInt() const { return m_meanInt; }
+  inline int    minInt() const { return m_minInt; }
+  inline int    maxInt() const { return m_maxInt; }
+  inline int    meanInt() const { return m_meanInt; }
   inline double minDouble() const { return m_minDouble; }
   inline double maxDouble() const { return m_maxDouble; }
   inline double meanDouble() const { return m_meanDouble; }
@@ -82,7 +82,7 @@ public:
   /// access display info
   inline bool visible() const { return m_visible; }
   inline void setVisible(bool visible) { m_visible = visible; }
-  String webStatText() const;
+  String      webStatText() const;
 
   /// if true, highlight the min/max values
   inline bool highlightMinMax() const { return m_highlightMinMax; }
@@ -90,50 +90,50 @@ public:
 
   /// get/set the printf format for this column's data (e.g. "%4.2f")
   inline const String &format() const { return m_format; }
-  inline void setFormat(const String &format) { m_format = format; }
+  inline void          setFormat(const String &format) { m_format = format; }
 
   /// get/set a text description
   inline const String &description() const { return m_description; }
-  inline void setDescription(const String &description) {
+  inline void          setDescription(const String &description) {
     m_description = description;
   }
 
 private:
   // column's data values
-  VectorI m_dataInt;
-  VectorD m_dataDouble;
+  VectorI       m_dataInt;
+  VectorD       m_dataDouble;
   Array<String> m_dataString;
-  bool m_isTimestamp;
+  bool          m_isTimestamp;
 
   // stats about data
-  int m_nonZeroCount;
-  int m_minInt;
-  int m_maxInt;
-  int m_meanInt;
+  int    m_nonZeroCount;
+  int    m_minInt;
+  int    m_maxInt;
+  int    m_meanInt;
   double m_minDouble;
   double m_maxDouble;
   double m_meanDouble;
 
   /// column's display info
   String m_name;
-  int m_nameHash;
-  bool m_visible;
+  int    m_nameHash;
+  bool   m_visible;
   String m_toolTip;
-  bool m_highlightMinMax;
+  bool   m_highlightMinMax;
   String m_format;
   String m_description;
 
   // file format tags
   enum {
-    TAG_NAME = 101,
-    TAG_VISIBLE = 200,
-    TAG_TOOL_TIP = 201,
-    TAG_FORMAT = 202,
-    TAG_IS_TIMESTAMP = 203,
+    TAG_NAME              = 101,
+    TAG_VISIBLE           = 200,
+    TAG_TOOL_TIP          = 201,
+    TAG_FORMAT            = 202,
+    TAG_IS_TIMESTAMP      = 203,
     TAG_HIGHLIGHT_MIN_MAX = 204,
-    TAG_DATA_INT = 301,
-    TAG_DATA_DOUBLE = 302,
-    TAG_DATA_STRING = 303
+    TAG_DATA_INT          = 301,
+    TAG_DATA_DOUBLE       = 302,
+    TAG_DATA_STRING       = 303
   };
 
   // disable copy constructor and assignment operator
@@ -156,7 +156,7 @@ public:
 
   /// get/set the table title
   inline const String &title() const { return m_title; }
-  inline void setTitle(const String &title) { m_title = title; }
+  inline void          setTitle(const String &title) { m_title = title; }
 
   //-------------------------------------------
   // READ/WRITE DATA
@@ -164,15 +164,15 @@ public:
 
   /// access columns
   inline const TableColumn &column(int index) const { return m_columns[index]; }
-  inline TableColumn &column(int index) { return m_columns[index]; }
-  inline int columnCount() const { return m_columns.count(); }
-  inline int timestampColumn() const { return m_timestampColumn; }
+  inline TableColumn &      column(int index) { return m_columns[index]; }
+  inline int                columnCount() const { return m_columns.count(); }
+  inline int         timestampColumn() const { return m_timestampColumn; }
   const TableColumn &column(const String &colName) const;
-  TableColumn &column(const String &colName);
-  bool columnDefined(const String &colName) const;
+  TableColumn &      column(const String &colName);
+  bool               columnDefined(const String &colName) const;
 
   /// read a value
-  int readInt(const char *colName, int rowIndex) const;
+  int    readInt(const char *colName, int rowIndex) const;
   double readDouble(const char *colName, int rowIndex) const;
   String readString(const char *colName, int rowIndex) const;
 
@@ -254,10 +254,10 @@ private:
 
   // display info
   VectorI m_sortIndex;
-  int m_startIndex;
-  int m_dispLength;
-  int m_timestampColumn;
-  String m_defaultFormat;
+  int     m_startIndex;
+  int     m_dispLength;
+  int     m_timestampColumn;
+  String  m_defaultFormat;
 
   // display callback (static so used by all table instances)
   static Display<aptr<Table>> *s_tableDisplay;

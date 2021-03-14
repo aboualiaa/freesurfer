@@ -1,16 +1,11 @@
 /**
- * @file  Region2DPolyline.h
  * @brief Region2DPolyline data object.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/10/07 20:01:59 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,8 +22,8 @@
 #define Region2DPolyline_h
 
 #include "Region2D.h"
-#include <QList>
 #include "vtkSmartPointer.h"
+#include <QList>
 
 class vtkActor2D;
 class RenderView2D;
@@ -80,7 +75,7 @@ protected:
   };
 
   QList<ScreenPoint> m_screenPts; // 2D points
-  QList<WorldPoint> m_worldPts;
+  QList<WorldPoint>  m_worldPts;
 
   bool m_bSpline;
 };

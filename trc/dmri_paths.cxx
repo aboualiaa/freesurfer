@@ -1,17 +1,12 @@
 /**
- * @file  dmri_paths.cxx
  * @brief Probabilistic global tractography
  *
  * Probabilistic global tractography
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
- *    $Author: ayendiki $
- *    $Date: 2016/12/18 14:03:25 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,64 +20,74 @@
 
 #include "coffin.h"
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <float.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <math.h>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
+#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
 using namespace std;
 
-static int parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static int  parse_commandline(int argc, char **argv);
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options();
 
 int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
 const char *Progname = "dmri_paths";
 
 unsigned int nlab1 = 0, nlab2 = 0;
 unsigned int nTract = 1, nBurnIn = 5000, nSample = 5000, nKeepSample = 10,
              nUpdateProp = 40, localPriorSet = 15, neighPriorSet = 14;
-float fminPath = 0;
-char *dwiFile = nullptr, *gradFile = nullptr, *bvalFile = nullptr,
-     *maskFile = nullptr, *bedpostDir = nullptr, *baseXfmFile = nullptr,
-     *baseMaskFile = nullptr, *affineXfmFile = nullptr,
-     *nonlinXfmFile = nullptr;
-vector<char *> outDir, inDirList, initFile, roiFile1, roiFile2, roiMeshFile1,
-    roiMeshFile2, roiRefFile1, roiRefFile2, xyzPriorFile0, xyzPriorFile1,
-    tangPriorFile, curvPriorFile, neighPriorFile, neighIdFile, localPriorFile,
-    localIdFile, asegList, stdPropFile;
+float       fminPath = 0;
+std::string dwiFile, gradFile, bvalFile, maskFile, bedpostDir, baseXfmFile,
+    baseMaskFile, affineXfmFile, nonlinXfmFile;
+vector<std::string> outDir, inDirList, initFile, roiFile1, roiFile2,
+    roiMeshFile1, roiMeshFile2, roiRefFile1, roiRefFile2, xyzPriorFile0,
+    xyzPriorFile1, tangPriorFile, curvPriorFile, neighPriorFile, neighIdFile,
+    localPriorFile, localIdFile, asegList, stdPropFile;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  bool doxyzprior = true;
-  bool dotangprior = true;
-  bool docurvprior = true;
-  bool doneighprior = true;
-  bool dolocalprior = true;
-  bool dopropinit = true;
-  int nargs;
-  int cputime;
-  int ilab1 = 0;
-  int ilab2 = 0;
+  bool doxyzprior = true, dotangprior = true, docurvprior = true,
+       doneighprior = true, dolocalprior = true, dopropinit = true;
+  int nargs, cputime, ilab1 = 0, ilab2 = 0;
 
   nargs = handleVersionOption(argc, argv, "dmri_paths");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -92,105 +97,99 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  if (argc == 0) {
+  if (argc == 0)
     usage_exit();
-  }
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly != 0) {
+  if (checkoptsonly)
     return (0);
-  }
 
   dump_options();
 
   srand(6875);
   srand48(6875);
 
-  if (xyzPriorFile0.empty()) {
+  if (xyzPriorFile0.empty())
     doxyzprior = false;
-  }
-  if (tangPriorFile.empty()) {
+  if (tangPriorFile.empty())
     dotangprior = false;
-  }
-  if (curvPriorFile.empty()) {
+  if (curvPriorFile.empty())
     docurvprior = false;
-  }
-  if (neighPriorFile.empty()) {
+  if (neighPriorFile.empty())
     doneighprior = false;
-  }
-  if (localPriorFile.empty()) {
+  if (localPriorFile.empty())
     dolocalprior = false;
-  }
-  if (stdPropFile.empty()) {
+  if (stdPropFile.empty())
     dopropinit = false;
-  }
 
-  Coffin mycoffin(
-      outDir[0], inDirList, dwiFile, gradFile, bvalFile, maskFile, bedpostDir,
-      nTract, fminPath, baseXfmFile, baseMaskFile, initFile[0], roiFile1[0],
-      roiFile2[0],
-      strstr(roiFile1[0], ".label") != nullptr ? roiMeshFile1[ilab1] : nullptr,
-      strstr(roiFile2[0], ".label") != nullptr ? roiMeshFile2[ilab2] : nullptr,
-      strstr(roiFile1[0], ".label") != nullptr ? roiRefFile1[ilab1] : nullptr,
-      strstr(roiFile2[0], ".label") != nullptr ? roiRefFile2[ilab2] : nullptr,
-      doxyzprior ? xyzPriorFile0[0] : nullptr,
-      doxyzprior ? xyzPriorFile1[0] : nullptr,
-      dotangprior ? tangPriorFile[0] : nullptr,
-      docurvprior ? curvPriorFile[0] : nullptr,
-      doneighprior ? neighPriorFile[0] : nullptr,
-      doneighprior ? neighIdFile[0] : nullptr, doneighprior ? neighPriorSet : 0,
-      dolocalprior ? localPriorFile[0] : nullptr,
-      dolocalprior ? localIdFile[0] : nullptr, dolocalprior ? localPriorSet : 0,
-      asegList, affineXfmFile, nonlinXfmFile, nBurnIn, nSample, nKeepSample,
-      nUpdateProp, dopropinit ? stdPropFile[0] : nullptr, debug != 0);
+  Coffin mycoffin(outDir[0], inDirList, dwiFile, gradFile, bvalFile, maskFile,
+                  bedpostDir, nTract, fminPath, baseXfmFile, baseMaskFile,
+                  initFile[0], roiFile1[0], roiFile2[0],
+                  strstr(roiFile1[0].c_str(), ".label") ? roiMeshFile1[ilab1]
+                                                        : std::string(),
+                  strstr(roiFile2[0].c_str(), ".label") ? roiMeshFile2[ilab2]
+                                                        : std::string(),
+                  strstr(roiFile1[0].c_str(), ".label") ? roiRefFile1[ilab1]
+                                                        : std::string(),
+                  strstr(roiFile2[0].c_str(), ".label") ? roiRefFile2[ilab2]
+                                                        : std::string(),
+                  doxyzprior ? xyzPriorFile0[0] : std::string(),
+                  doxyzprior ? xyzPriorFile1[0] : std::string(),
+                  dotangprior ? tangPriorFile[0] : std::string(),
+                  docurvprior ? curvPriorFile[0] : std::string(),
+                  doneighprior ? neighPriorFile[0] : std::string(),
+                  doneighprior ? neighIdFile[0] : std::string(),
+                  doneighprior ? neighPriorSet : 0,
+                  dolocalprior ? localPriorFile[0] : std::string(),
+                  dolocalprior ? localIdFile[0] : std::string(),
+                  dolocalprior ? localPriorSet : 0, asegList, affineXfmFile,
+                  nonlinXfmFile, nBurnIn, nSample, nKeepSample, nUpdateProp,
+                  dopropinit ? stdPropFile[0] : std::string(), debug);
 
-  if (strstr(roiFile1[0], ".label") != nullptr) {
+  if (strstr(roiFile1[0].c_str(), ".label"))
     ilab1++;
-  }
-  if (strstr(roiFile2[0], ".label") != nullptr) {
+  if (strstr(roiFile2[0].c_str(), ".label"))
     ilab2++;
-  }
 
   for (unsigned int iout = 0; iout < outDir.size(); iout++) {
     if (iout > 0) {
       mycoffin.SetOutputDir(outDir[iout]);
       mycoffin.SetPathway(
           initFile[iout], roiFile1[iout], roiFile2[iout],
-          strstr(roiFile1[iout], ".label") != nullptr ? roiMeshFile1[ilab1]
-                                                      : nullptr,
-          strstr(roiFile2[iout], ".label") != nullptr ? roiMeshFile2[ilab2]
-                                                      : nullptr,
-          strstr(roiFile1[iout], ".label") != nullptr ? roiRefFile1[ilab1]
-                                                      : nullptr,
-          strstr(roiFile2[iout], ".label") != nullptr ? roiRefFile2[ilab2]
-                                                      : nullptr,
-          doxyzprior ? xyzPriorFile0[iout] : nullptr,
-          doxyzprior ? xyzPriorFile1[iout] : nullptr,
-          dotangprior ? tangPriorFile[iout] : nullptr,
-          docurvprior ? curvPriorFile[iout] : nullptr,
-          doneighprior ? neighPriorFile[iout] : nullptr,
-          doneighprior ? neighIdFile[iout] : nullptr,
-          dolocalprior ? localPriorFile[iout] : nullptr,
-          dolocalprior ? localIdFile[iout] : nullptr);
+          strstr(roiFile1[iout].c_str(), ".label") ? roiMeshFile1[ilab1]
+                                                   : std::string(),
+          strstr(roiFile2[iout].c_str(), ".label") ? roiMeshFile2[ilab2]
+                                                   : std::string(),
+          strstr(roiFile1[iout].c_str(), ".label") ? roiRefFile1[ilab1]
+                                                   : std::string(),
+          strstr(roiFile2[iout].c_str(), ".label") ? roiRefFile2[ilab2]
+                                                   : std::string(),
+          doxyzprior ? xyzPriorFile0[iout] : std::string(),
+          doxyzprior ? xyzPriorFile1[iout] : std::string(),
+          dotangprior ? tangPriorFile[iout] : std::string(),
+          docurvprior ? curvPriorFile[iout] : std::string(),
+          doneighprior ? neighPriorFile[iout] : std::string(),
+          doneighprior ? neighIdFile[iout] : std::string(),
+          dolocalprior ? localPriorFile[iout] : std::string(),
+          dolocalprior ? localIdFile[iout] : std::string());
       mycoffin.SetMcmcParameters(nBurnIn, nSample, nKeepSample, nUpdateProp,
-                                 dopropinit ? stdPropFile[iout] : nullptr);
+                                 dopropinit ? stdPropFile[iout]
+                                            : std::string());
 
-      if (strstr(roiFile1[iout], ".label") != nullptr) {
+      if (strstr(roiFile1.at(iout).c_str(), ".label"))
         ilab1++;
-      }
-      if (strstr(roiFile2[iout], ".label") != nullptr) {
+      if (strstr(roiFile2.at(iout).c_str(), ".label"))
         ilab2++;
-      }
     }
 
     cout << "Processing pathway " << iout + 1 << " of " << outDir.size()
          << "..." << endl;
     cputimer.reset();
 
-    // if (mycoffin.RunMcmcFull())
+    //if (mycoffin.RunMcmcFull())
     if (mycoffin.RunMcmcSingle()) {
       mycoffin.WriteOutputs();
     } else {
@@ -208,296 +207,256 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
-  char **pargv;
-  char *option;
+  int    nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) {
+  if (argc < 1)
     usage_exit();
-  }
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug != 0) {
+    if (debug)
       printf("%d %s\n", nargc, option);
-    }
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (strcasecmp(option, "--help") == 0) {
+    if (!strcasecmp(option, "--help"))
       print_help();
-    } else if (strcasecmp(option, "--version") == 0) {
+    else if (!strcasecmp(option, "--version"))
       print_version();
-    } else if (strcasecmp(option, "--debug") == 0) {
+    else if (!strcasecmp(option, "--debug"))
       debug = 1;
-    } else if (strcasecmp(option, "--checkopts") == 0) {
+    else if (!strcasecmp(option, "--checkopts"))
       checkoptsonly = 1;
-    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+    else if (!strcasecmp(option, "--nocheckopts"))
       checkoptsonly = 0;
-    } else if (strcmp(option, "--outdir") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--outdir")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         outDir.push_back(pargv[nargsused]);
         nargsused++;
       }
-    } else if (strcmp(option, "--indir") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--indir")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         inDirList.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--dwi") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--dwi")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      dwiFile = pargv[0];
+      dwiFile   = pargv[0];
       nargsused = 1;
-    } else if (strcmp(option, "--grad") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--grad")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      gradFile = pargv[0];
+      gradFile  = pargv[0];
       nargsused = 1;
-    } else if (strcmp(option, "--bval") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--bval")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      bvalFile = pargv[0];
+      bvalFile  = pargv[0];
       nargsused = 1;
-    } else if (strcmp(option, "--mask") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--mask")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      maskFile = pargv[0];
+      maskFile  = pargv[0];
       nargsused = 1;
-    } else if (strcmp(option, "--bpdir") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--bpdir")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       bedpostDir = pargv[0];
-      nargsused = 1;
-    } else if (strcmp(option, "--ntr") == 0) {
-      if (nargc < 1) {
+      nargsused  = 1;
+    } else if (!strcmp(option, "--ntr")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%u", &nTract);
       nargsused = 1;
-    } else if (strcmp(option, "--fmin") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--fmin")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%f", &fminPath);
       nargsused = 1;
-    } else if (strcmp(option, "--basereg") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--basereg")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       baseXfmFile = pargv[0];
-      nargsused = 1;
-    } else if (strcmp(option, "--basemask") == 0) {
-      if (nargc < 1) {
+      nargsused   = 1;
+    } else if (!strcmp(option, "--basemask")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       baseMaskFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
-    } else if (strcmp(option, "--roi1") == 0) {
-      if (nargc < 1) {
+      nargsused    = 1;
+    } else if (!strcmp(option, "--roi1")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         roiFile1.push_back(fio_fullpath(pargv[nargsused]));
-        if (strstr(*(roiFile1.end() - 1), ".label") != nullptr) {
+        if (strstr(roiFile1.back().c_str(), ".label"))
           nlab1++;
-        }
         nargsused++;
       }
-    } else if (strcmp(option, "--roi2") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--roi2")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         roiFile2.push_back(fio_fullpath(pargv[nargsused]));
-        if (strstr(*(roiFile2.end() - 1), ".label") != nullptr) {
+        if (strstr(roiFile2.back().c_str(), ".label"))
           nlab2++;
-        }
         nargsused++;
       }
-    } else if (strcmp(option, "--roimesh1") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--roimesh1")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         roiMeshFile1.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--roimesh2") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--roimesh2")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         roiMeshFile2.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--roiref1") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--roiref1")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         roiRefFile1.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--roiref2") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--roiref2")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         roiRefFile2.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--reg") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--reg")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       affineXfmFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
-    } else if (strcmp(option, "--regnl") == 0) {
-      if (nargc < 1) {
+      nargsused     = 1;
+    } else if (!strcmp(option, "--regnl")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nonlinXfmFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
-    } else if (strcmp(option, "--init") == 0) {
-      if (nargc < 1) {
+      nargsused     = 1;
+    } else if (!strcmp(option, "--init")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         initFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--sdp") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--sdp")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         stdPropFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--prior") == 0) {
-      if (nargc < 2) {
+    } else if (!strcmp(option, "--prior")) {
+      if (nargc < 2)
         CMDargNErr(option, 2);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         xyzPriorFile0.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
         xyzPriorFile1.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--nprior") == 0) {
-      if (nargc < 2) {
+    } else if (!strcmp(option, "--nprior")) {
+      if (nargc < 2)
         CMDargNErr(option, 2);
-      }
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         neighPriorFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
         neighIdFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--nset") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--nset")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%u", &neighPriorSet);
       nargsused = 1;
-    } else if (strcmp(option, "--lprior") == 0) {
-      if (nargc < 2) {
+    } else if (!strcmp(option, "--lprior")) {
+      if (nargc < 2)
         CMDargNErr(option, 2);
-      }
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         localPriorFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
         localIdFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--lset") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--lset")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%u", &localPriorSet);
       nargsused = 1;
-    } else if (strcmp(option, "--seg") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--seg")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         asegList.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--tprior") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--tprior")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         tangPriorFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--cprior") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--cprior")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         curvPriorFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
       }
-    } else if (strcmp(option, "--nb") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--nb")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%u", &nBurnIn);
       nargsused = 1;
-    } else if (strcmp(option, "--ns") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--ns")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%u", &nSample);
       nargsused = 1;
-    } else if (strcmp(option, "--nk") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--nk")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%u", &nKeepSample);
       nargsused = 1;
-    } else if (strcmp(option, "--nu") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--nu")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%u", &nUpdateProp);
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
-      if (CMDsingleDash(option) != 0) {
+      if (CMDsingleDash(option))
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -507,7 +466,7 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   cout << endl
        << "USAGE: " << Progname << endl
        << endl
@@ -613,7 +572,7 @@ static void print_usage() {
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
 
   cout << endl << "..." << endl << endl;
@@ -622,40 +581,40 @@ static void print_help() {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  cout << vcid << endl;
+static void print_version(void) {
+  cout << getVersion() << endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void check_options() {
+static void check_options(void) {
   if (outDir.empty()) {
     cout << "ERROR: Must specify output directory" << endl;
     exit(1);
   }
-  if (dwiFile == nullptr) {
+  if (dwiFile.empty()) {
     cout << "ERROR: Must specify DWI volume series" << endl;
     exit(1);
   }
-  if (gradFile == nullptr) {
+  if (gradFile.empty()) {
     cout << "ERROR: Must specify gradient text file" << endl;
     exit(1);
   }
-  if (bvalFile == nullptr) {
+  if (bvalFile.empty()) {
     cout << "ERROR: Must specify b-value text file" << endl;
     exit(1);
   }
-  if (maskFile == nullptr) {
+  if (maskFile.empty()) {
     cout << "ERROR: Must specify mask volume" << endl;
     exit(1);
   }
-  if (bedpostDir == nullptr) {
+  if (bedpostDir.empty()) {
     cout << "ERROR: Must specify BEDPOST directory" << endl;
     exit(1);
   }
@@ -724,14 +683,15 @@ static void check_options() {
          << " standard deviation files as outputs" << endl;
     exit(1);
   }
+  return;
 }
 
 /* --------------------------------------------- */
 static void dump_options() {
-  vector<char *>::const_iterator istr;
+  vector<std::string>::const_iterator istr;
 
   cout << endl
-       << vcid << endl
+       << getVersion() << endl
        << "cwd " << cwd << endl
        << "cmdline " << cmdline << endl
        << "sysname  " << uts.sysname << endl
@@ -740,9 +700,8 @@ static void dump_options() {
        << "user     " << VERuser() << endl;
 
   cout << "Output directory:";
-  for (istr = outDir.begin(); istr < outDir.end(); istr++) {
+  for (istr = outDir.begin(); istr < outDir.end(); istr++)
     cout << " " << *istr;
-  }
   cout << endl;
 
   if (!inDirList.empty()) {
@@ -861,11 +820,11 @@ static void dump_options() {
     cout << endl;
   }
 
-  if (affineXfmFile != nullptr) {
+  if (!affineXfmFile.empty()) {
     cout << "DWI-to-atlas affine registration: " << affineXfmFile << endl;
   }
 
-  if (nonlinXfmFile != nullptr) {
+  if (!nonlinXfmFile.empty()) {
     cout << "DWI-to-atlas nonlinear registration: " << nonlinXfmFile << endl;
   }
 
@@ -881,4 +840,6 @@ static void dump_options() {
     }
     cout << endl;
   }
+
+  return;
 }

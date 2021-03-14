@@ -1,7 +1,7 @@
 #!/bin/tcsh -f
 # tkmeditfv
 
-set VERSION = '$Id: tkmeditfv,v 1.18 2016/02/16 17:17:20 zkaufman Exp $';
+set VERSION = 'tkmeditfv @FS_VERSION@';
 
 set subject = ();
 set overlay = ();
@@ -111,10 +111,19 @@ if(! $UseTkMedit) then
   foreach vol ($vollist)
     set cmd = ($cmd -v $vol)
   end
+  if($DoDefects) then
+    set cmd = ($cmd -c $SUBJECTS_DIR/$subject/surf/?h.defects.pointset)
+  endif
   @ nth = 0;
   foreach surf ($surflist)
     @ nth = $nth + 1;
-    set cmd = ($cmd --surface $surf":"edgecolor=$surfcolor[$nth])
+    set ov = ()
+    if($DoDefects) then
+      set sdir = $SUBJECTS_DIR/$subject/surf
+      if($surflist0[$nth] == lh.orig.nofix) set ov = ":overlay=$sdir/lh.defect_labels:edgecolor=overlay"
+      if($surflist0[$nth] == rh.orig.nofix) set ov = ":overlay=$sdir/rh.defect_labels:edgecolor=overlay"
+    endif
+    set cmd = ($cmd --surface $surf":"edgecolor=$surfcolor[$nth]$ov)
   end
   if($#CursorCRS) set cmd = ($cmd -slice $CursorCRS)
   if($CenterCursor) set cmd = ($cmd -cc)
@@ -349,6 +358,18 @@ while( $#argv != 0 )
       set DoSurfs = 1;
       set surflist0 = ($surflist0 lh.white rh.white lh.pial rh.pial)
       set surfcolor = ($surfcolor yellow yellow red red);
+      breaksw
+
+    case "-lh-surfs":
+      set DoSurfs = 1;
+      set surflist0 = ($surflist0 lh.white lh.pial)
+      set surfcolor = ($surfcolor yellow red);
+      breaksw
+
+    case "-rh-surfs":
+      set DoSurfs = 1;
+      set surflist0 = ($surflist0 rh.white rh.pial)
+      set surfcolor = ($surfcolor yellow red);
       breaksw
 
     case "-pial":
@@ -608,7 +629,7 @@ usage_exit:
   echo ""
   echo "-tkmedit : use tkmedit instead of freeview"
   echo "-aparc+aseg"
-  echo "-surfs  : load lh and rh white and pial"
+  echo "-surfs  : load lh and rh white and pial (-lh-surfs, -rh-surfs)"
   echo "-surf /path/to/surface <color> : load surface with optional color (eg, blue)"
   echo "-vol volume1 <-vol volume2> : load extra volumes "
   echo "-crs col row slice : place cursor at given location and center FoV"

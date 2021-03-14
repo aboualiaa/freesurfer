@@ -1,17 +1,12 @@
 /**
- * @file  label_border.c
- * @brief
+ * @brief 
  *
  * compute the boundary of a label
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:11 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,36 +18,36 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
 #include "const.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
 #include "mrisurf.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage(void);
-static int unmark_interior(MRI_SURFACE *mris);
+static int  unmark_interior(MRI_SURFACE *mris);
 
 const char *Progname;
 
-static int verbose = 0;
+static int verbose      = 0;
 static int print_radius = 0;
 
 static char subjects_dir[STRLEN] = "";
 
 int main(int argc, char *argv[]) {
-  int ac, nargs;
+  int    ac, nargs;
   char **av, *cp, surf_name[STRLEN], *hemi, *subject_name, *area_name,
       *out_name;
   MRI_SURFACE *mris;
-  LABEL *area;
+  LABEL *      area;
 
   nargs = handleVersionOption(argc, argv, "label_border");
   if (nargs && argc - nargs == 1)
@@ -76,9 +71,9 @@ int main(int argc, char *argv[]) {
     print_usage();
 
   subject_name = argv[1];
-  hemi = argv[2];
-  area_name = argv[3];
-  out_name = argv[4];
+  hemi         = argv[2];
+  area_name    = argv[3];
+  out_name     = argv[4];
 
   cp = getenv("SUBJECTS_DIR");
   if (!cp)
@@ -110,7 +105,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -163,7 +158,7 @@ static int unmark_interior(MRI_SURFACE *mris) {
   MRIScopyMarkedToMarked2(mris);
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (v->marked == 0)
       continue;
     for (unmarked = n = 0; unmarked == 0 && n < vt->vnum; n++) {
@@ -178,7 +173,7 @@ static int unmark_interior(MRI_SURFACE *mris) {
 
   if (print_radius) {
     double xc, yc;
-    int num;
+    int    num;
 
     for (xc = yc = 0.0, num = vno = 0; vno < mris->nvertices; vno++) {
       VERTEX const *const v = &mris->vertices[vno];

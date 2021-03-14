@@ -2,24 +2,24 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "itkImageFileReader.h"
 #include "kvlAtlasMeshCollection.h"
 #include "kvlAtlasMeshToIntensityImageCostAndGradientCalculator.h"
-#include "itkImageFileReader.h"
 
 class TestFileLoader {
 public:
   typedef kvl::AtlasMeshToIntensityImageCostAndGradientCalculator::ImageType
       ImageType;
 
-  ImageType::ConstPointer image;
+  ImageType::ConstPointer           image;
   kvl::AtlasMeshCollection::Pointer meshCollection;
-  kvl::AtlasMesh::ConstPointer mesh;
+  kvl::AtlasMesh::ConstPointer      mesh;
 
   //! Constructor reads in the two files
   TestFileLoader() {
     // Read a test image
     typedef itk::ImageFileReader<ImageType> ReaderType;
-    ReaderType::Pointer reader = ReaderType::New();
+    ReaderType::Pointer                     reader = ReaderType::New();
     reader->SetFileName("test.nii");
     reader->Update();
     this->image = reader->GetOutput();

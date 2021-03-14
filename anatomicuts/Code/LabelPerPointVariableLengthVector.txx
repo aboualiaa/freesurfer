@@ -1,32 +1,34 @@
 #include "itkNumericTraitsVariableLengthVectorPixel.h"
 #include "vnl/vnl_math.h"
+#include <cstring>
+#include <stdlib.h>
+#include <string.h>
 
 template <typename TValueType, class TMesh>
 void LabelPerPointVariableLengthVector<TValueType, TMesh>::SetCell(
     MeshPointerType mesh, int cellId) {
   int pointBegin = 0;
-  int pointEnd = mesh->GetNumberOfPoints();
+  int pointEnd   = mesh->GetNumberOfPoints();
   if (cellId != -1) {
     CellAutoPointerType cellAutoPointer;
     mesh->GetCell(cellId, cellAutoPointer);
-    ////typename MeshType::CellTraits::PointIdIterator  pointIdIt  =
-    ///cellAutoPointer->PointIdsBegin();
+    ////typename MeshType::CellTraits::PointIdIterator  pointIdIt  = cellAutoPointer->PointIdsBegin();
     pointBegin = cellId * cellAutoPointer->GetNumberOfPoints();
-    pointEnd = (cellId + 1) * cellAutoPointer->GetNumberOfPoints();
+    pointEnd   = (cellId + 1) * cellAutoPointer->GetNumberOfPoints();
   }
-  int i = 0;
+  int                          i          = 0;
   typename MeshType::PointType ptPrevious = 0;
   mesh->GetPoint(pointBegin, &ptPrevious);
-  this->m_length = 0.0;
+  this->m_length         = 0.0;
   this->m_numberOfPoints = pointEnd - pointBegin;
-  // std::cout << this->m_numberOfPoints<< std::endl;
+  //std::cout << this->m_numberOfPoints<< std::endl;
   for (int pointIdIt = pointBegin; pointIdIt < pointEnd; pointIdIt++) {
 
     typename MeshType::PointType pt = 0;
     mesh->GetPoint(pointIdIt, &pt);
     this->m_length += ptPrevious.EuclideanDistanceTo(pt);
-    ptPrevious = pt;
-    (*this)[i] = pt[0];
+    ptPrevious     = pt;
+    (*this)[i]     = pt[0];
     (*this)[i + 1] = pt[1];
     (*this)[i + 2] = pt[2];
 
@@ -44,13 +46,12 @@ void LabelPerPointVariableLengthVector<TValueType, TMesh>::SetCell(
         if (this->m_labelsPerDirection[q].count(cell[q]) > 0) {
           this->m_labelsPerDirection[q][cell[q]] =
               this->m_labelsPerDirection[q][cell[q]] +
-              1.0; // 000.0/this->m_numberOfPoints;
-          // std::cout << this->m_labelsPerDirection[q][cell[q]] << std::endl;
+              1.0; //000.0/this->m_numberOfPoints;
+          //std::cout << this->m_labelsPerDirection[q][cell[q]] << std::endl;
         } else {
           this->m_labelsPerDirection[q][cell[q]] =
-              1.0; // 000.0/this->m_numberOfPoints;
-          // std::cout <<1.0/this->m_numberOfPoints << " " <<
-          // this->m_labelsPerDirection[q][cell[q]] << std::endl;
+              1.0; //000.0/this->m_numberOfPoints;
+          //std::cout <<1.0/this->m_numberOfPoints << " " << this->m_labelsPerDirection[q][cell[q]] << std::endl;
         }
       }
     }

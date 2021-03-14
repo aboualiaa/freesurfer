@@ -1,16 +1,7 @@
-/**
- * @file  DialogTransformVolume.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/03/16 19:24:27 $
- *    $Revision: 1.23 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,25 +13,25 @@
  *
  */
 #include "DialogTransformVolume.h"
-#include "ui_DialogTransformVolume.h"
-#include "MainWindow.h"
 #include "LayerCollection.h"
+#include "LayerLandmarks.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
-#include "LayerLandmarks.h"
+#include "MainWindow.h"
 #include "RenderView.h"
+#include "ui_DialogTransformVolume.h"
+#include "vtkMath.h"
 #include "vtkMatrix4x4.h"
 #include "vtkTransform.h"
-#include "vtkMath.h"
-#include <QMessageBox>
+#include <QButtonGroup>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 #include <QPixmap>
-#include <QButtonGroup>
 
-#define ROTATION_INCREMENT 0.5
+#define ROTATION_INCREMENT    0.5
 #define TRANSLATION_INCREMENT 0.5
-#define SCALE_INCREMENT 0.05
+#define SCALE_INCREMENT       0.05
 
 #include "mri.h"
 
@@ -58,30 +49,30 @@ DialogTransformVolume::DialogTransformVolume(QWidget *parent)
   bg->addButton(ui->radioButtonRotateManual);
   bg->setExclusive(true);
 
-  m_checkRotate[0] = ui->checkBoxRotateX;
-  m_checkRotate[1] = ui->checkBoxRotateY;
-  m_checkRotate[2] = ui->checkBoxRotateZ;
-  m_comboRotate[0] = ui->comboBoxRotateX;
-  m_comboRotate[1] = ui->comboBoxRotateY;
-  m_comboRotate[2] = ui->comboBoxRotateZ;
-  m_sliderRotate[0] = ui->scrollBarRotateX;
-  m_sliderRotate[1] = ui->scrollBarRotateY;
-  m_sliderRotate[2] = ui->scrollBarRotateZ;
-  m_textAngle[0] = ui->lineEditRotateX;
-  m_textAngle[1] = ui->lineEditRotateY;
-  m_textAngle[2] = ui->lineEditRotateZ;
+  m_checkRotate[0]     = ui->checkBoxRotateX;
+  m_checkRotate[1]     = ui->checkBoxRotateY;
+  m_checkRotate[2]     = ui->checkBoxRotateZ;
+  m_comboRotate[0]     = ui->comboBoxRotateX;
+  m_comboRotate[1]     = ui->comboBoxRotateY;
+  m_comboRotate[2]     = ui->comboBoxRotateZ;
+  m_sliderRotate[0]    = ui->scrollBarRotateX;
+  m_sliderRotate[1]    = ui->scrollBarRotateY;
+  m_sliderRotate[2]    = ui->scrollBarRotateZ;
+  m_textAngle[0]       = ui->lineEditRotateX;
+  m_textAngle[1]       = ui->lineEditRotateY;
+  m_textAngle[2]       = ui->lineEditRotateZ;
   m_scrollTranslate[0] = ui->scrollBarTranslateX;
   m_scrollTranslate[1] = ui->scrollBarTranslateY;
   m_scrollTranslate[2] = ui->scrollBarTranslateZ;
-  m_textTranslate[0] = ui->lineEditTranslateX;
-  m_textTranslate[1] = ui->lineEditTranslateY;
-  m_textTranslate[2] = ui->lineEditTranslateZ;
-  m_scrollScale[0] = ui->scrollBarScaleX;
-  m_scrollScale[1] = ui->scrollBarScaleY;
-  m_scrollScale[2] = ui->scrollBarScaleZ;
-  m_textScale[0] = ui->lineEditScaleX;
-  m_textScale[1] = ui->lineEditScaleY;
-  m_textScale[2] = ui->lineEditScaleZ;
+  m_textTranslate[0]   = ui->lineEditTranslateX;
+  m_textTranslate[1]   = ui->lineEditTranslateY;
+  m_textTranslate[2]   = ui->lineEditTranslateZ;
+  m_scrollScale[0]     = ui->scrollBarScaleX;
+  m_scrollScale[1]     = ui->scrollBarScaleY;
+  m_scrollScale[2]     = ui->scrollBarScaleZ;
+  m_textScale[0]       = ui->lineEditScaleX;
+  m_textScale[1]       = ui->lineEditScaleY;
+  m_textScale[2]       = ui->lineEditScaleZ;
   m_btnPickLandmark << ui->pushButtonLandmarkPick1
                     << ui->pushButtonLandmarkPick2
                     << ui->pushButtonLandmarkPick3
@@ -143,11 +134,11 @@ void DialogTransformVolume::UpdateUI(int scope) {
     }
     if (scope == 0 || scope == 2) {
       double *ws = layer->GetWorldSize();
-      double pos[3];
+      double  pos[3];
       layer->GetTranslate(pos);
       for (int i = 0; i < 3; i++) {
         int range = (int)(ws[i] / m_dIncrementTranslate + 0.5) * 2;
-        int npos = (int)(pos[i] / m_dIncrementTranslate) + range / 2;
+        int npos  = (int)(pos[i] / m_dIncrementTranslate) + range / 2;
         m_scrollTranslate[i]->setRange(0, range);
         m_scrollTranslate[i]->setValue(npos);
         ChangeLineEditNumber(m_textTranslate[i], pos[i], 6);
@@ -200,7 +191,7 @@ bool DialogTransformVolume::GetRotation(int nIndex_in, int &plane_out,
   }
 
   plane_out = m_comboRotate[nIndex_in]->currentIndex();
-  bool bOK;
+  bool   bOK;
   double dVal = m_textAngle[nIndex_in]->text().toDouble(&bOK);
   if (bOK) {
     angle_out = dVal;
@@ -210,7 +201,7 @@ bool DialogTransformVolume::GetRotation(int nIndex_in, int &plane_out,
 
 void DialogTransformVolume::OnApply() {
   if (ui->radioButtonRotateManual->isChecked()) {
-    int plane;
+    int    plane;
     double angle;
     if (!m_checkRotate[0]->isChecked() && !m_checkRotate[1]->isChecked() &&
         !m_checkRotate[2]->isChecked()) {
@@ -292,7 +283,7 @@ void DialogTransformVolume::DoRotate() {
       (LayerMRI *)MainWindow::GetMainWindow()->GetActiveLayer("MRI");
   if (layer) {
     std::vector<RotationElement> rotations;
-    RotationElement re;
+    RotationElement              re;
     re.SampleMethod = SAMPLE_TRILINEAR;
     if (ui->radioButtonNearestNeighbor->isChecked()) {
       re.SampleMethod = SAMPLE_NEAREST;
@@ -329,8 +320,8 @@ void DialogTransformVolume::DoRotate() {
 
       // first figure out landmark vectors
       double v[3][3], ax[3][3];
-      int n0 = ui->comboBoxAxis11->currentIndex();
-      int n1 = ui->comboBoxAxis12->currentIndex();
+      int    n0 = ui->comboBoxAxis11->currentIndex();
+      int    n1 = ui->comboBoxAxis12->currentIndex();
       for (int i = 0; i < 3; i++)
         v[0][i] = p[n1][i] - p[n0][i];
       vtkMath::Normalize(v[0]);
@@ -479,7 +470,7 @@ void DialogTransformVolume::OnScrollBarTranslateZ(int nVal) {
 
 void DialogTransformVolume::RespondTextTranslate(int n) {
   if (isVisible()) {
-    bool bOK;
+    bool   bOK;
     double dvalue = m_textTranslate[n]->text().toDouble(&bOK);
     if (bOK) {
       LayerMRI *layer =
@@ -512,8 +503,8 @@ void DialogTransformVolume::RespondScrollTranslate(int n) {
       double pos[3];
       layer->GetTranslate(pos);
       int range = m_scrollTranslate[n]->maximum();
-      int npos = m_scrollTranslate[n]->value();
-      pos[n] = (npos - range / 2) * m_dIncrementTranslate;
+      int npos  = m_scrollTranslate[n]->value();
+      pos[n]    = (npos - range / 2) * m_dIncrementTranslate;
       layer->SetTranslate(pos);
       MainWindow::GetMainWindow()->RequestRedraw();
       ChangeLineEditNumber(m_textTranslate[n], pos[n], 2, true);
@@ -527,7 +518,7 @@ void DialogTransformVolume::RespondScrollTranslate(int n) {
 
 void DialogTransformVolume::RespondTextRotate(int n) {
   if (isVisible()) {
-    bool bOK;
+    bool   bOK;
     double dvalue = m_textAngle[n]->text().toDouble(&bOK);
     if (bOK) {
       LayerMRI *layer =
@@ -607,7 +598,7 @@ void DialogTransformVolume::OnScrollBarScaleZ(int nVal) {
 
 void DialogTransformVolume::RespondTextScale(int n) {
   if (isVisible()) {
-    bool bOK;
+    bool   bOK;
     double dvalue = m_textScale[n]->text().toDouble(&bOK);
     if (bOK && dvalue > 0) {
       LayerMRI *layer =
@@ -643,7 +634,7 @@ void DialogTransformVolume::RespondScrollScale(int n) {
   if (layer) {
     double scale[3];
     layer->GetScale(scale);
-    int npos = m_scrollScale[n]->value();
+    int    npos = m_scrollScale[n]->value();
     double nmax = m_scrollScale[n]->maximum();
     if (npos >= nmax / 2) {
       scale[n] = (npos - nmax / 2) / (nmax / 2) + 1.0;

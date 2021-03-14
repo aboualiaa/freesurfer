@@ -1,5 +1,4 @@
 /**
- * @file  rbm.h
  * @brief utilities for Restricted Boltzmann Machines
  *
  * Reference:
@@ -9,12 +8,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2014/05/10 00:37:45 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -57,7 +52,7 @@ int RBMsortLabelProbabilities(RBM *rbm) {
 
   for (l = 0; l < rbm->nlabels; l++) {
     rbm->label_pvals[l].label = l;
-    rbm->label_pvals[l].pval = rbm->labels[l];
+    rbm->label_pvals[l].pval  = rbm->labels[l];
   }
   qsort(rbm->label_pvals, rbm->nlabels, sizeof(LABEL_PVAL), compare_pvals);
 
@@ -66,7 +61,7 @@ int RBMsortLabelProbabilities(RBM *rbm) {
 
 static MRI *weights_to_mri(RBM *rbm) {
   MRI *mri;
-  int v, h, k1, k2;
+  int  v, h, k1, k2;
 
   if (rbm->input_type == RBM_INPUT_IMAGE) {
     mri = MRIallocSequence(rbm->ksize, rbm->ksize, 1, MRI_FLOAT, rbm->nhidden);
@@ -86,8 +81,8 @@ static MRI *weights_to_mri(RBM *rbm) {
 }
 
 static MRI *layer_weights_to_mri(DBN *dbn, int layer) {
-  MRI *mri, *mri_previous_layer, *mri_tmp = nullptr;
-  int v, h;
+  MRI *mri, *mri_previous_layer, *mri_tmp = NULL;
+  int  v, h;
   RBM *rbm_first = dbn->rbms[0], *rbm;
 
   if (layer == 0)
@@ -95,13 +90,12 @@ static MRI *layer_weights_to_mri(DBN *dbn, int layer) {
 
   if (rbm_first->input_type == RBM_INPUT_IMAGE) {
     /*
-      each frame in the previous layer if a hidden node for it, but a visible
-      node for us. Create an image that has as many frames as we have hidden
-      nodes, and each frame is a linear combination of all the frames in the
-      previous layer with the weights given by the connection strength.
+      each frame in the previous layer if a hidden node for it, but a visible node for us. Create
+      an image that has as many frames as we have hidden nodes, and each frame is a linear combination of all
+      the frames in the previous layer with the weights given by the connection strength.
     */
     mri_previous_layer = layer_weights_to_mri(dbn, layer - 1);
-    rbm = dbn->rbms[layer];
+    rbm                = dbn->rbms[layer];
     mri = MRIallocSequence(rbm_first->ksize, rbm_first->ksize, 1, MRI_FLOAT,
                            rbm->nhidden);
     for (h = 0; h < rbm->nhidden; h++) {
@@ -182,23 +176,9 @@ static int dump_gradients(RBM *rbm, double *dvisible_bias, double *dvariance,
   return (NO_ERROR);
 }
 
-#if 0
-static MRI *
-visible_to_mri(RBM *rbm)  
-{
-  MRI *mri ;
-  int k1, k2, i ;
-  
-  mri = MRIalloc(rbm->ksize, rbm->ksize, 1, MRI_FLOAT) ;
-  for (i = k1 = 0 ; k1 < rbm->ksize ; k1++)
-    for (k2 = 0 ; k2 < rbm->ksize ; k2++, i++)
-      MRIsetVoxVal(mri, k1, k2, 0, 0, rbm->visible[i]) ;
-  return(mri) ;
-}
-#endif
 double RBMfreeEnergy(RBM *rbm, double *visible) {
   double free_energy[MAX_RBM_LABELS], total;
-  int v, h, l;
+  int    v, h, l;
 
   if (rbm->nlabels > 0) {
     for (total = 0.0, l = 0; l < rbm->nlabels; l++) {
@@ -256,30 +236,41 @@ int RBMwriteNetwork(RBM *rbm, int n, RBM_PARMS *parms, int layer) {
 
   mri = weights_to_mri(rbm);
   if (layer < 0) {
-    if (n < 0)
-      sprintf(fname, "%s.wts.mgz", parms->base_name);
-    else
-      sprintf(fname, "%s.%3.3d.wts.mgz", parms->base_name, n);
+    if (n < 0) {
+      int req = snprintf(fname, STRLEN, "%s.wts.mgz", parms->base_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+    } else {
+      int req =
+          snprintf(fname, STRLEN, "%s.%3.3d.wts.mgz", parms->base_name, n);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+    }
   } else {
-    if (n < 0)
-      sprintf(fname, "%s.layer%d.wts.mgz", parms->base_name, layer);
-    else
-      sprintf(fname, "%s.%3.3d.layer%d.wts.mgz", parms->base_name, n, layer);
+    if (n < 0) {
+      int req = snprintf(fname, STRLEN, "%s.layer%d.wts.mgz", parms->base_name,
+                         layer);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+    } else {
+      int req = snprintf(fname, STRLEN, "%s.%3.3d.layer%d.wts.mgz",
+                         parms->base_name, n, layer);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+    }
   }
 
   printf("saving weights to %s\n", fname);
   MRIwrite(mri, fname);
   MRIfree(&mri);
-
-#if 0
-  if (n < 0)
-    sprintf(fname, "%s.V.mgz", parms->base_name) ;
-  else
-    sprintf(fname, "%s.%3.3d.V.mgz", parms->base_name, n) ;
-  mri = visible_to_mri(rbm) ;
-  printf("saving visible to %s\n", fname) ;
-  MRIwrite(mri, fname) ; MRIfree(&mri) ;
-#endif
 
   return (NO_ERROR);
 }
@@ -302,38 +293,38 @@ int RBMprintNetworkActivations(RBM *rbm, FILE *fp, int n, RBM_PARMS *parms) {
 RBM *RBMcopy(RBM *rbm_src, RBM *rbm_dst) {
   int l, v, h;
 
-  if (rbm_dst == nullptr)
+  if (rbm_dst == NULL)
     rbm_dst = RBMalloc(rbm_src->type, rbm_src->nvisible, rbm_src->nhidden,
                        rbm_src->nlabels, rbm_src->input_type);
 
-  rbm_dst->ksize = rbm_src->ksize;
+  rbm_dst->ksize      = rbm_src->ksize;
   rbm_dst->mri_inputs = rbm_src->mri_inputs;
 
   for (l = 0; l < rbm_dst->nlabels; l++) {
-    rbm_dst->labels[l] = rbm_src->labels[l];
-    rbm_dst->lact[l] = rbm_src->lact[l];
-    rbm_dst->label_bias[l] = rbm_src->label_bias[l];
+    rbm_dst->labels[l]       = rbm_src->labels[l];
+    rbm_dst->lact[l]         = rbm_src->lact[l];
+    rbm_dst->label_bias[l]   = rbm_src->label_bias[l];
     rbm_dst->label_states[l] = rbm_src->label_states[l];
     if (rbm_src->sorted_labels && rbm_dst->sorted_labels)
       rbm_dst->sorted_labels[l] = rbm_src->sorted_labels[l];
     rbm_dst->label_pvals[l].label = rbm_src->label_pvals[l].label;
-    rbm_dst->label_pvals[l].pval = rbm_src->label_pvals[l].pval;
+    rbm_dst->label_pvals[l].pval  = rbm_src->label_pvals[l].pval;
     for (h = 0; h < rbm_dst->nhidden; h++)
       rbm_dst->label_weights[l][h] = rbm_src->label_weights[l][h];
   }
   for (h = 0; h < rbm_dst->nhidden; h++) {
-    rbm_dst->hidden_bias[h] = rbm_src->hidden_bias[h];
-    rbm_dst->act[h] = rbm_src->act[h];
-    rbm_dst->hidden[h] = rbm_src->hidden[h];
+    rbm_dst->hidden_bias[h]  = rbm_src->hidden_bias[h];
+    rbm_dst->act[h]          = rbm_src->act[h];
+    rbm_dst->hidden[h]       = rbm_src->hidden[h];
     rbm_dst->hidden_state[h] = rbm_src->hidden_state[h];
     rbm_dst->active_pvals[h] = rbm_src->active_pvals[h];
-    rbm_dst->active[h] = rbm_src->active[h];
+    rbm_dst->active[h]       = rbm_src->active[h];
   }
 
   for (v = 0; v < rbm_dst->nvisible; v++) {
-    rbm_dst->visible[v] = rbm_src->visible[v];
+    rbm_dst->visible[v]      = rbm_src->visible[v];
     rbm_dst->visible_bias[v] = rbm_src->visible_bias[v];
-    rbm_dst->variance[v] = rbm_src->variance[v];
+    rbm_dst->variance[v]     = rbm_src->variance[v];
 
     for (h = 0; h < rbm_dst->nhidden; h++)
       rbm_dst->weights[v][h] = rbm_src->weights[v][h];
@@ -344,19 +335,19 @@ RBM *RBMcopy(RBM *rbm_src, RBM *rbm_dst) {
 
 RBM *RBMalloc(int type, int nvisible, int nhidden, int nlabels,
               int input_type) {
-  RBM *rbm;
-  int v, h;
+  RBM *  rbm;
+  int    v, h;
   double wt_lim;
 
   rbm = (RBM *)calloc(1, sizeof(RBM));
-  if (rbm == nullptr)
+  if (rbm == NULL)
     ErrorExit(ERROR_NOMEMORY, "RBMalloc: could not allocate RBM");
 
   rbm->input_type = input_type;
-  rbm->type = type;
-  rbm->nvisible = nvisible;
-  rbm->nhidden = nhidden;
-  rbm->nlabels = nlabels;
+  rbm->type       = type;
+  rbm->nvisible   = nvisible;
+  rbm->nhidden    = nhidden;
+  rbm->nlabels    = nlabels;
 
   wt_lim = 1.0 / (rbm->nhidden);
   if (nlabels > 0) {
@@ -389,7 +380,7 @@ RBM *RBMalloc(int type, int nvisible, int nhidden, int nlabels,
 
     for (v = 0; v < nlabels; v++) {
       rbm->label_weights[v] = (double *)calloc(nhidden, sizeof(double));
-      if (rbm->label_weights[v] == nullptr)
+      if (rbm->label_weights[v] == NULL)
         ErrorExit(ERROR_NOMEMORY,
                   "RBMalloc: could not allocate label weights[%d]\n", v);
       for (h = 0; h < nhidden; h++) {
@@ -404,11 +395,11 @@ RBM *RBMalloc(int type, int nvisible, int nhidden, int nlabels,
   else
     rbm->ksize = (int)nint(
         sqrt((float)nvisible)); // input is a convoution kernel centered on node
-  rbm->visible = (double *)calloc(nvisible, sizeof(double));
-  rbm->variance = (double *)calloc(nvisible, sizeof(double));
-  rbm->act = (double *)calloc(nhidden, sizeof(double));
-  rbm->hidden = (double *)calloc(nhidden, sizeof(double));
-  rbm->active = (double *)calloc(nhidden, sizeof(double));
+  rbm->visible      = (double *)calloc(nvisible, sizeof(double));
+  rbm->variance     = (double *)calloc(nvisible, sizeof(double));
+  rbm->act          = (double *)calloc(nhidden, sizeof(double));
+  rbm->hidden       = (double *)calloc(nhidden, sizeof(double));
+  rbm->active       = (double *)calloc(nhidden, sizeof(double));
   rbm->active_pvals = (double *)calloc(nhidden, sizeof(double));
   rbm->hidden_state = (double *)calloc(nhidden, sizeof(double));
   if (!rbm->act || !rbm->visible || !rbm->hidden || !rbm->hidden_state ||
@@ -431,7 +422,7 @@ RBM *RBMalloc(int type, int nvisible, int nhidden, int nlabels,
 
   for (v = 0; v < nvisible; v++) {
     rbm->weights[v] = (double *)calloc(nhidden, sizeof(double));
-    if (rbm->weights[v] == nullptr)
+    if (rbm->weights[v] == NULL)
       ErrorExit(ERROR_NOMEMORY, "RBMalloc: could not allocate weights[%d]\n",
                 v);
     for (h = 0; h < nhidden; h++) {
@@ -473,7 +464,7 @@ int RBMactivateForward(RBM *rbm, double *visible) {
       if (!devFinite(act))
         DiagBreak();
 
-      var = exp(rbm->variance[v]);
+      var   = exp(rbm->variance[v]);
       delta = (rbm->visible[v] / var) * rbm->weights[v][h];
       ;
       if (!devFinite(delta))
@@ -520,7 +511,7 @@ int RBMactivateBackward(RBM *rbm) {
       ROMP_PFLB_begin
 
           double act;
-      int h;
+      int        h;
       // double var;
 
       // var = exp(rbm->variance[v]);
@@ -564,7 +555,7 @@ int RBMactivateBackward(RBM *rbm) {
   }
   if (rbm->nlabels > 0) {
     double r, total;
-    int label;
+    int    label;
     ROMP_PF_begin
 #ifdef HAVE_OPENMP
 #pragma omp parallel for if_ROMP(experimental) shared(rbm) schedule(static, 1)
@@ -573,13 +564,13 @@ int RBMactivateBackward(RBM *rbm) {
       ROMP_PFLB_begin
 
           double act;
-      int h;
+      int        h;
 
       act = rbm->label_bias[v];
       for (h = 0; h < rbm->nhidden; h++) {
         act += rbm->label_weights[v][h] * rbm->hidden_state[h];
       }
-      rbm->lact[v] = act;
+      rbm->lact[v]   = act;
       rbm->labels[v] = exp(act);
       if (!devFinite(rbm->labels[v]))
         rbm->labels[v] = 100;
@@ -597,7 +588,7 @@ int RBMactivateBackward(RBM *rbm) {
           DiagBreak();
       }
     RBMsortLabelProbabilities(rbm);
-    r = randomNumber(0, 1.0);
+    r     = randomNumber(0, 1.0);
     total = 0.0;
     label = 0;
     for (v = 0; v < rbm->nlabels - 1; v++) {
@@ -615,10 +606,10 @@ int RBMactivateBackward(RBM *rbm) {
 
 int RBMfree(RBM **prbm) {
   RBM *rbm;
-  int v;
+  int  v;
 
-  rbm = *prbm;
-  *prbm = nullptr;
+  rbm   = *prbm;
+  *prbm = NULL;
 
   free(rbm->act);
   free(rbm->hidden_bias);
@@ -654,7 +645,7 @@ int RBMfree(RBM **prbm) {
 int RBMwrite(RBM *rbm, char *fname) { return (NO_ERROR); }
 
 RBM *RBMread(char *fname) {
-  RBM *rbm = nullptr;
+  RBM *rbm = NULL;
 
   return (rbm);
 }
@@ -662,7 +653,7 @@ static int Ncd = 5;
 
 int RBMfillVisible(RBM *rbm, MRI *mri_inputs, double *visible, int x0, int y0,
                    int z0, int f0, int ksize) {
-  int xk, yk, xi, yi, whalf, v;
+  int   xk, yk, xi, yi, whalf, v;
   float val;
 
   if (rbm->input_type == RBM_INPUT_IMAGE) {
@@ -670,8 +661,8 @@ int RBMfillVisible(RBM *rbm, MRI *mri_inputs, double *visible, int x0, int y0,
     for (v = 0, xk = -whalf; xk <= whalf; xk++) {
       xi = mri_inputs->xi[x0 + xk];
       for (yk = -whalf; yk <= whalf; yk++, v++) {
-        yi = mri_inputs->yi[y0 + yk];
-        val = MRIgetVoxVal(mri_inputs, xi, yi, 0, f0);
+        yi         = mri_inputs->yi[y0 + yk];
+        val        = MRIgetVoxVal(mri_inputs, xi, yi, 0, f0);
         visible[v] = val;
       }
     }
@@ -686,14 +677,14 @@ int RBMfillVisible(RBM *rbm, MRI *mri_inputs, double *visible, int x0, int y0,
 }
 
 int RBMmostLikelyLabel(RBM *rbm) {
-  int best_label, label;
+  int    best_label, label;
   double pbest;
 
-  pbest = rbm->labels[0];
+  pbest      = rbm->labels[0];
   best_label = 0;
   for (label = 1; label < rbm->nlabels; label++)
     if (rbm->labels[label] > pbest) {
-      pbest = rbm->labels[label];
+      pbest      = rbm->labels[label];
       best_label = label;
     }
 
@@ -710,12 +701,12 @@ int RBMsetLabel(RBM *rbm, int label) {
 
 double RBMvoxlistRMS(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms, int *indices,
                      int index, int num) {
-  int i, x, y, z, f, n, ind, v, nvox, h;
+  int    i, x, y, z, f, n, ind, v, nvox, h;
   double rms, *visible;
-  MRI *mri_inputs;
+  MRI *  mri_inputs;
 
   mri_inputs = vl->mri;
-  visible = (double *)calloc(rbm->nvisible, sizeof(double));
+  visible    = (double *)calloc(rbm->nvisible, sizeof(double));
   if (indices) {
     for (h = 0; h < rbm->nhidden; h++)
       rbm->active[h] = 0;
@@ -730,7 +721,7 @@ double RBMvoxlistRMS(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms, int *indices,
       RBMactivateForward(rbm, visible);
       RBMactivateBackward(rbm);
       for (n = 0; n < Ncd; n++) {
-        RBMactivateForward(rbm, nullptr);
+        RBMactivateForward(rbm, NULL);
         RBMactivateBackward(rbm);
       }
       for (h = 0; h < rbm->nhidden; h++)
@@ -752,7 +743,7 @@ double RBMvoxlistRMS(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms, int *indices,
       RBMactivateForward(rbm, visible);
       RBMactivateBackward(rbm);
       for (n = 0; n < Ncd; n++) {
-        RBMactivateForward(rbm, nullptr);
+        RBMactivateForward(rbm, NULL);
         RBMactivateBackward(rbm);
       }
       for (v = 0; v < rbm->nvisible; v++, nvox++)
@@ -769,19 +760,19 @@ double RBMvoxlistRMS(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms, int *indices,
 static double sigma = 10;
 double RBMvoxlistHistoRMS(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms, int *indices,
                           int index, int num) {
-  int i, x, y, z, f, n, ind, v, min_ind, max_ind;
-  double rms, *visible;
+  int         i, x, y, z, f, n, ind, v, min_ind, max_ind;
+  double      rms, *visible;
   HISTOGRAM **histo_data, **histo_recon;
-  MRI *mri_inputs;
-  static int callno = 0;
-  char fname[STRLEN];
+  MRI *       mri_inputs;
+  static int  callno = 0;
+  char        fname[STRLEN];
 
-  mri_inputs = vl->mri;
+  mri_inputs  = vl->mri;
   histo_recon = (HISTOGRAM **)calloc(rbm->nvisible, sizeof(HISTOGRAM *));
-  histo_data = (HISTOGRAM **)calloc(rbm->nvisible, sizeof(HISTOGRAM *));
+  histo_data  = (HISTOGRAM **)calloc(rbm->nvisible, sizeof(HISTOGRAM *));
   for (v = 0; v < rbm->nvisible; v++) {
-    histo_recon[v] = HISTOinit(nullptr, HISTO_BINS, 0, 1);
-    histo_data[v] = HISTOinit(nullptr, HISTO_BINS, 0, 1);
+    histo_recon[v] = HISTOinit(NULL, HISTO_BINS, 0, 1);
+    histo_data[v]  = HISTOinit(NULL, HISTO_BINS, 0, 1);
   }
   visible = (double *)calloc(rbm->nvisible, sizeof(double));
   if (indices) {
@@ -806,7 +797,7 @@ double RBMvoxlistHistoRMS(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms, int *indices,
     RBMactivateForward(rbm, visible);
     RBMactivateBackward(rbm);
     for (n = 0; n < Ncd; n++) {
-      RBMactivateForward(rbm, nullptr);
+      RBMactivateForward(rbm, NULL);
       RBMactivateBackward(rbm);
     }
     for (v = 0; v < rbm->nvisible; v++) {
@@ -819,9 +810,17 @@ double RBMvoxlistHistoRMS(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms, int *indices,
     HISTOsmooth(histo_data[v], histo_data[v], sigma);
     HISTOsmooth(histo_recon[v], histo_recon[v], sigma);
     if (!((callno + 1) % parms->write_iterations)) {
-      sprintf(fname, "hist.data.%3.3d.%2.2d.log", callno, v);
+      int req = snprintf(fname, STRLEN, "hist.data.%3.3d.%2.2d.log", callno, v);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       HISTOplot(histo_data[v], fname);
-      sprintf(fname, "hist.recon.%3.3d.%2.2d.log", callno, v);
+      req = snprintf(fname, STRLEN, "hist.recon.%3.3d.%2.2d.log", callno, v);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       HISTOplot(histo_recon[v], fname);
     }
     rms += HISTOksDistance(histo_data[v], histo_recon[v]);
@@ -842,16 +841,16 @@ int RBMcomputeGradients(RBM *rbm, VOXLIST *vl, double **dw,
                         double *dvariance, double *dlabel_bias,
                         double **dlabel_weights, RBM_PARMS *parms, int *indices,
                         int index) {
-  int i, x, y, z, f, n, v, h, ind, current_label;
+  int     i, x, y, z, f, n, v, h, ind, current_label;
   double *visible, Q0, Qn, V0, Vn, *hidden0, scale, *db_sparsity, *active;
-  MRI *mri_inputs = vl->mri;
+  MRI *   mri_inputs = vl->mri;
 
   for (v = 0; v < rbm->nvisible; v++)
     memset(dw[v], 0, rbm->nhidden * sizeof(dw[v][0]));
-  active = (double *)calloc(rbm->nhidden, sizeof(double));
-  hidden0 = (double *)calloc(rbm->nhidden, sizeof(double));
+  active      = (double *)calloc(rbm->nhidden, sizeof(double));
+  hidden0     = (double *)calloc(rbm->nhidden, sizeof(double));
   db_sparsity = (double *)calloc(rbm->nhidden, sizeof(double));
-  visible = (double *)calloc(rbm->nvisible, sizeof(double));
+  visible     = (double *)calloc(rbm->nvisible, sizeof(double));
 
   if (rbm->nlabels > 0) {
     memset(dlabel_bias, 0, rbm->nlabels * sizeof(dlabel_bias[0]));
@@ -884,7 +883,7 @@ int RBMcomputeGradients(RBM *rbm, VOXLIST *vl, double **dw,
       RBMprintNetworkActivations(rbm, stdout, 0, parms);
     }
     for (n = 0; n < Ncd; n++) {
-      RBMactivateForward(rbm, nullptr);
+      RBMactivateForward(rbm, NULL);
       RBMactivateBackward(rbm);
     }
 
@@ -918,12 +917,12 @@ int RBMcomputeGradients(RBM *rbm, VOXLIST *vl, double **dw,
       double dvar_data, dvar_model, var;
 
       var = exp(rbm->variance[v]);
-      V0 = visible[v];
-      Vn = rbm->visible[v];
+      V0  = visible[v];
+      Vn  = rbm->visible[v];
       dvisible_bias[v] += (V0 - Vn) / var;
 
       // compute variance update
-      dvar_data = 0.5 * SQR(V0 - rbm->visible_bias[v]);
+      dvar_data  = 0.5 * SQR(V0 - rbm->visible_bias[v]);
       dvar_model = 0.5 * SQR(Vn - rbm->visible_bias[v]);
 
       // compute weight update
@@ -976,8 +975,7 @@ int RBMcomputeGradients(RBM *rbm, VOXLIST *vl, double **dw,
 
     dhidden_bias[h] *= (scale * .01);
     db_sparsity[h] *= scale;
-    //    dhidden_bias[h] += parms->l_sparsity*(parms->sparsity -
-    //    db_sparsity[h]) ;
+    //    dhidden_bias[h] += parms->l_sparsity*(parms->sparsity - db_sparsity[h]) ;
 
     active[h] *= scale; // frequency with which this node was active
     rbm->active_pvals[h] = parms->sparsity_decay * rbm->active_pvals[h] +
@@ -1003,12 +1001,16 @@ int RBMtrainFromImage(RBM *rbm, MRI *mri_inputs, MRI *mri_labels,
   rbm->mri_inputs = mri_inputs;
   if (parms->write_iterations > 0) {
     char fname[STRLEN];
-    sprintf(fname, "%s.V%3.3d.mgz", parms->base_name, 0);
+    int  req = snprintf(fname, STRLEN, "%s.V%3.3d.mgz", parms->base_name, 0);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("writing snapshot to %s\n", fname);
     MRIwrite(mri_inputs, fname);
   }
 
-  vl = VLSTcreate(mri_labels, 1, 255, nullptr, 0, 0);
+  vl      = VLSTcreate(mri_labels, 1, 255, NULL, 0, 0);
   vl->mri = mri_inputs;
   RBMtrainFromVoxlistImage(rbm, vl, parms);
   return (NO_ERROR);
@@ -1017,9 +1019,9 @@ int RBMtrainFromImage(RBM *rbm, MRI *mri_inputs, MRI *mri_labels,
 int RBMtrainFromVoxlistImage(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms) {
   double training_rate, last_rms, pct_diff, rms, momentum, delta, min_rms, **dw,
       *dvisible_bias, *dhidden_bias, *dvariance, *last_dvariance,
-      *dlabel_bias = nullptr, **dlabel_weights = nullptr, **last_dw,
-      *last_dvisible_bias, *last_dhidden_bias, *last_dlabel_bias = nullptr,
-      **last_dlabel_weights = nullptr, var;
+      *dlabel_bias = NULL, **dlabel_weights = NULL, **last_dw,
+      *last_dvisible_bias, *last_dhidden_bias, *last_dlabel_bias = NULL,
+      **last_dlabel_weights = NULL, var;
 
   // double sparsity, mean;
   int v, h, step, nbad, *indices, index, b, held_out_index;
@@ -1029,7 +1031,7 @@ int RBMtrainFromVoxlistImage(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms) {
   else // estimate it from data
   {
     // mean =
-    VLSTmean(vl, nullptr, &var);
+    VLSTmean(vl, NULL, &var);
     var /= parms->nclasses;
     printf("setting initial variances to %2.3f\n", var);
   }
@@ -1039,21 +1041,21 @@ int RBMtrainFromVoxlistImage(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms) {
   printf("training on %d voxels, mini batch size %d (%d), held out %d\n",
          vl->nvox, parms->mini_batch_size, parms->batches_per_step,
          parms->held_out);
-  indices = compute_permutation(vl->nvox, nullptr);
+  indices         = compute_permutation(vl->nvox, NULL);
   parms->held_out = MIN(vl->nvox - 1, parms->held_out);
-  held_out_index = MAX(0, vl->nvox - (parms->held_out));
+  held_out_index  = MAX(0, vl->nvox - (parms->held_out));
   //  held_out_index = 0 ;
 
-  dw = (double **)calloc(rbm->nvisible, sizeof(double *));
-  last_dw = (double **)calloc(rbm->nvisible, sizeof(double *));
-  dvisible_bias = (double *)calloc(rbm->nvisible, sizeof(double));
-  dvariance = (double *)calloc(rbm->nvisible, sizeof(double));
-  last_dvariance = (double *)calloc(rbm->nvisible, sizeof(double));
+  dw                 = (double **)calloc(rbm->nvisible, sizeof(double *));
+  last_dw            = (double **)calloc(rbm->nvisible, sizeof(double *));
+  dvisible_bias      = (double *)calloc(rbm->nvisible, sizeof(double));
+  dvariance          = (double *)calloc(rbm->nvisible, sizeof(double));
+  last_dvariance     = (double *)calloc(rbm->nvisible, sizeof(double));
   last_dvisible_bias = (double *)calloc(rbm->nvisible, sizeof(double));
-  dhidden_bias = (double *)calloc(rbm->nhidden, sizeof(double));
-  last_dhidden_bias = (double *)calloc(rbm->nhidden, sizeof(double));
+  dhidden_bias       = (double *)calloc(rbm->nhidden, sizeof(double));
+  last_dhidden_bias  = (double *)calloc(rbm->nhidden, sizeof(double));
   for (v = 0; v < rbm->nvisible; v++) {
-    dw[v] = (double *)calloc(rbm->nhidden, sizeof(double));
+    dw[v]      = (double *)calloc(rbm->nhidden, sizeof(double));
     last_dw[v] = (double *)calloc(rbm->nhidden, sizeof(double));
     if (!dw[v] || !last_dw[v])
       ErrorExit(ERROR_NOMEMORY,
@@ -1061,13 +1063,13 @@ int RBMtrainFromVoxlistImage(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms) {
   }
 
   if (rbm->nlabels > 0) {
-    last_dlabel_bias = (double *)calloc(rbm->nlabels, sizeof(double));
-    dlabel_bias = (double *)calloc(rbm->nlabels, sizeof(double));
-    dlabel_weights = (double **)calloc(rbm->nlabels, sizeof(double *));
+    last_dlabel_bias    = (double *)calloc(rbm->nlabels, sizeof(double));
+    dlabel_bias         = (double *)calloc(rbm->nlabels, sizeof(double));
+    dlabel_weights      = (double **)calloc(rbm->nlabels, sizeof(double *));
     last_dlabel_weights = (double **)calloc(rbm->nlabels, sizeof(double *));
 
     for (v = 0; v < rbm->nlabels; v++) {
-      dlabel_weights[v] = (double *)calloc(rbm->nhidden, sizeof(double));
+      dlabel_weights[v]      = (double *)calloc(rbm->nhidden, sizeof(double));
       last_dlabel_weights[v] = (double *)calloc(rbm->nhidden, sizeof(double));
       if (!dlabel_weights[v] || !last_dlabel_weights[v])
         ErrorExit(ERROR_NOMEMORY,
@@ -1076,7 +1078,7 @@ int RBMtrainFromVoxlistImage(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms) {
   }
   // sparsity = parms->sparsity[0];
   training_rate = parms->training_rates[0];
-  momentum = parms->momentum[0];
+  momentum      = parms->momentum[0];
 
   min_rms = last_rms =
       RBMvoxlistRMS(rbm, vl, parms, indices, held_out_index, parms->held_out);
@@ -1139,19 +1141,17 @@ int RBMtrainFromVoxlistImage(RBM *rbm, VOXLIST *vl, RBM_PARMS *parms) {
     printf("iter %3.3d: rms = %2.5f (%2.5f%%)\n", step + 1, rms, pct_diff);
     if (last_rms < rms) {
       //      training_rate *= .99 ;
-      //      printf("error increased - decreasing training rate to %f\n",
-      //      training_rate) ; memset(last_dvisible_bias, 0,
-      //      rbm->nvisible*sizeof(last_dvisible_bias[0])) ;
-      //      memset(last_dhidden_bias, 0,
-      //      rbm->nhidden*sizeof(last_dhidden_bias[0])) ; for (v = 0 ; v <
-      //      rbm->nvisible ; v++)
+      //      printf("error increased - decreasing training rate to %f\n", training_rate) ;
+      //      memset(last_dvisible_bias, 0, rbm->nvisible*sizeof(last_dvisible_bias[0])) ;
+      //      memset(last_dhidden_bias, 0, rbm->nhidden*sizeof(last_dhidden_bias[0])) ;
+      //      for (v = 0 ; v < rbm->nvisible ; v++)
       //	memset(last_dw[v], 0, rbm->nhidden*sizeof(last_dw[v][0])) ;
     } else
       training_rate *= 1.000;
 
     if (rms < min_rms) {
       min_rms = rms;
-      nbad = 0;
+      nbad    = 0;
     } else if (nbad++ > parms->max_no_progress) {
       printf("stopping learning due to lack of progress\n");
       break;
@@ -1195,10 +1195,10 @@ int RBMcountHiddenActive(RBM *rbm) {
 MRI *RBMaverageActiveHiddenReceptiveFields(RBM *rbm, MRI *mri_receptive_fields,
                                            MRI *mri_inputs, int x0, int y0,
                                            int z0) {
-  int k1, k2, xi, yi, zi, h, whalf;
+  int    k1, k2, xi, yi, zi, h, whalf;
   double val;
 
-  if (mri_receptive_fields == nullptr)
+  if (mri_receptive_fields == NULL)
     mri_receptive_fields =
         MRIallocSequence(rbm->ksize, rbm->ksize, 1, MRI_FLOAT, rbm->nhidden);
 
@@ -1211,7 +1211,7 @@ MRI *RBMaverageActiveHiddenReceptiveFields(RBM *rbm, MRI *mri_receptive_fields,
     for (k1 = 0; k1 < rbm->ksize; k1++) {
       xi = mri_inputs->xi[x0 + k1 - whalf];
       for (k2 = 0; k2 < rbm->ksize; k2++) {
-        yi = mri_inputs->yi[y0 + k2 - whalf];
+        yi  = mri_inputs->yi[y0 + k2 - whalf];
         val = MRIgetVoxVal(mri_inputs, xi, yi, zi, 0);
         val += MRIgetVoxVal(mri_receptive_fields, k1, k2, 0, h);
         MRIsetVoxVal(mri_receptive_fields, k1, k2, 0, h, val);
@@ -1222,19 +1222,19 @@ MRI *RBMaverageActiveHiddenReceptiveFields(RBM *rbm, MRI *mri_receptive_fields,
 }
 
 static double threshold = 0.9;
-MRI *RBMreconstruct(RBM *rbm, MRI *mri_inputs, MRI *mri_reconstructed,
-                    MRI **pmri_labeled, RBM_PARMS *parms) {
-  int h, x, y, z, center, n, nvox, hidden_active, *hidden_counts, whalf, f;
+MRI *         RBMreconstruct(RBM *rbm, MRI *mri_inputs, MRI *mri_reconstructed,
+                             MRI **pmri_labeled, RBM_PARMS *parms) {
+  int   h, x, y, z, center, n, nvox, hidden_active, *hidden_counts, whalf, f;
   float rms, V0, Vn;
-  HISTOGRAM *histo;
+  HISTOGRAM *  histo;
   HISTOGRAM2D *histo_labels;
-  MRI *mri_receptive_fields = nullptr, *mri_labeled = nullptr;
-  char fname[STRLEN];
+  MRI *        mri_receptive_fields = NULL, *mri_labeled = NULL;
+  char         fname[STRLEN];
 
-  histo_labels = HISTO2Dinit(nullptr, rbm->nhidden, rbm->nlabels, 0,
+  histo_labels = HISTO2Dinit(NULL, rbm->nhidden, rbm->nlabels, 0,
                              rbm->nhidden - 1, 0, rbm->nlabels - 1);
-  if (mri_reconstructed == nullptr)
-    mri_reconstructed = MRIclone(mri_inputs, nullptr);
+  if (mri_reconstructed == NULL)
+    mri_reconstructed = MRIclone(mri_inputs, NULL);
 
   if (rbm->nlabels > 0) {
     mri_labeled = MRIallocSequence(mri_inputs->width, mri_inputs->height,
@@ -1245,10 +1245,10 @@ MRI *RBMreconstruct(RBM *rbm, MRI *mri_inputs, MRI *mri_reconstructed,
   mri_receptive_fields =
       MRIallocSequence(rbm->ksize, rbm->ksize, 1, MRI_FLOAT, rbm->nhidden);
   hidden_counts = (int *)calloc(rbm->nhidden, sizeof(int));
-  histo = HISTOinit(nullptr, rbm->nhidden + 1, 0, rbm->nhidden);
+  histo         = HISTOinit(NULL, rbm->nhidden + 1, 0, rbm->nhidden);
   if (rbm->input_type == RBM_INPUT_IMAGE) {
     center = (parms->ksize * parms->ksize - 1) / 2;
-    whalf = (parms->ksize - 1) / 2;
+    whalf  = (parms->ksize - 1) / 2;
     for (rms = 0.0, f = 0; f < mri_inputs->nframes; f++)
       for (x = whalf; x < mri_inputs->width - whalf; x++) {
         if (!(((x + 1) % 100))) {
@@ -1262,14 +1262,14 @@ MRI *RBMreconstruct(RBM *rbm, MRI *mri_inputs, MRI *mri_reconstructed,
             V0 = MRIgetVoxVal(mri_inputs, x, y, z, f);
 
             /*
-                        RBMfillVisible(rbm, mri_inputs, rbm->visible, x, y, z,
-               f, parms->ksize); RBMactivateForward(rbm, rbm->visible) ;
+                        RBMfillVisible(rbm, mri_inputs, rbm->visible, x, y, z, f, parms->ksize);
+                        RBMactivateForward(rbm, rbm->visible) ;
                         RBMactivateBackward(rbm) ;
             */
             for (n = 0; n < Ncd; n++) {
               RBMfillVisible(rbm, mri_inputs, rbm->visible, x, y, z, f,
                              parms->ksize);
-              RBMactivateForward(rbm, nullptr);
+              RBMactivateForward(rbm, NULL);
               RBMactivateBackward(rbm);
             }
             Vn = rbm->visible[center];
@@ -1294,10 +1294,18 @@ MRI *RBMreconstruct(RBM *rbm, MRI *mri_inputs, MRI *mri_reconstructed,
               hidden_counts[h] += rbm->hidden_state[h];
           }
       }
-    sprintf(fname, "%s.hidden.plt", parms->base_name);
+    int req = snprintf(fname, STRLEN, "%s.hidden.plt", parms->base_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("saving %s\n", fname);
     HISTOplot(histo, fname);
-    sprintf(fname, "%s.hidden_labels.plt", parms->base_name);
+    req = snprintf(fname, STRLEN, "%s.hidden_labels.plt", parms->base_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("saving %s\n", fname);
     HISTO2Dplot(histo_labels, fname);
   } else {
@@ -1316,7 +1324,7 @@ MRI *RBMreconstruct(RBM *rbm, MRI *mri_inputs, MRI *mri_reconstructed,
             RBMactivateForward(rbm, rbm->visible);
             RBMactivateBackward(rbm);
             for (n = 0; n < Ncd; n++) {
-              RBMactivateForward(rbm, nullptr);
+              RBMactivateForward(rbm, NULL);
               RBMactivateBackward(rbm);
             }
             for (v = 0; v < rbm->nvisible; v++) {
@@ -1351,14 +1359,14 @@ MRI *RBMreconstruct(RBM *rbm, MRI *mri_inputs, MRI *mri_reconstructed,
 DBN *DBNalloc(int type, int nlayers, int nvisible, int *nhidden, int nlabels,
               int input_type) {
   DBN *dbn;
-  int itype, nl, layer;
+  int  itype, nl, layer;
 
-  dbn = (DBN *)calloc(1, sizeof(DBN));
+  dbn          = (DBN *)calloc(1, sizeof(DBN));
   dbn->nlayers = nlayers;
-  if (dbn == nullptr)
+  if (dbn == NULL)
     ErrorExit(ERROR_NOMEMORY, "DBNalloc: could not allocate DBN");
   dbn->rbms = (RBM **)calloc(dbn->nlayers, sizeof(dbn->rbms[0]));
-  if (dbn->rbms == nullptr)
+  if (dbn->rbms == NULL)
     ErrorExit(ERROR_NOMEMORY, "DBNalloc: could not allocate DBN RBM array");
 
   for (layer = 0; layer < dbn->nlayers; layer++) {
@@ -1366,8 +1374,8 @@ DBN *DBNalloc(int type, int nlayers, int nvisible, int *nhidden, int nlabels,
       itype = input_type; // only first layer is continuous (image) inputs
     else {
       nvisible = nhidden[layer - 1];
-      type = RBM_TYPE_BINARY_INPUTS;
-      itype = RBM_INPUT_VALUE;
+      type     = RBM_TYPE_BINARY_INPUTS;
+      itype    = RBM_INPUT_VALUE;
     }
     if (layer == dbn->nlayers - 1)
       nl = nlabels; // only final layer has labels
@@ -1380,18 +1388,18 @@ DBN *DBNalloc(int type, int nlayers, int nvisible, int *nhidden, int nlabels,
 }
 int DBNfree(DBN **pdbn) {
   DBN *dbn;
-  int layer;
+  int  layer;
 
-  dbn = *pdbn;
-  *pdbn = nullptr;
+  dbn   = *pdbn;
+  *pdbn = NULL;
   for (layer = 0; layer < dbn->nlayers; layer++)
     RBMfree(&dbn->rbms[layer]);
   free(dbn->rbms);
   free(dbn);
   return (NO_ERROR);
 }
-DBN *DBNread(char *fname) { return (nullptr); }
-int DBNwrite(DBN *dbn, char *fname) { return (NO_ERROR); }
+DBN *DBNread(char *fname) { return (NULL); }
+int  DBNwrite(DBN *dbn, char *fname) { return (NO_ERROR); }
 
 int DBNactivateForward(DBN *dbn, double *visible, int nlayers) {
   int l;
@@ -1429,12 +1437,16 @@ int DBNtrainFromImage(DBN *dbn, MRI *mri_inputs, MRI *mri_labels,
 
   if (parms->write_iterations > 0) {
     char fname[STRLEN];
-    sprintf(fname, "%s.V%3.3d.mgz", parms->base_name, 0);
+    int  req = snprintf(fname, STRLEN, "%s.V%3.3d.mgz", parms->base_name, 0);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("writing snapshot to %s\n", fname);
     MRIwrite(mri_inputs, fname);
   }
 
-  vl = VLSTcreate(mri_labels, 1, 255, nullptr, 0, 0);
+  vl      = VLSTcreate(mri_labels, 1, 255, NULL, 0, 0);
   vl->mri = mri_inputs;
   DBNtrainFromVoxlistImage(dbn, vl, parms);
   return (NO_ERROR);
@@ -1443,12 +1455,12 @@ int DBNtrainFromImage(DBN *dbn, MRI *mri_inputs, MRI *mri_labels,
 int DBNtrainFromVoxlistImage(DBN *dbn, VOXLIST *vl, RBM_PARMS *parms) {
   double training_rate, last_rms, pct_diff, rms, momentum, delta, min_rms, **dw,
       *dvisible_bias, *dhidden_bias, *dvariance, *last_dvariance,
-      *dlabel_bias = nullptr, **dlabel_weights = nullptr, **last_dw,
-      *last_dvisible_bias, *last_dhidden_bias, *last_dlabel_bias = nullptr,
-      **last_dlabel_weights = nullptr, var;
+      *dlabel_bias = NULL, **dlabel_weights = NULL, **last_dw,
+      *last_dvisible_bias, *last_dhidden_bias, *last_dlabel_bias = NULL,
+      **last_dlabel_weights = NULL, var;
 
   // double sparsity, mean;
-  int l, v, h, step, nbad, *indices, index, b, held_out_index;
+  int  l, v, h, step, nbad, *indices, index, b, held_out_index;
   RBM *rbm;
 
   if (!FZERO(parms->variance))
@@ -1456,7 +1468,7 @@ int DBNtrainFromVoxlistImage(DBN *dbn, VOXLIST *vl, RBM_PARMS *parms) {
   else // estimate it from data
   {
     // mean =
-    VLSTmean(vl, nullptr, &var);
+    VLSTmean(vl, NULL, &var);
     var /= parms->nclasses;
     printf("setting initial variances to %2.3f\n", var);
   }
@@ -1467,9 +1479,9 @@ int DBNtrainFromVoxlistImage(DBN *dbn, VOXLIST *vl, RBM_PARMS *parms) {
   printf("training DBN on %d voxels, mini batch size %d (%d), held out %d\n",
          vl->nvox, parms->mini_batch_size, parms->batches_per_step,
          parms->held_out);
-  indices = compute_permutation(vl->nvox, nullptr);
+  indices         = compute_permutation(vl->nvox, NULL);
   parms->held_out = MIN(vl->nvox - 1, parms->held_out);
-  held_out_index = MAX(0, vl->nvox - (parms->held_out));
+  held_out_index  = MAX(0, vl->nvox - (parms->held_out));
   //  held_out_index = 0 ;
 
   for (l = 0; l < dbn->nlayers; l++) {
@@ -1478,21 +1490,21 @@ int DBNtrainFromVoxlistImage(DBN *dbn, VOXLIST *vl, RBM_PARMS *parms) {
            l);
 
     // sparsity = parms->sparsity[l];
-    momentum = parms->momentum[l];
+    momentum      = parms->momentum[l];
     training_rate = parms->training_rates[l];
 
-    rbm = dbn->rbms[l];
-    rbm->mri_inputs = vl->mri;
-    dw = (double **)calloc(rbm->nvisible, sizeof(double *));
-    last_dw = (double **)calloc(rbm->nvisible, sizeof(double *));
-    dvisible_bias = (double *)calloc(rbm->nvisible, sizeof(double));
-    dvariance = (double *)calloc(rbm->nvisible, sizeof(double));
-    last_dvariance = (double *)calloc(rbm->nvisible, sizeof(double));
+    rbm                = dbn->rbms[l];
+    rbm->mri_inputs    = vl->mri;
+    dw                 = (double **)calloc(rbm->nvisible, sizeof(double *));
+    last_dw            = (double **)calloc(rbm->nvisible, sizeof(double *));
+    dvisible_bias      = (double *)calloc(rbm->nvisible, sizeof(double));
+    dvariance          = (double *)calloc(rbm->nvisible, sizeof(double));
+    last_dvariance     = (double *)calloc(rbm->nvisible, sizeof(double));
     last_dvisible_bias = (double *)calloc(rbm->nvisible, sizeof(double));
-    dhidden_bias = (double *)calloc(rbm->nhidden, sizeof(double));
-    last_dhidden_bias = (double *)calloc(rbm->nhidden, sizeof(double));
+    dhidden_bias       = (double *)calloc(rbm->nhidden, sizeof(double));
+    last_dhidden_bias  = (double *)calloc(rbm->nhidden, sizeof(double));
     for (v = 0; v < rbm->nvisible; v++) {
-      dw[v] = (double *)calloc(rbm->nhidden, sizeof(double));
+      dw[v]      = (double *)calloc(rbm->nhidden, sizeof(double));
       last_dw[v] = (double *)calloc(rbm->nhidden, sizeof(double));
       if (!dw[v] || !last_dw[v])
         ErrorExit(ERROR_NOMEMORY,
@@ -1500,13 +1512,13 @@ int DBNtrainFromVoxlistImage(DBN *dbn, VOXLIST *vl, RBM_PARMS *parms) {
     }
 
     if (rbm->nlabels > 0) {
-      last_dlabel_bias = (double *)calloc(rbm->nlabels, sizeof(double));
-      dlabel_bias = (double *)calloc(rbm->nlabels, sizeof(double));
-      dlabel_weights = (double **)calloc(rbm->nlabels, sizeof(double *));
+      last_dlabel_bias    = (double *)calloc(rbm->nlabels, sizeof(double));
+      dlabel_bias         = (double *)calloc(rbm->nlabels, sizeof(double));
+      dlabel_weights      = (double **)calloc(rbm->nlabels, sizeof(double *));
       last_dlabel_weights = (double **)calloc(rbm->nlabels, sizeof(double *));
 
       for (v = 0; v < rbm->nlabels; v++) {
-        dlabel_weights[v] = (double *)calloc(rbm->nhidden, sizeof(double));
+        dlabel_weights[v]      = (double *)calloc(rbm->nhidden, sizeof(double));
         last_dlabel_weights[v] = (double *)calloc(rbm->nhidden, sizeof(double));
         if (!dlabel_weights[v] || !last_dlabel_weights[v])
           ErrorExit(ERROR_NOMEMORY,
@@ -1578,20 +1590,17 @@ int DBNtrainFromVoxlistImage(DBN *dbn, VOXLIST *vl, RBM_PARMS *parms) {
         DiagBreak();
       if (last_rms < rms) {
         //      training_rate *= .99 ;
-        //	printf("error increased - decreasing training rate to %f\n",
-        // training_rate) ;
-        //      memset(last_dvisible_bias, 0,
-        //      rbm->nvisible*sizeof(last_dvisible_bias[0])) ;
-        //      memset(last_dhidden_bias, 0,
-        //      rbm->nhidden*sizeof(last_dhidden_bias[0])) ; for (v = 0 ; v <
-        //      rbm->nvisible ; v++)
+        //	printf("error increased - decreasing training rate to %f\n", training_rate) ;
+        //      memset(last_dvisible_bias, 0, rbm->nvisible*sizeof(last_dvisible_bias[0])) ;
+        //      memset(last_dhidden_bias, 0, rbm->nhidden*sizeof(last_dhidden_bias[0])) ;
+        //      for (v = 0 ; v < rbm->nvisible ; v++)
         //	memset(last_dw[v], 0, rbm->nhidden*sizeof(last_dw[v][0])) ;
       } else
         training_rate *= 1.000;
 
       if (rms < min_rms) {
         min_rms = rms;
-        nbad = 0;
+        nbad    = 0;
       } else if (nbad++ > parms->max_no_progress) {
         printf("stopping learning due to lack of progress\n");
         break;
@@ -1624,17 +1633,28 @@ int DBNtrainFromVoxlistImage(DBN *dbn, VOXLIST *vl, RBM_PARMS *parms) {
   return (NO_ERROR);
 }
 int DBNwriteNetwork(DBN *dbn, int n, RBM_PARMS *parms) {
-  int layer;
+  int  layer;
   MRI *mri;
   char fname[STRLEN];
 
   RBMwriteNetwork(dbn->rbms[0], n, parms, 0);
   for (layer = 1; layer < dbn->nlayers; layer++) {
     mri = layer_weights_to_mri(dbn, layer);
-    if (n < 0)
-      sprintf(fname, "%s.layer%d.wts.mgz", parms->base_name, layer);
-    else
-      sprintf(fname, "%s.%3.3d.layer%d.wts.mgz", parms->base_name, n, layer);
+    if (n < 0) {
+      int req = snprintf(fname, STRLEN, "%s.layer%d.wts.mgz", parms->base_name,
+                         layer);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+    } else {
+      int req = snprintf(fname, STRLEN, "%s.%3.3d.layer%d.wts.mgz",
+                         parms->base_name, n, layer);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+    }
     printf("saving weights to %s\n", fname);
     MRIwrite(mri, fname);
     MRIfree(&mri);
@@ -1647,19 +1667,19 @@ int DBNcomputeGradients(DBN *dbn, int layer, VOXLIST *vl, double **dw,
                         double *dvariance, double *dlabel_bias,
                         double **dlabel_weights, RBM_PARMS *parms, int *indices,
                         int index) {
-  int i, x, y, z, f, n, v, h, ind, current_label;
+  int     i, x, y, z, f, n, v, h, ind, current_label;
   double *visible, Q0, Qn, V0, Vn, *hidden0, scale, *db_sparsity, *active;
-  MRI *mri_inputs = vl->mri;
-  RBM *rbm, *rbm_first_layer;
+  MRI *   mri_inputs = vl->mri;
+  RBM *   rbm, *rbm_first_layer;
 
   rbm_first_layer = dbn->rbms[0];
-  rbm = dbn->rbms[layer];
+  rbm             = dbn->rbms[layer];
   for (v = 0; v < rbm->nvisible; v++)
     memset(dw[v], 0, rbm->nhidden * sizeof(dw[v][0]));
-  hidden0 = (double *)calloc(rbm->nhidden, sizeof(double));
-  active = (double *)calloc(rbm->nhidden, sizeof(double));
+  hidden0     = (double *)calloc(rbm->nhidden, sizeof(double));
+  active      = (double *)calloc(rbm->nhidden, sizeof(double));
   db_sparsity = (double *)calloc(rbm->nhidden, sizeof(double));
-  visible = (double *)calloc(rbm->nvisible, sizeof(double));
+  visible     = (double *)calloc(rbm->nvisible, sizeof(double));
 
   if (rbm->nlabels > 0) {
     memset(dlabel_bias, 0, rbm->nlabels * sizeof(dlabel_bias[0]));
@@ -1692,7 +1712,7 @@ int DBNcomputeGradients(DBN *dbn, int layer, VOXLIST *vl, double **dw,
       RBMprintNetworkActivations(rbm, stdout, 0, parms);
     }
     for (n = 0; n < Ncd; n++) {
-      RBMactivateForward(rbm, nullptr);
+      RBMactivateForward(rbm, NULL);
       RBMactivateBackward(rbm);
     }
 
@@ -1726,12 +1746,12 @@ int DBNcomputeGradients(DBN *dbn, int layer, VOXLIST *vl, double **dw,
       double dvar_data, dvar_model, var;
 
       var = exp(rbm->variance[v]);
-      V0 = visible[v];
-      Vn = rbm->visible[v];
+      V0  = visible[v];
+      Vn  = rbm->visible[v];
       dvisible_bias[v] += (V0 - Vn) / var;
 
       // compute variance update
-      dvar_data = 0.5 * SQR(V0 - rbm->visible_bias[v]);
+      dvar_data  = 0.5 * SQR(V0 - rbm->visible_bias[v]);
       dvar_model = 0.5 * SQR(Vn - rbm->visible_bias[v]);
 
       // compute weight update
@@ -1785,19 +1805,12 @@ int DBNcomputeGradients(DBN *dbn, int layer, VOXLIST *vl, double **dw,
     active[h] *= scale;
     dhidden_bias[h] *= scale;
     db_sparsity[h] *= scale;
-    //    dhidden_bias[h] += parms->l_sparsity*(parms->sparsity -
-    //    db_sparsity[h]) ;
+    //    dhidden_bias[h] += parms->l_sparsity*(parms->sparsity - db_sparsity[h]) ;
     rbm->active_pvals[h] = parms->sparsity_decay * rbm->active_pvals[h] +
                            (1 - parms->sparsity_decay) * active[h];
     delta = parms->l_sparsity[layer] *
             (parms->sparsity[layer] - rbm->active_pvals[h]);
-#if 0
-#define MAX_DELTA .01
-    if (delta > MAX_DELTA)
-      delta = MAX_DELTA ;
-    else if (delta < -MAX_DELTA)
-      delta = -MAX_DELTA ;
-#endif
+
     dhidden_bias[h] += delta;
     delta /= rbm->nvisible;
     for (v = 0; v < rbm->nvisible; v++)
@@ -1813,25 +1826,24 @@ int DBNcomputeGradients(DBN *dbn, int layer, VOXLIST *vl, double **dw,
 
 MRI *DBNreconstruct(DBN *dbn, MRI *mri_inputs, MRI *mri_reconstructed,
                     MRI **pmri_labeled, RBM_PARMS *parms) {
-  int x, y, z, center, n, nvox, whalf, f, h, hidden_active;
-  float rms = 0.0, V0, Vn;
-  MRI *mri_labeled = nullptr;
-  RBM *rbm_first, *rbm_last;
-  HISTOGRAM *histo[MAX_DBN_LAYERS];
+  int          x, y, z, center, n, nvox, whalf, f, h, hidden_active;
+  float        rms         = 0.0, V0, Vn;
+  MRI *        mri_labeled = NULL;
+  RBM *        rbm_first, *rbm_last;
+  HISTOGRAM *  histo[MAX_DBN_LAYERS];
   HISTOGRAM2D *histo_labels;
-  char fname[STRLEN];
+  char         fname[STRLEN];
 
   rbm_first = dbn->rbms[0];
-  rbm_last = dbn->rbms[dbn->nlayers - 1];
+  rbm_last  = dbn->rbms[dbn->nlayers - 1];
 
-  histo_labels = HISTO2Dinit(nullptr, rbm_last->nhidden, rbm_last->nlabels, 0,
+  histo_labels = HISTO2Dinit(NULL, rbm_last->nhidden, rbm_last->nlabels, 0,
                              rbm_last->nhidden - 1, 0, rbm_last->nlabels - 1);
   for (n = 0; n < dbn->nlayers; n++)
-    histo[n] =
-        HISTOinit(nullptr, rbm_first->nhidden + 1, 0, rbm_first->nhidden);
+    histo[n] = HISTOinit(NULL, rbm_first->nhidden + 1, 0, rbm_first->nhidden);
 
-  if (mri_reconstructed == nullptr)
-    mri_reconstructed = MRIclone(mri_inputs, nullptr);
+  if (mri_reconstructed == NULL)
+    mri_reconstructed = MRIclone(mri_inputs, NULL);
 
   if (dbn->rbms[dbn->nlayers - 1]->nlabels > 0) {
     mri_labeled = MRIallocSequence(mri_inputs->width, mri_inputs->height,
@@ -1840,7 +1852,7 @@ MRI *DBNreconstruct(DBN *dbn, MRI *mri_inputs, MRI *mri_reconstructed,
   }
   if (rbm_first->input_type == RBM_INPUT_IMAGE) {
     center = (parms->ksize * parms->ksize - 1) / 2;
-    whalf = (parms->ksize - 1) / 2;
+    whalf  = (parms->ksize - 1) / 2;
     for (rms = 0.0, f = 0; f < mri_inputs->nframes; f++)
       for (x = whalf; x < mri_inputs->width - whalf; x++) {
         if (!(((x + 1) % 100))) {
@@ -1860,7 +1872,7 @@ MRI *DBNreconstruct(DBN *dbn, MRI *mri_inputs, MRI *mri_reconstructed,
             for (n = 0; n < Ncd; n++) {
               RBMfillVisible(rbm_first, mri_inputs, rbm_first->visible, x, y, z,
                              f, parms->ksize);
-              DBNactivateForward(dbn, nullptr, dbn->nlayers);
+              DBNactivateForward(dbn, NULL, dbn->nlayers);
               DBNactivateBackward(dbn, -1, -1);
             }
             Vn = rbm_first->visible[center];
@@ -1891,49 +1903,23 @@ MRI *DBNreconstruct(DBN *dbn, MRI *mri_inputs, MRI *mri_reconstructed,
           }
       }
     for (n = 0; n < dbn->nlayers; n++) {
-      sprintf(fname, "%s.hidden.layer%d.plt", parms->base_name, n);
+      int req =
+          snprintf(fname, STRLEN, "%s.hidden.layer%d.plt", parms->base_name, n);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       printf("saving %s\n", fname);
       HISTOplot(histo[n], fname);
     }
-    sprintf(fname, "%s.hidden_labels.plt", parms->base_name);
+    int req = snprintf(fname, STRLEN, "%s.hidden_labels.plt", parms->base_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("saving %s\n", fname);
     HISTO2Dplot(histo_labels, fname);
   }
-#if 0
-  else
-  {
-    int v ;
-
-    for (rms = 0.0, f = 0 ; f < mri_inputs->nframes ; f++)
-      for (x = 0 ; x < mri_inputs->width ; x++)
-      {
-	if (!((x+1) % 100))
-	{
-	  printf("x = %d of %d\n", x, mri_inputs->width) ;
-	  MRIwrite(mri_reconstructed, "r.mgz") ;
-	}
-	for (y = 0 ; y < mri_inputs->height ; y++)
-	  for (z = 0 ; z < mri_inputs->depth ; z++)
-	  {
-	    RBMfillVisible(rbm, mri_inputs, rbm->visible, x, y, z, f, parms->ksize);
-	    RBMactivateForward(rbm, rbm->visible) ;
-	    RBMactivateBackward(rbm) ;
-	    for (n = 0 ; n < Ncd ; n++)
-	    {
-	      RBMactivateForward(rbm, NULL) ;
-	      RBMactivateBackward(rbm) ;
-	    }
-	    for (v = 0 ; v < rbm->nvisible ; v++)
-	    {
-	      V0 = MRIgetVoxVal(mri_inputs, x, y, z, v) ;
-	      Vn = rbm->visible[v] ;
-	      rms += SQR(Vn-V0) ;
-	      MRIsetVoxVal(mri_reconstructed, x, y, z, v, Vn) ;
-	    }
-	  }
-      }
-  }
-#endif
 
   nvox = mri_inputs->width * mri_inputs->height * mri_inputs->depth *
          mri_inputs->nframes;
@@ -1942,20 +1928,21 @@ MRI *DBNreconstruct(DBN *dbn, MRI *mri_inputs, MRI *mri_reconstructed,
     *pmri_labeled = mri_labeled;
   return (mri_reconstructed);
 }
+
 double DBNvoxlistRMS(DBN *dbn, int layer, VOXLIST *vl, RBM_PARMS *parms,
                      int *indices, int index, int num) {
-  int i, x, y, z, f, n, ind, v, nvox;
+  int    i, x, y, z, f, n, ind, v, nvox;
   double rms, *visible;
-  MRI *mri_inputs;
-  RBM *rbm, *rbm_first_layer;
+  MRI *  mri_inputs;
+  RBM *  rbm, *rbm_first_layer;
 
   if (layer < 0)
     layer = dbn->nlayers - 1;
   rbm_first_layer = dbn->rbms[0];
-  rbm = dbn->rbms[layer];
+  rbm             = dbn->rbms[layer];
 
   mri_inputs = vl->mri;
-  visible = (double *)calloc(rbm->nvisible, sizeof(double));
+  visible    = (double *)calloc(rbm->nvisible, sizeof(double));
   if (indices) {
     for (rms = 0.0, nvox = 0, ind = index; ind < index + num; ind++) {
       i = indices[ind];
@@ -1970,7 +1957,7 @@ double DBNvoxlistRMS(DBN *dbn, int layer, VOXLIST *vl, RBM_PARMS *parms,
       memcpy(visible, rbm->visible, rbm->nvisible * sizeof(rbm->visible[0]));
       RBMactivateBackward(rbm);
       for (n = 0; n < Ncd; n++) {
-        RBMactivateForward(rbm, nullptr);
+        RBMactivateForward(rbm, NULL);
         RBMactivateBackward(rbm);
       }
       for (v = 0; v < rbm->nvisible; v++, nvox++) {
@@ -1988,7 +1975,7 @@ double DBNvoxlistRMS(DBN *dbn, int layer, VOXLIST *vl, RBM_PARMS *parms,
       RBMactivateForward(rbm, visible);
       RBMactivateBackward(rbm);
       for (n = 0; n < Ncd; n++) {
-        RBMactivateForward(rbm, nullptr);
+        RBMactivateForward(rbm, NULL);
         RBMactivateBackward(rbm);
       }
       for (v = 0; v < rbm->nvisible; v++, nvox++)
@@ -2005,12 +1992,16 @@ int CDBNtrainFromImage(CDBN *cdbn, MRI *mri_inputs, MRI *mri_labels,
 
   if (parms->write_iterations > 0) {
     char fname[STRLEN];
-    sprintf(fname, "%s.V%3.3d.mgz", parms->base_name, 0);
+    int  req = snprintf(fname, STRLEN, "%s.V%3.3d.mgz", parms->base_name, 0);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("writing snapshot to %s\n", fname);
     MRIwrite(mri_inputs, fname);
   }
 
-  vl = VLSTcreate(mri_labels, 1, 255, nullptr, 0, 0);
+  vl      = VLSTcreate(mri_labels, 1, 255, NULL, 0, 0);
   vl->mri = mri_inputs;
   CDBNtrainFromVoxlistImage(cdbn, vl, parms, mri_inputs, mri_labels);
   return (NO_ERROR);
@@ -2019,18 +2010,18 @@ int CDBNtrainFromImage(CDBN *cdbn, MRI *mri_inputs, MRI *mri_labels,
 CDBN *CDBNalloc(int type, int nlayers, int *ksizes, int *ngroups, int nlabels,
                 MRI *mri_inputs) {
   CDBN *cdbn;
-  int nl, layer, nvisible;
+  int   nl, layer, nvisible;
 
-  cdbn = (CDBN *)calloc(1, sizeof(CDBN));
+  cdbn          = (CDBN *)calloc(1, sizeof(CDBN));
   cdbn->nlayers = nlayers;
-  if (cdbn == nullptr)
+  if (cdbn == NULL)
     ErrorExit(ERROR_NOMEMORY, "CDBNalloc: could not allocate CDBN");
   cdbn->rbms = (RBM **)calloc(cdbn->nlayers, sizeof(cdbn->rbms[0]));
-  if (cdbn->rbms == nullptr)
+  if (cdbn->rbms == NULL)
     ErrorExit(ERROR_NOMEMORY, "CDBNalloc: could not allocate CDBN RBM array");
 
   cdbn->mri_outputs = (MRI **)calloc(cdbn->nlayers, sizeof(MRI *));
-  if (cdbn->mri_outputs == nullptr)
+  if (cdbn->mri_outputs == NULL)
     ErrorExit(ERROR_NOMEMORY,
               "CDBNalloc: could not allocate CDBN mri_outputs array");
 
@@ -2062,10 +2053,7 @@ CDBN *CDBNalloc(int type, int nlayers, int *ksizes, int *ngroups, int nlabels,
 
 static int reset_hidden_nodes(CDBN *cdbn, int layer, double min_active,
                               double max_active) {
-  int h, num_off, num_on;
-#if 0
-  int    v ;
-#endif
+  int  h, num_off, num_on;
   RBM *rbm;
 
   rbm = cdbn->rbms[layer];
@@ -2074,30 +2062,18 @@ static int reset_hidden_nodes(CDBN *cdbn, int layer, double min_active,
     if (rbm->active[h] < min_active ||
         rbm->active[h] > max_active) // always on or off
     {
-      if (rbm->active[h] < min_active)
+      if (rbm->active[h] < min_active) {
         num_off++;
-      else
+      } else {
         num_on++;
-#if 0
- // double wt_lim = 1.0 / rbm->nhidden;
-      rbm->hidden_bias[h] = 0 ;
-      for (v = 0 ; v < rbm->nvisible ; v++)
-	rbm->weights[v][h] *= .9 ;
-//	rbm->weights[v][h] = randomNumber(-wt_lim, wt_lim) ;
-      if (rbm->nlabels > 0)
-      {
-	for (v = 0 ; v < rbm->nlabels ; v++)
-	  rbm->label_weights[v][h] *= .9 ;
-//	  rbm->label_weights[v][h] = randomNumber(-wt_lim, wt_lim) ;
       }
-#endif
     }
   }
   if (num_off + num_on > 0)
     printf(
         "resetting %d hidden nodes that are always (%d) or never (%d) active\n",
         num_off + num_on, num_on, num_off);
-  if (false && num_off > .9 * rbm->nhidden) {
+  if (0 && num_off > .9 * rbm->nhidden) {
     printf("hidden biases: \n");
     for (h = 0; h < rbm->nhidden; h++)
       printf(" %2.2f : ", rbm->hidden_bias[h]);
@@ -2111,13 +2087,13 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
                               MRI *mri_inputs, MRI *mri_labels) {
   double sparsity, training_rate, last_rms, pct_diff, rms, momentum, delta,
       min_rms, **dw, *dvisible_bias, *dhidden_bias, *dvariance, *last_dvariance,
-      *dlabel_bias = nullptr, **dlabel_weights = nullptr, **last_dw,
-      *last_dvisible_bias, *last_dhidden_bias, *last_dlabel_bias = nullptr,
-      **last_dlabel_weights = nullptr, mean, var, label_rms, min_label_rms,
+      *dlabel_bias = NULL, **dlabel_weights = NULL, **last_dw,
+      *last_dvisible_bias, *last_dhidden_bias, *last_dlabel_bias = NULL,
+      **last_dlabel_weights = NULL, mean, var, label_rms, min_label_rms,
       last_label_rms, label_pct_diff;
 
   // double saved_rms;
-  int layer, v, h, step, nbad, *indices, index, b, held_out_index, new_min = 0;
+  int  layer, v, h, step, nbad, *indices, index, b, held_out_index, new_min = 0;
   RBM *rbm, *rbm_min, *rbm_min_label, *rbm_save;
   MRI *mri_layer_inputs;
 
@@ -2125,7 +2101,7 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
     var = parms->variance;
   else // estimate it from data
   {
-    mean = VLSTmean(vl, nullptr, &var);
+    mean = VLSTmean(vl, NULL, &var);
     var /= parms->nclasses;
     //    MRIaddScalar(mri_inputs, mri_inputs, -mean) ;
     printf("setting initial variances to %2.3f and subtracting %2.1f from "
@@ -2139,18 +2115,18 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
   printf("training CDBN on %d voxels, mini batch size %d (%d), held out %d\n",
          vl->nvox, parms->mini_batch_size, parms->batches_per_step,
          parms->held_out);
-  indices = compute_permutation(vl->nvox, nullptr);
+  indices         = compute_permutation(vl->nvox, NULL);
   parms->held_out = MIN(vl->nvox - 1, parms->held_out);
-  held_out_index = MAX(0, vl->nvox - (parms->held_out));
+  held_out_index  = MAX(0, vl->nvox - (parms->held_out));
   //  held_out_index = 0 ;
 
   for (layer = 0; layer < cdbn->nlayers; layer++) {
-    sparsity = parms->sparsity[layer];
-    momentum = parms->momentum[layer];
+    sparsity      = parms->sparsity[layer];
+    momentum      = parms->momentum[layer];
     training_rate = parms->training_rates[layer];
     if (layer > 0) // create inputs to lth layer from outputs of l-1st
     {
-      CDBNcreateOutputs(cdbn, parms, mri_inputs, layer - 1, layer - 1, nullptr);
+      CDBNcreateOutputs(cdbn, parms, mri_inputs, layer - 1, layer - 1, NULL);
       mri_layer_inputs = cdbn->mri_outputs[layer - 1];
     } else
       mri_layer_inputs = mri_inputs;
@@ -2160,20 +2136,20 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
            "%2.5f ************\n",
            layer, sparsity, parms->l_sparsity[layer], momentum, training_rate,
            parms->weight_decays[layer]);
-    rbm = cdbn->rbms[layer];
-    rbm_min = RBMcopy(rbm, nullptr);
-    rbm_min_label = RBMcopy(rbm, nullptr);
+    rbm             = cdbn->rbms[layer];
+    rbm_min         = RBMcopy(rbm, NULL);
+    rbm_min_label   = RBMcopy(rbm, NULL);
     rbm->mri_inputs = vl->mri = mri_layer_inputs;
-    dw = (double **)calloc(rbm->nvisible, sizeof(double *));
-    last_dw = (double **)calloc(rbm->nvisible, sizeof(double *));
-    dvisible_bias = (double *)calloc(rbm->nvisible, sizeof(double));
-    dvariance = (double *)calloc(rbm->nvisible, sizeof(double));
-    last_dvariance = (double *)calloc(rbm->nvisible, sizeof(double));
+    dw                 = (double **)calloc(rbm->nvisible, sizeof(double *));
+    last_dw            = (double **)calloc(rbm->nvisible, sizeof(double *));
+    dvisible_bias      = (double *)calloc(rbm->nvisible, sizeof(double));
+    dvariance          = (double *)calloc(rbm->nvisible, sizeof(double));
+    last_dvariance     = (double *)calloc(rbm->nvisible, sizeof(double));
     last_dvisible_bias = (double *)calloc(rbm->nvisible, sizeof(double));
-    dhidden_bias = (double *)calloc(rbm->nhidden, sizeof(double));
-    last_dhidden_bias = (double *)calloc(rbm->nhidden, sizeof(double));
+    dhidden_bias       = (double *)calloc(rbm->nhidden, sizeof(double));
+    last_dhidden_bias  = (double *)calloc(rbm->nhidden, sizeof(double));
     for (v = 0; v < rbm->nvisible; v++) {
-      dw[v] = (double *)calloc(rbm->nhidden, sizeof(double));
+      dw[v]      = (double *)calloc(rbm->nhidden, sizeof(double));
       last_dw[v] = (double *)calloc(rbm->nhidden, sizeof(double));
       if (!dw[v] || !last_dw[v])
         ErrorExit(ERROR_NOMEMORY,
@@ -2181,13 +2157,13 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
     }
 
     if (rbm->nlabels > 0) {
-      last_dlabel_bias = (double *)calloc(rbm->nlabels, sizeof(double));
-      dlabel_bias = (double *)calloc(rbm->nlabels, sizeof(double));
-      dlabel_weights = (double **)calloc(rbm->nlabels, sizeof(double *));
+      last_dlabel_bias    = (double *)calloc(rbm->nlabels, sizeof(double));
+      dlabel_bias         = (double *)calloc(rbm->nlabels, sizeof(double));
+      dlabel_weights      = (double **)calloc(rbm->nlabels, sizeof(double *));
       last_dlabel_weights = (double **)calloc(rbm->nlabels, sizeof(double *));
 
       for (v = 0; v < rbm->nlabels; v++) {
-        dlabel_weights[v] = (double *)calloc(rbm->nhidden, sizeof(double));
+        dlabel_weights[v]      = (double *)calloc(rbm->nhidden, sizeof(double));
         last_dlabel_weights[v] = (double *)calloc(rbm->nhidden, sizeof(double));
         if (!dlabel_weights[v] || !last_dlabel_weights[v])
           ErrorExit(ERROR_NOMEMORY,
@@ -2263,7 +2239,7 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
       if (!((step + 1) % parms->write_iterations))
         CDBNwriteNetwork(cdbn, step + 1, parms, layer);
       pct_diff = 100 * (last_rms - rms) / (.5 * (last_rms));
-      new_min = (rms < min_rms);
+      new_min  = (rms < min_rms);
 
       if (rbm->nlabels > 0) {
         label_pct_diff =
@@ -2279,23 +2255,20 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
         DiagBreak();
       if (last_rms < rms) {
         //      training_rate *= .99 ;
-        //	printf("error increased - decreasing training rate to %f\n",
-        // training_rate) ;
-        //      memset(last_dvisible_bias, 0,
-        //      rbm->nvisible*sizeof(last_dvisible_bias[0])) ;
-        //      memset(last_dhidden_bias, 0,
-        //      rbm->nhidden*sizeof(last_dhidden_bias[0])) ; for (v = 0 ; v <
-        //      rbm->nvisible ; v++)
+        //	printf("error increased - decreasing training rate to %f\n", training_rate) ;
+        //      memset(last_dvisible_bias, 0, rbm->nvisible*sizeof(last_dvisible_bias[0])) ;
+        //      memset(last_dhidden_bias, 0, rbm->nhidden*sizeof(last_dhidden_bias[0])) ;
+        //      for (v = 0 ; v < rbm->nvisible ; v++)
         //	memset(last_dw[v], 0, rbm->nhidden*sizeof(last_dw[v][0])) ;
       } else
         training_rate *= 1.000;
 
       if (label_rms < min_label_rms) // save best label rms and RBM
       {
-        min_label_rms = label_rms;
-        nbad = 0;
-        rbm_min_label = RBMcopy(rbm, rbm_min_label);
-        rbm_save = cdbn->rbms[layer];
+        min_label_rms     = label_rms;
+        nbad              = 0;
+        rbm_min_label     = RBMcopy(rbm, rbm_min_label);
+        rbm_save          = cdbn->rbms[layer];
         cdbn->rbms[layer] = rbm_min_label;
         rms = CDBNvoxlistRMS(cdbn, layer, vl, parms, indices, held_out_index,
                              parms->held_out, &label_rms);
@@ -2305,10 +2278,10 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
       }
       if (rms < min_rms) // save best RBM and it's RMS
       {
-        min_rms = rms;
-        nbad = 0;
-        rbm_min = RBMcopy(rbm, rbm_min);
-        rbm_save = cdbn->rbms[layer];
+        min_rms           = rms;
+        nbad              = 0;
+        rbm_min           = RBMcopy(rbm, rbm_min);
+        rbm_save          = cdbn->rbms[layer];
         cdbn->rbms[layer] = rbm_min;
         rms = CDBNvoxlistRMS(cdbn, layer, vl, parms, indices, held_out_index,
                              parms->held_out, &label_rms);
@@ -2317,15 +2290,15 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
         printf("stopping learning due to lack of progress\n");
         break;
       }
-      last_rms = rms;
+      last_rms       = rms;
       last_label_rms = label_rms;
     }
     // saved_rms = rms;
-    rbm_save = RBMcopy(cdbn->rbms[layer], nullptr);
+    rbm_save = RBMcopy(cdbn->rbms[layer], NULL);
 
     rbm = RBMcopy(rbm_min, cdbn->rbms[layer]); // restore best one
     if (rbm_min_label) {
-      rbm = RBMcopy(rbm_min_label, cdbn->rbms[layer]); // restore best one
+      rbm      = RBMcopy(rbm_min_label, cdbn->rbms[layer]); // restore best one
       last_rms = CDBNvoxlistRMS(cdbn, layer, vl, parms, indices, held_out_index,
                                 parms->held_out, &last_label_rms);
     }
@@ -2355,9 +2328,8 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
           CDBNcomputeDiscriminativeGradients(
               cdbn, layer, vl, dw, dhidden_bias, dvariance, dlabel_bias,
               dlabel_weights, parms, indices, index);
-          //	  CDBNcomputeLabelGradients(cdbn, layer, vl, dw, dhidden_bias,
-          // dvariance, dlabel_bias, dlabel_weights, 				    parms,
-          // indices, index) ;
+          //	  CDBNcomputeLabelGradients(cdbn, layer, vl, dw, dhidden_bias, dvariance, dlabel_bias, dlabel_weights,
+          //				    parms, indices, index) ;
 
           if (parms->debug &&
               ((!((step + 1) % parms->write_iterations)) || (step == 0)))
@@ -2402,8 +2374,7 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
         }
         rms = CDBNvoxlistRMS(cdbn, layer, vl, parms, indices, held_out_index,
                              parms->held_out, &label_rms);
-        //	rms = CDBNvoxlistRMS(cdbn, layer, vl, parms, indices, index,
-        // parms->mini_batch_size, &label_rms) ;
+        //	rms = CDBNvoxlistRMS(cdbn, layer, vl, parms, indices, index, parms->mini_batch_size, &label_rms) ;
 
         if (step > 0)
           reset_hidden_nodes(cdbn, layer, .001, .999);
@@ -2420,30 +2391,27 @@ int CDBNtrainFromVoxlistImage(CDBN *cdbn, VOXLIST *vl, RBM_PARMS *parms,
           DiagBreak();
         if (last_label_rms < label_rms) {
           //      training_rate *= .99 ;
-          //	  printf("error increased - decreasing training rate to %f\n",
-          // training_rate) ;
-          //      memset(last_dvisible_bias, 0,
-          //      rbm->nvisible*sizeof(last_dvisible_bias[0])) ;
-          //      memset(last_dhidden_bias, 0,
-          //      rbm->nhidden*sizeof(last_dhidden_bias[0])) ; for (v = 0 ; v <
-          //      rbm->nvisible ; v++)
+          //	  printf("error increased - decreasing training rate to %f\n", training_rate) ;
+          //      memset(last_dvisible_bias, 0, rbm->nvisible*sizeof(last_dvisible_bias[0])) ;
+          //      memset(last_dhidden_bias, 0, rbm->nhidden*sizeof(last_dhidden_bias[0])) ;
+          //      for (v = 0 ; v < rbm->nvisible ; v++)
           //	memset(last_dw[v], 0, rbm->nhidden*sizeof(last_dw[v][0])) ;
         } else
           training_rate *= 1.000;
 
         if (label_rms < min_label_rms) {
           min_label_rms = label_rms;
-          nbad = 0;
+          nbad          = 0;
         }
         if (rms < min_rms) {
           min_rms = rms;
-          nbad = 0;
+          nbad    = 0;
           rbm_min = RBMcopy(rbm, rbm_min);
         } else if (nbad++ > parms->max_no_progress) {
           printf("stopping learning due to lack of progress\n");
           break;
         }
-        last_rms = rms;
+        last_rms       = rms;
         last_label_rms = label_rms;
       }
     }
@@ -2478,15 +2446,15 @@ double CDBNvoxlistRMS(CDBN *cdbn, int layer, VOXLIST *vl, RBM_PARMS *parms,
   int i, x, y, z, n, ind, h, v, nvox, current_label, l;
   // int f;
   double rms, *visible, label_rms;
-  MRI *mri_inputs;
-  RBM *rbm;
+  MRI *  mri_inputs;
+  RBM *  rbm;
 
   if (layer < 0)
     layer = cdbn->nlayers - 1;
   rbm = cdbn->rbms[layer];
 
   mri_inputs = vl->mri;
-  visible = (double *)calloc(rbm->nvisible, sizeof(double));
+  visible    = (double *)calloc(rbm->nvisible, sizeof(double));
   if (indices) {
     for (h = 0; h < rbm->nhidden; h++)
       rbm->active[h] = 0;
@@ -2503,7 +2471,7 @@ double CDBNvoxlistRMS(CDBN *cdbn, int layer, VOXLIST *vl, RBM_PARMS *parms,
       memcpy(visible, rbm->visible, rbm->nvisible * sizeof(rbm->visible[0]));
       RBMactivateBackward(rbm);
       for (n = 0; n < Ncd; n++) {
-        RBMactivateForward(rbm, nullptr);
+        RBMactivateForward(rbm, NULL);
         RBMactivateBackward(rbm);
       }
       for (h = 0; h < rbm->nhidden; h++)
@@ -2536,7 +2504,7 @@ double CDBNvoxlistRMS(CDBN *cdbn, int layer, VOXLIST *vl, RBM_PARMS *parms,
       RBMactivateForward(rbm, visible);
       RBMactivateBackward(rbm);
       for (n = 0; n < Ncd; n++) {
-        RBMactivateForward(rbm, nullptr);
+        RBMactivateForward(rbm, NULL);
         RBMactivateBackward(rbm);
       }
       for (v = 0; v < rbm->nvisible; v++, nvox++)
@@ -2564,16 +2532,16 @@ int CDBNcomputeGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
   int i, x, y, z, n, v, h, ind, current_label;
   // int f;
   double *visible, Q0, Qn, V0, Vn, *hidden0, scale, *db_sparsity, *active;
-  MRI *mri_inputs = vl->mri;
-  RBM *rbm;
+  MRI *   mri_inputs = vl->mri;
+  RBM *   rbm;
 
   rbm = cdbn->rbms[layer];
   for (v = 0; v < rbm->nvisible; v++)
     memset(dw[v], 0, rbm->nhidden * sizeof(dw[v][0]));
-  hidden0 = (double *)calloc(rbm->nhidden, sizeof(double));
-  active = (double *)calloc(rbm->nhidden, sizeof(double));
+  hidden0     = (double *)calloc(rbm->nhidden, sizeof(double));
+  active      = (double *)calloc(rbm->nhidden, sizeof(double));
   db_sparsity = (double *)calloc(rbm->nhidden, sizeof(double));
-  visible = (double *)calloc(rbm->nvisible, sizeof(double));
+  visible     = (double *)calloc(rbm->nvisible, sizeof(double));
 
   if (rbm->nlabels > 0) {
     memset(dlabel_bias, 0, rbm->nlabels * sizeof(dlabel_bias[0]));
@@ -2599,17 +2567,19 @@ int CDBNcomputeGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
     RBMactivateForward(rbm, rbm->visible);
 
     memcpy(visible, rbm->visible, rbm->nvisible * sizeof(rbm->visible[0]));
-    memcpy(hidden0, rbm->hidden,
-           rbm->nhidden *
-               sizeof(rbm->hidden[0])); // Bengio says use hidden_state here,
-                                        // but Lee and Ng posterior
+    memcpy(
+        hidden0, rbm->hidden,
+        rbm->nhidden *
+            sizeof(
+                rbm->hidden
+                    [0])); // Bengio says use hidden_state here, but Lee and Ng posterior
     RBMactivateBackward(rbm);
     if (parms->debug > 1) {
       printf("index %d: %2.3f\n", i, visible[0]);
       RBMprintNetworkActivations(rbm, stdout, 0, parms);
     }
     for (n = 0; n < Ncd; n++) {
-      RBMactivateForward(rbm, nullptr);
+      RBMactivateForward(rbm, NULL);
       RBMactivateBackward(rbm);
     }
 
@@ -2644,8 +2614,8 @@ int CDBNcomputeGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
       double dvar_data = 0, dvar_model = 0, var;
 
       var = exp(rbm->variance[v]);
-      V0 = visible[v];
-      Vn = rbm->visible[v];
+      V0  = visible[v];
+      Vn  = rbm->visible[v];
       //      dvisible_bias[v] += (V0 - Vn)/var ;
       dvisible_bias[0] += (V0 - Vn) / var;
 
@@ -2663,7 +2633,7 @@ int CDBNcomputeGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
         dvar_model -= Qn * rbm->weights[v][h];
       }
       if (parms->learn_variance) {
-        dvar_data = 0.5 * SQR(V0 - rbm->visible_bias[v]);
+        dvar_data  = 0.5 * SQR(V0 - rbm->visible_bias[v]);
         dvar_model = 0.5 * SQR(Vn - rbm->visible_bias[v]);
 
         for (h = 0; h < rbm->nhidden; h++) {
@@ -2717,8 +2687,7 @@ int CDBNcomputeGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
     active[h] *= scale;
     dhidden_bias[h] *= scale;
     db_sparsity[h] *= scale;
-    //    dhidden_bias[h] += parms->l_sparsity*(parms->sparsity -
-    //    db_sparsity[h]) ;
+    //    dhidden_bias[h] += parms->l_sparsity*(parms->sparsity - db_sparsity[h]) ;
     rbm->active_pvals[h] = parms->sparsity_decay * rbm->active_pvals[h] +
                            (1 - parms->sparsity_decay) * active[h];
     delta = parms->l_sparsity[layer] *
@@ -2736,22 +2705,22 @@ int CDBNcomputeGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
   return (NO_ERROR);
 }
 
-static int compute_label_bias = 1;
+static int compute_label_bias    = 1;
 static int compute_label_weights = 0;
-static int compute_hidden_bias = 0;
-static int compute_weights = 0;
+static int compute_hidden_bias   = 0;
+static int compute_weights       = 0;
 #if 1
 int CDBNcomputeDiscriminativeGradients(CDBN *cdbn, int layer, VOXLIST *vl,
                                        double **dw, double *dhidden_bias,
                                        double *dvariance, double *dlabel_bias,
-                                       double **dlabel_weights,
+                                       double **  dlabel_weights,
                                        RBM_PARMS *parms, int *indices,
                                        int index) {
   int l, i, x, y, z, n, v, h, ind, current_label;
   // int  f;
   double *visible, scale, var;
-  MRI *mri_inputs = vl->mri;
-  RBM *rbm;
+  MRI *   mri_inputs = vl->mri;
+  RBM *   rbm;
 
   rbm = cdbn->rbms[layer];
   memset(dlabel_bias, 0, rbm->nlabels * sizeof(dlabel_bias[0]));
@@ -2783,7 +2752,7 @@ int CDBNcomputeDiscriminativeGradients(CDBN *cdbn, int layer, VOXLIST *vl,
     RBMactivateForward(rbm, visible);
     RBMactivateBackward(rbm);
     for (n = 0; n < Ncd * 0; n++) {
-      RBMactivateForward(rbm, nullptr);
+      RBMactivateForward(rbm, NULL);
       RBMactivateBackward(rbm);
     }
 
@@ -2840,15 +2809,7 @@ int CDBNcomputeDiscriminativeGradients(CDBN *cdbn, int layer, VOXLIST *vl,
     //    double delta ;
 
     dhidden_bias[h] *= scale;
-//    rbm->active_pvals[h] = parms->sparsity_decay*rbm->active_pvals[h] +
-//    (1-parms->sparsity_decay)*active[h];
-#if 0
-    delta = parms->l_sparsity[layer] * (parms->sparsity[layer] - rbm->active_pvals[h]) ;
-    dhidden_bias[h] += delta ;
-    delta /= rbm->nvisible ;
-    for (v = 0 ; v < rbm->nvisible ; v++)
-      dw[v][h] += delta ;
-#endif
+    //    rbm->active_pvals[h] = parms->sparsity_decay*rbm->active_pvals[h] + (1-parms->sparsity_decay)*active[h];
   }
 
   free(visible);
@@ -2863,8 +2824,8 @@ int CDBNcomputeLabelGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
   int l, i, x, y, z, n, v, h, ind, current_label;
   // int f;
   double *visible, scale, var, softmax_deriv[MAX_RBM_LABELS];
-  MRI *mri_inputs = vl->mri;
-  RBM *rbm;
+  MRI *   mri_inputs = vl->mri;
+  RBM *   rbm;
 
   rbm = cdbn->rbms[layer];
   memset(dlabel_bias, 0, rbm->nlabels * sizeof(dlabel_bias[0]));
@@ -2899,7 +2860,7 @@ int CDBNcomputeLabelGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
       RBMprintNetworkActivations(rbm, stdout, 0, parms);
     }
     for (n = 0; n < Ncd * 0; n++) {
-      RBMactivateForward(rbm, nullptr);
+      RBMactivateForward(rbm, NULL);
       RBMactivateBackward(rbm);
     }
 
@@ -2913,7 +2874,7 @@ int CDBNcomputeLabelGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
 
     // compute derivative of softmax term
     for (l = 0; l < rbm->nlabels; l++) {
-      int l1;
+      int    l1;
       double num, denom;
 
       softmax_deriv[l] = 0;
@@ -2980,15 +2941,6 @@ int CDBNcomputeLabelGradients(CDBN *cdbn, int layer, VOXLIST *vl, double **dw,
     //    double delta ;
 
     dhidden_bias[h] *= scale;
-//    rbm->active_pvals[h] = parms->sparsity_decay*rbm->active_pvals[h] +
-//    (1-parms->sparsity_decay)*active[h];
-#if 0
-    delta = parms->l_sparsity[layer] * (parms->sparsity[layer] - rbm->active_pvals[h]) ;
-    dhidden_bias[h] += delta ;
-    delta /= rbm->nvisible ;
-    for (v = 0 ; v < rbm->nvisible ; v++)
-      dw[v][h] += delta ;
-#endif
   }
 
   free(visible);
@@ -3027,7 +2979,7 @@ int CDBNactivateBackward(CDBN *cdbn, int last_layer, int first_layer) {
 
 int CDBNfillVisible(CDBN *cdbn, MRI *mri_inputs, double *visible, int x0,
                     int y0, int z0, int ksize) {
-  int xk, yk, xi, yi, whalf, v, f;
+  int   xk, yk, xi, yi, whalf, v, f;
   float val;
 
   whalf = (ksize - 1) / 2;
@@ -3035,8 +2987,8 @@ int CDBNfillVisible(CDBN *cdbn, MRI *mri_inputs, double *visible, int x0,
     for (xk = -whalf; xk <= whalf; xk++) {
       xi = mri_inputs->xi[x0 + xk];
       for (yk = -whalf; yk <= whalf; yk++, v++) {
-        yi = mri_inputs->yi[y0 + yk];
-        val = MRIgetVoxVal(mri_inputs, xi, yi, 0, f);
+        yi         = mri_inputs->yi[y0 + yk];
+        val        = MRIgetVoxVal(mri_inputs, xi, yi, 0, f);
         visible[v] = val;
       }
     }
@@ -3045,9 +2997,9 @@ int CDBNfillVisible(CDBN *cdbn, MRI *mri_inputs, double *visible, int x0,
 }
 MRI *CDBNcreateOutputs(CDBN *cdbn, RBM_PARMS *parms, MRI *mri_inputs,
                        int first_layer, int last_layer, MRI **pmri_labeled) {
-  int layer, x, y, z, h, *hidden_counts;
-  MRI *mri_layer_inputs, *mri_outputs = nullptr, *mri_labeled = nullptr;
-  RBM *rbm;
+  int        layer, x, y, z, h, *hidden_counts;
+  MRI *      mri_layer_inputs, *mri_outputs = NULL, *mri_labeled = NULL;
+  RBM *      rbm;
   static int callno = 0;
   callno++;
   if (cdbn->rbms[cdbn->nlayers - 1]->nlabels > 0 && pmri_labeled) {
@@ -3057,9 +3009,9 @@ MRI *CDBNcreateOutputs(CDBN *cdbn, RBM_PARMS *parms, MRI *mri_inputs,
   }
   for (layer = first_layer, mri_layer_inputs = mri_inputs; layer <= last_layer;
        layer++) {
-    rbm = cdbn->rbms[layer];
+    rbm           = cdbn->rbms[layer];
     hidden_counts = (int *)calloc(rbm->nhidden, sizeof(int));
-    mri_outputs = cdbn->mri_outputs[layer];
+    mri_outputs   = cdbn->mri_outputs[layer];
     for (x = 0; x < mri_inputs->width; x++) {
       if (x && !(x % 100))
         printf("layer %d of %d: x = %d of %d\n", layer, last_layer, x,
@@ -3072,12 +3024,12 @@ MRI *CDBNcreateOutputs(CDBN *cdbn, RBM_PARMS *parms, MRI *mri_inputs,
             memset(rbm->labels, 0, rbm->nlabels * sizeof(rbm->labels[0]));
           CDBNfillVisible(cdbn, mri_layer_inputs, rbm->visible, x, y, z,
                           rbm->ksize);
-          RBMactivateForward(rbm, nullptr);
+          RBMactivateForward(rbm, NULL);
           RBMactivateBackward(rbm);
           if (pmri_labeled)
             CDBNfillVisible(cdbn, mri_layer_inputs, rbm->visible, x, y, z,
                             rbm->ksize);
-          RBMactivateForward(rbm, nullptr);
+          RBMactivateForward(rbm, NULL);
           for (h = 0; h < rbm->nhidden; h++) {
             MRIsetVoxVal(mri_outputs, x, y, z, h, rbm->hidden_state[h]);
             hidden_counts[h] += rbm->hidden_state[h];
@@ -3099,7 +3051,7 @@ MRI *CDBNcreateOutputs(CDBN *cdbn, RBM_PARMS *parms, MRI *mri_inputs,
             CDBNfillVisible(cdbn, mri_layer_inputs, rbm->visible, x, y, z,
                             rbm->ksize);
             RBMfreeEnergy(rbm, rbm->visible);
-            label = RBMmostLikelyLabel(rbm);
+            label     = RBMmostLikelyLabel(rbm);
             out_label = label;
             if (out_label == 2)
               out_label = 4;
@@ -3114,13 +3066,17 @@ MRI *CDBNcreateOutputs(CDBN *cdbn, RBM_PARMS *parms, MRI *mri_inputs,
     }
     mri_layer_inputs = mri_outputs;
     {
-      char fname[STRLEN];
+      char  fname[STRLEN];
       FILE *fp;
-      int nvox, always, never;
+      int   nvox, always, never;
 
-      sprintf(fname, "%s.%3.3d.layer%d.hidden_counts.txt", parms->base_name,
-              callno, layer);
-      fp = fopen(fname, "w");
+      int req = snprintf(fname, STRLEN, "%s.%3.3d.layer%d.hidden_counts.txt",
+                         parms->base_name, callno, layer);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+      fp     = fopen(fname, "w");
       always = never = 0;
       nvox = mri_inputs->height * mri_inputs->width * mri_inputs->depth;
       for (h = 0; h < rbm->nhidden; h++) {
@@ -3145,27 +3101,26 @@ MRI *CDBNcreateOutputs(CDBN *cdbn, RBM_PARMS *parms, MRI *mri_inputs,
   return (mri_outputs);
 }
 MRI *cdbn_layer_weights(CDBN *cdbn, int layer) {
-  MRI *mri = nullptr, *mri_prev, *mri_counts;
-  int width, whalf_prev, x, y, xk, yk, v, h, count, xp, yp, hp;
-  RBM *rbm, *rbm_prev;
+  MRI * mri = NULL, *mri_prev, *mri_counts;
+  int   width, whalf_prev, x, y, xk, yk, v, h, count, xp, yp, hp;
+  RBM * rbm, *rbm_prev;
   float val, val_prev;
 
   if (layer <= 0)
     return (weights_to_mri(cdbn->rbms[0]));
   else if (layer >= 1) {
-    rbm = cdbn->rbms[layer];
-    rbm_prev = cdbn->rbms[layer - 1];
-    mri_prev = cdbn_layer_weights(cdbn, layer - 1);
+    rbm        = cdbn->rbms[layer];
+    rbm_prev   = cdbn->rbms[layer - 1];
+    mri_prev   = cdbn_layer_weights(cdbn, layer - 1);
     whalf_prev = (mri_prev->width - 1) / 2;
-    width = rbm->ksize + 2 * whalf_prev;
+    width      = rbm->ksize + 2 * whalf_prev;
 
     mri = MRIallocSequence(width, width, 1, MRI_FLOAT, rbm->nhidden);
     MRIcopyHeader(cdbn->rbms[0]->mri_inputs, mri);
     mri_counts = MRIallocSequence(width, width, 1, MRI_INT, 1);
     MRIcopyHeader(mri, mri_counts);
 
-    // v is the visible unit in this layer, which is the hidden unit (or frame)
-    // in the previous one
+    // v is the visible unit in this layer, which is the hidden unit (or frame) in the previous one
     for (h = 0; h < rbm->nhidden; h++) {
       for (v = hp = 0; hp < rbm_prev->nhidden; hp++) {
         for (x = 0; x < rbm->ksize; x++) {
@@ -3177,14 +3132,14 @@ MRI *cdbn_layer_weights(CDBN *cdbn, int layer) {
                 if (xk == Gx && yk == Gy)
                   DiagBreak();
                 if (h == 0 && x == rbm->ksize - 1 && (Gdiag & DIAG_SHOW) &&
-                    DIAG_VERBOSE_ON && false)
+                    DIAG_VERBOSE_ON && 0)
                   printf("x = %d, xp = %d, xi = %d    y = %d, yp = %d, yk = "
                          "%d, v = %d\n",
                          x, xp, xk, y, yp, yk, v);
                 count = MRIgetVoxVal(mri_counts, xk, yk, 0, 0);
                 count++;
                 MRIsetVoxVal(mri_counts, xk, yk, 0, 0, count);
-                val = MRIgetVoxVal(mri, xk, yk, 0, h);
+                val      = MRIgetVoxVal(mri, xk, yk, 0, h);
                 val_prev = MRIgetVoxVal(mri_prev, xp, yp, 0, hp);
                 val_prev *= rbm->weights[v][h];
                 MRIsetVoxVal(mri, xk, yk, 0, h, val + val_prev);
@@ -3216,10 +3171,21 @@ int CDBNwriteNetwork(CDBN *cdbn, int n, RBM_PARMS *parms, int layer) {
   char fname[STRLEN];
 
   mri = cdbn_layer_weights(cdbn, layer);
-  if (n < 0)
-    sprintf(fname, "%s.layer%d.wts.mgz", parms->base_name, layer);
-  else
-    sprintf(fname, "%s.%3.3d.layer%d.wts.mgz", parms->base_name, n, layer);
+  if (n < 0) {
+    int req =
+        snprintf(fname, STRLEN, "%s.layer%d.wts.mgz", parms->base_name, layer);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  } else {
+    int req = snprintf(fname, STRLEN, "%s.%3.3d.layer%d.wts.mgz",
+                       parms->base_name, n, layer);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  }
   printf("saving weights to %s\n", fname);
   MRIwrite(mri, fname);
   MRIfree(&mri);
@@ -3228,7 +3194,7 @@ int CDBNwriteNetwork(CDBN *cdbn, int n, RBM_PARMS *parms, int layer) {
 
 int dump_visible(RBM *rbm, char *fname) {
   FILE *fp = fopen(fname, "w");
-  int v;
+  int   v;
 
   for (v = 0; v < rbm->nvisible; v++)
     fprintf(fp, "%f\n", rbm->visible[v]);
@@ -3238,7 +3204,7 @@ int dump_visible(RBM *rbm, char *fname) {
 }
 int dump_hidden(RBM *rbm, char *fname) {
   FILE *fp = fopen(fname, "w");
-  int v;
+  int   v;
 
   for (v = 0; v < rbm->nhidden; v++)
     fprintf(fp, "%f\n", rbm->hidden[v]);

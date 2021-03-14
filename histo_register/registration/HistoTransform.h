@@ -1,9 +1,9 @@
 #ifndef _HISTO_TRANSFORM_H_
 #define _HISTO_TRANSFORM_H_
-#include <sbl/math/Geometry.h>
-#include <sbl/image/MotionField.h>
-#include <sbl/image/ImageTransform.h>
 #include "registration/CorresField3D.h"
+#include <sbl/image/ImageTransform.h>
+#include <sbl/image/MotionField.h>
+#include <sbl/math/Geometry.h>
 namespace hb {
 
 /*! \file HistoTransform.cc
@@ -78,12 +78,12 @@ private:
   // non-linear slice transform
   Array<ImageTransform> m_histoTransform;
   Array<ImageTransform> m_histoTransformInv;
-  Array<MotionField> m_mfHisto;
-  Array<MotionField> m_mfHistoInv;
-  VectorI m_histoSliceIndex;
-  int m_blockOffset;
-  VectorD m_histoShrinkX;
-  VectorD m_histoShrinkY;
+  Array<MotionField>    m_mfHisto;
+  Array<MotionField>    m_mfHistoInv;
+  VectorI               m_histoSliceIndex;
+  int                   m_blockOffset;
+  VectorD               m_histoShrinkX;
+  VectorD               m_histoShrinkY;
 };
 
 // register commands, etc. defined in this module

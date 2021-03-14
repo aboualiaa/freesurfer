@@ -5,12 +5,8 @@
 % fast_swfflac_nbhd_sess.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:05 $
-%    $Revision: 1.7 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -50,7 +46,7 @@ tic;
 
 
 
-fast_swfflac_nbhd_sess_ver = '$Id: fast_swfflac_nbhd_sess.m,v 1.7 2011/03/02 00:04:05 nicks Exp $';
+fast_swfflac_nbhd_sess_ver = 'fast_swfflac_nbhd_sess.m @FS_VERSION@';
 
 SynthSeed = round(sum(100*clock)); 
 randn('state',SynthSeed); 

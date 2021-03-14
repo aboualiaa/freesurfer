@@ -1,16 +1,11 @@
 /**
- * @file  LayerDTI.h
  * @brief Layer class for DTI volume.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/10/27 19:31:09 $
- *    $Revision: 1.22 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -69,10 +64,10 @@ protected:
   virtual void UpdateVectorActor(int nPlane);
 
   FSVolume *m_vectorSource;
-  QString m_sVectorFileName;
+  QString   m_sVectorFileName;
 
-  FSVolume *m_eigenvalueSource; // eigen values
-  QString m_sEigenvalueFileName;
+  FSVolume *    m_eigenvalueSource; // eigen values
+  QString       m_sEigenvalueFileName;
   vtkDataArray *m_vectorData;
 };
 

@@ -1,5 +1,4 @@
 /**
- * @file  mri_cc.c
  * @brief program for segmenting the corpus callosum
  *
  * segments the callosum into 5 parts divided along the primary
@@ -8,12 +7,8 @@
  */
 /*
  * Original Authors: Bruce Fischl and Peng Yu
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2015/12/04 13:59:56 $
- *    $Revision: 1.39 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,77 +20,93 @@
  *
  */
 
-#include "diag.h"
-#include "timer.h"
-#include "mrinorm.h"
 #include "cma.h"
-#include "version.h"
-#include "talairachex.h"
-#include "voxlist.h"
+#include "const.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mriTransform.h"
+#include "mrimorph.h"
+#include "mrinorm.h"
 #include "mrisegment.h"
+#include "proto.h"
+#include "talairachex.h"
+#include "timer.h"
+#include "transform.h"
 #include "tritri.h"
+#include "version.h"
+#include "voxlist.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#define MAX_CC_ROT RADIANS(7)
-#define CC_ANGLE_DELTA RADIANS(.25)
-#define LABEL_IN_CC 128
-#define LABEL_BORDER_CC 64
+#define MAX_CC_ROT         RADIANS(7)
+#define CC_ANGLE_DELTA     RADIANS(.25)
+#define LABEL_IN_CC        128
+#define LABEL_BORDER_CC    64
 #define MAX_CENTRAL_SLICES 500
 
-static int norm_thresh = 40;
-static double max_cc_rot = MAX_CC_ROT;
-static int use_aseg = 1;
-static int write_lta = 0;
-static int force = 0;
-static MRI *find_voxels_close_to_both_hemis(MRI *mri_aseg, int lh_label,
-                                            int rh_label, int wsize);
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static void print_usage();
-static char *wmvolume = "mri/wm";
-const char *Progname;
-static int dxi = 2; // thickness on either side of midline
-static int x_edge = 0, y_edge = 0;
-static int write_cc = 0;
-static double cc_tal_x = 0.0;
-static double cc_tal_y = 0.0;
-static double cc_tal_z = 27.0;
-static int fornix = 0;
-static int lh_only = 0;
-static int rh_only = 0;
-static int skip = 0;
-static LTA *lta = 0;
-static char output_fname[STRLEN] = "aseg_with_cc.mgz";
-static char norm_fname[STRLEN] = "norm.mgz";
-static char aseg_fname[STRLEN] = "aseg.mgz";
-static char lta_fname[STRLEN] = "";
-static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited);
-static int cc_cutting_plane_correct(MRI *mri_aseg, double x0, double y0,
-                                    double z0, double dx, double dy, double dz,
-                                    VOXEL_LIST *vl_left_wm,
-                                    VOXEL_LIST *vl_right_wm, int debug);
-static MRI *find_cc_with_aseg(MRI *mri_aseg, MRI *mri_cc, LTA **plta,
-                              double *pxc, double *pyc, double *pzc, int thick,
-                              MRI *mri_norm, MRI *mri_fornix);
+static int         norm_thresh = 40;
+static double      max_cc_rot  = MAX_CC_ROT;
+static int         use_aseg    = 1;
+static int         write_lta   = 0;
+static int         force       = 0;
+static MRI *       find_voxels_close_to_both_hemis(MRI *mri_aseg, int lh_label,
+                                                   int rh_label, int wsize);
+int                main(int argc, char *argv[]);
+static int         get_option(int argc, char *argv[]);
+static void        print_usage();
+static const char *wmvolume = "mri/wm";
+const char *       Progname;
+static int         dxi    = 2; // thickness on either side of midline
+static int         x_edge = 0, y_edge = 0;
+static int         write_cc             = 0;
+static double      cc_tal_x             = 0.0;
+static double      cc_tal_y             = 0.0;
+static double      cc_tal_z             = 27.0;
+static int         fornix               = 0;
+static int         lh_only              = 0;
+static int         rh_only              = 0;
+static int         skip                 = 0;
+static LTA *       lta                  = 0;
+static char        output_fname[STRLEN] = "aseg_with_cc.mgz";
+static char        norm_fname[STRLEN]   = "norm.mgz";
+static char        aseg_fname[STRLEN]   = "aseg.mgz";
+static char        lta_fname[STRLEN]    = "";
+static MRI *       remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited);
+static int         cc_cutting_plane_correct(MRI *mri_aseg, double x0, double y0,
+                                            double z0, double dx, double dy, double dz,
+                                            VOXEL_LIST *vl_left_wm,
+                                            VOXEL_LIST *vl_right_wm, int debug);
+static MRI *       find_cc_with_aseg(MRI *mri_aseg, MRI *mri_cc, LTA **plta,
+                                     double *pxc, double *pyc, double *pzc, int thick,
+                                     MRI *mri_norm, MRI *mri_fornix);
 static int find_cc_slice(MRI *mri, double *pccx, double *pccy, double *pccz,
                          const LTA *lta, MRI *mri_tal_cc);
 static int find_corpus_callosum(MRI *mri, double *ccx, double *ccy, double *ccz,
                                 const LTA *lta, MRI *mri_tal_cc);
 static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv);
-static int edge_detection(MRI *mri_temp, int edge_count, int signal);
-static int labels[] = {THICKEN_FILL, NBHD_FILL, VENTRICLE_FILL, DIAGONAL_FILL,
+static int  edge_detection(MRI *mri_temp, int edge_count, int signal);
+static int  labels[] = {THICKEN_FILL, NBHD_FILL, VENTRICLE_FILL, DIAGONAL_FILL,
                        DEGENERATE_FILL};
-#define NLABELS sizeof(labels) / (sizeof(labels[0]))
-#define MAX_SLICES 21 /* 41*/
+#define NLABELS     sizeof(labels) / (sizeof(labels[0]))
+#define MAX_SLICES  21 /* 41*/
 #define HALF_SLICES ((MAX_SLICES - 1) / 2)
-#define CUT_WIDTH 1
-#define HALF_CUT ((CUT_WIDTH - 1) / 2)
+#define CUT_WIDTH   1
+#define HALF_CUT    ((CUT_WIDTH - 1) / 2)
 #define SEARCH_STEP 3
-#define MAX_OFFSET 50
-#define CC_VAL 100
+#define MAX_OFFSET  50
+#define CC_VAL      100
 
 /* aspect ratios are dy/dx */
-#define MIN_CC_AREA 350  /* smallest I've seen is 389 */
-#define MAX_CC_AREA 1400 /* biggest I've seen is 1154 */
+#define MIN_CC_AREA   350  /* smallest I've seen is 389 */
+#define MAX_CC_AREA   1400 /* biggest I've seen is 1154 */
 #define MIN_CC_ASPECT 0.1
 #define MAX_CC_ASPECT 0.75
 
@@ -124,32 +135,28 @@ double findMinSize(MRI *mri) {
   return minsize;
 }
 
-#define MAX_CC_DIVISIONS 50
+#define MAX_CC_DIVISIONS     50
 #define DEFAULT_CC_DIVISIONS 5
-static int cc_divisions = DEFAULT_CC_DIVISIONS ;
+static int cc_divisions = DEFAULT_CC_DIVISIONS;
 
-int
-main(int argc, char *argv[])
-{
-  char        ifname[STRLEN], ofname[STRLEN],  data_dir[STRLEN], *cp ;
-  int         nargs, msec, y, z, xi, temp, i, j, k ;
-  double      xc,yc,zc, xv, yv, zv;
-  MATRIX      *mrot = NULL, *mtrans = NULL;
-  Timer then ;
-  MRI         *mri_tal=NULL, *mri_talheader=NULL, *mri_header=NULL, *mri_cc;
-  FILE        *fp=NULL;
-  LTA         *lta2 = 0;
-  MRI         *mri_wm = NULL,
-               *mri_cc_tal = NULL, *mri_fornix = NULL, *mri_aseg = NULL ;
-  double      means[3] ;
-  float       volume[MAX_CC_DIVISIONS], evalues[3],
-              ez_x, ez_y, ez_z, zf, zf_low=256, zf_high=0;
-  MATRIX      *m_evectors ;
+int main(int argc, char *argv[]) {
+  char    ifname[STRLEN], ofname[STRLEN], data_dir[STRLEN], *cp;
+  int     nargs, msec, y, z, xi, temp, i, j, k;
+  double  xc, yc, zc, xv, yv, zv;
+  MATRIX *mrot = NULL, *mtrans = NULL;
+  Timer   then;
+  MRI *   mri_tal = NULL, *mri_talheader = NULL, *mri_header = NULL, *mri_cc;
+  FILE *  fp   = NULL;
+  LTA *   lta2 = 0;
+  MRI *mri_wm = NULL, *mri_cc_tal = NULL, *mri_fornix = NULL, *mri_aseg = NULL;
+  double means[3];
+  float  volume[MAX_CC_DIVISIONS], evalues[3], ez_x, ez_y, ez_z, zf,
+      zf_low = 256, zf_high = 0;
+  MATRIX *m_evectors;
 
   nargs = handleVersionOption(argc, argv, "mri_cc");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -181,7 +188,12 @@ main(int argc, char *argv[])
   strcpy(data_dir, sdir);
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-    sprintf(ifname, "%s/%s/mri/cc_volume_%d.txt", data_dir, argv[1], dxi);
+    int req = snprintf(ifname, STRLEN, "%s/%s/mri/cc_volume_%d.txt", data_dir,
+                       argv[1], dxi);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     if ((fp = fopen(ifname, "a")) == NULL) {
       ErrorReturn(ERROR_BADFILE,
                   (ERROR_BADFILE,
@@ -193,14 +205,25 @@ main(int argc, char *argv[])
   if (use_aseg) {
     MRI *mri_norm;
 
-    sprintf(ifname, "%s/%s/mri/%s", data_dir, argv[1], aseg_fname);
+    int req =
+        snprintf(ifname, STRLEN, "%s/%s/mri/%s", data_dir, argv[1], aseg_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     printf("reading aseg from %s\n", ifname);
     mri_aseg = MRIread(ifname);
     if (mri_aseg == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not read aseg volume from %s",
                 Progname, ifname);
     if (lh_only || rh_only) {
-      sprintf(ofname, "%s/%s/mri/%s", data_dir, argv[1], output_fname);
+      int req = snprintf(ofname, STRLEN, "%s/%s/mri/%s", data_dir, argv[1],
+                         output_fname);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       fprintf(stdout, "copying aseg WITHOUT callosum to %s...\n", ofname);
       MRIwrite(mri_aseg, ofname);
       exit(0);
@@ -217,24 +240,38 @@ main(int argc, char *argv[])
       // need to replace the cc labels with either lh or rh wm here...
     }
 
-    sprintf(ifname, "%s/%s/mri/%s", data_dir, argv[1], norm_fname);
+    req =
+        snprintf(ifname, STRLEN, "%s/%s/mri/%s", data_dir, argv[1], norm_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading norm from %s\n", ifname);
     mri_norm = MRIread(ifname);
     if (mri_norm == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not read aseg volume from %s",
                 Progname, ifname);
     mri_fornix = MRIclone(mri_aseg, NULL);
-    mri_cc = find_cc_with_aseg(mri_aseg, NULL, &lta, &xc, &yc, &zc, dxi,
+    mri_cc     = find_cc_with_aseg(mri_aseg, NULL, &lta, &xc, &yc, &zc, dxi,
                                mri_norm, mri_fornix);
     MRIfree(&mri_norm);
 
     // set cc center in xc, yc, zc
   } else {
-    sprintf(ifname, "%s/%s/%s", data_dir, argv[1], wmvolume);
+    int req = snprintf(ifname, STRLEN, "%s/%s/%s", data_dir, argv[1], wmvolume);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading white matter volume from %s\n", ifname);
     mri_wm = MRIread(ifname);
 
-    sprintf(ifname, "%s/%s/mri/transforms/talairach.xfm", data_dir, argv[1]);
+    req = snprintf(ifname, STRLEN, "%s/%s/mri/transforms/talairach.xfm",
+                   data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     lta = LTAreadEx(ifname);
     if (lta == 0) {
       ErrorExit(ERROR_BADPARM, "ERROR: cound not load lta from %s.\n", ifname);
@@ -263,28 +300,38 @@ main(int argc, char *argv[])
                 110);
 
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      sprintf(ofname, "%s/%s/mri/wm_tal.mgz", data_dir, argv[1]);
+      int req =
+          snprintf(ofname, STRLEN, "%s/%s/mri/wm_tal.mgz", data_dir, argv[1]);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       fprintf(stdout,
               "writing talairach transformed white matter volume to %s...\n",
               ofname);
       MRIwrite(mri_tal, ofname);
     }
 
-    // find the transform matrix
+    //find the transform matrix
     mtrans = MatrixAlloc(4, 4, MATRIX_REAL);
-    mrot = MatrixAlloc(4, 4, MATRIX_REAL);
+    mrot   = MatrixAlloc(4, 4, MATRIX_REAL);
 
-    // try method 2 to get the rotation matrix
-    sprintf(ifname, "%s/%s/mri/transforms/talairach.xfm", data_dir, argv[1]);
-    lta2 = LTAreadEx(ifname);
+    //try method 2 to get the rotation matrix
+    req = snprintf(ifname, STRLEN, "%s/%s/mri/transforms/talairach.xfm",
+                   data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+    lta2   = LTAreadEx(ifname);
     mtrans = lta2->xforms[0].m_L;
     Trns_ExtractRotationMatrix(mtrans, mrot);
     *MATRIX_RELT(mrot, 1, 4) = mtrans->rptr[1][4];
     *MATRIX_RELT(mrot, 2, 4) = mtrans->rptr[2][4];
     *MATRIX_RELT(mrot, 3, 4) = mtrans->rptr[3][4];
-    lta2->xforms[0].m_L = mrot;
+    lta2->xforms[0].m_L      = mrot;
 
-    // rotation wm volume to be upright, using cc volume temporarily
+    //rotation wm volume to be upright, using cc volume temporarily
     mri_header = MRIallocHeader(mri_wm->width, mri_wm->height, mri_wm->depth,
                                 mri_wm->type, 1);
     MRIcopyHeader(mri_wm, mri_header);
@@ -297,42 +344,56 @@ main(int argc, char *argv[])
                 110);
 
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      sprintf(ofname, "%s/%s/mri/wm.mgz", data_dir, argv[1]);
+      int req = snprintf(ofname, STRLEN, "%s/%s/mri/wm.mgz", data_dir, argv[1]);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+
       fprintf(stdout, "writing rotated white matter volume to %s...\n", ofname);
       MRIwrite(mri_cc, ofname);
     }
 
-    // now start cc segmentation in talairach space
+    //now start cc segmentation in talairach space
     mri_cc_tal = MRIcopy(mri_tal, NULL);
     MRIcopyHeader(mri_talheader, mri_cc_tal);
     MRIvalueFill(mri_cc_tal, 0);
 
-    // most of the work is done in find_corpus_callosum function
+    //most of the work is done in find_corpus_callosum function
     find_corpus_callosum(mri_tal, &cc_tal_x, &cc_tal_y, &cc_tal_z, lta,
                          mri_cc_tal);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      sprintf(ofname, "%s/%s/mri/cc_tal.mgz", data_dir, argv[1]);
+      int req =
+          snprintf(ofname, STRLEN, "%s/%s/mri/cc_tal.mgz", data_dir, argv[1]);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       fprintf(stdout, "writing output to %s...\n", ofname);
       MRIwrite(mri_cc_tal, ofname);
     }
 
-    // starting the volume measurement
+    //starting the volume measurement
 
-    // transform cc volume from talairach space to normal space
+    //transform cc volume from talairach space to normal space
     MRIfromTalairachEx(mri_cc_tal, mri_wm, lta);
     // binalize the rotated cc volume (mri_wm)
     MRIbinarize(mri_wm, mri_wm, CC_VAL / 2 - 1, 0, 100);
-    sprintf(ofname, "%s/%s/mri/cc_org.mgz", data_dir, argv[1]);
+    req = snprintf(ofname, STRLEN, "%s/%s/mri/cc_org.mgz", data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stdout, "writing corpus callosum in original space to %s...\n",
             ofname);
     MRIwrite(mri_wm, ofname);
 
-    // trying to find the position of mid-sagital plane
+    //trying to find the position of mid-sagital plane
     MRIcopyHeader(mri_talheader, mri_cc_tal);
     MRItalairachVoxelToVoxelEx(mri_cc_tal, cc_tal_x, cc_tal_y, cc_tal_z, &xv,
                                &yv, &zv, lta);
 
-    // rotate the cc volume by the rotation matrix calculated above
+    //rotate the cc volume by the rotation matrix calculated above
     MRIcopyHeader(mri_header, mri_cc);
     MRItoTalairachEx(mri_wm, mri_cc, lta2);
     // binalize the rotated cc volume (mri_cc)
@@ -341,11 +402,11 @@ main(int argc, char *argv[])
     MRIvoxelToTalairachVoxelEx(mri_cc, xv, yv, zv, &xc, &yc, &zc, lta2);
   }
 
-  // find the mid-sagital plane there
+  //find the mid-sagital plane there
   xi = nint(xc);
   fprintf(stdout, "cc center is found at %d %d %d\n", xi, nint(yc), nint(zc));
 
-  // count the number if equally segmented five parts
+  //count the number if equally segmented five parts
   m_evectors = MatrixAlloc(3, 3, MATRIX_REAL);
   MRIprincipleComponents(mri_cc, m_evectors, evalues, means, 1);
   printf("eigenvectors:\n");
@@ -369,7 +430,7 @@ main(int argc, char *argv[])
   }
   MatrixFree(&m_evectors);
 
-  // find the bounding box
+  //find the bounding box
   for (y = 0; y < mri_cc->height; y++) {
     for (z = 0; z < mri_cc->depth; z++) {
       if (nint(MRIgetVoxVal(mri_cc, xi, y, z, 0))) {
@@ -412,7 +473,7 @@ main(int argc, char *argv[])
     }
   }
   if (use_aseg) {
-    int label;
+    int  label;
     MRI *mri_tmp;
 
     mri_tmp = MRIlinearTransformInterp(mri_cc, NULL, lta->inv_xforms[0].m_L,
@@ -494,8 +555,8 @@ main(int argc, char *argv[])
     // now make sure curved cc don't have wrong labels
     {
       MRI_SEGMENTATION *mseg;
-      MRI_SEGMENT *seg;
-      int i, j;
+      MRI_SEGMENT *     seg;
+      int               i, j;
 
       mseg = MRIsegment(mri_aseg, CC_Mid_Anterior, CC_Mid_Anterior);
       if (mseg->nsegments > 1) {
@@ -531,7 +592,12 @@ main(int argc, char *argv[])
       }
     }
 
-    sprintf(ofname, "%s/%s/mri/%s", data_dir, argv[1], output_fname);
+    int req = snprintf(ofname, STRLEN, "%s/%s/mri/%s", data_dir, argv[1],
+                       output_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stdout, "writing aseg with callosum to %s...\n", ofname);
     MRIwrite(mri_aseg, ofname);
   }
@@ -544,13 +610,23 @@ main(int argc, char *argv[])
   }
 
   if (write_cc) {
-    sprintf(ofname, "%s/%s/mri/cc_new.mgz", data_dir, argv[1]);
+    int req =
+        snprintf(ofname, STRLEN, "%s/%s/mri/cc_new.mgz", data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stdout, "writing corpus callosum output to %s...\n", ofname);
     MRIwrite(mri_cc, ofname);
   }
 
   if (mri_fornix && fornix) {
-    sprintf(ofname, "%s/%s/mri/fornix.mgz", data_dir, argv[1]);
+    int req =
+        snprintf(ofname, STRLEN, "%s/%s/mri/fornix.mgz", data_dir, argv[1]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stdout, "writing fornix to to %s...\n", ofname);
     MRIwrite(mri_fornix, ofname);
   }
@@ -583,11 +659,14 @@ main(int argc, char *argv[])
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     fclose(fp);
   }
+  printf("#VMPC# mri_cc VmPeak  %d\n", GetVmPeak());
+  printf("mri_cc done\n");
+
   exit(0);
   return (0);
 }
 
-#define CC_SPREAD 10
+#define CC_SPREAD     10
 #define MIN_THICKNESS 3
 #define MAX_THICKNESS 20
 
@@ -595,16 +674,16 @@ static int find_corpus_callosum(MRI *mri_tal, double *pccx, double *pccy,
                                 double *pccz, const LTA *lta, MRI *mri_cc_tal) {
   int xv, yv, zv, max_y, max_thick = 0, thickness = 0, y1, xcc, ycc, x, y, x0,
                          extension = 50;
-  int flag = 0, counts = 0;
-  double xr, yr, zr;
+  int        flag = 0, counts = 0;
+  double     xr, yr, zr;
   MRI_REGION region;
-  int cc_spread, min_thickness, max_thickness, slice_size;
-  double voxsize = findMinSize(mri_tal);
+  int        cc_spread, min_thickness, max_thickness, slice_size;
+  double     voxsize = findMinSize(mri_tal);
 
-  cc_spread = ceil(CC_SPREAD / voxsize);
+  cc_spread     = ceil(CC_SPREAD / voxsize);
   min_thickness = ceil(MIN_THICKNESS / voxsize); // estimate bigger
   max_thickness = ceil(MAX_THICKNESS / voxsize);
-  slice_size = mri_tal->width;
+  slice_size    = mri_tal->width;
 
   MRIboundingBox(mri_tal, 1, &region);
   // bounding box center position in voxel coords
@@ -650,9 +729,9 @@ static int find_corpus_callosum(MRI *mri_tal, double *pccx, double *pccy,
         if (thickness > min_thickness && thickness < max_thickness) {
           if (y > max_y || (y == max_y && thickness > max_thick)) {
             // found the zero voxel at y1 -> thinckness
-            xcc = x;
-            ycc = y + thickness / 2; /* in middle of cc */
-            max_y = y;               // mark starting y position
+            xcc       = x;
+            ycc       = y + thickness / 2; /* in middle of cc */
+            max_y     = y;                 // mark starting y position
             max_thick = thickness;
             if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
               fprintf(stdout,
@@ -663,8 +742,8 @@ static int find_corpus_callosum(MRI *mri_tal, double *pccx, double *pccy,
             flag = 1;
             counts++;
           } else if (flag == 1) {
-            xcc = xcc + nint(counts / 2);
-            flag = 0;
+            xcc    = xcc + nint(counts / 2);
+            flag   = 0;
             counts = 0;
           }
         }
@@ -693,41 +772,41 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
   // here we can handle only up to .5 mm voxel size
   int area[MAX_SLICES * 2], flag[MAX_SLICES * 2], min_area, min_slice, slice,
       offset, xv, yv, zv, i, total_area = 0, left = 0, right = 0;
-  MRI *mri_slice, *mri_filled;
-  double x_tal, y_tal, z_tal, x, y, z, xvv, yvv, zvv;
+  MRI *      mri_slice, *mri_filled;
+  double     x_tal, y_tal, z_tal, x, y, z, xvv, yvv, zvv;
   MRI_REGION region;
-  char fname[STRLEN];
-  int half_slices, ii, jj;
-  double voxsize = findMinSize(mri_tal);
-  int slice_size = mri_tal->width;
-  int max_slices = ceil(MAX_SLICES / voxsize);
-  int max_cc_area = ceil(MAX_CC_AREA / (voxsize * voxsize));
-  int min_cc_area = floor(MIN_CC_AREA / (voxsize * voxsize));
+  char       fname[STRLEN];
+  int        half_slices, ii, jj;
+  double     voxsize     = findMinSize(mri_tal);
+  int        slice_size  = mri_tal->width;
+  int        max_slices  = ceil(MAX_SLICES / voxsize);
+  int        max_cc_area = ceil(MAX_CC_AREA / (voxsize * voxsize));
+  int        min_cc_area = floor(MIN_CC_AREA / (voxsize * voxsize));
 
   half_slices = floor(HALF_SLICES / voxsize);
   if (half_slices <= 0) {
     half_slices = 1;
   }
 
-  x_tal = *pccx;
-  y_tal = *pccy;
-  z_tal = *pccz;
+  x_tal  = *pccx;
+  y_tal  = *pccy;
+  z_tal  = *pccz;
   offset = 0;
   xv = yv = zv = 0;
   for (slice = 0; slice < max_slices; slice++) {
     offset = slice - half_slices;
 
-    i = 0;
+    i           = 0;
     area[slice] = 0;
     while (area[slice] < 100 && i <= 5) {
       x = x_tal + offset;
       y = y_tal;
       z = z_tal;
       MRIworldToVoxel(mri_tal, x, y, z, &x, &y, &z);
-      xv = nint(x);
-      yv = nint(y) - i;
-      zv = nint(z);
-      mri_slice = MRIextractPlane(mri_tal, NULL, MRI_SAGITTAL, xv);
+      xv         = nint(x);
+      yv         = nint(y) - i;
+      zv         = nint(z);
+      mri_slice  = MRIextractPlane(mri_tal, NULL, MRI_SAGITTAL, xv);
       mri_filled = MRIfillFG(mri_slice, NULL, zv, yv, 0, WM_MIN_VAL, CC_VAL,
                              &area[slice]);
       MRIboundingBox(mri_filled, 1, &region);
@@ -757,8 +836,8 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
       }
     } else {
       flag[slice] = 1;
-      // if (offset>=-5&&offset<0) left++;
-      // else if (offset<=5&&offset>0) right++;
+      //if (offset>=-5&&offset<0) left++;
+      //else if (offset<=5&&offset>0) right++;
     }
 
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
@@ -790,7 +869,7 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
     }
   }
 #else
-  min_area = 10000 * 5;
+  min_area  = 10000 * 5;
   min_slice = -1;
   for (slice = 6; slice <= 14; slice++) {
     for (i = -2, total_area = 0; i <= 2; i++) {
@@ -799,7 +878,7 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
 
     if (total_area < min_area &&
         (total_area >= min_cc_area * 5 && total_area <= max_cc_area * 5)) {
-      min_area = total_area;
+      min_area  = total_area;
       min_slice = slice;
     }
   }
@@ -814,7 +893,7 @@ static int find_cc_slice(MRI *mri_tal, double *pccx, double *pccy, double *pccz,
   offset = floor((min_slice - half_slices) / 2);
   fprintf(stdout, "find offset as %d using area\n", offset);
 
-  // another way to move the central slice
+  //another way to move the central slice
   for (slice = 0; slice < max_slices; slice++) {
     if ((slice - (half_slices + offset) >= -6) &&
         (slice < half_slices + offset) && flag[slice] == 1) {
@@ -853,7 +932,7 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
   int temp = 0, temp2 = 0, old_temp = 0;
   int x1 = 0, y1 = 0, x2 = 0, y2 = 0, height = mri_filled->height,
       width = mri_filled->width, flag = 0;
-  int i, section1[150];
+  int  i, section1[150];
   MRI *mri_temp1, *mri_temp2;
   char fname[STRLEN];
 
@@ -919,10 +998,10 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
 
   sprintf(fname,
           "/space/neo/2/recon/buckner/001015_vc5442/mri/cc_dilation.mgz");
-  // MRIwrite(mri_temp1, fname) ;
+  //MRIwrite(mri_temp1, fname) ;
   mri_filled = MRIcopy(mri_temp2, NULL);
   sprintf(fname, "/space/neo/2/recon/buckner/001015_vc5442/mri/cc_filled.mgz");
-  // MRIwrite(mri_temp2, fname) ;
+  //MRIwrite(mri_temp2, fname) ;
 
   /*find the first edge of the spike */
 
@@ -934,7 +1013,7 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
   for (x_edge = xi_high - nint((xi_high - xi_low) / 4);
        x_edge >= xi_low + nint((xi_high - xi_low) / 7); x_edge--) {
     edge_count = 0;
-    y_edge = 0;
+    y_edge     = 0;
     while (edge_count < 3 && y_edge < height - 2) {
       length = edge_detection(mri_temp2, edge_count, 0);
       if (length > 1) {
@@ -956,7 +1035,7 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
         }
 
         if (length <= 1 || y_edge < yv - 3) {
-          // for (y=y_edge+1; y>0; y--)
+          //for (y=y_edge+1; y>0; y--)
           // MRIvox(mri_filled, x_edge, y, 0) =0;
           edge_count -= 1;
         } else if (length > 2 && x_edge > xi_low + 15 && x_edge < zv + 17) {
@@ -973,24 +1052,24 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
       flag = 1;
     } else if (edge_count <= 1 && flag == 1 && x_edge > xi_low + 13) {
       flag = 0;
-      y1 = old_temp;
-      x1 = x_edge;
+      y1   = old_temp;
+      x1   = x_edge;
       //   if (x1<zv+13) break;
     }
     old_temp = temp;
   }
-  // fprintf(stdout, "first point found at %d %d \n", x1, y1);
+  //fprintf(stdout, "first point found at %d %d \n", x1, y1);
   x_edge = 0;
   y_edge = 0;
 
   /*the second edge of the spike */
 
   flag = 0;
-  // for (y_edge=yi_high-nint((yi_high-yi_low)/3); y_edge>=yi_low+4; y_edge--)
+  //for (y_edge=yi_high-nint((yi_high-yi_low)/3); y_edge>=yi_low+4; y_edge--)
   for (y_edge = yv + 20; y_edge >= yv; y_edge--) {
-    edge_count = 0;
-    x_edge = 0;
-    i = yv + 20 - y_edge;
+    edge_count  = 0;
+    x_edge      = 0;
+    i           = yv + 20 - y_edge;
     section1[i] = 0;
     while (x_edge < width - 1) {
       length = edge_detection(mri_temp2, edge_count, 1);
@@ -1012,8 +1091,8 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
       flag = 1;
     } else if (edge_count <= 2 && flag == 1) {
       flag = 0;
-      x2 = old_temp;
-      y2 = y_edge;
+      x2   = old_temp;
+      y2   = y_edge;
       if (y2 <= yi_low + 20) {
         break;
       }
@@ -1031,16 +1110,16 @@ static MRI *remove_fornix(MRI *mri_filled, int xv, int yv, int zv) {
       old_temp = temp;
     }
   }
-  // fprintf(stdout, "second point found at %d %d \n", x2, y2);
+  //fprintf(stdout, "second point found at %d %d \n", x2, y2);
 
   if (x2 > 0 && x1 > xi_low + 8 && x1 > x2 && x1 < zv + 5) {
     if (x2 < x1) {
       temp = x1;
-      x1 = x2;
-      x2 = temp;
+      x1   = x2;
+      x2   = temp;
       temp = y1;
-      y1 = y2;
-      y2 = temp;
+      y1   = y2;
+      y2   = temp;
     }
     for (x = x1; x <= x2; x++) {
       for (y = nint(y1 + (y2 - y1) * (x - x1) / (x2 - x1)) + 1; y < height;
@@ -1128,7 +1207,7 @@ static void print_usage() {
   outputHelpXml(mri_cc_help_xml, mri_cc_help_xml_len);
 }
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -1149,7 +1228,7 @@ static int get_option(int argc, char *argv[]) {
     strcpy(aseg_fname, argv[2]);
     printf("will read input aseg from %s\n", aseg_fname);
     use_aseg = 1;
-    nargs = 1;
+    nargs    = 1;
   } else if (!stricmp(option, "NORM")) {
     strcpy(norm_fname, argv[2]);
     printf("will read norm from %s\n", norm_fname);
@@ -1158,7 +1237,7 @@ static int get_option(int argc, char *argv[]) {
     strcpy(lta_fname, argv[2]);
     printf("will write lta as %s\n", lta_fname);
     write_lta = 1;
-    nargs = 1;
+    nargs     = 1;
   } else if (!stricmp(option, "force")) {
     force = 1;
     printf("processing regardless of existence of cc in input volume\n");
@@ -1172,7 +1251,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'M':
       max_cc_rot = RADIANS(atof(argv[2]));
-      nargs = 1;
+      nargs      = 1;
       printf("setting maximum rotation search to %2.1f deg\n",
              DEGREES(max_cc_rot));
       break;
@@ -1196,7 +1275,7 @@ static int get_option(int argc, char *argv[]) {
       printf("subdividing the cc into %d compartments\n", cc_divisions);
       break;
     case 'S':
-      skip = atoi(argv[2]);
+      skip  = atoi(argv[2]);
       nargs = 1;
       printf("skipping %d voxels in rotational alignment\n", skip);
       break;
@@ -1229,11 +1308,11 @@ static int get_option(int argc, char *argv[]) {
 static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
                               double *pxc, double *pyc, double *pzc, int thick,
                               MRI *mri_norm, MRI *mri_fornix) {
-  LTA *lta;
+  LTA *       lta;
   VOXEL_LIST *vl_left, *vl_right;
-  double dx, dy, dz, yrot, zrot, yrot_best, zrot_best;
-  double x0, x0_best, means[3];
-  float evalues[3];
+  double      dx, dy, dz, yrot, zrot, yrot_best, zrot_best;
+  double      x0, x0_best, means[3];
+  float       evalues[3];
   int y0, z0, y0_best, z0_best, label, i, correct, max_correct, xmin, xmax,
       scale, slice_voxels[MAX_CENTRAL_SLICES], best_slice, changed, xleft_min,
       xright_max;
@@ -1248,11 +1327,11 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
     Gdiag |= (DIAG_VERBOSE | DIAG_WRITE);
   }
 
-  *plta = lta = LTAalloc(1, NULL);
+  *plta = lta         = LTAalloc(1, NULL);
   lta->xforms[0].type = LINEAR_VOX_TO_VOX;
 
   // find leftwards extent of right wm, and rightwards extent of left wm
-  xleft_min = mri_aseg->width;
+  xleft_min  = mri_aseg->width;
   xright_max = 0;
   for (x0 = 0; x0 < mri_aseg->width; x0++) {
     for (y0 = 0; y0 < mri_aseg->height; y0++)
@@ -1280,15 +1359,15 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
         }
       }
   }
-  xmin = MIN(xleft_min, xright_max) - 1;
-  xmax = MAX(xleft_min, xright_max) + 1;
+  xmin  = MIN(xleft_min, xright_max) - 1;
+  xmax  = MAX(xleft_min, xright_max) + 1;
   box.y = box.z = 0;
-  box.dy = mri_aseg->height;
-  box.dz = mri_aseg->depth;
-  box.x = xmin - 1;
-  box.dx = (xmax - xmin) + 2;
+  box.dy        = mri_aseg->height;
+  box.dz        = mri_aseg->depth;
+  box.x         = xmin - 1;
+  box.dx        = (xmax - xmin) + 2;
 
-  vl_left = VLSTcreateInRegion(mri_aseg, Left_Cerebral_White_Matter,
+  vl_left  = VLSTcreateInRegion(mri_aseg, Left_Cerebral_White_Matter,
                                Left_Cerebral_Cortex, NULL, skip, 0, &box);
   vl_right = VLSTcreateInRegion(mri_aseg, Right_Cerebral_White_Matter,
                                 Right_Cerebral_Cortex, NULL, skip, 0, &box);
@@ -1306,15 +1385,15 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
   MRIprincipleComponents(mri_midline, m_evectors, evalues, means, 0);
   MRIfree(&mri_midline);
 
-  dx = 1;
-  dy = 0;
-  dz = 0;
+  dx        = 1;
+  dy        = 0;
+  dz        = 0;
   yrot_best = 0;
   zrot_best = 0;
   x0 = x0_best = ((xmin + xmax) / 2);
   y0 = y0_best = 128;
   z0 = z0_best = 128;
-  max_correct = -1;
+  max_correct  = -1;
 
   dx = *MATRIX_RELT(m_evectors, 1, 3);
   dy = *MATRIX_RELT(m_evectors, 2, 3);
@@ -1324,23 +1403,23 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
     dy *= -1;
     dz *= -1;
   }
-  x0 = means[0];
-  y0 = means[1];
-  z0 = means[2];
+  x0      = means[0];
+  y0      = means[1];
+  z0      = means[2];
   correct = cc_cutting_plane_correct(mri_aseg, x0, y0, z0, dx, dy, dz, vl_left,
                                      vl_right, 0);
   max_correct = correct;
-  x0_best = x0;
-  y0_best = y0;
-  z0_best = z0;
-  zrot_best = -asin(dy);
-  yrot_best = asin(dz / cos(zrot_best));
+  x0_best     = x0;
+  y0_best     = y0;
+  z0_best     = z0;
+  zrot_best   = -asin(dy);
+  yrot_best   = asin(dz / cos(zrot_best));
 
-  m = MatrixAlloc(4, 4, MATRIX_REAL);
-  m_yrot = MatrixIdentity(4, NULL);
-  m_zrot = MatrixIdentity(4, NULL);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  m                 = MatrixAlloc(4, 4, MATRIX_REAL);
+  m_yrot            = MatrixIdentity(4, NULL);
+  m_zrot            = MatrixIdentity(4, NULL);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
   VECTOR_ELT(v2, 4) = 1.0;
   for (scale = 1; scale >= 1; scale /= 2) {
@@ -1373,10 +1452,10 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
           correct = cc_cutting_plane_correct(mri_aseg, x0, y0, z0, dx, dy, dz,
                                              vl_left, vl_right, 0);
           if (correct > max_correct) {
-            x0_best = x0;
+            x0_best     = x0;
             max_correct = correct;
-            yrot_best = yrot;
-            zrot_best = zrot;
+            yrot_best   = yrot;
+            zrot_best   = zrot;
           }
         }
       }
@@ -1390,9 +1469,9 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
     V3_Y(v1) = 0;
     V3_Z(v1) = 0;
     MatrixMultiply(m, v1, v2);
-    dx = V3_X(v2);
-    dy = V3_Y(v2);
-    dz = V3_Z(v2);
+    dx          = V3_X(v2);
+    dy          = V3_Y(v2);
+    dz          = V3_Z(v2);
     max_correct = -1;
   }
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
@@ -1401,11 +1480,11 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
   printf("global minimum found at slice %2.1f, rotations (%2.2f, %2.2f)\n",
          x0_best, DEGREES(yrot_best), DEGREES(zrot_best));
 
-  m_trans = MatrixIdentity(4, NULL);
-  *MATRIX_RELT(m_trans, 1, 4) = x0_best;
-  *MATRIX_RELT(m_trans, 2, 4) = y0_best;
-  *MATRIX_RELT(m_trans, 3, 4) = z0_best;
-  m_trans_inv = MatrixIdentity(4, NULL);
+  m_trans                         = MatrixIdentity(4, NULL);
+  *MATRIX_RELT(m_trans, 1, 4)     = x0_best;
+  *MATRIX_RELT(m_trans, 2, 4)     = y0_best;
+  *MATRIX_RELT(m_trans, 3, 4)     = z0_best;
+  m_trans_inv                     = MatrixIdentity(4, NULL);
   *MATRIX_RELT(m_trans_inv, 1, 4) = -128;
   *MATRIX_RELT(m_trans_inv, 2, 4) = -128;
   *MATRIX_RELT(m_trans_inv, 3, 4) = -128;
@@ -1451,7 +1530,7 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
   }
 
   // update xmin and xmax to be in transformed coords
-  xleft_min = mri_aseg->width;
+  xleft_min  = mri_aseg->width;
   xright_max = 0;
   for (x0 = 0; x0 < mri_aseg->width; x0++) {
     for (y0 = 0; y0 < mri_cc->height; y0++)
@@ -1482,7 +1561,7 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
          xmax);
 
   for (x0 = xmin; x0 <= xmax; x0++) {
-    i = x0 - xmin; // slice_voxels index
+    i               = x0 - xmin; // slice_voxels index
     slice_voxels[i] = 0;
     for (y0 = 0; y0 < mri_cc->height; y0++)
       for (z0 = 0; z0 < mri_cc->depth; z0++) {
@@ -1609,7 +1688,7 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
   MRIdilate(mri_tmp, mri_tmp);
   MRIdilate(mri_tmp, mri_tmp);
   mseg = MRIsegment(mri_tmp, 1, 255);
-  i = MRIsegmentMax(mseg);
+  i    = MRIsegmentMax(mseg);
   MRIfree(&mri_tmp);
   mri_tmp = MRIsegmentToImage(mri_cc, NULL, mseg, i);
   MRIcopy(mri_tmp, mri_cc);
@@ -1627,9 +1706,9 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
   VectorFree(&v1);
   VectorFree(&v2);
   *plta = lta;
-  *pxc = (double)best_slice;
-  *pyc = (double)y0_best;
-  *pzc = (double)z0_best;
+  *pxc  = (double)best_slice;
+  *pyc  = (double)y0_best;
+  *pzc  = (double)z0_best;
 
   mri_tmp = MRIclone(mri_cc, NULL);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
@@ -1643,7 +1722,7 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
     if (x0 == Gdiag_no) {
       DiagBreak();
     }
-    mri_slice = MRIextractPlane(mri_cc, NULL, MRI_SAGITTAL, x0);
+    mri_slice        = MRIextractPlane(mri_cc, NULL, MRI_SAGITTAL, x0);
     mri_slice_edited = remove_fornix_new(mri_slice, NULL);
     MRIfillPlane(mri_slice_edited, mri_tmp, MRI_SAGITTAL, x0, CC_VAL);
     MRIfree(&mri_slice);
@@ -1678,7 +1757,7 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
       }
 
   changed = 0;
-  i = 3 * 3 * 3; // max nbhd size
+  i       = 3 * 3 * 3; // max nbhd size
   do {
     for (y0 = 0; y0 < mri_cc->height; y0++)
       for (z0 = 0; z0 < mri_cc->depth; z0++) {
@@ -1689,9 +1768,9 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
         if (label &&
             MRIlabelsInNbhd(mri_cc, best_slice, y0, z0, 1, LABEL_IN_CC) >= i) {
           changed = 1;
-          *pyc = y0;
+          *pyc    = y0;
           y0_best = y0;
-          *pzc = z0;
+          *pzc    = z0;
           z0_best = z0;
           break;
         }
@@ -1700,8 +1779,8 @@ static MRI *find_cc_with_aseg(MRI *mri_aseg_orig, MRI *mri_cc, LTA **plta,
   } while (changed == 0 && i > 0);
 
   if (write_lta) {
-    LTA *lta2 = LTAalloc(1, mri_norm);
-    lta2->xforms[0].m_L = MatrixCopy(lta->xforms[0].m_L, lta2->xforms[0].m_L);
+    LTA *lta2            = LTAalloc(1, mri_norm);
+    lta2->xforms[0].m_L  = MatrixCopy(lta->xforms[0].m_L, lta2->xforms[0].m_L);
     lta2->xforms[0].type = LINEAR_VOX_TO_VOX;
     getVolGeom(mri_norm, &lta2->xforms[0].src);
     getVolGeom(mri_norm, &lta2->xforms[0].dst);
@@ -1728,15 +1807,15 @@ static int cc_cutting_plane_correct(MRI *mri_aseg, double x0, double y0,
       label_left, label_right, correct;
   double xf, yf, zf, e1[3], e2[3], n[3], len, x, y;
   double dot, dxi, dyi, dzi;
-  MRI *mri_debug = NULL;
+  MRI *  mri_debug = NULL;
 
   if (debug) {
     mri_debug = MRIclone(mri_aseg, NULL);
   }
 
-  n[0] = dx;
-  n[1] = dy;
-  n[2] = dz;
+  n[0]  = dx;
+  n[1]  = dy;
+  n[2]  = dz;
   e2[0] = dy;
   e2[1] = dx;
   e2[2] = dx;
@@ -1747,8 +1826,8 @@ static int cc_cutting_plane_correct(MRI *mri_aseg, double x0, double y0,
   len = VLEN(e2);
   SCALAR_MUL(e2, 1 / len, e2);
 
-  width = mri_aseg->depth;
-  height = mri_aseg->height; // of extracted plane
+  width   = mri_aseg->depth;
+  height  = mri_aseg->height; // of extracted plane
   correct = 0;
   if (debug) {
     for (x = -width / 2; x <= width / 2; x += 0.5) {
@@ -1759,16 +1838,16 @@ static int cc_cutting_plane_correct(MRI *mri_aseg, double x0, double y0,
 
 #define SDIST 0.25
         if (ISINT(xf)) {
-          xv_left = (int)floor(xf + SDIST * n[0]);
-          yv_left = (int)floor(yf + SDIST * n[1]);
-          zv_left = (int)floor(zf + SDIST * n[2]);
+          xv_left  = (int)floor(xf + SDIST * n[0]);
+          yv_left  = (int)floor(yf + SDIST * n[1]);
+          zv_left  = (int)floor(zf + SDIST * n[2]);
           xv_right = (int)floor(xf - SDIST * n[0]);
           yv_right = (int)floor(yf - SDIST * n[1]);
           zv_right = (int)floor(zf - SDIST * n[2]);
         } else {
-          xv_left = (int)floor(xf + SDIST * n[0]);
-          yv_left = (int)floor(yf + SDIST * n[1]);
-          zv_left = (int)floor(zf + SDIST * n[2]);
+          xv_left  = (int)floor(xf + SDIST * n[0]);
+          yv_left  = (int)floor(yf + SDIST * n[1]);
+          zv_left  = (int)floor(zf + SDIST * n[2]);
           xv_right = (int)ceil(xf - SDIST * n[0]);
           yv_right = (int)ceil(yf - SDIST * n[1]);
           zv_right = (int)ceil(zf - SDIST * n[2]);
@@ -1838,20 +1917,22 @@ static int cc_cutting_plane_correct(MRI *mri_aseg, double x0, double y0,
   return (correct);
 }
 
-#define FORNIX_VAL 32
+#define FORNIX_VAL  32
 #define LABEL_ERASE 96
 
 static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) {
   int xmin, xmax, x, y, edges_found, val, last_val, i, x1, changed, found, ymax;
   MRI_SEGMENTATION *mseg;
-  MRI *mri_tmp;
+  MRI *             mri_tmp;
 
   if (mri_slice_edited == NULL) {
     mri_slice_edited = MRIclone(mri_slice, NULL);
   }
 
+  // This was just xmin = mri_slice->width, but can cause an error
+  xmin = mri_slice->width - 1;
+
   // find posterior/anterior extent of the cc
-  xmin = mri_slice->width;
   ymax = xmax = 0;
   for (x = 0; x < mri_slice->width; x++) {
     for (y = 0; y < mri_slice->height; y++) {
@@ -1877,7 +1958,7 @@ static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) {
     // scan downwards from top.
     // First set of connected pixels will be callosum, 2nd will be fornix
     edges_found = 0;
-    last_val = 0;
+    last_val    = 0;
     for (y = 0; y < mri_slice->height; y++) {
       val = (int)MRIgetVoxVal(mri_slice, x, y, 0, 0);
       if (val > 0 && last_val == 0) // transition from off to on
@@ -1987,8 +2068,8 @@ static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) {
   */
   {
     double mean_thickness = 0.0, std_thickness = 0.0;
-    int num = 0, thickness = 256, first_on, last_on, min_x_fornix = 256,
-        max_thickness, first_off, ystart;
+    int    num = 0, thickness = 256, first_on, last_on,
+        min_x_fornix = mri_slice->width - 1, max_thickness, first_off, ystart;
 
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
       MRIwrite(mri_slice, "s.mgz");
@@ -2011,6 +2092,7 @@ static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) {
         }
       }
 
+    int min_x_fornix_set = 0;
     for (x = xmin; x <= xmax; x++) {
       int val2, y1;
 
@@ -2018,12 +2100,13 @@ static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) {
         if (x == Gx && y == Gy) {
           DiagBreak();
         }
-        val = (int)MRIgetVoxVal(mri_slice, x, y, 0, 0);
+        val  = (int)MRIgetVoxVal(mri_slice, x, y, 0, 0);
         val2 = (int)MRIgetVoxVal(mri_slice_edited, x, y, 0, 0);
         if (val == LABEL_IN_CC && val2 == LABEL_ERASE) // in fornix
         {
-          thickness = 0;
-          min_x_fornix = MIN(min_x_fornix, x);
+          thickness        = 0;
+          min_x_fornix     = MIN(min_x_fornix, x);
+          min_x_fornix_set = 1;
           first_on = last_on = -1;
           for (y1 = y; y1 >= 0; y1--) {
             val = (int)MRIgetVoxVal(mri_slice_edited, x, y1, 0, 0);
@@ -2043,6 +2126,12 @@ static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) {
         }
       }
     }
+
+    if (!min_x_fornix_set)
+      printf("WARNING: min_x_fornix not set\n");
+    else
+      printf("min_x_fornix = %d\n", min_x_fornix);
+
     mean_thickness /= num;
     std_thickness = sqrt(std_thickness / num - mean_thickness * mean_thickness);
     max_thickness = (int)ceil(mean_thickness + 3 * std_thickness);
@@ -2096,7 +2185,7 @@ static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) {
 
   // remove unconnected stuff
   mseg = MRIsegment(mri_slice_edited, 1, 255);
-  i = MRIsegmentMax(mseg);
+  i    = MRIsegmentMax(mseg);
   MRIclear(mri_slice_edited);
   MRIsegmentToImage(mri_slice, mri_slice_edited, mseg, i);
   MRIsegmentFree(&mseg);
@@ -2106,11 +2195,11 @@ static MRI *remove_fornix_new(MRI *mri_slice, MRI *mri_slice_edited) {
 
 static MRI *find_voxels_close_to_both_hemis(MRI *mri_aseg, int lh_label,
                                             int rh_label, int wsize) {
-  int x, y, z, xk, yk, zk, xi, yi, zi, num_lh, num_rh, whalf, label;
+  int  x, y, z, xk, yk, zk, xi, yi, zi, num_lh, num_rh, whalf, label;
   MRI *mri_dst;
 
   mri_dst = MRIclone(mri_aseg, NULL);
-  whalf = (wsize - 1) / 2;
+  whalf   = (wsize - 1) / 2;
   for (x = 0; x < mri_aseg->width; x++)
     for (y = 0; y < mri_aseg->height; y++)
       for (z = 0; z < mri_aseg->depth; z++) {
@@ -2120,7 +2209,7 @@ static MRI *find_voxels_close_to_both_hemis(MRI *mri_aseg, int lh_label,
           for (yk = -whalf; yk <= whalf; yk++) {
             yi = mri_aseg->yi[y + yk];
             for (zk = -whalf; zk <= whalf; zk++) {
-              zi = mri_aseg->zi[z + zk];
+              zi    = mri_aseg->zi[z + zk];
               label = MRIgetVoxVal(mri_aseg, xi, yi, zi, 0);
               if (label == lh_label) {
                 num_lh++;

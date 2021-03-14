@@ -1,16 +1,7 @@
-/**
- * @file  ThreadIOWorker.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2014/01/21 22:06:58 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,8 +15,8 @@
 #ifndef ThreadIOWorker_H
 #define ThreadIOWorker_H
 
-#include <QThread>
 #include <QMutex>
+#include <QThread>
 #include <QVariantMap>
 
 class Layer;
@@ -45,6 +36,7 @@ public:
     JT_LoadTrack,
     JT_LoadConnectome,
     JT_LoadFCD,
+    JT_LoadODF,
     JT_TransformVolume
   };
 
@@ -52,12 +44,13 @@ public:
   void SaveVolume(Layer *layer, const QVariantMap &args = QVariantMap());
   void LoadSurface(Layer *layer, const QVariantMap &args = QVariantMap());
   void SaveSurface(Layer *layer, const QVariantMap &args = QVariantMap());
-  void LoadSurfaceOverlay(Layer *layer,
+  void LoadSurfaceOverlay(Layer *            layer,
                           const QVariantMap &args = QVariantMap());
   void LoadTrack(Layer *layer, const QVariantMap &args = QVariantMap());
-  void LoadConnectomeMatrix(Layer *layer,
+  void LoadConnectomeMatrix(Layer *            layer,
                             const QVariantMap &args = QVariantMap());
   void LoadFCD(Layer *layer, const QVariantMap &args = QVariantMap());
+  void LoadODF(Layer *layer, const QVariantMap &args = QVariantMap());
   void TransformVolume(Layer *layer, const QVariantMap &args = QVariantMap());
 
 signals:
@@ -74,8 +67,8 @@ protected:
 private:
   QMutex mutex;
   // to abort
-  int m_nJobType;
-  Layer *m_layer;
+  int         m_nJobType;
+  Layer *     m_layer;
   QVariantMap m_args;
 };
 

@@ -1,12 +1,11 @@
 #pragma once
 /*
- * @file utilities common to mrisurf*.c but not used outside them
  *
  */
 /*
  * surfaces Author: Bruce Fischl, extracted from mrisurf.c by Bevin Brett
  *
- * $ © copyright-2014,2018 The General Hospital Corporation (Boston, MA) "MGH"
+ * $ Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,7 +28,7 @@
 
 #define SAMPLE_DIST 0.25
 
-#define MAX_CSF 55.0f
+#define MAX_CSF   55.0f
 #define STEP_SIZE 0.1
 
 int mrisClearMomentum(MRI_SURFACE *mris);

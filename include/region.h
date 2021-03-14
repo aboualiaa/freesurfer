@@ -1,17 +1,6 @@
-/**
- * @file  region.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2012/12/07 21:53:30 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,8 +15,8 @@
 #ifndef REGION_H
 #define REGION_H
 
-#include <cstdio>
 #include "mri.h"
+#include <cstdio>
 
 MRI_REGION *REGIONsubtract(MRI_REGION *reg1, MRI_REGION *reg2,
                            MRI_REGION *rdst);
@@ -38,15 +27,16 @@ MRI_REGION *REGIONintersect(MRI_REGION *reg1, MRI_REGION *reg2,
 MRI_REGION *REGIONunion(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst);
 MRI_REGION *REGIONalloc();
 MRI_REGION *REGIONcopy(MRI_REGION *rsrc, MRI_REGION *rdst);
-int REGIONinside(MRI_REGION *reg, int x, int y, int z);
+int         REGIONinside(MRI_REGION *reg, int x, int y, int z);
 MRI_REGION *REGIONexpand(MRI_REGION *rsrc, MRI_REGION *rdst, int n);
-float REGIONminCornerDistance(MRI_REGION *r1, MRI_REGION *r2);
-int REGIONprint(FILE *fp, MRI_REGION *r);
+float       REGIONminCornerDistance(MRI_REGION *r1, MRI_REGION *r2);
+int         REGIONprint(FILE *fp, MRI_REGION *r);
 MRI_REGION *REGIONgetBoundingBox(MRI *mask, int npad);
+MRI_REGION *REGIONgetBoundingBoxM(const MRI *mask, const int npad[6]);
 MRI_REGION *REGIONgetBoundingBoxEqOdd(MRI *mask, int npad);
 
-#define REGION_INSIDE 1
+#define REGION_INSIDE    1
 #define REGION_ON_BORDER -1
-#define REGION_OUTSIDE 0
+#define REGION_OUTSIDE   0
 
 #endif

@@ -1,12 +1,12 @@
-#include <cstdlib>
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 
 #define DLEN 1000
 
 int main(int argc, char *argv[]) {
   double result;
-  int i;
+  int    i;
 
   srand48(0L);
 

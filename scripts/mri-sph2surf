@@ -3,15 +3,9 @@
 #
 # mri-sph2surf
 #
-# REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
 #
-# Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/16 17:17:20 $
-#    $Revision: 1.5 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,7 +20,7 @@
 #
 #
 
-set SPH2SURF_VER = '$Id: mri-sph2surf,v 1.5 2016/02/16 17:17:20 zkaufman Exp $';
+set SPH2SURF_VER = 'mri-sph2surf @FS_VERSION@';
 
 set subject = ();
 set hemi    = ();

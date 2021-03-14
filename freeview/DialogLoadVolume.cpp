@@ -1,16 +1,7 @@
-/**
- * @file  DialogLoadVolume.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/02 18:41:17 $
- *    $Revision: 1.32 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,14 +13,13 @@
  *
  */
 #include "DialogLoadVolume.h"
-#include "ui_DialogLoadVolume.h"
+#include "LUTDataHolder.h"
 #include "LayerPropertyMRI.h"
 #include "MainWindow.h"
-#include "LUTDataHolder.h"
 #include "MyUtils.h"
+#include "ui_DialogLoadVolume.h"
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFileDialog>
 #include <QMessageBox>
 
 #include "mri.h"
@@ -59,9 +49,14 @@ void DialogLoadVolume::UpdateLUT() {
 }
 
 void DialogLoadVolume::OnOpen() {
+  QString fn = ui->comboBoxFilenames->currentText().trimmed();
+  if (fn == "current folder")
+    fn = QDir::currentPath();
+  else
+    fn = QFileInfo(fn).absolutePath();
   QStringList filenames = QFileDialog::getOpenFileNames(
       this, "Select volume files",
-      MainWindow::AutoSelectLastDir(m_strLastDir, "mri"),
+      fn, // MainWindow::AutoSelectLastDir( m_strLastDir, "mri" ),
       "Volume files (*.mgz *.mgh *.nii *.nii.gz *.img *.mnc);;All files (*)");
   if (!filenames.isEmpty()) {
     m_strLastDir = QFileInfo(filenames[0]).canonicalPath();
@@ -89,6 +84,7 @@ void DialogLoadVolume::SetRecentFiles(const QStringList &filenames) {
   for (int i = 0; i < fns.size(); i++) {
     fns[i] = MyUtils::Win32PathProof(fns[i]);
   }
+  fns.insert(0, "current folder");
   ui->comboBoxFilenames->clear();
   ui->comboBoxFilenames->addItems(fns);
   if (!filenames.isEmpty()) {
@@ -161,7 +157,8 @@ QString DialogLoadVolume::GetColorMap() {
 QString DialogLoadVolume::GetLUT() { return ui->comboBoxLUT->currentText(); }
 
 void DialogLoadVolume::OnOK() {
-  if (GetVolumeFileNames().isEmpty()) {
+  if (GetVolumeFileNames().isEmpty() ||
+      ui->comboBoxFilenames->currentText().trimmed() == "current folder") {
     QMessageBox::warning(this, "Error", "Please specify volume file to load.");
     return;
   }

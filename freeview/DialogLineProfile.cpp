@@ -1,15 +1,15 @@
 #include "DialogLineProfile.h"
-#include "ui_DialogLineProfile.h"
-#include "MainWindow.h"
+#include "DialogSelectSplines.h"
+#include "LayerCollection.h"
 #include "LayerLineProfile.h"
 #include "LayerMRI.h"
 #include "LayerPointSet.h"
-#include "LayerCollection.h"
-#include "RenderView.h"
-#include <QFileDialog>
-#include <QDebug>
 #include "LayerPropertyLineProfile.h"
-#include "DialogSelectSplines.h"
+#include "MainWindow.h"
+#include "RenderView.h"
+#include "ui_DialogLineProfile.h"
+#include <QDebug>
+#include <QFileDialog>
 
 DialogLineProfile::DialogLineProfile(QWidget *parent)
     : QDialog(parent), m_lineProfile(NULL), ui(new Ui::DialogLineProfile) {
@@ -33,7 +33,7 @@ bool DialogLineProfile::Validate(LayerPointSet *&spline0_out,
     return false;
   }
   MainWindow *mainwnd = MainWindow::GetMainWindow();
-  int nViewId = mainwnd->GetActiveViewId();
+  int         nViewId = mainwnd->GetActiveViewId();
   if (nViewId > 2) {
     ui->labelError->setText(tr("Please select a 2D slice view"));
     ui->labelError->show();
@@ -51,7 +51,7 @@ void DialogLineProfile::OnCompute() {
     return;
 
   MainWindow *mainwnd = MainWindow::GetMainWindow();
-  int nViewId = mainwnd->GetActiveViewId();
+  int         nViewId = mainwnd->GetActiveViewId();
 
   LayerCollection *col = mainwnd->GetLayerCollection("Supplement");
   if (!col)
@@ -73,7 +73,7 @@ void DialogLineProfile::OnCompute() {
     }
   }
   m_lineProfile = new LayerLineProfile(nViewId, NULL, layer1, layer2);
-  double r = ui->lineEditRadius->text().toDouble();
+  double r      = ui->lineEditRadius->text().toDouble();
   if (r <= 0) {
     double vs[3];
     col->GetWorldVoxelSize(vs);
@@ -84,7 +84,7 @@ void DialogLineProfile::OnCompute() {
   m_lineProfile->GetProperty()->SetRadius(r);
   col->AddLayer(m_lineProfile);
 
-  double dVoxelSize = 1.0;
+  double    dVoxelSize = 1.0;
   LayerMRI *mri = qobject_cast<LayerMRI *>(mainwnd->GetActiveLayer("MRI"));
   if (mri) {
     double vs[3];
@@ -100,7 +100,7 @@ void DialogLineProfile::OnCompute() {
 
 void DialogLineProfile::OnClear() {
   MainWindow *mainwnd = MainWindow::GetMainWindow();
-  int nViewId = mainwnd->GetActiveViewId();
+  int         nViewId = mainwnd->GetActiveViewId();
 
   LayerCollection *col = mainwnd->GetLayerCollection("Supplement");
   if (!col)
@@ -152,7 +152,7 @@ void DialogLineProfile::OnExport() {
                                    "CSV files (*.csv);;All Files (*)");
   if (!fn.isEmpty()) {
     MainWindow *mainwnd = MainWindow::GetMainWindow();
-    LayerMRI *mri = qobject_cast<LayerMRI *>(mainwnd->GetActiveLayer("MRI"));
+    LayerMRI *  mri = qobject_cast<LayerMRI *>(mainwnd->GetActiveLayer("MRI"));
     if (mri) {
       if (!m_lineProfile->Export(fn, mri, GetNumberOfSamples())) {
         ui->labelError->setText("Failed to export");
@@ -187,7 +187,7 @@ void DialogLineProfile::OnSave() {
 
 void DialogLineProfile::OnLoad() {
   MainWindow *mainwnd = MainWindow::GetMainWindow();
-  LayerMRI *mri = qobject_cast<LayerMRI *>(mainwnd->GetActiveLayer("MRI"));
+  LayerMRI *  mri = qobject_cast<LayerMRI *>(mainwnd->GetActiveLayer("MRI"));
   if (!mri) {
     return;
   }
@@ -200,7 +200,7 @@ void DialogLineProfile::OnLoad() {
       ui->labelError->setText("Failed to load splines");
       ui->labelError->show();
     } else {
-      LayerCollection *col_wp = mainwnd->GetLayerCollection("PointSet");
+      LayerCollection *col_wp  = mainwnd->GetLayerCollection("PointSet");
       LayerCollection *col_sup = mainwnd->GetLayerCollection("Supplement");
       LayerCollection *col_mri = mainwnd->GetLayerCollection("MRI");
       if (col_wp->IsEmpty()) {
@@ -225,9 +225,9 @@ void DialogLineProfile::OnLoad() {
 void DialogLineProfile::OnComboIsoLine(int sel) { Q_UNUSED(sel); }
 
 void DialogLineProfile::UpdatePointSetList() {
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  QList<Layer *> layers = mainwnd->GetLayers("PointSet");
-  QVariant v =
+  MainWindow *   mainwnd = MainWindow::GetMainWindow();
+  QList<Layer *> layers  = mainwnd->GetLayers("PointSet");
+  QVariant       v =
       ui->comboBoxIsoLine1->itemData(ui->comboBoxIsoLine1->currentIndex());
   Layer *layer1 = qobject_cast<Layer *>(v.value<QObject *>());
   v = ui->comboBoxIsoLine1->itemData(ui->comboBoxIsoLine2->currentIndex());
@@ -259,7 +259,7 @@ void DialogLineProfile::OnColorPicker(const QColor &color) {
 
 void DialogLineProfile::OnEditRadius(const QString &strg) {
   if (m_lineProfile) {
-    bool ok = false;
+    bool   ok  = false;
     double val = strg.toDouble(&ok);
     if (ok && val > 0)
       m_lineProfile->GetProperty()->SetRadius(val);
@@ -279,9 +279,9 @@ void DialogLineProfile::OnLineProfileIdPicked(LayerLineProfile *lp, int nId) {
 }
 
 void DialogLineProfile::OnExportThickness() {
-  MainWindow *mainwnd = MainWindow::GetMainWindow();
-  QList<Layer *> layers = mainwnd->GetLayers("PointSet");
-  QVariant v =
+  MainWindow *   mainwnd = MainWindow::GetMainWindow();
+  QList<Layer *> layers  = mainwnd->GetLayers("PointSet");
+  QVariant       v =
       ui->comboBoxIsoLine1->itemData(ui->comboBoxIsoLine1->currentIndex());
   LayerPointSet *layer1 = qobject_cast<LayerPointSet *>(v.value<QObject *>());
   v = ui->comboBoxIsoLine1->itemData(ui->comboBoxIsoLine2->currentIndex());

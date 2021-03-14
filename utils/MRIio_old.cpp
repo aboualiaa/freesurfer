@@ -1,17 +1,6 @@
-/**
- * @file  MRIio_old.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:41 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -57,7 +46,7 @@ char *lcalloc(size_t nmemb, size_t size) {
   return p;
 }
 
-void file_name(char *fpref, char *fname, int num, char *form) {
+void file_name(const char *fpref, char *fname, int num, const char *form) {
   char ext[10];
 
   sprintf(ext, form, num);
@@ -67,11 +56,11 @@ void file_name(char *fpref, char *fname, int num, char *form) {
 
 void buffer_to_image(unsigned char *buf, unsigned char **im, int ysize,
                      int xsize) {
-  int i, j;
+  int           i, j;
   unsigned long k;
-  float sum;
+  float         sum;
 
-  k = 0;
+  k   = 0;
   sum = 0;
   for (i = 0; i < ysize; i++)
     for (j = 0; j < xsize; j++) {
@@ -85,7 +74,7 @@ void buffer_to_image(unsigned char *buf, unsigned char **im, int ysize,
 
 void image_to_buffer(unsigned char **im, unsigned char *buf, int ysize,
                      int xsize) {
-  int i, j;
+  int           i, j;
   unsigned long k;
 
   k = 0;

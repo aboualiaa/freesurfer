@@ -1,17 +1,11 @@
 /**
- * @file  mri_fcili.c
  * @brief Computes intrinsic laterality index (iLI) based on supplied waveforms.
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
  * Original Author: Douglas N. Greve
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2013/11/22 19:41:44 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,8 +24,6 @@
 
 */
 
-// $Id: mri_fcili.c,v 1.3 2013/11/22 19:41:44 greve Exp $
-
 /*
   BEGINHELP
 
@@ -44,54 +36,54 @@
   ENDUSAGE
 */
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/utsname.h>
 #include <sys/stat.h>
-#include <errno.h>
+#include <sys/utsname.h>
+#include <unistd.h>
 
-#include "utils.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "fio.h"
 #include "mri.h"
+#include "utils.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
 static void usage_exit(void);
 static void print_help(void);
 static void print_version(void);
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
-MRI *MRIfcIntrinsicLI(MRI *lh, MRI *rh, double DenThresh);
+int         main(int argc, char *argv[]);
+MRI *       MRIfcIntrinsicLI(MRI *lh, MRI *rh, double DenThresh);
 
-static char vcid[] = "$Id: mri_fcili.c,v 1.3 2013/11/22 19:41:44 greve Exp $";
-const char *Progname = NULL;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
-char tmpstr[4000];
+char           tmpstr[4000];
 
-char *outdir = NULL;
-char *lhfile = NULL, *rhfile = NULL;
-char *outfmt = "nii.gz";
+char * outdir = NULL;
+char * lhfile = NULL, *rhfile = NULL;
+char * outfmt    = "nii.gz";
 double DenThresh = 0.2;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, err;
-  MRI *lh, *rh;
-  MRI *lhn, *rhn, *iLI, *vLL, *vLR, *vRL, *vRR;
-  int c, f, nrois, roi1, roi2, nframes;
+  int    nargs, err;
+  MRI *  lh, *rh;
+  MRI *  lhn, *rhn, *iLI, *vLL, *vLR, *vRL, *vRR;
+  int    c, f, nrois, roi1, roi2, nframes;
   double v, ss, v1, v2, den, num, LL, LR, RL, RR;
 
   nargs = handleVersionOption(argc, argv, "mri_fcili");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -283,7 +275,7 @@ int main(int argc, char *argv[]) {
 }
 /* ------------------------------------------------*/
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -315,12 +307,12 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      outdir = pargv[0];
+      outdir    = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--fmt")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      outfmt = pargv[0];
+      outfmt    = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--den-thresh")) {
       if (nargc < 1)
@@ -330,12 +322,12 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--lh")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      lhfile = pargv[0];
+      lhfile    = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--rh")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      rhfile = pargv[0];
+      rhfile    = pargv[0];
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
@@ -384,7 +376,7 @@ static void print_usage(void) {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /*-----------------------------------------------------------*/
@@ -400,13 +392,13 @@ static void print_help(void) {
 }
 /*-----------------------------------------------------------*/
 static void print_version(void) {
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /*-----------------------------------------------------------*/
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);
@@ -425,8 +417,8 @@ static void dump_options(FILE *fp) {
 /*-----------------------------------------------------------*/
 
 MRI *MRIfcIntrinsicLI(MRI *lh, MRI *rh, double DenThresh) {
-  MRI *lhn, *rhn, *iLI;
-  int c, f, nrois, roi1, roi2, nframes;
+  MRI *  lhn, *rhn, *iLI;
+  int    c, f, nrois, roi1, roi2, nframes;
   double v, ss, v1, v2, den, num, LL, LR, RL, RR;
 
   if (lh->nframes != rh->nframes) {

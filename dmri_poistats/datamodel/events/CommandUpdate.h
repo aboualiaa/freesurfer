@@ -10,16 +10,16 @@
 class CommandUpdate : public itk::Command {
 
 public:
-  typedef CommandUpdate Self;
-  typedef itk::Command Superclass;
+  typedef CommandUpdate           Self;
+  typedef itk::Command            Superclass;
   typedef itk::SmartPointer<Self> Pointer;
   itkNewMacro(Self);
 
-  typedef itk::DiffusionTensor3D<float> TensorPixelType;
+  typedef itk::DiffusionTensor3D<float>  TensorPixelType;
   typedef itk::Image<TensorPixelType, 3> TensorImageType;
-  typedef itk::OrientedImage<float, 3> OutputImageType;
+  typedef itk::OrientedImage<float, 3>   OutputImageType;
   typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
-      PoistatsFilterType;
+                                    PoistatsFilterType;
   typedef const PoistatsFilterType *PoistatsFilterPointer;
   //  typedef const PoistatsFilterType* PoistatsFilterPointer;
 

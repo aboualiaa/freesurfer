@@ -1,16 +1,11 @@
 /**
- * @file  MyVTKUtils.h
  * @brief Misc utility class.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/06/24 17:11:04 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,9 +21,9 @@
 #ifndef MyVTKUtils_h
 #define MyVTKUtils_h
 
+#include <QStringList>
 #include <math.h>
 #include <vector>
-#include <QStringList>
 
 class vtkRenderer;
 class vtkRenderWindow;
@@ -72,15 +67,15 @@ public:
                                      vtkActor *actor_out,
                                      int nSmoothIterations = 0, int *ext = NULL,
                                      bool bAllRegion = false,
-                                     bool bUpsample = false,
+                                     bool bUpsample  = false,
                                      bool bVoxelized = false);
 
-  static bool BuildLabelContourActor(vtkImageData *data_in,
+  static bool BuildLabelContourActor(vtkImageData *    data_in,
                                      const QList<int> &labelIndices,
-                                     vtkActor *actor_out,
+                                     vtkActor *        actor_out,
                                      int nSmoothIterations = 0, int *ext = NULL,
                                      bool bAllRegion = false,
-                                     bool bUpsample = false);
+                                     bool bUpsample  = false);
 
   static bool BuildVolume(vtkImageData *data_in, double dTh1, double dTh2,
                           vtkVolume *vol_out);

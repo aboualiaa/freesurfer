@@ -1,17 +1,6 @@
-/**
- * @file  mri_paint.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:23 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,11 +16,9 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] = "$Id: mri_paint.c,v 1.5 2011/03/02 00:04:23 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -39,7 +26,7 @@ static void print_version();
 
 const char *Progname;
 
-static int imageoffset = 0;
+static int   imageoffset     = 0;
 static char *thickness_fname = nullptr;
 
 static int coords = TALAIRACH_COORDS;
@@ -48,12 +35,12 @@ static int coords = TALAIRACH_COORDS;
 usage: stat_paint [options] <input> <subject> <hemisphere> <surface> <output>
 */
 int main(int argc, char *argv[]) {
-  char **av, *in_vol, *in_surf, *xform_fname, *out_fname;
-  int ac, nargs;
+  char **      av, *in_vol, *in_surf, *xform_fname, *out_fname;
+  int          ac, nargs;
   MRI_SURFACE *mris;
-  MRI *mri;
-  LTA *lta;
-  MATRIX *m;
+  MRI *        mri;
+  LTA *        lta;
+  MATRIX *     m;
 
   nargs = handleVersionOption(argc, argv, "mri_paint");
   if (nargs && argc - nargs == 1)
@@ -75,10 +62,10 @@ int main(int argc, char *argv[]) {
   if (argc < 5)
     usage_exit();
 
-  in_vol = argv[1];
-  in_surf = argv[2];
+  in_vol      = argv[1];
+  in_surf     = argv[2];
   xform_fname = argv[3];
-  out_fname = argv[4];
+  out_fname   = argv[4];
 
   fprintf(stderr, "reading volume from %s and painting it onto %s\n", in_vol,
           in_surf);
@@ -124,7 +111,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -134,16 +121,16 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "imageoffset")) {
     imageoffset = atoi(argv[2]);
-    nargs = 1;
+    nargs       = 1;
   } else
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'T':
       thickness_fname = argv[2];
-      nargs = 1;
+      nargs           = 1;
       printf("using thickness file %s to sample with...\n", thickness_fname);
       break;
     case 'S':
@@ -189,7 +176,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

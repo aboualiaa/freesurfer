@@ -1,5 +1,4 @@
 /**
- * @file  dmri_trk2trk.cxx
  * @brief Transform streamlines in .trk file
  *
  * Transform streamlines in .trk file:
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
- *    $Author: ayendiki $
- *    $Date: 2015/08/28 20:33:54 $
- *    $Revision: 1.21 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,64 +23,79 @@
 #include "TrackIO.h"
 #include "vial.h" // Needs to be included first because of CVS libs
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <float.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <math.h>
+#include <sstream>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
+#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
 using namespace std;
 
-static int parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static int  parse_commandline(int argc, char **argv);
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options(FILE *fp);
 
 int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
 const char *Progname = "dmri_trk2trk";
 
 int doInvNonlin = 0, doFill = 0, doMean = 0, doNth = 0, strNum = -1,
     lengthMin = -1, lengthMax = -1;
 unsigned int nTract = 0;
-char *inDir = nullptr, *outDir = nullptr, *inRefFile = nullptr,
-     *outRefFile = nullptr, *affineXfmFile = nullptr, *nonlinXfmFile = nullptr;
-vector<char *> inTrkList, inAscList, outTrkList, outAscList, outVolList,
+std::string  inDir, outDir, inRefFile, outRefFile, affineXfmFile, nonlinXfmFile;
+vector<std::string> inTrkList, inAscList, outTrkList, outAscList, outVolList,
     incMaskList, excMaskList;
 vector<MRI *> incMask, excMask;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
-  char fname[PATH_MAX];
-  char outorient[4];
-  vector<float> point(3);
-  vector<float> step(3, 0);
-  MATRIX *outv2r;
-  MRI *inref = 0;
-  MRI *outref = 0;
-  MRI *outvol = 0;
-  AffineReg affinereg;
+  int           nargs, cputime;
+  char          outorient[4];
+  std::string   fname;
+  vector<float> point(3), step(3, 0);
+  MATRIX *      outv2r;
+  MRI *         inref = 0, *outref = 0, *outvol = 0;
+  AffineReg     affinereg;
 #ifndef NO_CVS_UP_IN_HERE
   NonlinReg nonlinreg;
 #endif
 
   nargs = handleVersionOption(argc, argv, "dmri_trk2trk");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -95,26 +105,24 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  if (argc == 0) {
+  if (argc == 0)
     usage_exit();
-  }
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly != 0) {
+  if (checkoptsonly)
     return (0);
-  }
 
   dump_options(stdout);
 
   // Read reference volumes
-  inref = MRIread(inRefFile);
-  outref = MRIread(outRefFile);
+  inref  = MRIread(inRefFile.c_str());
+  outref = MRIread(outRefFile.c_str());
 
   if (!outVolList.empty()) {
-    outvol = MRIclone(outref, nullptr);
+    outvol = MRIclone(outref, NULL);
   }
 
   // Output space orientation information
@@ -123,32 +131,34 @@ int main(int argc, char **argv) {
 
   // Read transform files
 #ifndef NO_CVS_UP_IN_HERE
-  if (nonlinXfmFile != nullptr) {
-    if (affineXfmFile != nullptr) {
-      affinereg.ReadXfm(affineXfmFile, inref, nullptr);
+  if (!nonlinXfmFile.empty()) {
+    if (!affineXfmFile.empty()) {
+      affinereg.ReadXfm(affineXfmFile.c_str(), inref, 0);
     }
-    nonlinreg.ReadXfm(nonlinXfmFile, outref);
-  } else
+    nonlinreg.ReadXfm(nonlinXfmFile.c_str(), outref);
+  } else {
 #endif
-      if (affineXfmFile != nullptr) {
-    affinereg.ReadXfm(affineXfmFile, inref, outref);
+    if (!affineXfmFile.empty()) {
+      affinereg.ReadXfm(affineXfmFile.c_str(), inref, outref);
+    }
+#ifndef NO_CVS_UP_IN_HERE
   }
+#endif
 
   // Read inclusion masks
   for (auto imask = incMaskList.begin(); imask < incMaskList.end(); imask++) {
-    incMask.push_back(MRIread(*imask));
+    incMask.push_back(MRIread((*imask).c_str()));
   }
 
   // Read exclusion masks
   for (auto imask = excMaskList.begin(); imask < excMaskList.end(); imask++) {
-    excMask.push_back(MRIread(*imask));
+    excMask.push_back(MRIread((*imask).c_str()));
   }
 
   for (unsigned int itract = 0; itract < nTract; itract++) {
-    int npts;
-    int nstr = 0;
-    CTrackReader trkreader;
-    TRACK_HEADER trkheadin;
+    int                   npts, nstr = 0;
+    CTrackReader          trkreader;
+    TRACK_HEADER          trkheadin;
     vector<vector<float>> streamlines;
 
     cout << "Processing input file " << itract + 1 << " of " << nTract << "..."
@@ -156,28 +166,27 @@ int main(int argc, char **argv) {
     cputimer.reset();
 
     if (!inTrkList.empty()) { // Read streamlines from .trk file
-      if (inDir != nullptr) {
-        sprintf(fname, "%s/%s", inDir, inTrkList[itract]);
+      if (!inDir.empty()) {
+        fname = inDir + "/" + inTrkList.at(itract);
       } else {
-        strcpy(fname, inTrkList[itract]);
+        fname = inTrkList.at(itract);
       }
 
-      if (!trkreader.Open(fname, &trkheadin)) {
+      if (!trkreader.Open(fname.c_str(), &trkheadin)) {
         cout << "ERROR: Cannot open input file " << fname << endl;
         cout << "ERROR: " << trkreader.GetLastErrorMessage() << endl;
         exit(1);
       }
 
       while (trkreader.GetNextPointCount(&npts)) {
-        const int veclen = npts * 3;
-        float *iraw;
-        float *rawpts = new float[veclen];
+        const int     veclen = npts * 3;
+        float *       iraw, *rawpts = new float[veclen];
         vector<float> newpts(veclen);
 
         // Read a streamline from input file
         trkreader.GetNextTrackData(npts, rawpts);
 
-        if (((doNth != 0) && nstr != strNum) ||
+        if ((doNth && nstr != strNum) ||
             (lengthMin > -1 && npts <= lengthMin) ||
             (lengthMax > -1 && npts >= lengthMax)) {
           delete[] rawpts;
@@ -188,12 +197,12 @@ int main(int argc, char **argv) {
         iraw = rawpts;
 
         // Divide by input voxel size and make 0-based to get voxel coords
-        for (auto ipt = newpts.begin(); ipt < newpts.end(); ipt += 3) {
+        for (vector<float>::iterator ipt = newpts.begin(); ipt < newpts.end();
+             ipt += 3)
           for (int k = 0; k < 3; k++) {
             ipt[k] = *iraw / trkheadin.voxel_size[k] - .5;
             iraw++;
           }
-        }
 
         delete[] rawpts;
         streamlines.push_back(newpts);
@@ -201,14 +210,14 @@ int main(int argc, char **argv) {
         nstr++;
       }
     } else if (!inAscList.empty()) { // Read streamlines from text file
-      string ptline;
-      ifstream infile;
+      string        ptline;
+      ifstream      infile;
       vector<float> newpts;
 
-      if (inDir != nullptr) {
-        sprintf(fname, "%s/%s", inDir, inAscList[itract]);
+      if (!inDir.empty()) {
+        fname = inDir + '/' + inAscList.at(itract);
       } else {
-        strcpy(fname, inAscList[itract]);
+        fname = inAscList.at(itract);
       }
 
       infile.open(fname, ios::in);
@@ -218,22 +227,18 @@ int main(int argc, char **argv) {
       }
 
       while (getline(infile, ptline)) {
-        float val;
+        float         val;
         istringstream linestr(ptline);
         vector<float> point;
 
-        while (linestr >> val) {
+        while (linestr >> val)
           point.push_back(val);
-        }
 
         if (point.empty()) { // Empty line marks end of streamline
-          if (((doNth == 0) || nstr == strNum) &&
-              (lengthMin == -1 ||
-               static_cast<int>(newpts.size()) / 3 > lengthMin) &&
-              (lengthMax == -1 ||
-               static_cast<int>(newpts.size()) / 3 < lengthMax)) {
+          if ((!doNth || nstr == strNum) &&
+              (lengthMin == -1 || (int)newpts.size() / 3 > lengthMin) &&
+              (lengthMax == -1 || (int)newpts.size() / 3 < lengthMax))
             streamlines.push_back(newpts);
-          }
 
           newpts.clear();
           nstr++;
@@ -241,9 +246,8 @@ int main(int argc, char **argv) {
           cout << "ERROR: Unexpected number of entries in a line ("
                << point.size() << ") in file " << fname << endl;
           exit(1);
-        } else {
+        } else
           newpts.insert(newpts.end(), point.begin(), point.end());
-        }
       }
 
       infile.close();
@@ -254,62 +258,56 @@ int main(int argc, char **argv) {
     for (int kstr = nstr - 1; kstr >= 0; kstr--) {
       vector<float> newpts;
 
-      for (auto ipt = streamlines[kstr].begin(); ipt < streamlines[kstr].end();
-           ipt += 3) {
+      for (vector<float>::iterator ipt = streamlines[kstr].begin();
+           ipt < streamlines[kstr].end(); ipt += 3) {
         copy(ipt, ipt + 3, point.begin());
 
         // Apply affine transform
-        if (!affinereg.IsEmpty()) {
+        if (!affinereg.IsEmpty())
           affinereg.ApplyXfm(point, point.begin());
-        }
 
 #ifndef NO_CVS_UP_IN_HERE
         // Apply nonlinear transform
         if (!nonlinreg.IsEmpty()) {
-          if (doInvNonlin != 0) {
+          if (doInvNonlin)
             nonlinreg.ApplyXfmInv(point, point.begin());
-          } else {
+          else
             nonlinreg.ApplyXfm(point, point.begin());
-          }
         }
 #endif
 
         copy(point.begin(), point.end(), ipt);
       }
 
-      for (auto ipt = streamlines[kstr].begin(); ipt < streamlines[kstr].end();
-           ipt += 3) {
+      for (vector<float>::const_iterator ipt = streamlines[kstr].begin();
+           ipt < streamlines[kstr].end(); ipt += 3) {
         float dmax = 1; // This will not remove duplicate points
 
-        if ((doFill != 0) && ipt < streamlines[kstr].end() - 3) {
+        if (doFill && ipt < streamlines[kstr].end() - 3) {
           // Calculate step for filling in gap between points
           // Gaps could result when mapping to a higher-resolution space
           for (int k = 0; k < 3; k++) {
             float dist = ipt[k + 3] - ipt[k];
 
             step[k] = dist;
-            dist = fabs(dist);
+            dist    = fabs(dist);
 
-            if (dist > dmax) {
+            if (dist > dmax)
               dmax = dist;
-            }
           }
 
-          if (dmax > 0) {
-            for (int k = 0; k < 3; k++) {
+          if (dmax > 0)
+            for (int k = 0; k < 3; k++)
               step[k] /= dmax;
-            }
-          }
         }
 
         copy(ipt, ipt + 3, point.begin());
 
-        for (int istep = static_cast<int>(round(dmax)); istep > 0; istep--) {
+        for (int istep = (int)round(dmax); istep > 0; istep--) {
           newpts.insert(newpts.end(), point.begin(), point.end());
 
-          for (int k = 0; k < 3; k++) {
+          for (int k = 0; k < 3; k++)
             point[k] += step[k];
-          }
         }
       }
 
@@ -324,33 +322,27 @@ int main(int argc, char **argv) {
       bool dokeep = true;
 
       // There must be at least one point that intersects each inclusion mask
-      for (auto imask = incMask.begin(); imask < incMask.end(); imask++) {
+      for (vector<MRI *>::const_iterator imask = incMask.begin();
+           imask < incMask.end(); imask++) {
         dokeep = false;
 
-        for (auto ipt = streamlines[kstr].begin();
+        for (vector<float>::const_iterator ipt = streamlines[kstr].begin();
              ipt < streamlines[kstr].end(); ipt += 3) {
-          int ix = (int)round(ipt[0]);
-          int iy = (int)round(ipt[1]);
-          int iz = (int)round(ipt[2]);
+          int ix = (int)round(ipt[0]), iy = (int)round(ipt[1]),
+              iz = (int)round(ipt[2]);
 
-          if (ix < 0) {
+          if (ix < 0)
             ix = 0;
-          }
-          if (ix >= (*imask)->width) {
+          if (ix >= (*imask)->width)
             ix = (*imask)->width - 1;
-          }
-          if (iy < 0) {
+          if (iy < 0)
             iy = 0;
-          }
-          if (iy >= (*imask)->height) {
+          if (iy >= (*imask)->height)
             iy = (*imask)->height - 1;
-          }
-          if (iz < 0) {
+          if (iz < 0)
             iz = 0;
-          }
-          if (iz >= (*imask)->depth) {
+          if (iz >= (*imask)->depth)
             iz = (*imask)->depth - 1;
-          }
 
           if (MRIgetVoxVal(*imask, ix, iy, iz, 0) > 0) {
             dokeep = true;
@@ -358,9 +350,8 @@ int main(int argc, char **argv) {
           }
         }
 
-        if (!dokeep) {
+        if (!dokeep)
           break;
-        }
       }
 
       if (!dokeep) {
@@ -369,31 +360,25 @@ int main(int argc, char **argv) {
       }
 
       // There must be no point that intersects any exclusion mask
-      for (auto ipt = streamlines[kstr].begin(); ipt < streamlines[kstr].end();
-           ipt += 3) {
-        for (auto imask = excMask.begin(); imask < excMask.end(); imask++) {
-          int ix = (int)round(ipt[0]);
-          int iy = (int)round(ipt[1]);
-          int iz = (int)round(ipt[2]);
+      for (vector<float>::const_iterator ipt = streamlines[kstr].begin();
+           ipt < streamlines[kstr].end(); ipt += 3) {
+        for (vector<MRI *>::const_iterator imask = excMask.begin();
+             imask < excMask.end(); imask++) {
+          int ix = (int)round(ipt[0]), iy = (int)round(ipt[1]),
+              iz = (int)round(ipt[2]);
 
-          if (ix < 0) {
+          if (ix < 0)
             ix = 0;
-          }
-          if (ix >= (*imask)->width) {
+          if (ix >= (*imask)->width)
             ix = (*imask)->width - 1;
-          }
-          if (iy < 0) {
+          if (iy < 0)
             iy = 0;
-          }
-          if (iy >= (*imask)->height) {
+          if (iy >= (*imask)->height)
             iy = (*imask)->height - 1;
-          }
-          if (iz < 0) {
+          if (iz < 0)
             iz = 0;
-          }
-          if (iz >= (*imask)->depth) {
+          if (iz >= (*imask)->depth)
             iz = (*imask)->depth - 1;
-          }
 
           if (MRIgetVoxVal(*imask, ix, iy, iz, 0) > 0) {
             dokeep = false;
@@ -401,42 +386,29 @@ int main(int argc, char **argv) {
           }
         }
 
-        if (!dokeep) {
+        if (!dokeep)
           break;
-        }
       }
 
-      if (!dokeep) {
+      if (!dokeep)
         streamlines.erase(streamlines.begin() + kstr);
-      }
     }
 
-    if ((doMean != 0) && !streamlines.empty()) {
-      unsigned int nstr = streamlines.size();
-      unsigned int lmin;
-      unsigned int kmax;
-      unsigned int nstrout;
-      unsigned int kstrmean = 0;
-      float dmin = numeric_limits<float>::infinity();
+    if (doMean && !streamlines.empty()) {
+      unsigned int nstr = streamlines.size(), lmin, kmax, nstrout, kstrmean = 0;
+      float        dmin = numeric_limits<float>::infinity();
       vector<bool> isout(nstr);
-      vector<unsigned int> lengths(nstr);
-      vector<float> steps(nstr);
-      vector<float> strmean;
-      vector<float> strstd;
-      vector<float> strU;
-      vector<float> strL;
-      vector<bool>::iterator iout;
+      vector<unsigned int>           lengths(nstr);
+      vector<float>                  steps(nstr), strmean, strstd, strU, strL;
+      vector<bool>::iterator         iout;
       vector<unsigned int>::iterator ilen;
-      vector<float>::iterator istep;
-      vector<float>::iterator imean;
-      vector<float>::iterator istd;
-      vector<float>::iterator iupper;
-      vector<float>::iterator ilower;
+      vector<float>::iterator        istep, imean, istd, iupper, ilower;
 
       // Find the minimum streamline length
       ilen = lengths.begin();
 
-      for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
+      for (vector<vector<float>>::const_iterator istr = streamlines.begin();
+           istr < streamlines.end(); istr++) {
         *ilen = istr->size() / 3;
         ilen++;
       }
@@ -448,7 +420,7 @@ int main(int argc, char **argv) {
       istep = steps.begin();
 
       for (ilen = lengths.begin(); ilen < lengths.end(); ilen++) {
-        *istep = (*ilen - 1) / static_cast<float>(kmax);
+        *istep = (*ilen - 1) / (float)kmax;
         istep++;
       }
 
@@ -462,21 +434,21 @@ int main(int argc, char **argv) {
 
       istep = steps.begin();
 
-      for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
+      for (vector<vector<float>>::const_iterator istr = streamlines.begin();
+           istr < streamlines.end(); istr++) {
         imean = strmean.begin();
-        istd = strstd.begin();
+        istd  = strstd.begin();
 
         for (unsigned int kpt = 0; kpt < kmax; kpt++) {
-          const auto idx = static_cast<unsigned int>(round(kpt * (*istep)));
-          auto ipt = istr->begin() + idx * 3;
+          const unsigned int idx = (unsigned int)round(kpt * (*istep));
+          vector<float>::const_iterator ipt = istr->begin() + idx * 3;
 
-          if (ipt > istr->end() - 3) {
+          if (ipt > istr->end() - 3)
             ipt = istr->end() - 3;
-          }
 
           for (int k = 0; k < 3; k++) {
-            imean[k] += ipt[k];
-            istd[k] += ipt[k] * ipt[k];
+            imean[k] += (float)ipt[k];
+            istd[k] += (float)ipt[k] * ipt[k];
           }
 
           imean += 3;
@@ -490,7 +462,7 @@ int main(int argc, char **argv) {
       strU.resize(strmean.size());
       strL.resize(strmean.size());
 
-      istd = strstd.begin();
+      istd   = strstd.begin();
       iupper = strU.begin();
       ilower = strL.begin();
 
@@ -499,17 +471,15 @@ int main(int argc, char **argv) {
 
         *imean /= nstr;
 
-        if (nstr > 1) {
+        if (nstr > 1)
           *istd = sqrt((*istd - nstr * (*imean) * (*imean)) / (nstr - 1));
-        } else {
+        else
           *istd = 0;
-        }
 
-        if (imean == strmean.begin() || imean == strmean.end() - 1) {
+        if (imean == strmean.begin() || imean == strmean.end() - 1)
           dout = *istd;
-        } else {
+        else
           dout = 2 * (*istd);
-        }
 
         *iupper = *imean + dout;
         *ilower = *imean - dout;
@@ -522,16 +492,17 @@ int main(int argc, char **argv) {
       // Flag streamlines with at least one outlier point
       fill(isout.begin(), isout.end(), false);
 
-      iout = isout.begin();
+      iout  = isout.begin();
       istep = steps.begin();
 
-      for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
+      for (vector<vector<float>>::const_iterator istr = streamlines.begin();
+           istr < streamlines.end(); istr++) {
         iupper = strU.begin();
         ilower = strL.begin();
 
         for (unsigned int kpt = 0; kpt < kmax; kpt++) {
-          const auto idx = static_cast<unsigned int>(round(kpt * (*istep)));
-          auto ipt = istr->begin() + idx * 3;
+          const unsigned int idx = (unsigned int)round(kpt * (*istep));
+          vector<float>::const_iterator ipt = istr->begin() + idx * 3;
 
           for (int k = 0; k < 3; k++) {
             if (*ipt > *iupper || *ipt < *ilower) {
@@ -544,9 +515,8 @@ int main(int argc, char **argv) {
             ilower++;
           }
 
-          if (*iout) {
+          if (*iout)
             break;
-          }
         }
 
         iout++;
@@ -565,23 +535,23 @@ int main(int argc, char **argv) {
       }
 
       // Find the non-outlier streamline that is closest to the mean streamline
-      iout = isout.begin();
+      iout  = isout.begin();
       istep = steps.begin();
 
-      for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
+      for (vector<vector<float>>::const_iterator istr = streamlines.begin();
+           istr < streamlines.end(); istr++) {
         if (!*iout) {
           float dist = 0;
 
           imean = strmean.begin();
-          istd = strstd.begin();
+          istd  = strstd.begin();
 
           for (unsigned int kpt = 0; kpt < kmax; kpt++) {
-            const auto idx = static_cast<unsigned int>(round(kpt * (*istep)));
-            auto ipt = istr->begin() + idx * 3;
+            const unsigned int idx = (unsigned int)round(kpt * (*istep));
+            vector<float>::const_iterator ipt = istr->begin() + idx * 3;
 
-            const float dx = ipt[0] - imean[0];
-            const float dy = ipt[1] - imean[1];
-            const float dz = ipt[2] - imean[2];
+            const float dx = ipt[0] - imean[0], dy = ipt[1] - imean[1],
+                        dz = ipt[2] - imean[2];
 
             dist += sqrt(dx * dx + dy * dy + dz * dz);
 
@@ -590,7 +560,7 @@ int main(int argc, char **argv) {
           }
 
           if (dist < dmin) {
-            dmin = dist;
+            dmin     = dist;
             kstrmean = istr - streamlines.begin();
           }
         }
@@ -608,55 +578,49 @@ int main(int argc, char **argv) {
 
     // Write transformed streamlines to volume
     if (!outVolList.empty()) {
-      if (outDir != nullptr) {
-        sprintf(fname, "%s/%s", outDir, outVolList[itract]);
+      if (!outDir.empty()) {
+        fname = outDir + "/" + outVolList.at(itract);
       } else {
-        strcpy(fname, outVolList[itract]);
+        fname = outVolList.at(itract);
       }
 
       MRIclear(outvol);
 
-      for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
-        for (auto ipt = istr->begin(); ipt < istr->end(); ipt += 3) {
-          int ix = (int)round(ipt[0]);
-          int iy = (int)round(ipt[1]);
-          int iz = (int)round(ipt[2]);
+      for (vector<vector<float>>::const_iterator istr = streamlines.begin();
+           istr < streamlines.end(); istr++)
+        for (vector<float>::const_iterator ipt = istr->begin();
+             ipt < istr->end(); ipt += 3) {
+          int ix = (int)round(ipt[0]), iy = (int)round(ipt[1]),
+              iz = (int)round(ipt[2]);
 
-          if (ix < 0) {
+          if (ix < 0)
             ix = 0;
-          }
-          if (ix >= outvol->width) {
+          if (ix >= outvol->width)
             ix = outvol->width - 1;
-          }
-          if (iy < 0) {
+          if (iy < 0)
             iy = 0;
-          }
-          if (iy >= outvol->height) {
+          if (iy >= outvol->height)
             iy = outvol->height - 1;
-          }
-          if (iz < 0) {
+          if (iz < 0)
             iz = 0;
-          }
-          if (iz >= outvol->depth) {
+          if (iz >= outvol->depth)
             iz = outvol->depth - 1;
-          }
 
           MRIsetVoxVal(outvol, ix, iy, iz, 0,
                        MRIgetVoxVal(outvol, ix, iy, iz, 0) + 1);
         }
-      }
 
-      MRIwrite(outvol, fname);
+      MRIwrite(outvol, fname.c_str());
     }
 
     // Write transformed streamlines to text file
     if (!outAscList.empty()) {
       ofstream outfile;
 
-      if (outDir != nullptr) {
-        sprintf(fname, "%s/%s", outDir, outAscList[itract]);
+      if (!outDir.empty()) {
+        fname = outDir + "/" + outAscList.at(itract);
       } else {
-        strcpy(fname, outAscList[itract]);
+        fname = outAscList.at(itract);
       }
 
       outfile.open(fname, ios::out);
@@ -666,11 +630,9 @@ int main(int argc, char **argv) {
       }
 
       for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
-        for (auto ipt = istr->begin(); ipt < istr->end(); ipt += 3) {
-          outfile << static_cast<int>(round(ipt[0])) << " "
-                  << static_cast<int>(round(ipt[1])) << " "
-                  << static_cast<int>(round(ipt[2])) << endl;
-        }
+        for (auto ipt = istr->begin(); ipt < istr->end(); ipt += 3)
+          outfile << (int)round(ipt[0]) << " " << (int)round(ipt[1]) << " "
+                  << (int)round(ipt[2]) << endl;
 
         outfile << endl;
       }
@@ -726,28 +688,28 @@ int main(int argc, char **argv) {
       trkheadout.image_orientation_patient[5] =
           trkheadout.vox_to_ras[2][1] / trkheadout.voxel_size[1];
 
-      trkheadout.n_count = static_cast<int>(streamlines.size());
+      trkheadout.n_count = (int)streamlines.size();
 
       // Open output .trk file
-      if (outDir != nullptr) {
-        sprintf(fname, "%s/%s", outDir, outTrkList[itract]);
+      if (!outDir.empty()) {
+        fname = outDir + "/" + outTrkList.at(itract);
       } else {
-        strcpy(fname, outTrkList[itract]);
+        fname = outTrkList.at(itract);
       }
 
-      if (!trkwriter.Initialize(fname, trkheadout)) {
+      if (!trkwriter.Initialize(fname.c_str(), trkheadout)) {
         cout << "ERROR: Cannot open output file " << fname << endl;
         cout << "ERROR: " << trkwriter.GetLastErrorMessage() << endl;
         exit(1);
       }
 
-      for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
+      for (vector<vector<float>>::iterator istr = streamlines.begin();
+           istr < streamlines.end(); istr++) {
         // Make .5-based and multiply back by output voxel size
-        for (auto ipt = istr->begin(); ipt < istr->end(); ipt += 3) {
-          for (int k = 0; k < 3; k++) {
+        for (vector<float>::iterator ipt = istr->begin(); ipt < istr->end();
+             ipt += 3)
+          for (int k = 0; k < 3; k++)
             ipt[k] = (ipt[k] + .5) * trkheadout.voxel_size[k];
-          }
-        }
 
         trkwriter.WriteNextTrack(istr->size() / 3, &(istr->at(0)));
       }
@@ -762,15 +724,14 @@ int main(int argc, char **argv) {
   MatrixFree(&outv2r);
   MRIfree(&inref);
   MRIfree(&outref);
-  if (!outVolList.empty()) {
+  if (!outVolList.empty())
     MRIfree(&outvol);
-  }
-  for (auto imask = incMask.begin(); imask < incMask.end(); imask++) {
+  for (vector<MRI *>::iterator imask = incMask.begin(); imask < incMask.end();
+       imask++)
     MRIfree(&(*imask));
-  }
-  for (auto imask = excMask.begin(); imask < excMask.end(); imask++) {
+  for (vector<MRI *>::iterator imask = excMask.begin(); imask < excMask.end();
+       imask++)
     MRIfree(&(*imask));
-  }
 
   cout << "dmri_trk2trk done" << endl;
   return (0);
@@ -779,166 +740,145 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
-  char **pargv;
-  char *option;
+  int    nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) {
+  if (argc < 1)
     usage_exit();
-  }
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug != 0) {
+    if (debug)
       printf("%d %s\n", nargc, option);
-    }
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (strcasecmp(option, "--help") == 0) {
+    if (!strcasecmp(option, "--help"))
       print_help();
-    } else if (strcasecmp(option, "--version") == 0) {
+    else if (!strcasecmp(option, "--version"))
       print_version();
-    } else if (strcasecmp(option, "--debug") == 0) {
+    else if (!strcasecmp(option, "--debug"))
       debug = 1;
-    } else if (strcasecmp(option, "--checkopts") == 0) {
+    else if (!strcasecmp(option, "--checkopts"))
       checkoptsonly = 1;
-    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+    else if (!strcasecmp(option, "--nocheckopts"))
       checkoptsonly = 0;
-    } else if (strcmp(option, "--indir") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--indir")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      inDir = fio_fullpath(pargv[0]);
+      inDir     = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--in") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--in")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         inTrkList.push_back(pargv[nargsused]);
         nargsused++;
       }
-    } else if (strcmp(option, "--inasc") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--inasc")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         inAscList.push_back(pargv[nargsused]);
         nargsused++;
       }
-    } else if (strcmp(option, "--outdir") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--outdir")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      outDir = fio_fullpath(pargv[0]);
+      outDir    = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--out") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--out")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         outTrkList.push_back(pargv[nargsused]);
         nargsused++;
       }
-    } else if (strcmp(option, "--outasc") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--outasc")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         outAscList.push_back(pargv[nargsused]);
         nargsused++;
       }
-    } else if (strcmp(option, "--outvol") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--outvol")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         outVolList.push_back(pargv[nargsused]);
         nargsused++;
       }
-    } else if (strcmp(option, "--inref") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--inref")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       inRefFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--outref") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--outref")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       outRefFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
-    } else if (strcmp(option, "--reg") == 0) {
-      if (nargc < 1) {
+      nargsused  = 1;
+    } else if (!strcmp(option, "--reg")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       affineXfmFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
-    } else if (strcmp(option, "--regnl") == 0) {
-      if (nargc < 1) {
+      nargsused     = 1;
+    } else if (!strcmp(option, "--regnl")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nonlinXfmFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
-    } else if (strcasecmp(option, "--invnl") == 0) {
+      nargsused     = 1;
+    } else if (!strcasecmp(option, "--invnl"))
       doInvNonlin = 1;
-    } else if (strcasecmp(option, "--fill") == 0) {
+    else if (!strcasecmp(option, "--fill"))
       doFill = 1;
-    } else if (strcmp(option, "--imask") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--imask")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         incMaskList.push_back(pargv[nargsused]);
         nargsused++;
       }
-    } else if (strcmp(option, "--emask") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--emask")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         excMaskList.push_back(pargv[nargsused]);
         nargsused++;
       }
-    } else if (strcasecmp(option, "--lmin") == 0) {
-      if (nargc < 1) {
+    } else if (!strcasecmp(option, "--lmin")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%d", &lengthMin);
       nargsused = 1;
-    } else if (strcasecmp(option, "--lmax") == 0) {
-      if (nargc < 1) {
+    } else if (!strcasecmp(option, "--lmax")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%d", &lengthMax);
       nargsused = 1;
-    } else if (strcasecmp(option, "--mean") == 0) {
+    } else if (!strcasecmp(option, "--mean"))
       doMean = 1;
-    } else if (strcasecmp(option, "--nth") == 0) {
-      if (nargc < 1) {
+    else if (!strcasecmp(option, "--nth")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%d", &strNum);
       nargsused = 1;
-      doNth = 1;
+      doNth     = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
-      if (CMDsingleDash(option) != 0) {
+      if (CMDsingleDash(option))
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -948,7 +888,7 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   cout
       << endl
       << "USAGE: " << Progname << endl
@@ -1027,7 +967,7 @@ static void print_usage() {
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
 
   cout << endl << "..." << endl << endl;
@@ -1036,19 +976,19 @@ static void print_help() {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  cout << vcid << endl;
+static void print_version(void) {
+  cout << getVersion() << endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void check_options() {
+static void check_options(void) {
   if (inTrkList.empty() && inAscList.empty()) {
     cout << "ERROR: must specify input .trk or text file(s)" << endl;
     exit(1);
@@ -1079,24 +1019,25 @@ static void check_options() {
          << endl;
     exit(1);
   }
-  if (inRefFile == nullptr) {
+  if (inRefFile.empty()) {
     cout << "ERROR: must specify input reference volume" << endl;
     exit(1);
   }
-  if (outRefFile == nullptr) {
+  if (outRefFile.empty()) {
     cout << "ERROR: must specify output reference volume" << endl;
     exit(1);
   }
-  if ((doMean != 0) && (doNth != 0)) {
+  if (doMean && doNth) {
     cout << "ERROR: cannot use both --mean and --nth" << endl;
     exit(1);
   }
+  return;
 }
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   cout << endl
-       << vcid << endl
+       << getVersion() << endl
        << "cwd " << cwd << endl
        << "cmdline " << cmdline << endl
        << "sysname  " << uts.sysname << endl
@@ -1104,7 +1045,7 @@ static void dump_options(FILE *fp) {
        << "machine  " << uts.machine << endl
        << "user     " << VERuser() << endl;
 
-  if (inDir != nullptr) {
+  if (!inDir.empty()) {
     cout << "Input directory: " << inDir << endl;
   }
   if (!inTrkList.empty()) {
@@ -1121,7 +1062,7 @@ static void dump_options(FILE *fp) {
     }
     cout << endl;
   }
-  if (outDir != nullptr) {
+  if (!outDir.empty()) {
     cout << "Output directory: " << outDir << endl;
   }
   if (!outTrkList.empty()) {
@@ -1159,27 +1100,27 @@ static void dump_options(FILE *fp) {
     }
     cout << endl;
   }
-  if (lengthMin > -1) {
+  if (lengthMin > -1)
     cout << "Lower length threshold: " << lengthMin << endl;
-  }
-  if (lengthMax > -1) {
+  if (lengthMax > -1)
     cout << "Upper length threshold: " << lengthMax << endl;
-  }
   cout << "Input reference: " << inRefFile << endl;
   cout << "Output reference: " << outRefFile << endl;
-  if (affineXfmFile != nullptr) {
+  if (!affineXfmFile.empty()) {
     cout << "Affine registration: " << affineXfmFile << endl;
   }
-  if (nonlinXfmFile != nullptr) {
+  if (!nonlinXfmFile.empty()) {
     cout << "Nonlinear registration: " << nonlinXfmFile << endl;
     cout << "Invert nonlinear morph: " << doInvNonlin << endl;
   }
   cout << "Fill gaps between points: " << doFill << endl;
-  if (doMean != 0) {
+  if (doMean) {
     cout << "Saving mean streamline" << endl;
-  } else if (doNth != 0) {
+  } else if (doNth) {
     cout << "Saving single streamline: " << strNum << endl;
   } else {
     cout << "Saving all streamlines" << endl;
   }
+
+  return;
 }

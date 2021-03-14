@@ -1,17 +1,12 @@
 /**
- * @file  mris_spherical_average.c
  * @brief spherical averaging of labels, curvs and vals.
  *
  * apply spherical averaging to various scalars (see Fischl et al, HBM, 1999)
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2016/12/11 14:33:44 $
- *    $Revision: 1.38 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,19 +18,16 @@
  *
  */
 
+#include "diag.h"
+#include "icosahedron.h"
 #include "mrisurf_project.h"
 #include "mrisurf_vals.h"
-#include "icosahedron.h"
-#include "diag.h"
 #include "tags.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_spherical_average.c,v 1.38 2016/12/11 14:33:44 fischl Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -43,47 +35,46 @@ static void print_version(void);
 
 const char *Progname;
 
-static char *surf_dir = "surf";
-static int erode = 0;
-static int dilate = 0;
-static float threshold = 0;
-static int reassign = 0;
-static int normalize_flag = 0;
-static int condition_no = 0;
-static int stat_flag = 0;
-static char *output_subject_name = NULL;
-static int navgs = 0;
-static char *ohemi = NULL;
-static char *osurf = NULL;
-static char *orig_name = "white";
-static int segment = 0; // not implemented yet
-static char *mask_name = NULL;
+static const char *surf_dir            = "surf";
+static int         erode               = 0;
+static int         dilate              = 0;
+static float       threshold           = 0;
+static int         reassign            = 0;
+static int         normalize_flag      = 0;
+static int         condition_no        = 0;
+static int         stat_flag           = 0;
+static char *      output_subject_name = NULL;
+static int         navgs               = 0;
+static char *      ohemi               = NULL;
+static char *      osurf               = NULL;
+static const char *orig_name           = "white";
+static int         segment             = 0; // not implemented yet
+static char *      mask_name           = NULL;
 
-static int compute_average_label_area = 0;
-static int which_ic = 7;
-static char *sdir = NULL;
-static char *osdir = NULL;
-static double logodds_slope = 0.1;
+static int    compute_average_label_area = 0;
+static int    which_ic                   = 7;
+static char * sdir                       = NULL;
+static char * osdir                      = NULL;
+static double logodds_slope              = 0.1;
 
-static int spatial_prior_avgs = 0;
+static int   spatial_prior_avgs  = 0;
 static char *spatial_prior_fname = NULL;
-static char dir[STRLEN] = "";
+static char  dir[STRLEN]         = "";
 
 int main(int argc, char *argv[]) {
   char **av, *out_fname, *surf_name, fname[STRLEN], *hemi, *cp, *data_fname;
-  int ac, nargs, i, which, nsubjects;
+  int    ac, nargs, i, which, nsubjects;
   double max_len, mean, sigma;
-  MRI_SURFACE *mris, *mris_avg;
+  MRI_SURFACE *    mris, *mris_avg;
   MRIS_HASH_TABLE *mht = NULL;
-  LABEL *area, *area_avg = NULL;
-  float average_label_area = 0;
+  LABEL *          area, *area_avg = NULL;
+  float            average_label_area = 0;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_spherical_average");
 
   nargs = handleVersionOption(argc, argv, "mris_spherical_average");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -149,7 +140,7 @@ int main(int argc, char *argv[]) {
   }
 
   data_fname = argv[2];
-  hemi = argv[3];
+  hemi       = argv[3];
   if (!ohemi) {
     ohemi = hemi;
   }
@@ -395,10 +386,10 @@ int main(int argc, char *argv[]) {
   }
   if (stat_flag) /* write out summary statistics files */
   {
-    int vno;
+    int     vno;
     VERTEX *v;
-    float dof;
-    FILE *fp;
+    float   dof;
+    FILE *  fp;
 
     sprintf(fname, "%s/sigavg%d-%s.w", out_fname, condition_no, ohemi);
     fprintf(stderr, "writing output means to %s\n", fname);
@@ -467,15 +458,15 @@ int main(int argc, char *argv[]) {
         LABEL *area_saved;
         double thresh, best_thresh, surface_area, best_area;
 
-        area_saved = LabelCopy(area, NULL);
-        best_area = LabelArea(area_saved, mris);
+        area_saved  = LabelCopy(area, NULL);
+        best_area   = LabelArea(area_saved, mris);
         best_thresh = 0.0;
         for (thresh = 0; thresh <= 1; thresh += .01) {
           LabelThreshold(area_saved, thresh);
           surface_area = LabelArea(area_saved, mris);
           if (fabs(surface_area - average_label_area) <
               fabs(best_area - average_label_area)) {
-            best_area = surface_area;
+            best_area   = surface_area;
             best_thresh = thresh;
           }
         }
@@ -516,7 +507,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -538,24 +529,24 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "ic")) {
     which_ic = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
   } else if (!stricmp(option, "average_area")) {
     compute_average_label_area = 1;
     printf("computing threshold that yields surface area of average label "
            "closest to average of individual surface areas\n");
   } else if (!stricmp(option, "sdir")) {
-    sdir = argv[2];
+    sdir  = argv[2];
     nargs = 1;
   } else if (!stricmp(option, "dir")) {
     strcpy(dir, argv[2]);
     nargs = 1;
   } else if (!stricmp(option, "mask")) {
     mask_name = argv[2];
-    nargs = 1;
+    nargs     = 1;
   } else if (!stricmp(option, "prior")) {
-    spatial_prior_avgs = atoi(argv[2]);
+    spatial_prior_avgs  = atoi(argv[2]);
     spatial_prior_fname = argv[3];
-    nargs = 2;
+    nargs               = 2;
     printf("blurring label priors and writing output to %s\n",
            spatial_prior_fname);
   } else if (!stricmp(option, "segment")) {
@@ -567,19 +558,19 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "orig")) {
     orig_name = argv[2];
-    nargs = 1;
+    nargs     = 1;
   } else if (!stricmp(option, "erode")) {
     erode = atoi(argv[2]);
     nargs = 1;
     printf("eroding label %d times before writing\n", erode);
   } else if (!stricmp(option, "dilate")) {
     dilate = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("dilating label %d times before writing\n", dilate);
   } else if (!stricmp(option, "close")) {
     dilate = atoi(argv[2]);
-    erode = dilate;
-    nargs = 1;
+    erode  = dilate;
+    nargs  = 1;
     printf("closing label %d times before writing\n", dilate);
   } else if (!stricmp(option, "reassign")) {
     reassign = 1;
@@ -592,7 +583,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("debugging vertex %d\n", Gdiag_no);
       break;
     case 'A':
@@ -607,7 +598,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'O':
       output_subject_name = argv[2];
-      nargs = 1;
+      nargs               = 1;
       fprintf(stderr, "painting output onto subject %s.\n",
               output_subject_name);
       break;
@@ -617,9 +608,9 @@ static int get_option(int argc, char *argv[]) {
       exit(1);
       break;
     case 'S': /* write out stats */
-      stat_flag = 1;
+      stat_flag    = 1;
       condition_no = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       fprintf(stderr, "writing out summary statistics as condition %d\n",
               condition_no);
       break;
@@ -681,6 +672,6 @@ static void print_help(void) {
 }
 
 static void print_version(void) {
-  fprintf(stderr, "%s\n", vcid);
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

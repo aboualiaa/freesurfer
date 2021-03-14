@@ -1,16 +1,7 @@
-/**
- * @file  PanelTrack.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/05/10 19:17:30 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,12 +13,12 @@
  *
  */
 #include "PanelTrack.h"
-#include "ui_PanelTrack.h"
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
-#include "LayerTrack.h"
-#include "MyUtils.h"
 #include "LayerPropertyTrack.h"
+#include "LayerTrack.h"
+#include "MainWindow.h"
+#include "MyUtils.h"
+#include "ui_MainWindow.h"
+#include "ui_PanelTrack.h"
 #include <QFileInfo>
 
 PanelTrack::PanelTrack(QWidget *parent)
@@ -148,8 +139,8 @@ void PanelTrack::OnSliderOpacity(int val) {
 
 void PanelTrack::OnLineEditOpacity(const QString &text) {
   LayerTrack *layer = GetCurrentLayer<LayerTrack *>();
-  bool bOK;
-  double val = text.toDouble(&bOK);
+  bool        bOK;
+  double      val = text.toDouble(&bOK);
   if (layer && bOK) {
     layer->GetProperty()->SetOpacity(val);
     ui->sliderOpacity->blockSignals(true);

@@ -19,7 +19,7 @@
 namespace fs::util::cli {
 
 namespace pocl = boost::program_options::command_line_style;
-namespace po = boost::program_options;
+namespace po   = boost::program_options;
 
 // program option style
 constexpr auto po_style =

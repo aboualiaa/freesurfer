@@ -1,17 +1,11 @@
 /**
- * @file  mri_cnr.c
  * @brief use white and pial surfaces to compute the CNR of a volume
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2016/05/05 18:44:03 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,39 +18,38 @@
  */
 
 #include "diag.h"
-#include "mrisurf.h"
 #include "mri_conform.h"
+#include "mrisurf.h"
 #include "version.h"
-
-static char vcid[] = "$Id: mri_cnr.c,v 1.11 2016/05/05 18:44:03 fischl Exp $";
 
 int main(int argc, char *argv[]);
 
-static int MRIScomputeSlope(MRI_SURFACE *mris, MRI *mri, double dist_in,
-                            double dist_out, double step_in, double step_out,
-                            MATRIX *m_linfit);
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_version();
+static int    MRIScomputeSlope(MRI_SURFACE *mris, MRI *mri, double dist_in,
+                               double dist_out, double step_in, double step_out,
+                               MATRIX *m_linfit);
+static int    get_option(int argc, char *argv[]);
+static void   usage_exit();
+static void   print_usage();
+static void   print_version();
 static double compute_volume_cnr(MRI_SURFACE *mris, MRI *mri, char *log_fname);
-const char *Progname;
-static char *log_fname = nullptr;
+const char *  Progname;
+static char * log_fname = nullptr;
 
-static char *slope_fname = nullptr;
+static char * slope_fname = nullptr;
 static double dist_in, dist_out, step_in, step_out;
-static int interp = SAMPLE_TRILINEAR;
+static int    interp = SAMPLE_TRILINEAR;
 
 static LABEL *lh_area, *rh_area;
 
 static int only_total = 0;
 
 int main(int argc, char *argv[]) {
-  char **av, *mri_name, fname[STRLEN], *hemi, *path;
-  int ac, nargs, i, j;
-  MRI *mri, *mri_template = nullptr, *mri_tmp;
+  char **      av, *mri_name, fname[STRLEN], *path;
+  const char * hemi;
+  int          ac, nargs, i, j;
+  MRI *        mri, *mri_template = NULL, *mri_tmp;
   MRI_SURFACE *mris;
-  double cnr_total, cnr = 0.0;
+  double       cnr_total, cnr = 0.0;
 
   nargs = handleVersionOption(argc, argv, "mri_cnr");
   if (nargs && argc - nargs == 1)
@@ -130,7 +123,7 @@ int main(int argc, char *argv[]) {
       } else {
         double rh_cnr;
         rh_cnr = compute_volume_cnr(mris, mri, log_fname);
-        cnr = (cnr + rh_cnr) / 2.0;
+        cnr    = (cnr + rh_cnr) / 2.0;
         if (only_total == 0)
           printf("%s CNR = %2.3f\n", hemi, rh_cnr);
       }
@@ -173,7 +166,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -200,11 +193,11 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'S':
       slope_fname = argv[2];
-      dist_in = atof(argv[3]);
-      dist_out = atof(argv[4]);
-      step_in = atof(argv[5]);
-      step_out = atof(argv[6]);
-      nargs = 5;
+      dist_in     = atof(argv[3]);
+      dist_out    = atof(argv[4]);
+      step_in     = atof(argv[5]);
+      step_out    = atof(argv[6]);
+      nargs       = 5;
       break;
     case 'T':
       only_total = 1;
@@ -212,7 +205,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -261,8 +254,8 @@ static void print_usage() {
   fprintf(stderr, "\t-version : print software version information and quit\n");
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 /*
@@ -272,9 +265,9 @@ static void print_version() {
 static double compute_volume_cnr(MRI_SURFACE *mris, MRI *mri, char *log_fname) {
   double gray_white_cnr, gray_csf_cnr, gray_var, white_var, csf_var, gray_mean,
       white_mean, csf_mean;
-  float thickness;
-  double x, y, z, gray, white, csf;
-  int vno;
+  float   thickness;
+  double  x, y, z, gray, white, csf;
+  int     vno;
   VERTEX *v;
 
   //  MRISsetVolumeForSurface(mris, mri);
@@ -341,7 +334,7 @@ static double compute_volume_cnr(MRI_SURFACE *mris, MRI *mri, char *log_fname) {
 
   white_var = white_var / (double)mris->nvertices - white_mean * white_mean;
   gray_var = gray_var / ((double)mris->nvertices * 2.0) - gray_mean * gray_mean;
-  csf_var = csf_var / (double)mris->nvertices - csf_mean * csf_mean;
+  csf_var  = csf_var / (double)mris->nvertices - csf_mean * csf_mean;
 
   if (only_total == 0)
     printf("\twhite = %2.1f+-%2.1f, gray = %2.1f+-%2.1f, csf = %2.1f+-%2.1f\n",
@@ -349,7 +342,7 @@ static double compute_volume_cnr(MRI_SURFACE *mris, MRI *mri, char *log_fname) {
            sqrt(csf_var));
 
   gray_white_cnr = SQR(gray_mean - white_mean) / (gray_var + white_var);
-  gray_csf_cnr = SQR(gray_mean - csf_mean) / (gray_var + csf_var);
+  gray_csf_cnr   = SQR(gray_mean - csf_mean) / (gray_var + csf_var);
 
   if (only_total == 0)
     printf("\tgray/white CNR = %2.3f, gray/csf CNR = %2.3f\n", gray_white_cnr,
@@ -374,15 +367,15 @@ static double compute_volume_cnr(MRI_SURFACE *mris, MRI *mri, char *log_fname) {
 static int MRIScomputeSlope(MRI_SURFACE *mris, MRI *mri, double dist_in,
                             double dist_out, double step_in, double step_out,
                             MATRIX *m_linfit) {
-  int vno, nsamples, n;
+  int     vno, nsamples, n;
   VERTEX *v;
   MATRIX *m_X, *m_Y, *m_P, *m_pinv = nullptr;
-  double d, xv, yv, zv, x, y, z, val;
+  double  d, xv, yv, zv, x, y, z, val;
 
   nsamples = 1 + (int)(dist_in / step_in) + (int)(dist_out / step_out);
-  m_X = MatrixAlloc(2, nsamples, MATRIX_REAL);
-  m_Y = MatrixAlloc(1, nsamples, MATRIX_REAL);
-  m_P = MatrixAlloc(1, 2, MATRIX_REAL);
+  m_X      = MatrixAlloc(2, nsamples, MATRIX_REAL);
+  m_Y      = MatrixAlloc(1, nsamples, MATRIX_REAL);
+  m_P      = MatrixAlloc(1, 2, MATRIX_REAL);
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
     if (vno == Gdiag_no)

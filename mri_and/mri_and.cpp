@@ -1,5 +1,4 @@
 /**
- * @file  mri_and.c
  * @brief performs a logical and at each voxel on a series of volumes
  *
  * performs a logical and at each voxel on a series of volumes
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:13 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,9 +19,9 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "version.h"
 
 static void print_usage();
@@ -35,15 +30,14 @@ static void print_help();
 static void print_version();
 
 static int get_option(int argc, char *argv[]);
-static char vcid[] = "$Id: mri_and.c,v 1.4 2011/03/02 00:04:13 nicks Exp $";
 
 const char *Progname;
 
 /***-------------------------------------------------------****/
 int main(int argc, char *argv[]) {
-  int nargs, index, ac, nvolumes;
+  int    nargs, index, ac, nvolumes;
   char **av;
-  MRI *mri_and = nullptr, *mri;
+  MRI *  mri_and = nullptr, *mri;
 
   nargs = handleVersionOption(argc, argv, "mri_and");
   if (nargs && argc - nargs == 1)
@@ -91,7 +85,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -132,8 +126,8 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

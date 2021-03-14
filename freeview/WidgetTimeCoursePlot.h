@@ -1,16 +1,11 @@
 /**
- * @file  WidgetTimeCoursePlot.h
  * @brief Widget drawing time course plot
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/08/29 15:24:59 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,26 +20,26 @@
 #ifndef WIDGETTIMECOURSEPLOT_H
 #define WIDGETTIMECOURSEPLOT_H
 
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 
 struct TimeCourseData {
 public:
   TimeCourseData() {
-    m_bShow = true;
-    m_dXOffset = 0;
+    m_bShow      = true;
+    m_dXOffset   = 0;
     m_dXInterval = 1;
   }
   QList<double> m_points;
-  double m_dMin;
-  double m_dMax;
-  QString m_strXUnit;
-  double m_dXOffset;
-  double m_dXInterval;
-  qint64 m_nId;
-  QString m_strName;
+  double        m_dMin;
+  double        m_dMax;
+  QString       m_strXUnit;
+  double        m_dXOffset;
+  double        m_dXInterval;
+  qint64        m_nId;
+  QString       m_strName;
 
-  bool m_bShow;
+  bool   m_bShow;
   QColor m_color;
 };
 
@@ -91,21 +86,21 @@ signals:
 
 private:
   QList<TimeCourseData> m_data;
-  double m_dMin;
-  double m_dMax;
-  double m_dLocalMin;
-  double m_dLocalMax;
-  double m_dMinPlot;
-  double m_dMaxPlot;
-  bool m_bAutoScale;
-  int m_nCurrentFrame;
-  int m_nFrames;
-  QRectF m_rectPlot;
-  bool m_bShowFrameNumber;
+  double                m_dMin;
+  double                m_dMax;
+  double                m_dLocalMin;
+  double                m_dLocalMax;
+  double                m_dMinPlot;
+  double                m_dMaxPlot;
+  bool                  m_bAutoScale;
+  int                   m_nCurrentFrame;
+  int                   m_nFrames;
+  QRectF                m_rectPlot;
+  bool                  m_bShowFrameNumber;
 
   QColor m_colorBackground;
   QColor m_colorForeground;
-  bool m_bDarkMode;
+  bool   m_bDarkMode;
 
   bool m_bShowCursorInfo;
 };

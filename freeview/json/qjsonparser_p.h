@@ -71,8 +71,8 @@ public:
     ParsedObject(Parser *p, int pos) : parser(p), objectPosition(pos) {}
     void insert(uint offset);
 
-    Parser *parser;
-    int objectPosition;
+    Parser *                  parser;
+    int                       objectPosition;
     QVarLengthArray<uint, 64> offsets;
 
     inline QJsonPrivate::Entry *entryAt(int i) const {
@@ -86,26 +86,26 @@ private:
   inline bool eatSpace();
   inline char nextToken();
 
-  bool parseObject();
-  bool parseArray();
-  bool parseMember(int baseOffset);
-  bool parseString(bool *latin1);
-  bool parseValue(QJsonPrivate::Value *val, int baseOffset);
-  bool parseNumber(QJsonPrivate::Value *val, int baseOffset);
+  bool        parseObject();
+  bool        parseArray();
+  bool        parseMember(int baseOffset);
+  bool        parseString(bool *latin1);
+  bool        parseValue(QJsonPrivate::Value *val, int baseOffset);
+  bool        parseNumber(QJsonPrivate::Value *val, int baseOffset);
   const char *head;
   const char *json;
   const char *end;
 
-  char *data;
-  int dataLength;
-  int current;
-  int nestingLevel;
+  char *                      data;
+  int                         dataLength;
+  int                         current;
+  int                         nestingLevel;
   QJsonParseError::ParseError lastError;
 
   inline int reserveSpace(int space) {
     if (current + space >= dataLength) {
       dataLength = 2 * dataLength + space;
-      data = (char *)realloc(data, dataLength);
+      data       = (char *)realloc(data, dataLength);
     }
     int pos = current;
     current += space;

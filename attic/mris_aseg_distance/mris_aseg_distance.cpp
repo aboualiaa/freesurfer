@@ -1,5 +1,4 @@
 /**
- * @file  mris_aseg_distance.c
  * @brief computes a map of distances between each point in the cortex and
  * a subcortical centroid
  *
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:26 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,47 +20,47 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
+#include "cma.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "mrimorph.h"
+#include "proto.h"
 #include "utils.h"
 #include "version.h"
-#include "cma.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 
-MRI *MRIdivideAseg(MRI *mri_src, MRI *mri_dst, int label, int nunits);
+MRI *       MRIdivideAseg(MRI *mri_src, MRI *mri_dst, int label, int nunits);
 static void usage_exit(int code);
 static char sdir[STRLEN] = "";
 
-static int notransform = 0;
+static int  notransform       = 0;
 static char surf_name[STRLEN] = "white";
-static int dist_flag = 0;
-static int divide = 1;
-static int dot_flag = 0;
-static int normalize = 0;
+static int  dist_flag         = 0;
+static int  divide            = 1;
+static int  dot_flag          = 0;
+static int  normalize         = 0;
 
 int main(int argc, char *argv[]) {
-  char **av, *subject, *hemi, *out_fname, fname[STRLEN], *cp;
-  int ac, nargs, label;
-  MRI *mri_aseg, *mri_out;
-  LTA *lta;
+  char **      av, *subject, *hemi, *out_fname, fname[STRLEN], *cp;
+  int          ac, nargs, label;
+  MRI *        mri_aseg, *mri_out;
+  LTA *        lta;
   MRI_SURFACE *mris;
-  double xc, yc, zc, xv, yv, zv;
-  VECTOR *v1, *v2;
-  int vno, l;
-  VERTEX *v;
+  double       xc, yc, zc, xv, yv, zv;
+  VECTOR *     v1, *v2;
+  int          vno, l;
+  VERTEX *     v;
 
   nargs = handleVersionOption(argc, argv, "mris_aseg_distance");
   if (nargs && argc - nargs == 1)
@@ -94,9 +89,9 @@ int main(int argc, char *argv[]) {
                 Progname);
     strcpy(sdir, cp);
   }
-  subject = argv[1];
-  hemi = argv[2];
-  label = atoi(argv[3]);
+  subject   = argv[1];
+  hemi      = argv[2];
+  label     = atoi(argv[3]);
   out_fname = argv[4];
 
   sprintf(fname, "%s/%s/surf/%s.%s", sdir, subject, hemi, surf_name);
@@ -133,8 +128,8 @@ int main(int argc, char *argv[]) {
   else
     mri_out = MRIallocSequence(mris->nvertices, 1, 1, MRI_FLOAT, 3);
 
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = VECTOR_ELT(v2, 4) = 1.0;
   for (l = 0; l < divide; l++) {
     MRIcomputeLabelCentroid(mri_aseg, label + l, &xc, &yc, &zc);
@@ -165,9 +160,9 @@ int main(int argc, char *argv[]) {
       }
       if (dist_flag) {
         double dist, dx, dy, dz;
-        dx = xv - xc;
-        dy = yv - yc;
-        dz = zv - zc;
+        dx   = xv - xc;
+        dy   = yv - yc;
+        dz   = zv - zc;
         dist = sqrt(dx * dx + dy * dy + dz * dz);
         MRIsetVoxVal(mri_out, vno, 0, 0, 0, dist);
       } else if (dot_flag) {
@@ -202,7 +197,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

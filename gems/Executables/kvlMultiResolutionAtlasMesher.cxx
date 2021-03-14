@@ -1,5 +1,7 @@
 #include "kvlMultiResolutionAtlasMesher.h"
 
+#include <fstream>
+
 #ifdef USE_TETGEN
 #include "tetgen.h"
 #endif
@@ -18,7 +20,7 @@ MultiResolutionAtlasMesher ::MultiResolutionAtlasMesher() {
   m_Estimator->SetPositionOptimizer(AtlasParameterEstimator::LBFGS);
 
   m_NumberOfClasses = 0;
-  m_NumberOfMeshes = 0;
+  m_NumberOfMeshes  = 0;
 
   m_DomainSize.Fill(0);
 
@@ -47,21 +49,21 @@ MultiResolutionAtlasMesher ::~MultiResolutionAtlasMesher() {
 //
 //
 void MultiResolutionAtlasMesher ::PrintSelf(std::ostream &os,
-                                            itk::Indent indent) const {}
+                                            itk::Indent   indent) const {}
 
 //
 //
 //
 void MultiResolutionAtlasMesher ::SetUp(
     const std::vector<LabelImageType::ConstPointer> &labelImages,
-    const CompressionLookupTable *compressionLookupTable,
-    const itk::Size<3> &initialSize,
-    const std::vector<double> &initialStiffnesses) {
+    const CompressionLookupTable *                   compressionLookupTable,
+    const itk::Size<3> &                             initialSize,
+    const std::vector<double> &                      initialStiffnesses) {
   //
-  m_LabelImages = labelImages;
+  m_LabelImages            = labelImages;
   m_CompressionLookupTable = compressionLookupTable;
-  m_InitialSize = initialSize;
-  m_InitialStiffnesses = initialStiffnesses;
+  m_InitialSize            = initialSize;
+  m_InitialStiffnesses     = initialStiffnesses;
 
   // Pass the label images and mapping onto the estimator
   m_Estimator->SetLabelImages(m_LabelImages, m_CompressionLookupTable);
@@ -70,12 +72,12 @@ void MultiResolutionAtlasMesher ::SetUp(
   m_DomainSize =
       m_Estimator->GetLabelImage(0)->GetLargestPossibleRegion().GetSize();
   m_NumberOfClasses = m_Estimator->GetNumberOfClasses();
-  m_NumberOfMeshes = m_Estimator->GetNumberOfLabelImages();
+  m_NumberOfMeshes  = m_Estimator->GetNumberOfLabelImages();
 
 #ifdef USE_TETGEN
 
   // Set up hexahedra and reference position
-  m_Hexahedra = AtlasMesh::CellsContainer::New();
+  m_Hexahedra                        = AtlasMesh::CellsContainer::New();
   MeshSourceType::Pointer meshSource = MeshSourceType::New();
   for (int x = 0; x < m_InitialSize[0] - 1; x++) {
     for (int y = 0; y < m_InitialSize[1] - 1; y++) {
@@ -134,8 +136,7 @@ void MultiResolutionAtlasMesher ::SetUp(
     positions.push_back(target);
   }
 
-  // Create a mesh collection according to the reference position and the
-  // positions
+  // Create a mesh collection according to the reference position and the positions
   m_Current = this->GetMeshCollection(referencePosition, positions,
                                       m_InitialStiffnesses[0]);
 
@@ -146,7 +147,7 @@ void MultiResolutionAtlasMesher ::SetUp(
   unsigned int domSize[3];
   for (int i = 0; i < 3; i++) {
     meshSize[i] = static_cast<unsigned int>(m_InitialSize[i]);
-    domSize[i] = static_cast<unsigned int>(m_DomainSize[i]);
+    domSize[i]  = static_cast<unsigned int>(m_DomainSize[i]);
   }
 
   m_Current->Construct(meshSize, domSize, m_InitialStiffnesses[0],
@@ -197,8 +198,8 @@ AtlasMesh::CellsContainer::Pointer MultiResolutionAtlasMesher ::GetCells(
 
   // Initialize input structure for TetGen
   tetgenio tetgenInput;
-  tetgenInput.numberofpoints = position->Size();
-  tetgenInput.mesh_dim = 3;
+  tetgenInput.numberofpoints          = position->Size();
+  tetgenInput.mesh_dim                = 3;
   tetgenInput.numberofpointattributes = 0;
 
   tetgenInput.pointlist = new REAL[tetgenInput.numberofpoints * 3];
@@ -216,11 +217,11 @@ AtlasMesh::CellsContainer::Pointer MultiResolutionAtlasMesher ::GetCells(
     tetgenInput.pointlist[counter++] = it.Value()[2];
   }
 
-  // tetgenInput.save_nodes( "debugWithoutFile" );
+  //tetgenInput.save_nodes( "debugWithoutFile" );
 
   std::cout << "!!!!!!!!!!!!! Starting mesh generation " << std::endl;
   tetgenio tetgenOutput;
-  char switches[] = "";
+  char     switches[] = "";
   tetrahedralize(switches, &tetgenInput, &tetgenOutput);
   std::cout << "!!!!!!!!!!!!! Finished mesh generation " << std::endl;
 
@@ -235,11 +236,9 @@ AtlasMesh::CellsContainer::Pointer MultiResolutionAtlasMesher ::GetCells(
 
     {
       // Double-check that our tets are not negative volume.
-      // Do this by calculating the volume of the tetrahedron; this should be
-      // positive. In what follows, the matrix Lambda is the Jacobian of the
-      // transform from a standarized tetrahedron ( ( 0 0 0 )^T, ( 1 0 0 )^T, (
-      // 0 1 0 )^T, ( 0 0 1 )^T ), which has volume 1/6, to the actual
-      // tetrahedron
+      // Do this by calculating the volume of the tetrahedron; this should be positive.
+      // In what follows, the matrix Lambda is the Jacobian of the transform from a standarized tetrahedron
+      // ( ( 0 0 0 )^T, ( 1 0 0 )^T, ( 0 1 0 )^T, ( 0 0 1 )^T ), which has volume 1/6, to the actual tetrahedron
       const double x0 = position->ElementAt(point0Id)[0];
       const double y0 = position->ElementAt(point0Id)[1];
       const double z0 = position->ElementAt(point0Id)[2];
@@ -300,13 +299,12 @@ AtlasMesh::CellsContainer::Pointer MultiResolutionAtlasMesher ::GetCells(
 //
 //
 AtlasMeshCollection::Pointer MultiResolutionAtlasMesher ::GetMeshCollection(
-    AtlasMesh::PointsContainer *referencePosition,
+    AtlasMesh::PointsContainer *                      referencePosition,
     std::vector<AtlasMesh::PointsContainer::Pointer> &positions,
-    double stiffness) const {
+    double                                            stiffness) const {
   // Construct the cells by running TetGen on the referencePosition point set
   AtlasMesh::CellsContainer::Pointer cells = 0;
-  // for ( int cellGeneratingMeshNumber = m_NumberOfMeshes;
-  // cellGeneratingMeshNumber >= 0; cellGeneratingMeshNumber-- )
+  //for ( int cellGeneratingMeshNumber = m_NumberOfMeshes; cellGeneratingMeshNumber >= 0; cellGeneratingMeshNumber-- )
   for (int cellGeneratingMeshNumber = m_NumberOfMeshes;
        cellGeneratingMeshNumber >= m_NumberOfMeshes;
        cellGeneratingMeshNumber--) {
@@ -327,8 +325,7 @@ AtlasMeshCollection::Pointer MultiResolutionAtlasMesher ::GetMeshCollection(
     cells = this->GetCells(cellGeneratingPosition);
 
     // Check that our tets are not negative volume.
-    // Do this by calculating the volume of the tetrahedron; this should be
-    // positive.
+    // Do this by calculating the volume of the tetrahedron; this should be positive.
     bool problemDetected = false;
     for (int meshNumber = m_NumberOfMeshes; meshNumber >= 0; meshNumber--) {
 
@@ -350,7 +347,7 @@ AtlasMeshCollection::Pointer MultiResolutionAtlasMesher ::GetMeshCollection(
         }
 
         AtlasMesh::CellType::PointIdConstIterator pit = cell->PointIdsBegin();
-        AtlasMesh::CellIdentifier point0Id = *pit;
+        AtlasMesh::CellIdentifier                 point0Id = *pit;
         ++pit;
         AtlasMesh::CellIdentifier point1Id = *pit;
         ++pit;
@@ -358,9 +355,8 @@ AtlasMeshCollection::Pointer MultiResolutionAtlasMesher ::GetMeshCollection(
         ++pit;
         AtlasMesh::CellIdentifier point3Id = *pit;
 
-        // In what follows, the matrix Lambda is the Jacobian of the transform
-        // from a standarized tetrahedron ( ( 0 0 0 )^T, ( 1 0 0 )^T, ( 0 1 0
-        // )^T, ( 0 0 1 )^T ), which has volume 1/6, to the actual tetrahedron
+        // In what follows, the matrix Lambda is the Jacobian of the transform from a standarized tetrahedron
+        // ( ( 0 0 0 )^T, ( 1 0 0 )^T, ( 0 1 0 )^T, ( 0 0 1 )^T ), which has volume 1/6, to the actual tetrahedron
         const double x0 = thisPosition->ElementAt(point0Id)[0];
         const double y0 = thisPosition->ElementAt(point0Id)[1];
         const double z0 = thisPosition->ElementAt(point0Id)[2];
@@ -450,8 +446,9 @@ AtlasMeshCollection::Pointer MultiResolutionAtlasMesher ::GetMeshCollection(
     exit(-1);
   }
 
-  // Also get point parameters. Assign flat alphas as a starting point. Vertices
-  // lying on the border can not move freely and belong to first class
+  // Also get point parameters. Assign flat alphas as a starting point. Vertices lying on the border
+  // can not move freely and belong to
+  // first class
   kvl::AtlasAlphasType flatAlphasEntry(m_NumberOfClasses);
   flatAlphasEntry.Fill(1.0f / static_cast<double>(m_NumberOfClasses));
 
@@ -466,7 +463,7 @@ AtlasMeshCollection::Pointer MultiResolutionAtlasMesher ::GetMeshCollection(
        pointIt != referencePosition->End(); ++pointIt) {
     kvl::AtlasMesh::PixelType pointParameters;
 
-    pointParameters.m_Alphas = flatAlphasEntry;
+    pointParameters.m_Alphas          = flatAlphasEntry;
     pointParameters.m_CanChangeAlphas = true;
 
     if ((fabs(pointIt.Value()[0]) < 1e-3) ||
@@ -580,7 +577,7 @@ AtlasMeshCollection::Pointer MultiResolutionAtlasMesher ::GetMeshCollection(
         const double  volume = ( lambda11 * ( lambda22*lambda33 - lambda32*lambda23 )
                                 - lambda12 * ( lambda21*lambda33 - lambda31*lambda23 )
                                 + lambda13 * ( lambda21*lambda32 - lambda31*lambda22 ) ) / 6;
-        if ( volume <= 0 )
+        if ( volume <= 0 ) 
           {
           std::cout << "****************************************" << std::endl;
           std::cout << "****************************************" << std::endl;
@@ -639,13 +636,13 @@ void MultiResolutionAtlasMesher ::Upsample() {
   AtlasMesh::CellsContainer::Pointer upsampledHexahedra =
       AtlasMesh::CellsContainer::New();
 
-  double precision[3]; // Used to convert the reference positions into exact
-                       // integer coordinates
+  double precision
+      [3]; // Used to convert the reference positions into exact integer coordinates
   const int numberOfUpsamplingSteps = m_InitialStiffnesses.size() - 1;
   for (int i = 0; i < 3; i++) {
-    const int factor = static_cast<int>(pow(2, numberOfUpsamplingSteps));
+    const int factor    = static_cast<int>(pow(2, numberOfUpsamplingSteps));
     const int finalSize = factor * m_InitialSize[i] - (factor - 1);
-    precision[i] = static_cast<double>(finalSize - 1) /
+    precision[i]        = static_cast<double>(finalSize - 1) /
                    static_cast<double>(m_DomainSize[i] - 1);
   }
 
@@ -654,8 +651,8 @@ void MultiResolutionAtlasMesher ::Upsample() {
     // Retrieve the ids of the 8 corners
     const AtlasMesh::CellType *cell = hexIt.Value();
 
-    AtlasMesh::CellType::PointIdConstIterator pit = cell->PointIdsBegin();
-    const AtlasMesh::PointIdentifier p0Id = *pit;
+    AtlasMesh::CellType::PointIdConstIterator pit  = cell->PointIdsBegin();
+    const AtlasMesh::PointIdentifier          p0Id = *pit;
     ++pit;
     const AtlasMesh::PointIdentifier p1Id = *pit;
     ++pit;
@@ -680,8 +677,8 @@ void MultiResolutionAtlasMesher ::Upsample() {
     if (true) // Switch off for non-sparse upsampling
     {
       // Look up the label with the highest alpha in the first corner point
-      int maximumAlphaLabelNumber = 0;
-      double maximumAlpha = itk::NumericTraits<double>::min();
+      int    maximumAlphaLabelNumber = 0;
+      double maximumAlpha            = itk::NumericTraits<double>::min();
       for (unsigned int classNumber = 0; classNumber < m_NumberOfClasses;
            classNumber++) {
         if (m_Current->GetPointParameters()
@@ -726,8 +723,7 @@ void MultiResolutionAtlasMesher ::Upsample() {
 
     if (subdivideHexahedron) {
 
-      // The values of these ids will be filled on from the reference mesh, and
-      // used by all other meshes
+      // The values of these ids will be filled on from the reference mesh, and used by all other meshes
       AtlasMesh::PointIdentifier p0UpsampledId;
       AtlasMesh::PointIdentifier p1UpsampledId;
       AtlasMesh::PointIdentifier p2UpsampledId;
@@ -756,8 +752,7 @@ void MultiResolutionAtlasMesher ::Upsample() {
       AtlasMesh::PointIdentifier p4567UpsampledId;
       AtlasMesh::PointIdentifier pMiddleUpsampledId;
 
-      // Loop over all meshes, starting with the reference mesh to obtain the
-      // correct ids
+      // Loop over all meshes, starting with the reference mesh to obtain the correct ids
       for (int meshNumber = m_NumberOfMeshes; meshNumber >= 0; meshNumber--) {
 
         // Retrieve the corresponding original point set
@@ -822,9 +817,8 @@ void MultiResolutionAtlasMesher ::Upsample() {
               pMiddle);
         }
 
-        // If this is the reference mesh, add the points while simulatenously
-        // creating the correct hexahedra and looking up the ids of the points
-        // to be used for the other meshes. Otherwise, just add the points.
+        // If this is the reference mesh, add the points while simulatenously creating the correct hexahedra
+        // and looking up the ids of the points to be used for the other meshes. Otherwise, just add the points.
         if (meshNumber == static_cast<int>(m_NumberOfMeshes)) {
           // Create 8 sub-hexahedra
           this->AddHexahedron(
@@ -912,8 +906,7 @@ void MultiResolutionAtlasMesher ::Upsample() {
     } else {
       // Don't subdivide the hexahedron; just make it anew
 
-      // The values of these ids will be filled on from the reference mesh, and
-      // used by all other meshes
+      // The values of these ids will be filled on from the reference mesh, and used by all other meshes
       AtlasMesh::PointIdentifier p0UpsampledId;
       AtlasMesh::PointIdentifier p1UpsampledId;
       AtlasMesh::PointIdentifier p2UpsampledId;
@@ -990,8 +983,7 @@ void MultiResolutionAtlasMesher ::Upsample() {
     }
   }
 
-  // OK, so now we have a new reference position and position. Let's generate a
-  // mesh collection from that.
+  // OK, so now we have a new reference position and position. Let's generate a mesh collection from that.
   m_Current = this->GetMeshCollection(upsampledReferencePosition,
                                       upsampledPositions, m_Current->GetK());
 
@@ -1024,8 +1016,8 @@ void MultiResolutionAtlasMesher ::AddHexahedron(
     AtlasMesh::PointIdentifier &p4Id, AtlasMesh::PointIdentifier &p5Id,
     AtlasMesh::PointIdentifier &p6Id, AtlasMesh::PointIdentifier &p7Id) {
 
-  // Retrieve the ids of these eight corner points. If they're new, a new id
-  // will automatically be created
+  // Retrieve the ids of these eight corner points. If they're new, a new id will automatically
+  // be created
   p0Id = meshSource->AddPoint(p0);
   p1Id = meshSource->AddPoint(p1);
   p2Id = meshSource->AddPoint(p2);
@@ -1038,7 +1030,7 @@ void MultiResolutionAtlasMesher ::AddHexahedron(
   if (hexahedra) {
     // Create a hexahedral element for later usage
     typedef itk::HexahedronCell<AtlasMesh::CellType> HexahedronCell;
-    AtlasMesh::CellAutoPointer newCell;
+    AtlasMesh::CellAutoPointer                       newCell;
     newCell.TakeOwnership(new HexahedronCell);
     newCell->SetPointId(0, p0Id);
     newCell->SetPointId(1, p1Id);
@@ -1073,23 +1065,21 @@ void MultiResolutionAtlasMesher ::GetUpsampledHexahedronPoints(
     AtlasMesh::PointType &p2367, AtlasMesh::PointType &p0246,
     AtlasMesh::PointType &p0145, AtlasMesh::PointType &p4567,
     AtlasMesh::PointType &pMiddle) {
-  // Floating-point operations somehow don't seem to be entirely reproducible:
-  // we'd of course like middle points calculated on adjacent hexahedra to be
-  // *exactly* the same, but using normal floating-point ops, there sometimes
-  // appears to be a tiny difference in the calculated location, resulting in
-  // the same point being split into two extremely close ones. To avoid this,
-  // let's first convert to integer values, do the calculations on integers, and
-  // then convert back
+  // Floating-point operations somehow don't seem to be entirely reproducible: we'd of course
+  // like middle points calculated on adjacent hexahedra to be *exactly* the same, but using
+  // normal floating-point ops, there sometimes appears to be a tiny difference in the calculated
+  // location, resulting in the same point being split into two extremely close ones. To avoid this,
+  // let's first convert to integer values, do the calculations on integers, and then convert back
 
   typedef itk::Point<TCoordRep, 3> InternalPointType;
-  InternalPointType internalP0;
-  InternalPointType internalP1;
-  InternalPointType internalP2;
-  InternalPointType internalP3;
-  InternalPointType internalP4;
-  InternalPointType internalP5;
-  InternalPointType internalP6;
-  InternalPointType internalP7;
+  InternalPointType                internalP0;
+  InternalPointType                internalP1;
+  InternalPointType                internalP2;
+  InternalPointType                internalP3;
+  InternalPointType                internalP4;
+  InternalPointType                internalP5;
+  InternalPointType                internalP6;
+  InternalPointType                internalP7;
   for (int i = 0; i < 3; i++) {
     internalP0[i] = static_cast<TCoordRep>(p0[i]);
     internalP1[i] = static_cast<TCoordRep>(p1[i]);

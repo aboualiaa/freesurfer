@@ -1,7 +1,6 @@
 #include "kvlAtlasMeshCollectionFastReferencePositionCost.h"
 
 #include "kvlTetrahedronAspectRatio.h"
-#include <math.h>
 
 namespace kvl {
 
@@ -21,11 +20,11 @@ AtlasMeshCollectionFastReferencePositionCost ::
   m_DataAndAlphasCostCalculator =
       AtlasMeshCollectionModelLikelihoodCalculator::New();
 
-  m_PointId = 0;
+  m_PointId                = 0;
   m_InitialPointParameters = 0;
-  m_Cells = 0;
-  m_ReferencePosition = 0;
-  m_K = 1;
+  m_Cells                  = 0;
+  m_ReferencePosition      = 0;
+  m_K                      = 1;
 
   m_CostCalculationMeshCollection = 0;
 }
@@ -43,11 +42,11 @@ void AtlasMeshCollectionFastReferencePositionCost ::SetInitialMeshCollection(
     AtlasMeshCollection *meshCollection) {
 
   //
-  m_InitialPositions = meshCollection->GetPositions();
+  m_InitialPositions       = meshCollection->GetPositions();
   m_InitialPointParameters = meshCollection->GetPointParameters();
-  m_Cells = meshCollection->GetCells();
-  m_ReferencePosition = meshCollection->GetReferencePosition();
-  m_K = meshCollection->GetK();
+  m_Cells                  = meshCollection->GetCells();
+  m_ReferencePosition      = meshCollection->GetReferencePosition();
+  m_K                      = meshCollection->GetK();
 
   // Any existing vertex neighborhood is no longer valid
   m_VertexNeighborhood.clear();
@@ -60,7 +59,7 @@ void AtlasMeshCollectionFastReferencePositionCost ::SetInitialMeshCollection(
 //
 void AtlasMeshCollectionFastReferencePositionCost ::SetLabelImages(
     const std::vector<LabelImageType::ConstPointer> &labelImages,
-    const CompressionLookupTable *compressionLookupTable) {
+    const CompressionLookupTable *                   compressionLookupTable) {
   m_Estimator->SetLabelImages(labelImages, compressionLookupTable);
   m_DataAndAlphasCostCalculator->SetLabelImages(labelImages,
                                                 compressionLookupTable);
@@ -84,14 +83,14 @@ void AtlasMeshCollectionFastReferencePositionCost ::
   while (cellIt != m_Cells->End()) {
     const AtlasMesh::CellType *cell = cellIt.Value();
 
-    if (cell->GetType() != AtlasMesh::CellType::TETRAHEDRON_CELL) {
+    if (cell->GetType() != itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       ++cellIt;
       continue;
     }
 
     // Retrieve point id's of the four vertices
-    AtlasMesh::CellType::PointIdConstIterator pointIt = cell->PointIdsBegin();
-    AtlasMesh::PointIdentifier point0Id = *pointIt;
+    AtlasMesh::CellType::PointIdConstIterator pointIt  = cell->PointIdsBegin();
+    AtlasMesh::PointIdentifier                point0Id = *pointIt;
     ++pointIt;
     AtlasMesh::PointIdentifier point1Id = *pointIt;
     ++pointIt;
@@ -99,8 +98,7 @@ void AtlasMeshCollectionFastReferencePositionCost ::
     ++pointIt;
     AtlasMesh::PointIdentifier point3Id = *pointIt;
 
-    // We're only interested in those tetrahedra that have m_PointId as one of
-    // its vertices
+    // We're only interested in those tetrahedra that have m_PointId as one of its vertices
     if ((point0Id != m_PointId) && (point1Id != m_PointId) &&
         (point2Id != m_PointId) && (point3Id != m_PointId)) {
       ++cellIt;
@@ -137,57 +135,57 @@ void AtlasMeshCollectionFastReferencePositionCost ::
       // Add this tetrahedron to the neighborhood of vertex 0
       VertexNeighboringTetrahedronInfo vertex0Info;
       vertex0Info.m_TetrahedronId = cellIt.Index();
-      vertex0Info.m_X1 = x1;
-      vertex0Info.m_Y1 = y1;
-      vertex0Info.m_Z1 = z1;
-      vertex0Info.m_X2 = x2;
-      vertex0Info.m_Y2 = y2;
-      vertex0Info.m_Z2 = z2;
-      vertex0Info.m_X3 = x3;
-      vertex0Info.m_Y3 = y3;
-      vertex0Info.m_Z3 = z3;
+      vertex0Info.m_X1            = x1;
+      vertex0Info.m_Y1            = y1;
+      vertex0Info.m_Z1            = z1;
+      vertex0Info.m_X2            = x2;
+      vertex0Info.m_Y2            = y2;
+      vertex0Info.m_Z2            = z2;
+      vertex0Info.m_X3            = x3;
+      vertex0Info.m_Y3            = y3;
+      vertex0Info.m_Z3            = z3;
       m_VertexNeighborhood.push_back(vertex0Info);
     } else if (point1Id == m_PointId) {
       // Add this tetrahedron to the neighborhood of vertex 1
       VertexNeighboringTetrahedronInfo vertex1Info;
       vertex1Info.m_TetrahedronId = cellIt.Index();
-      vertex1Info.m_X1 = x2;
-      vertex1Info.m_Y1 = y2;
-      vertex1Info.m_Z1 = z2;
-      vertex1Info.m_X2 = x0;
-      vertex1Info.m_Y2 = y0;
-      vertex1Info.m_Z2 = z0;
-      vertex1Info.m_X3 = x3;
-      vertex1Info.m_Y3 = y3;
-      vertex1Info.m_Z3 = z3;
+      vertex1Info.m_X1            = x2;
+      vertex1Info.m_Y1            = y2;
+      vertex1Info.m_Z1            = z2;
+      vertex1Info.m_X2            = x0;
+      vertex1Info.m_Y2            = y0;
+      vertex1Info.m_Z2            = z0;
+      vertex1Info.m_X3            = x3;
+      vertex1Info.m_Y3            = y3;
+      vertex1Info.m_Z3            = z3;
       m_VertexNeighborhood.push_back(vertex1Info);
     } else if (point2Id == m_PointId) {
       // Add this tetrahedron to the neighborhood of vertex 2
       VertexNeighboringTetrahedronInfo vertex2Info;
       vertex2Info.m_TetrahedronId = cellIt.Index();
-      vertex2Info.m_X1 = x0;
-      vertex2Info.m_Y1 = y0;
-      vertex2Info.m_Z1 = z0;
-      vertex2Info.m_X2 = x1;
-      vertex2Info.m_Y2 = y1;
-      vertex2Info.m_Z2 = z1;
-      vertex2Info.m_X3 = x3;
-      vertex2Info.m_Y3 = y3;
-      vertex2Info.m_Z3 = z3;
+      vertex2Info.m_X1            = x0;
+      vertex2Info.m_Y1            = y0;
+      vertex2Info.m_Z1            = z0;
+      vertex2Info.m_X2            = x1;
+      vertex2Info.m_Y2            = y1;
+      vertex2Info.m_Z2            = z1;
+      vertex2Info.m_X3            = x3;
+      vertex2Info.m_Y3            = y3;
+      vertex2Info.m_Z3            = z3;
       m_VertexNeighborhood.push_back(vertex2Info);
     } else {
       // Add this tetrahedron to the neighborhood of vertex 3
       VertexNeighboringTetrahedronInfo vertex3Info;
       vertex3Info.m_TetrahedronId = cellIt.Index();
-      vertex3Info.m_X1 = x2;
-      vertex3Info.m_Y1 = y2;
-      vertex3Info.m_Z1 = z2;
-      vertex3Info.m_X2 = x1;
-      vertex3Info.m_Y2 = y1;
-      vertex3Info.m_Z2 = z1;
-      vertex3Info.m_X3 = x0;
-      vertex3Info.m_Y3 = y0;
-      vertex3Info.m_Z3 = z0;
+      vertex3Info.m_X1            = x2;
+      vertex3Info.m_Y1            = y2;
+      vertex3Info.m_Z1            = z2;
+      vertex3Info.m_X2            = x1;
+      vertex3Info.m_Y2            = y1;
+      vertex3Info.m_Z2            = z1;
+      vertex3Info.m_X3            = x0;
+      vertex3Info.m_Y3            = y0;
+      vertex3Info.m_Z3            = z0;
       m_VertexNeighborhood.push_back(vertex3Info);
     }
 
@@ -211,7 +209,7 @@ AtlasMeshCollectionFastReferencePositionCost ::GetValue(
 
   // Add the components
   double totalCost = dataCost + alphasCost + positionCost;
-  if (std::isnan(totalCost) || std::isinf(totalCost)) {
+  if (isnan(totalCost) || isinf(totalCost)) {
     totalCost = itk::NumericTraits<double>::max();
   }
 
@@ -225,16 +223,14 @@ AtlasMeshCollectionFastReferencePositionCost ::GetValue(
 bool AtlasMeshCollectionFastReferencePositionCost ::GetValue(
     const ParametersType &parameters, double &dataCost, double &alphasCost,
     double &positionCost) const {
-  // std::cout << "FastReferencePositionCost: Trying position " << parameters <<
-  // std::endl;
+  // std::cout << "FastReferencePositionCost: Trying position " << parameters << std::endl;
 
   // Make sure the vertex neighborhood has been calculated
   if (m_VertexNeighborhood.size() == 0) {
     this->CalculateVertexNeighborhood();
   }
 
-  // Set the reference position in the vertex under study to the provided
-  // parameters
+  // Set the reference position in the vertex under study to the provided parameters
   m_ReferencePosition->ElementAt(m_PointId)[0] = parameters[0];
   m_ReferencePosition->ElementAt(m_PointId)[1] = parameters[1];
   m_ReferencePosition->ElementAt(m_PointId)[2] = parameters[2];
@@ -258,12 +254,10 @@ bool AtlasMeshCollectionFastReferencePositionCost ::GetValue(
     const double y3 = (*tetrahedronInfoIt).m_Y3;
     const double z3 = (*tetrahedronInfoIt).m_Z3;
 
-    // Test if this tethrahedron is left-rotating. If it's not, stop looping
-    // over all affected tetrahedra. Do this by calculating the volume of the
-    // tetrahedron; this should be positive. In what follows, the matrix Lambda
-    // is the Jacobian of the transform from a standarized tetrahedron ( ( 0 0 0
-    // )^T, ( 1 0 0 )^T, ( 0 1 0 )^T, ( 0 0 1 )^T ), which has volume 1/6, to
-    // the actual tetrahedron
+    // Test if this tethrahedron is left-rotating. If it's not, stop looping over all affected tetrahedra.
+    // Do this by calculating the volume of the tetrahedron; this should be positive.
+    // In what follows, the matrix Lambda is the Jacobian of the transform from a standarized tetrahedron
+    // ( ( 0 0 0 )^T, ( 1 0 0 )^T, ( 0 1 0 )^T, ( 0 0 1 )^T ), which has volume 1/6, to the actual tetrahedron
     const double lambda11 = -x0 + x1;
     const double lambda21 = -y0 + y1;
     const double lambda31 = -z0 + z1;
@@ -279,8 +273,7 @@ bool AtlasMeshCollectionFastReferencePositionCost ::GetValue(
          lambda13 * (lambda21 * lambda32 - lambda31 * lambda22)) /
         6;
     if (volume <= 0) {
-      // std::cout << "FastReferencePositionCost: referencePosition would cause
-      // a tetrahedron flip; rejecting this possibility" << std::endl;
+      // std::cout << "FastReferencePositionCost: referencePosition would cause a tetrahedron flip; rejecting this possibility" << std::endl;
       return false;
     }
 
@@ -309,15 +302,13 @@ bool AtlasMeshCollectionFastReferencePositionCost ::GetValue(
         TetrahedronRadiusRatio(point0, point1, point2, point3);
 
     //// std::cout << "FastReferencePositionCost: badness of tetrahedron "
-    //          << tetrahedronInfoIt->m_TetrahedronId << " is " << badness <<
-    //          std::endl;
+    //          << tetrahedronInfoIt->m_TetrahedronId << " is " << badness << std::endl;
     // // std::cout << "                      point0: " << point0 << std::endl;
     // // std::cout << "                      point1: " << point1 << std::endl;
     // // std::cout << "                      point2: " << point2 << std::endl;
     // // std::cout << "                      point3: " << point3 << std::endl;
     if (badness > 10) {
-      // std::cout << "FastReferencePositionCost: referencePosition is too bad
-      // ("
+      // std::cout << "FastReferencePositionCost: referencePosition is too bad ("
       //           << badness << "); rejecting this possibility" << std::endl;
       return false;
     }
@@ -364,7 +355,7 @@ bool AtlasMeshCollectionFastReferencePositionCost ::GetValue(
   // Estimate the mesh collection alphas and positions
   m_Estimator->SetInitialMeshCollection(m_CostCalculationMeshCollection);
   m_Estimator->Estimate();
-  // meshCollection->Write( "tmp.txt" );
+  //meshCollection->Write( "tmp.txt" );
 
   // Compute the total model cost
   m_DataAndAlphasCostCalculator->SetMeshCollection(

@@ -8,12 +8,8 @@
 # --help option will show usage
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: greve $
-#    $Date: 2016/08/02 21:19:46 $
-#    $Revision: 1.24 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,7 +24,7 @@
 # uncomment this to increase number of allowable open files:
 #limit descriptors unlimited
 
-set VERSION = '$Id: make_average_subject,v 1.24 2016/08/02 21:19:46 greve Exp $'
+set VERSION = 'make_average_subject @FS_VERSION@';
 set PrintHelp = 0;
 set sdout = ();
 set average_subject = ();
@@ -109,7 +105,7 @@ if($DoVolumes) then
 endif
 
 if($DoSurfaces && $DoVolumes && $DoRibbon && $#hemilist == 2) then
-  set xopts = /tmp/make_average_subject.$$.xopts
+  set xopts = `fs_temp_file --suffix .xopts`
   set cmd = (recon-all -s $average_subject -cortribbon -aparc2aseg)
   echo "mri_aparc2aseg --no-relabel" > $xopts
   set cmd = ($cmd -expert $xopts -xopts-overwrite)

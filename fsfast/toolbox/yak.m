@@ -23,12 +23,8 @@ function yak(varargin)
 % yak.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:08 $
-%    $Revision: 1.7 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -41,7 +37,6 @@ function yak(varargin)
 
 if(nargin == 0)
   msg = 'USAGE: hfig = yak(flag,options)';
-  msg = sprintf('%s\n$Id: yak.m,v 1.7 2011/03/02 00:04:08 nicks Exp $',msg);
   qoe(msg);error(msg);
 end
 

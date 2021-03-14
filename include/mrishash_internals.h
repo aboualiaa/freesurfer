@@ -1,5 +1,4 @@
 /**
- * @file  mrishash_internals.h
  * @brief Implements a hash table mechanism to speed comparing vertices
  *
  * The purpose of MRI hash tables is to vastly accelerate algorithms which
@@ -9,12 +8,8 @@
 /*
  * Original Author: Graham Wideman, based on code by Bruce Fischl
  * Moved here by Bevin Brett
- * CVS Revision Info:
- *    $Author: zkaufman $
- *    $Date: 2015/03/18 17:04:00 $
- *    $Revision: 1.26 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -42,9 +37,9 @@ typedef struct MRIS_HASH_BUCKET {
   omp_lock_t mutable bucket_lock;
 #endif
   MRIS_HASH_BIN *const bins;
-  int const max_bins;
-  int nused;
-  int size, ysize, zsize;
+  int const            max_bins;
+  int                  nused;
+  int                  size, ysize, zsize;
 } MHBT;
 
 //-----------------------------------------------------------
@@ -65,8 +60,8 @@ typedef struct MRIS_HASH_BUCKET {
 #define VOXEL_RES 1.0
 
 // TABLE_SIZE dimensions for array of hash buckets. As defined here
-#define TABLE_SIZE     2000
-#define TABLE_CENTER   (int)(TABLE_SIZE / 2)
+#define TABLE_SIZE   2000
+#define TABLE_CENTER (int)(TABLE_SIZE / 2)
 
 typedef struct mht_face_t {
   // for per-vertex information that should not be stored in the MRIS FACE

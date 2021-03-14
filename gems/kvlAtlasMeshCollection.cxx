@@ -1,11 +1,13 @@
 #include "kvlAtlasMeshCollection.h"
 
-#include <gzstream.h>
 #include <fstream>
+#include <gzstream.h>
 
+#include "itkMesh.h"
+
+#include "kvlTetrahedronAspectRatio.h"
 #include "vnl/vnl_inverse.h"
 #include "vnl/vnl_matrix_fixed.h"
-#include "kvlTetrahedronAspectRatio.h"
 
 namespace kvl {
 
@@ -13,13 +15,13 @@ namespace kvl {
 //
 //
 AtlasMeshCollection ::AtlasMeshCollection() {
-  m_PointParameters = nullptr;
-  m_Cells = nullptr;
-  m_ReferenceTetrahedronInfos = nullptr;
-  m_ReferencePosition = nullptr;
-  m_K = 10;
+  m_PointParameters           = 0;
+  m_Cells                     = 0;
+  m_ReferenceTetrahedronInfos = 0;
+  m_ReferencePosition         = 0;
+  m_K                         = 10;
 
-  m_CellLinks = nullptr;
+  m_CellLinks = 0;
 }
 
 //
@@ -27,9 +29,8 @@ AtlasMeshCollection ::AtlasMeshCollection() {
 //
 AtlasMeshCollection ::~AtlasMeshCollection() {
 
-  // Clean up cells if no-one is using them anymore. First clear the cached
-  // meshes, so that we don't accidentally think someone else is still using the
-  // cells.
+  // Clean up cells if no-one is using them anymore. First clear the cached meshes,
+  // so that we don't accidentally think someone else is still using the cells.
   m_Meshes.clear();
   if (m_Cells) {
     if (m_Cells->GetReferenceCount() == 1) {
@@ -47,26 +48,26 @@ AtlasMeshCollection ::~AtlasMeshCollection() {
 //
 //
 void AtlasMeshCollection ::PrintSelf(std::ostream &os,
-                                     itk::Indent indent) const {}
+                                     itk::Indent   indent) const {}
 
 //
 //
 //
-void AtlasMeshCollection ::GenerateFromSingleMesh(AtlasMesh *mesh,
+void AtlasMeshCollection ::GenerateFromSingleMesh(AtlasMesh *  mesh,
                                                   unsigned int numberOfMeshes,
-                                                  double K) {
+                                                  double       K) {
   // Clean up cache of what we may have already
-  m_ReferenceTetrahedronInfos = nullptr;
+  m_ReferenceTetrahedronInfos = 0;
   m_Meshes.clear(); // delete all content from the mesh container
-  m_CellLinks = nullptr;
+  m_CellLinks = 0;
 
   // Initialize topology
   m_Cells = mesh->GetCells();
 
   // Initialize parameters
-  m_PointParameters = mesh->GetPointData();
+  m_PointParameters   = mesh->GetPointData();
   m_ReferencePosition = mesh->GetPoints();
-  m_K = K;
+  m_K                 = K;
 
   // Initialize positions by making copies of the mesh position
   PointsContainerType::ConstPointer sourcePosition = mesh->GetPoints();
@@ -96,7 +97,7 @@ void AtlasMeshCollection ::GenerateFromSingleMesh(AtlasMesh *mesh,
 const AtlasMesh *AtlasMeshCollection ::GetMesh(unsigned int meshNumber) const {
   // Sanity check on requested mesh
   if (meshNumber >= m_Positions.size()) {
-    return nullptr;
+    return 0;
   }
 
   // If cached meshes container is empty, create it
@@ -139,22 +140,22 @@ AtlasMesh::ConstPointer AtlasMeshCollection ::GetReferenceMesh() const {
 //
 //
 /*!
-  \fn const AtlasMeshCollection::CellDataContainerType*
-  AtlasMeshCollection::GetReferenceTetrahedronInfos() \brief Returns a pointer
-  to the m_ReferenceTetrahedronInfos private member. If the priv member is NULL,
-  then computes the volume and matrix inverse.
+  \fn const AtlasMeshCollection::CellDataContainerType* AtlasMeshCollection::GetReferenceTetrahedronInfos()
+  \brief Returns a pointer to the m_ReferenceTetrahedronInfos private
+  member. If the priv member is NULL, then computes the volume and matrix inverse.
  */
+
 const AtlasMeshCollection::CellDataContainerType *
 AtlasMeshCollection ::GetReferenceTetrahedronInfos() const {
   if (!m_ReferenceTetrahedronInfos) {
     // Calculate the tetrahedron volume parameters
-    // std::cout << "Calculating the tetrahedron volume parameters...";
+    //std::cout << "Calculating the tetrahedron volume parameters...";
     m_ReferenceTetrahedronInfos = CellDataContainerType::New();
     for (AtlasMesh::CellsContainer::Iterator cellIt = m_Cells->Begin();
          cellIt != m_Cells->End(); ++cellIt) {
       AtlasMesh::CellType *cell = cellIt.Value();
 
-      if (cell->GetType() == AtlasMesh::CellType::TETRAHEDRON_CELL) {
+      if (cell->GetType() == itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
         // Create info structure and fill in all the fields one by one
         ReferenceTetrahedronInfo info;
 
@@ -176,9 +177,9 @@ AtlasMeshCollection ::GetReferenceTetrahedronInfos() const {
         const double y3 = m_ReferencePosition->ElementAt(*pit)[1];
         const double z3 = m_ReferencePosition->ElementAt(*pit)[2];
 
-        // Calculate the volume of the tetrahedron in reference position. Lambda
-        // is the Jacobian of the transform from a standarizedized tetrahedron,
-        // which has volume 1/6, to the tethrahedron in reference position
+        // Calculate the volume of the tetrahedron in reference position. Lambda is the Jacobian of
+        // the transform from a standarizedized tetrahedron, which has volume 1/6, to the tethrahedron
+        // in reference position
         const double lambda11 = -x0 + x1;
         const double lambda21 = -y0 + y1;
         const double lambda31 = -z0 + z1;
@@ -218,8 +219,7 @@ AtlasMeshCollection ::GetReferenceTetrahedronInfos() const {
         referenceMatrix.put(2, 3, z3);
         referenceMatrix.put(3, 3, 1.0f);
 
-        // DNG: might be faster to have a dedicated 4x4 inverse, if not there
-        // already
+        // DNG: might be faster to have a dedicated 4x4 inverse, if not there already
         vnl_matrix_fixed<double, 4, 4> inverseReferenceMatrix =
             vnl_inverse(referenceMatrix);
         info.m_Z11 = inverseReferenceMatrix.get(0, 0);
@@ -237,7 +237,7 @@ AtlasMeshCollection ::GetReferenceTetrahedronInfos() const {
         info.m_Z33 = inverseReferenceMatrix.get(2, 2);
         info.m_Z43 = inverseReferenceMatrix.get(3, 2);
 
-        if (false) { // if(cellIt.Index() == 1652908){
+        if (0) { //if(cellIt.Index() == 1652908){
           std::cout << "Calculated reference tetrahedron info as follows:"
                     << std::endl;
           std::cout << "     p0: [" << x0 << ", " << y0 << ", " << z0 << "]"
@@ -265,7 +265,7 @@ AtlasMeshCollection ::GetReferenceTetrahedronInfos() const {
 
     } // End loop over all cells
 
-    // std::cout << "...done!" << std::endl;
+    //std::cout << "...done!" << std::endl;
   }
 
   return m_ReferenceTetrahedronInfos;
@@ -285,7 +285,7 @@ bool AtlasMeshCollection ::Write(const char *fileName) const {
 
   // Open the file name
   std::string zippedFileName = std::string(fileName) + ".gz";
-  ogzstream out(zippedFileName.c_str());
+  ogzstream   out(zippedFileName.c_str());
   if (out.bad()) {
     std::cerr << "Can't open " << zippedFileName << " for writing."
               << std::endl;
@@ -329,20 +329,22 @@ bool AtlasMeshCollection ::Write(const char *fileName) const {
 
   // Write out cells
   out << "Cells: " << std::endl;
-  CellsContainerType::ConstIterator cellIt = m_Cells->Begin();
+  CellsContainerType::ConstIterator cellIt  = m_Cells->Begin();
   CellsContainerType::ConstIterator cellEnd = m_Cells->End();
   while (cellIt != cellEnd) {
     AtlasMesh::CellType *cell = cellIt.Value();
 
     out << "   " << cellIt.Index() << "   ";
 
-    if (cell->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
+    if (cell->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
       out << "VERTEX   ";
-    } else if (cell->GetType() == AtlasMesh::CellType::LINE_CELL) {
+    } else if (cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL) {
       out << "LINE   ";
-    } else if (cell->GetType() == AtlasMesh::CellType::TRIANGLE_CELL) {
+    } else if (cell->GetType() ==
+               itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
       out << "TRIANGLE   ";
-    } else if (cell->GetType() == AtlasMesh::CellType::TETRAHEDRON_CELL) {
+    } else if (cell->GetType() ==
+               itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       out << "TETRAHEDRON   ";
     } else {
       itkExceptionMacro("Mesh collection may only contain vertices, lines, "
@@ -430,9 +432,9 @@ static bool GetValue(const std::string line, const std::string &searchString,
 //
 bool AtlasMeshCollection ::Read(const char *fileName) {
   // Clean up cache of what we may have already
-  m_ReferenceTetrahedronInfos = nullptr;
+  m_ReferenceTetrahedronInfos = 0;
   m_Meshes.clear();
-  m_CellLinks = nullptr;
+  m_CellLinks = 0;
 
 #if 0
   std::string  zippedFileName = std::string( fileName ) + ".gz";
@@ -455,8 +457,8 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
   }
 #endif
 
-  const int size = 1023;
-  char buffer[size];
+  const int   size = 1023;
+  char        buffer[size];
   std::string line;
 
   // Number of points
@@ -492,13 +494,13 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
     return false;
 
   // Some output
-  // std::cout << "numberOfPoints: " << numberOfPoints << std::endl;
-  // std::cout << "numberOfCells: " << numberOfCells << std::endl;
-  // std::cout << "numberOfLabels: " << numberOfLabels << std::endl;
-  // std::cout << "numberOfMeshes: " << numberOfMeshes << std::endl;
+  //std::cout << "numberOfPoints: " << numberOfPoints << std::endl;
+  //std::cout << "numberOfCells: " << numberOfCells << std::endl;
+  //std::cout << "numberOfLabels: " << numberOfLabels << std::endl;
+  //std::cout << "numberOfMeshes: " << numberOfMeshes << std::endl;
 
   // Read reference position
-  // std::cout << "Reading reference position " << std::endl;
+  //std::cout << "Reading reference position " << std::endl;
 
   // Skip the line saying "Reference position"
   if (!in.getline(buffer, size))
@@ -516,8 +518,8 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
     if (!in.getline(buffer, size))
       return false;
     line = buffer;
-    std::istringstream lineStream(line);
-    AtlasMesh::PointType point;
+    std::istringstream         lineStream(line);
+    AtlasMesh::PointType       point;
     AtlasMesh::PointIdentifier id;
     lineStream >> id >> point[0] >> point[1] >> point[2];
 
@@ -527,14 +529,13 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
     pointIdCompressionLookupTable[originalId] = id;
 #endif
 
-    // On Mac, istringstream cannot convert strings holding tiny float values
-    // into floats
+    // On Mac, istringstream cannot convert strings holding tiny float values into floats
     if (lineStream.fail()) {
       itkExceptionMacro(
           "The following line could not be parsed into floats: " << line);
     }
 
-    // std::cout << "   Adding point " << id << ": " << point << std::endl;
+    //std::cout << "   Adding point " << id << ": " << point << std::endl;
     m_ReferencePosition->InsertElement(id, point);
   }
 
@@ -548,7 +549,7 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
   // Read positions
   m_Positions.clear();
   for (unsigned int i = 0; i < numberOfMeshes; i++) {
-    // std::cout << "Reading positions " << i << std::endl;
+    //std::cout << "Reading positions " << i << std::endl;
 
     // Skip the line saying "Position X"
     if (!in.getline(buffer, size))
@@ -561,8 +562,8 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
       if (!in.getline(buffer, size))
         return false;
       line = buffer;
-      std::istringstream lineStream(line);
-      AtlasMesh::PointType point;
+      std::istringstream         lineStream(line);
+      AtlasMesh::PointType       point;
       AtlasMesh::PointIdentifier id;
       lineStream >> id >> point[0] >> point[1] >> point[2];
 
@@ -570,14 +571,13 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
       id = pointIdCompressionLookupTable.find(id)->second;
 #endif
 
-      // On Mac, istringstream cannot convert strings holding tiny float values
-      // into floats
+      // On Mac, istringstream cannot convert strings holding tiny float values into floats
       if (lineStream.fail()) {
         itkExceptionMacro(
             "The following line could not be parsed into floats: " << line);
       }
 
-      // std::cout << "   Adding point " << id << ": " << point << std::endl;
+      //std::cout << "   Adding point " << id << ": " << point << std::endl;
       position->InsertElement(id, point);
     }
 
@@ -591,10 +591,10 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
   if (!in.getline(buffer, size))
     return false;
 
-  using VertexCell = itk::VertexCell<AtlasMesh::CellType>;
-  using LineCell = itk::LineCell<AtlasMesh::CellType>;
-  using TriangleCell = itk::TriangleCell<AtlasMesh::CellType>;
-  using TetrahedronCell = itk::TetrahedronCell<AtlasMesh::CellType>;
+  typedef itk::VertexCell<AtlasMesh::CellType>      VertexCell;
+  typedef itk::LineCell<AtlasMesh::CellType>        LineCell;
+  typedef itk::TriangleCell<AtlasMesh::CellType>    TriangleCell;
+  typedef itk::TetrahedronCell<AtlasMesh::CellType> TetrahedronCell;
 
 #ifndef USE_DYNAMIC_MESH
   std::map<AtlasMesh::CellIdentifier, AtlasMesh::CellIdentifier>
@@ -607,9 +607,9 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
     if (!in.getline(buffer, size))
       return false;
     line = buffer;
-    std::istringstream lineStream(line);
+    std::istringstream        lineStream(line);
     AtlasMesh::CellIdentifier cellId;
-    std::string cellType;
+    std::string               cellType;
     lineStream >> cellId >> cellType;
 
 #ifndef USE_DYNAMIC_MESH
@@ -618,8 +618,7 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
     cellIdCompressionLookupTable[originalCellId] = cellId;
 #endif
 
-    // std::cout << "Detected cell with id: " << cellId << " of type: " <<
-    // cellType << std::endl;
+    //std::cout << "Detected cell with id: " << cellId << " of type: " << cellType << std::endl;
 
     if (cellType == "VERTEX") {
       // Read the id of the point
@@ -721,21 +720,20 @@ bool AtlasMeshCollection ::Read(const char *fileName) {
     if (!in.getline(buffer, size))
       return false;
     line = buffer;
-    std::istringstream lineStream(line);
+    std::istringstream         lineStream(line);
     AtlasMesh::PointIdentifier pointId;
     lineStream >> pointId;
 #ifndef USE_DYNAMIC_MESH
     pointId = pointIdCompressionLookupTable.find(pointId)->second;
 #endif
-    AtlasAlphasType alphas(numberOfLabels);
+    AtlasAlphasType      alphas(numberOfLabels);
     AtlasMesh::PixelType pointParameter;
     pointParameter.m_Alphas = alphas;
     for (unsigned int labelNumber = 0; labelNumber < numberOfLabels;
          labelNumber++) {
       lineStream >> pointParameter.m_Alphas[labelNumber];
 
-      // On Mac, istringstream cannot convert strings holding tiny float values
-      // into float
+      // On Mac, istringstream cannot convert strings holding tiny float values into float
       if (lineStream.fail()) {
         pointParameter.m_Alphas[labelNumber] = 0.0f;
         lineStream.clear();
@@ -792,9 +790,9 @@ void AtlasMeshCollection ::Construct(const unsigned int *meshSize,
                                      unsigned int numberOfMeshes,
                                      bool forceBorderVerticesToBackground) {
   // Clean up cache of what we may have already
-  m_ReferenceTetrahedronInfos = nullptr;
+  m_ReferenceTetrahedronInfos = 0;
   m_Meshes.clear();
-  m_CellLinks = nullptr;
+  m_CellLinks = 0;
 
   // Create a single mesh, then replicate it below
   // Use a mesh source to create the mesh
@@ -842,9 +840,7 @@ void AtlasMeshCollection ::Construct(const unsigned int *meshSize,
         const double p6[] = {x1, y2, z2};
         const double p7[] = {x2, y2, z2};
 
-        // Each cube will be filled by 5 tetrahedra. There are two different
-        // configurations however that should alternate in a checker-board
-        // pattern.
+        // Each cube will be filled by 5 tetrahedra. There are two different configurations however that should alternate in a checker-board pattern.
         bool flippedConfiguration = true;
         if (x % 2) {
           flippedConfiguration = !flippedConfiguration;
@@ -862,14 +858,13 @@ void AtlasMeshCollection ::Construct(const unsigned int *meshSize,
     }
   }
 
-  // Alpha[Class] is the probability that the given point belongs to class
-  // Class. Each point needs an alpha vector, but set up some defaults first
+  // Alpha[Class] is the probability that the given point belongs to class Class.
+  // Each point needs an alpha vector, but set up some defaults first
   // Assign flat alphas as a starting point.
   AtlasAlphasType flatAlphasEntry(numberOfClasses);
   flatAlphasEntry.Fill(1.0f / static_cast<float>(numberOfClasses));
 
-  // Vertices lying on the border can not move freely and belong to first
-  // (background) class
+  // Vertices lying on the border can not move freely and belong to first (background) class
   AtlasAlphasType borderAlphasEntry(numberOfClasses);
   if (forceBorderVerticesToBackground) {
     borderAlphasEntry.Fill(0.0f);
@@ -885,7 +880,7 @@ void AtlasMeshCollection ::Construct(const unsigned int *meshSize,
 
     // Goal here is to fill the pointParameters struct for this point
     AtlasMesh::PixelType pointParameters;
-    pointParameters.m_Alphas = flatAlphasEntry;
+    pointParameters.m_Alphas          = flatAlphasEntry;
     pointParameters.m_CanChangeAlphas = true;
 
     // pointIt.Value() will return an array[3] of the coordinates of the point
@@ -904,7 +899,7 @@ void AtlasMeshCollection ::Construct(const unsigned int *meshSize,
     if ((pointIt.Value()[1] == 0) ||
         (pointIt.Value()[1] == (domainSize[1] - 1))) {
       pointParameters.m_CanMoveY = false;
-#if 0      
+#if 0
       pointParameters.m_Alphas = borderAlphasEntry;
       pointParameters.m_CanChangeAlphas = false;
 #endif
@@ -915,7 +910,7 @@ void AtlasMeshCollection ::Construct(const unsigned int *meshSize,
     if ((pointIt.Value()[2] == 0) ||
         (pointIt.Value()[2] == (domainSize[2] - 1))) {
       pointParameters.m_CanMoveZ = false;
-#if 0      
+#if 0
       pointParameters.m_Alphas = borderAlphasEntry;
       pointParameters.m_CanChangeAlphas = false;
 #endif
@@ -936,31 +931,32 @@ void AtlasMeshCollection ::Construct(const unsigned int *meshSize,
 bool AtlasMeshCollection ::GetCollapsed(
     AtlasMesh::CellIdentifier edgeId, AtlasMeshCollection::Pointer &collapsed,
     std::set<AtlasMesh::CellIdentifier> &disappearingCells,
-    AtlasMesh::CellIdentifier &unifiedVertexId,
-    bool initializeAlphasToFlat) const {
+    AtlasMesh::CellIdentifier &          unifiedVertexId,
+    bool                                 initializeAlphasToFlat) const {
   // Sanity check
   if (!m_Cells->IndexExists(edgeId))
     return false;
 
-  if (m_Cells->ElementAt(edgeId)->GetType() != AtlasMesh::CellType::LINE_CELL)
+  if (m_Cells->ElementAt(edgeId)->GetType() !=
+      itk::CommonEnums::CellGeometry::LINE_CELL)
     return false;
 
   // Retrieve the id's of the two vertices of the edge to be collapsed
-  const AtlasMesh::CellType *edge = m_Cells->ElementAt(edgeId);
+  const AtlasMesh::CellType *               edge = m_Cells->ElementAt(edgeId);
   AtlasMesh::CellType::PointIdConstIterator pointIt = edge->PointIdsBegin();
-  AtlasMesh::PointIdentifier edgePoint0Id = *pointIt;
+  AtlasMesh::PointIdentifier                edgePoint0Id = *pointIt;
   ++pointIt;
   AtlasMesh::PointIdentifier edgePoint1Id = *pointIt;
 
 #if 0
-  std::cout << "Collapsing edgeId: " << edgeId 
-            << "\n     edgePoint0Id: " << edgePoint0Id 
-            << "\n     edgePoint1Id: " << edgePoint1Id 
+  std::cout << "Collapsing edgeId: " << edgeId
+            << "\n     edgePoint0Id: " << edgePoint0Id
+            << "\n     edgePoint1Id: " << edgePoint1Id
             << std::endl;
 #endif
 
-  // Retrieve if the vertices can move in X, Y, and Z direction, and check if
-  // the edge can be collapsed at all accordingly
+  // Retrieve if the vertices can move in X, Y, and Z direction, and check if the
+  // edge can be collapsed at all accordingly
   bool canMoveX0 = m_PointParameters->ElementAt(edgePoint0Id).m_CanMoveX;
   bool canMoveY0 = m_PointParameters->ElementAt(edgePoint0Id).m_CanMoveY;
   bool canMoveZ0 = m_PointParameters->ElementAt(edgePoint0Id).m_CanMoveZ;
@@ -1015,8 +1011,8 @@ bool AtlasMeshCollection ::GetCollapsed(
       }
       break;
     default:
-      // The other point is lies on an edge or is even a corner point. Make sure
-      // they're both on the same edge
+      // The other point is lies on an edge or is even a corner point. Make sure they're both on
+      // the same edge
       if ((!canMoveX0 && (canMoveX1 || (!canMoveZ0 && canMoveZ1) ||
                           (!canMoveY0 && canMoveY1))) ||
           (!canMoveY0 && (canMoveY1 || (!canMoveZ0 && canMoveZ1) ||
@@ -1034,29 +1030,25 @@ bool AtlasMeshCollection ::GetCollapsed(
     }
   }
 
-  // std::cout << "Decided that the edge can be collapsed" << std::endl;
+  //std::cout << "Decided that the edge can be collapsed" << std::endl;
 
-  // Find all tetrahedra that have p0 or p1 as their vertex. Divide those into
-  // two categories: the ones that will disappear (p0 *and* p1 as vertices), and
-  // the ones that have only one (referred to as "affected tetrahedra" as those
-  // will actually change shape due to the edge
+  // Find all tetrahedra that have p0 or p1 as their vertex. Divide those into two categories:
+  // the ones that will disappear (p0 *and* p1 as vertices), and the ones that have only one
+  // (referred to as "affected tetrahedra" as those will actually change shape due to the edge
   //  collapse )
 
   // Create links back from points to cells.
   const AtlasMesh::CellLinksContainerPointer cellLinks = this->GetCellLinks();
 
-  // Intersection of all the cells that contain p0 or p1 will be cells that will
-  // disappear
+  // Intersection of all the cells that contain p0 or p1 will be cells that will disappear
   const std::set<AtlasMesh::CellIdentifier> &cellsContainingEdgePoint0 =
       cellLinks->ElementAt(edgePoint0Id);
   const std::set<AtlasMesh::CellIdentifier> &cellsContainingEdgePoint1 =
       cellLinks->ElementAt(edgePoint1Id);
-  // std::cout << "   Found " << cellsContainingEdgePoint0.size()
-  //          << " cells containing point with id " << edgePoint0Id <<
-  //          std::endl;
-  // std::cout << "   Found " << cellsContainingEdgePoint0.size()
-  //          << " cells containing point with id " << edgePoint1Id <<
-  //          std::endl;
+  //std::cout << "   Found " << cellsContainingEdgePoint0.size()
+  //          << " cells containing point with id " << edgePoint0Id << std::endl;
+  //std::cout << "   Found " << cellsContainingEdgePoint0.size()
+  //          << " cells containing point with id " << edgePoint1Id << std::endl;
   std::set<AtlasMesh::CellIdentifier> initialDisappearingCells;
   std::set_intersection(
       cellsContainingEdgePoint0.begin(), cellsContainingEdgePoint0.end(),
@@ -1064,10 +1056,9 @@ bool AtlasMeshCollection ::GetCollapsed(
       std::inserter(initialDisappearingCells,
                     initialDisappearingCells.begin()));
 
-  // Loop over all the cells that are tagged for disappearing, and find the
-  // tetrahedra. For each such tetrahedron, there are additional cells that will
-  // disappear: the one triangle containing p1 but not p0, and its two edges
-  // that contain p1
+  // Loop over all the cells that are tagged for disappearing, and find the tetrahedra. For each such
+  // tetrahedron, there are additional cells that will disappear: the one triangle containing p1 but
+  // not p0, and its two edges that contain p1
   std::set<AtlasMesh::CellIdentifier> extraDisappearingCells;
   for (std::set<AtlasMesh::CellIdentifier>::const_iterator disappearingIt =
            initialDisappearingCells.begin();
@@ -1075,13 +1066,13 @@ bool AtlasMeshCollection ::GetCollapsed(
     // Get the cell
     const AtlasMesh::CellType *cell = m_Cells->ElementAt(*disappearingIt);
 
-    if (cell->GetType() != AtlasMesh::CellType::TETRAHEDRON_CELL) {
+    if (cell->GetType() != itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       continue;
     }
 
     // Retrieve ids of the points
-    AtlasMesh::CellType::PointIdConstIterator pointIt = cell->PointIdsBegin();
-    AtlasMesh::PointIdentifier point0Id = *pointIt;
+    AtlasMesh::CellType::PointIdConstIterator pointIt  = cell->PointIdsBegin();
+    AtlasMesh::PointIdentifier                point0Id = *pointIt;
     ++pointIt;
     AtlasMesh::PointIdentifier point1Id = *pointIt;
     ++pointIt;
@@ -1090,8 +1081,8 @@ bool AtlasMeshCollection ::GetCollapsed(
     AtlasMesh::PointIdentifier point3Id = *pointIt;
 
     // Look for the two points that are NOT p0 or p1
-    AtlasMesh::PointIdentifier firstOtherPointId;
-    AtlasMesh::PointIdentifier secondOtherPointId;
+    AtlasMesh::PointIdentifier              firstOtherPointId;
+    AtlasMesh::PointIdentifier              secondOtherPointId;
     std::vector<AtlasMesh::PointIdentifier> pointIds;
     pointIds.push_back(point0Id);
     pointIds.push_back(point1Id);
@@ -1112,14 +1103,13 @@ bool AtlasMeshCollection ::GetCollapsed(
       }
     }
 
-    // std::cout << "For disappearing tetrahdron with id " << *disappearingIt
+    //std::cout << "For disappearing tetrahdron with id " << *disappearingIt
     //          << ", we have for the two points that are NOT p0 or p1: "
-    //          << firstOtherPointId << " and " << secondOtherPointId <<
-    //          std::endl;
+    //          << firstOtherPointId << " and " << secondOtherPointId << std::endl;
 
-    // For each of these other points, find the intersection between the cells
-    // containing p1 and the cells containing the other point. There should only
-    // be one line in there, and that line will disappear as well
+    // For each of these other points, find the intersection between the cells containing
+    // p1 and the cells containing the other point. There should only be one line in there,
+    // and that line will disappear as well
     std::vector<AtlasMesh::PointIdentifier> otherPointIds;
     otherPointIds.push_back(firstOtherPointId);
     otherPointIds.push_back(secondOtherPointId);
@@ -1128,9 +1118,8 @@ bool AtlasMeshCollection ::GetCollapsed(
          otherIt != otherPointIds.end(); ++otherIt) {
       const std::set<AtlasMesh::CellIdentifier> &cellsContainingOtherPoint =
           cellLinks->ElementAt(*otherIt);
-      // std::cout << "     Found " << cellsContainingOtherPoint.size()
-      //          << " cells containing point with id " << *otherIt <<
-      //          std::endl;
+      //std::cout << "     Found " << cellsContainingOtherPoint.size()
+      //          << " cells containing point with id " << *otherIt << std::endl;
       std::set<AtlasMesh::CellIdentifier> cellsContainingOtherPointAndP1;
       std::set_intersection(
           cellsContainingOtherPoint.begin(), cellsContainingOtherPoint.end(),
@@ -1144,9 +1133,8 @@ bool AtlasMeshCollection ::GetCollapsed(
         // Get the cell
         const AtlasMesh::CellType *cell = m_Cells->ElementAt(*it);
 
-        if (cell->GetType() == AtlasMesh::CellType::LINE_CELL) {
-          // std::cout << "        Found an extra disappearing line that
-          // contains both "
+        if (cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL) {
+          //std::cout << "        Found an extra disappearing line that contains both "
           //          << *otherIt << " and p1: " << *it << std::endl;
           extraDisappearingCells.insert(*it);
           break;
@@ -1155,9 +1143,9 @@ bool AtlasMeshCollection ::GetCollapsed(
 
     } // End loop over each of the two "other" points
 
-    // Find the intersection between the cells containing p1, the first other
-    // point, and the second other point. There should only be one triangle in
-    // there, and that triangle will disappear as well.
+    // Find the intersection between the cells containing p1, the first other point, and the second
+    // other point. There should only be one triangle in there, and that triangle will disappear as
+    // well.
     const std::set<AtlasMesh::CellIdentifier> &cellsContainingFirstOtherPoint =
         cellLinks->ElementAt(firstOtherPointId);
     const std::set<AtlasMesh::CellIdentifier> &cellsContainingSecondOtherPoint =
@@ -1185,11 +1173,9 @@ bool AtlasMeshCollection ::GetCollapsed(
       // Get the cell
       const AtlasMesh::CellType *cell = m_Cells->ElementAt(*it);
 
-      if (cell->GetType() == AtlasMesh::CellType::TRIANGLE_CELL) {
-        // std::cout << "        Found an extra disappearing triangle that
-        // contains "
-        //          << firstOtherPointId << ", " << secondOtherPointId << ", and
-        //          p1: " << *it << std::endl;
+      if (cell->GetType() == itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
+        //std::cout << "        Found an extra disappearing triangle that contains "
+        //          << firstOtherPointId << ", " << secondOtherPointId << ", and p1: " << *it << std::endl;
         extraDisappearingCells.insert(*it);
         break;
       }
@@ -1204,9 +1190,8 @@ bool AtlasMeshCollection ::GetCollapsed(
     // Get the cell
     const AtlasMesh::CellType *cell = m_Cells->ElementAt(*it);
 
-    if (cell->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
-      // std::cout << "        Found an extra disappearing vertex that contains
-      // p1" << std::endl;
+    if (cell->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
+      //std::cout << "        Found an extra disappearing vertex that contains p1" << std::endl;
       extraDisappearingCells.insert(*it);
       break;
     }
@@ -1219,13 +1204,12 @@ bool AtlasMeshCollection ::GetCollapsed(
                  extraDisappearingCells.end(),
                  std::inserter(disappearingCells, disappearingCells.begin()));
 
-  // Look up the tetrahedra that will be affected by the edge collapse (i.e.
-  // those that have either p0 or p1 as a vertex. You can do this by looping
-  // over all cells that contain either p0 or p1, disregard the non-tetrahedral
-  // cells, and making sure the remaining tethrahedra are not in the set of
-  // cells that will disappear.
+  // Look up the tetrahedra that will be affected by the edge collapse (i.e. those that have
+  // either p0 or p1 as a vertex. You can do this by looping over all cells that contain either
+  // p0 or p1, disregard the non-tetrahedral cells, and making sure the remaining tethrahedra
+  // are not in the set of cells that will disappear.
   std::vector<AtlasMesh::CellIdentifier> affectedTetrahedra;
-  std::set<AtlasMesh::CellIdentifier> cellsContainingP0OrP1;
+  std::set<AtlasMesh::CellIdentifier>    cellsContainingP0OrP1;
   std::set_union(
       cellsContainingEdgePoint0.begin(), cellsContainingEdgePoint0.end(),
       cellsContainingEdgePoint1.begin(), cellsContainingEdgePoint1.end(),
@@ -1236,22 +1220,21 @@ bool AtlasMeshCollection ::GetCollapsed(
     // Get the cell
     const AtlasMesh::CellType *cell = m_Cells->ElementAt(*p0orP1It);
 
-    if (cell->GetType() != AtlasMesh::CellType::TETRAHEDRON_CELL) {
+    if (cell->GetType() != itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
       continue;
     }
 
     // Make sure this cell is not in the disappearingCells set
     if (disappearingCells.find(*p0orP1It) == disappearingCells.end()) {
-      // std::cout << "Found a tetrahedron that is affected: " << *p0orP1It <<
-      // std::endl;
+      //std::cout << "Found a tetrahedron that is affected: " << *p0orP1It << std::endl;
       affectedTetrahedra.push_back(*p0orP1It);
     }
 
   } // End loop over all cells that containing either p0 or p1
 
-  // For each mesh, propose three positions: either of the positions of the two
-  // edge points, and their average. If none of the positions yields a valid
-  // (i.e. counter-clockwise triangles) mesh, the edge can not be collapsed.
+  // For each mesh, propose three positions: either of the positions of the two edge points, and
+  // their average. If none of the positions yields a valid (i.e. counter-clockwise triangles) mesh, the
+  // edge can not be collapsed.
   std::vector<AtlasMesh::PointType> newPositionsOfUnifiedVertex;
   for (unsigned int meshNumber = 0; meshNumber < this->GetNumberOfMeshes() + 1;
        meshNumber++) {
@@ -1263,7 +1246,7 @@ bool AtlasMeshCollection ::GetCollapsed(
     }
 
 #if 0
-    std::cout << "Trying to find a valid position of the unified vertex for mesh number: " 
+    std::cout << "Trying to find a valid position of the unified vertex for mesh number: "
               << meshNumber << std::endl;
 #endif
 
@@ -1272,12 +1255,11 @@ bool AtlasMeshCollection ::GetCollapsed(
     AtlasMesh::PointType edgePoint1 = thisPosition->ElementAt(edgePoint1Id);
 
 #if 0
-    std::cout << "          edgePoint0: " << edgePoint0 << std::endl; 
+    std::cout << "          edgePoint0: " << edgePoint0 << std::endl;
     std::cout << "          edgePoint1: " << edgePoint1 << std::endl;
 #endif
 
-    // Depending on the allowed movements of the two vertices, propose positions
-    // to be tried
+    // Depending on the allowed movements of the two vertices, propose positions to be tried
     std::vector<AtlasMesh::PointType> testPoints;
     if (numberOfRestrictionsOnEdgePoint0 > numberOfRestrictionsOnEdgePoint1) {
       testPoints.push_back(edgePoint0);
@@ -1314,24 +1296,22 @@ bool AtlasMeshCollection ::GetCollapsed(
     }
 
     // Loop over all test points, and check if one gives us a valid mesh
-    bool illegalPosition = false;
+    bool         illegalPosition = false;
     unsigned int testPointNumber = 0;
     for (; testPointNumber < testPoints.size(); testPointNumber++) {
-      illegalPosition = false;
+      illegalPosition               = false;
       AtlasMesh::PointType newPoint = testPoints[testPointNumber];
 
-      // std::cout << "AtlasMeshCollection:           --> testing newPoint: " <<
-      // newPoint << std::endl;
+      //std::cout << "AtlasMeshCollection:           --> testing newPoint: " << newPoint << std::endl;
 
-      // Loop over all affected tetrahedra, and check validity under proposed
-      // position
+      // Loop over all affected tetrahedra, and check validity under proposed position
       std::vector<AtlasMesh::CellIdentifier>::const_iterator affectedIt =
           affectedTetrahedra.begin();
       while (affectedIt != affectedTetrahedra.end()) {
         const AtlasMesh::CellType *cell = m_Cells->ElementAt(*affectedIt);
 
         // Retrieve ids and original positions of the four vertices
-        pointIt = cell->PointIdsBegin();
+        pointIt                             = cell->PointIdsBegin();
         AtlasMesh::PointIdentifier point0Id = *pointIt;
         ++pointIt;
         AtlasMesh::PointIdentifier point1Id = *pointIt;
@@ -1345,8 +1325,8 @@ bool AtlasMeshCollection ::GetCollapsed(
         AtlasMesh::PointType point2 = thisPosition->ElementAt(point2Id);
         AtlasMesh::PointType point3 = thisPosition->ElementAt(point3Id);
 
-        // We know that one of the vertices lies on the edge to be collapsed.
-        // Look it up and change its position to the current test position
+        // We know that one of the vertices lies on the edge to be collapsed. Look it up
+        // and change its position to the current test position
         if ((point0Id == edgePoint0Id) || (point0Id == edgePoint1Id)) {
           point0 = newPoint;
         } else if ((point1Id == edgePoint0Id) || (point1Id == edgePoint1Id)) {
@@ -1357,12 +1337,10 @@ bool AtlasMeshCollection ::GetCollapsed(
           point3 = newPoint;
         }
 
-        // Test if this tethrahedron is left-rotating. If it's not, stop looping
-        // over all affected tetrahedra. Do this by calculating the volume of
-        // the tetrahedron; this should be positive. In what follows, the matrix
-        // Lambda is the Jacobian of the transform from a standarized
-        // tetrahedron ( ( 0 0 0 )^T, ( 1 0 0 )^T, ( 0 1 0 )^T, ( 0 0 1 )^T ),
-        // which has volume 1/6, to the actual tetrahedron
+        // Test if this tethrahedron is left-rotating. If it's not, stop looping over all affected tetrahedra.
+        // Do this by calculating the volume of the tetrahedron; this should be positive.
+        // In what follows, the matrix Lambda is the Jacobian of the transform from a standarized tetrahedron
+        // ( ( 0 0 0 )^T, ( 1 0 0 )^T, ( 0 1 0 )^T, ( 0 0 1 )^T ), which has volume 1/6, to the actual tetrahedron
         const float lambda11 = -point0[0] + point1[0];
         const float lambda21 = -point0[1] + point1[1];
         const float lambda31 = -point0[2] + point1[2];
@@ -1378,8 +1356,7 @@ bool AtlasMeshCollection ::GetCollapsed(
              lambda13 * (lambda21 * lambda32 - lambda31 * lambda22)) /
             6;
         if (volume <= 0) {
-          // std::cout << "AtlasMeshCollection: volume of tetrahedron " <<
-          // *affectedIt
+          //std::cout << "AtlasMeshCollection: volume of tetrahedron " << *affectedIt
           //          << " would be negative" << std::endl;
           illegalPosition = true;
           break;
@@ -1389,17 +1366,14 @@ bool AtlasMeshCollection ::GetCollapsed(
         if (meshNumber == this->GetNumberOfMeshes()) {
           const float badness =
               TetrahedronRadiusRatio(point0, point1, point2, point3);
-          // std::cout << "AtlasMeshCollection: badness of tetrahedron " <<
-          // *affectedIt
-          //          << " at reference position " << newPoint << " is " <<
-          //          badness << std::endl;
-          // std::cout << "                      point0: " << point0 <<
-          // std::endl; std::cout << "                      point1: " << point1
-          // << std::endl; std::cout << "                      point2: " <<
-          // point2 << std::endl; std::cout << "                      point3: "
-          // << point3 << std::endl;
+          //std::cout << "AtlasMeshCollection: badness of tetrahedron " << *affectedIt
+          //          << " at reference position " << newPoint << " is " << badness << std::endl;
+          // std::cout << "                      point0: " << point0 << std::endl;
+          // std::cout << "                      point1: " << point1 << std::endl;
+          // std::cout << "                      point2: " << point2 << std::endl;
+          // std::cout << "                      point3: " << point3 << std::endl;
           if (badness > 10) {
-            // std::cout << "referencePosition of tetrahedron " << *affectedIt
+            //std::cout << "referencePosition of tetrahedron " << *affectedIt
             //          << " would be too bad (" << badness << ")" << std::endl;
             illegalPosition = true;
             break;
@@ -1419,8 +1393,7 @@ bool AtlasMeshCollection ::GetCollapsed(
 
     // If none of the test points was legal, return negative
     if (illegalPosition) {
-      // std::cout << "Couldn't find a suitable position. Collapsing
-      // unsuccessful" << std::endl;
+      //std::cout << "Couldn't find a suitable position. Collapsing unsuccessful" << std::endl;
       return false;
     }
 
@@ -1436,18 +1409,16 @@ bool AtlasMeshCollection ::GetCollapsed(
     // Get the cell
     const AtlasMesh::CellType *cell = m_Cells->ElementAt(*it);
 
-    if (cell->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
+    if (cell->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
       unifiedVertexId = *it;
-      // std::cout << "        Found that unifiedVertexId is " <<
-      // unifiedVertexId << std::endl;
+      //std::cout << "        Found that unifiedVertexId is " << unifiedVertexId << std::endl;
       break;
     }
   }
 
-  // Copy all positions of the points, except for the second point on the edge,
-  // which simply disappears, and first point, which gets the previously
-  // determined new position
-  // std::cout << "Creating positions" << std::endl;
+  // Copy all positions of the points, except for the second point on the edge, which simply
+  // disappears, and first point, which gets the previously determined new position
+  //std::cout << "Creating positions" << std::endl;
   std::vector<PointsContainerType::Pointer> collapsedPositions;
   PointsContainerType::Pointer collapsedReferencePosition = nullptr;
   for (unsigned int meshNumber = 0; meshNumber < this->GetNumberOfMeshes() + 1;
@@ -1482,11 +1453,11 @@ bool AtlasMeshCollection ::GetCollapsed(
     }
   }
 
-  // Copy all parameters of the points, except for the second point on the edge,
-  // which simply disappears, and the first point on the edge, which will be the
-  // average alpha of the two collapsing vertices. As for the moving options of
-  // the new point, this will be the most stringent of the two.
-  // std::cout << "Creating point parameters" << std::endl;
+  // Copy all parameters of the points, except for the second point on the edge, which simply
+  // disappears, and the first point on the edge, which will be the average alpha of the two
+  // collapsing vertices. As for the moving options of the new point, this will be the most
+  // stringent of the two.
+  //std::cout << "Creating point parameters" << std::endl;
 
   PointDataContainerType::Pointer collapsedPointParameters =
       PointDataContainerType::New();
@@ -1510,12 +1481,11 @@ bool AtlasMeshCollection ::GetCollapsed(
             (m_PointParameters->ElementAt(edgePoint0Id).m_CanMoveZ &&
              m_PointParameters->ElementAt(edgePoint1Id).m_CanMoveZ);
 
-        // std::cout << "Point parameters of collapsed point: " << std::endl;
-        // std::cout << "     Alphas: " << pointParams.m_Alphas << std::endl;
-        // std::cout << "     CanMoveX: " << pointParams.m_CanMoveX <<
-        // std::endl; std::cout << "     CanMoveY: " << pointParams.m_CanMoveY <<
-        // std::endl; std::cout << "     CanMoveZ: " << pointParams.m_CanMoveZ <<
-        // std::endl;
+        //std::cout << "Point parameters of collapsed point: " << std::endl;
+        //std::cout << "     Alphas: " << pointParams.m_Alphas << std::endl;
+        //std::cout << "     CanMoveX: " << pointParams.m_CanMoveX << std::endl;
+        //std::cout << "     CanMoveY: " << pointParams.m_CanMoveY << std::endl;
+        //std::cout << "     CanMoveZ: " << pointParams.m_CanMoveZ << std::endl;
 
         collapsedPointParameters->InsertElement(pointParamIt.Index(),
                                                 pointParams);
@@ -1529,7 +1499,7 @@ bool AtlasMeshCollection ::GetCollapsed(
     }
   } else {
     const unsigned int numberOfClasses = pointParamIt.Value().m_Alphas.Size();
-    AtlasAlphasType flatAlphasEntry(numberOfClasses);
+    AtlasAlphasType    flatAlphasEntry(numberOfClasses);
     flatAlphasEntry.Fill(1.0f / static_cast<float>(numberOfClasses));
 
     while (pointParamIt != m_PointParameters->End()) {
@@ -1556,13 +1526,12 @@ bool AtlasMeshCollection ::GetCollapsed(
             (m_PointParameters->ElementAt(edgePoint0Id).m_CanMoveZ &&
              m_PointParameters->ElementAt(edgePoint1Id).m_CanMoveZ);
 
-        // std::cout << "Point parameters of collapsed point: " << std::endl;
-        // std::cout << "     Alphas: " << pointParams.m_Alphas << std::endl;
-        // std::cout << "     CanChangeAlphas: " <<
-        // pointParams.m_CanChangeAlphas << std::endl; std::cout << " CanMoveX: "
-        // << pointParams.m_CanMoveX << std::endl; std::cout << "     CanMoveY: "
-        // << pointParams.m_CanMoveY << std::endl; std::cout << "     CanMoveZ: "
-        // << pointParams.m_CanMoveZ << std::endl;
+        //std::cout << "Point parameters of collapsed point: " << std::endl;
+        //std::cout << "     Alphas: " << pointParams.m_Alphas << std::endl;
+        //std::cout << "     CanChangeAlphas: " << pointParams.m_CanChangeAlphas << std::endl;
+        //std::cout << "     CanMoveX: " << pointParams.m_CanMoveX << std::endl;
+        //std::cout << "     CanMoveY: " << pointParams.m_CanMoveY << std::endl;
+        //std::cout << "     CanMoveZ: " << pointParams.m_CanMoveZ << std::endl;
 
         collapsedPointParameters->InsertElement(pointParamIt.Index(),
                                                 pointParams);
@@ -1590,10 +1559,10 @@ bool AtlasMeshCollection ::GetCollapsed(
     }
   }
 
-  // Now loop over all cells, and simply copy unless the cell is disappearing.
-  // Also, correct all references to the second edge point (which is
-  // disappearing) to a reference to the first edge point
-  // std::cout << "Creating cells" << std::endl;
+  // Now loop over all cells, and simply copy unless the cell is disappearing. Also, correct all
+  // references to the second edge point (which is disappearing) to a reference to the first edge
+  // point
+  //std::cout << "Creating cells" << std::endl;
   CellsContainerType::Pointer collapsedCells = CellsContainerType::New();
   for (AtlasMesh::CellsContainer::Iterator cellIt = m_Cells->Begin();
        cellIt != m_Cells->End(); ++cellIt) {
@@ -1613,20 +1582,21 @@ bool AtlasMeshCollection ::GetCollapsed(
       const AtlasMesh::CellType *cell = cellIt.Value();
 
       // Create a new cell of the correct type
-      using VertexCell = itk::VertexCell<AtlasMesh::CellType>;
-      using LineCell = itk::LineCell<AtlasMesh::CellType>;
-      using TriangleCell = itk::TriangleCell<AtlasMesh::CellType>;
-      using TetrahedronCell = itk::TetrahedronCell<AtlasMesh::CellType>;
+      typedef itk::VertexCell<AtlasMesh::CellType>      VertexCell;
+      typedef itk::LineCell<AtlasMesh::CellType>        LineCell;
+      typedef itk::TriangleCell<AtlasMesh::CellType>    TriangleCell;
+      typedef itk::TetrahedronCell<AtlasMesh::CellType> TetrahedronCell;
 
       AtlasMesh::CellAutoPointer newCell;
 
-      if (cell->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
+      if (cell->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
         // Create a new vertex cell
         newCell.TakeOwnership(new VertexCell);
-      } else if (cell->GetType() == AtlasMesh::CellType::LINE_CELL) {
+      } else if (cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL) {
         // Create a new line cell
         newCell.TakeOwnership(new LineCell);
-      } else if (cell->GetType() == AtlasMesh::CellType::TRIANGLE_CELL) {
+      } else if (cell->GetType() ==
+                 itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
         // Create a new triangle cell
         newCell.TakeOwnership(new TriangleCell);
       } else {
@@ -1634,10 +1604,9 @@ bool AtlasMeshCollection ::GetCollapsed(
         newCell.TakeOwnership(new TetrahedronCell);
       }
 
-      // Add points to the new cell: Copy in most cases, correct instances of
-      // second collapse-edge point
+      // Add points to the new cell: Copy in most cases, correct instances of second collapse-edge point
       int localId = 0;
-      pointIt = cell->PointIdsBegin();
+      pointIt     = cell->PointIdsBegin();
       while (pointIt != cell->PointIdsEnd()) {
         AtlasMesh::PointIdentifier pointId = *pointIt;
 
@@ -1675,7 +1644,7 @@ bool AtlasMeshCollection ::GetCollapsed(
 //
 AtlasMeshCollection::Pointer
 AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
-                                     unsigned int radius,
+                                     unsigned int              radius,
                                      bool makeOuterPointsImmobile) const {
 
   // Sanity check
@@ -1692,14 +1661,13 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
    * Part I. Create all the cells of the region grown
    *
    */
-  // std::cout << "Creating cells" << std::endl;
+  //std::cout << "Creating cells" << std::endl;
 
   // Create links back from points to cells.
   const AtlasMesh::CellLinksContainerPointer cellLinks = this->GetCellLinks();
 
-  // Initialize the set of outer vertices with the those belonging to the seed
-  // cell
-  std::set<AtlasMesh::PointIdentifier> outerPoints;
+  // Initialize the set of outer vertices with the those belonging to the seed cell
+  std::set<AtlasMesh::PointIdentifier>      outerPoints;
   AtlasMesh::CellType::PointIdConstIterator pit = cell->PointIdsBegin();
   while (pit != cell->PointIdsEnd()) {
     outerPoints.insert(*pit);
@@ -1717,9 +1685,8 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
     const std::set<AtlasMesh::CellIdentifier> &cellNeighbors =
         cellLinks->ElementAt(*outerPointIt);
 
-    // std::cout << "   Found " << cellNeighbors.size()
-    //          << " neighboring cells of outer point " << *outerPointIt <<
-    //          std::endl;
+    //std::cout << "   Found " << cellNeighbors.size()
+    //          << " neighboring cells of outer point " << *outerPointIt << std::endl;
 
     // Loop over all neighboring cells
     std::set<AtlasMesh::CellIdentifier>::const_iterator neighborIt =
@@ -1734,9 +1701,8 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
       // Get the cell
       const AtlasMesh::CellType *cell = m_Cells->ElementAt(*neighborIt);
 
-      // Don't do anything if the cell contains other points than the ones in
-      // the original seed cell
-      bool containsWrongPoints = false;
+      // Don't do anything if the cell contains other points than the ones in the original seed cell
+      bool                                      containsWrongPoints = false;
       AtlasMesh::CellType::PointIdConstIterator pit = cell->PointIdsBegin();
       while (pit != cell->PointIdsEnd()) {
         if (std::find(outerPoints.begin(), outerPoints.end(), *pit) ==
@@ -1753,19 +1719,20 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
       }
 
       // Create a new cell of the correct type
-      using VertexCell = itk::VertexCell<AtlasMesh::CellType>;
-      using LineCell = itk::LineCell<AtlasMesh::CellType>;
-      using TriangleCell = itk::TriangleCell<AtlasMesh::CellType>;
-      using TetrahedronCell = itk::TetrahedronCell<AtlasMesh::CellType>;
+      typedef itk::VertexCell<AtlasMesh::CellType>      VertexCell;
+      typedef itk::LineCell<AtlasMesh::CellType>        LineCell;
+      typedef itk::TriangleCell<AtlasMesh::CellType>    TriangleCell;
+      typedef itk::TetrahedronCell<AtlasMesh::CellType> TetrahedronCell;
 
       AtlasMesh::CellAutoPointer newCell;
-      if (cell->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
+      if (cell->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
         // Create a new vertex cell
         newCell.TakeOwnership(new VertexCell);
-      } else if (cell->GetType() == AtlasMesh::CellType::LINE_CELL) {
+      } else if (cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL) {
         // Create a new line cell
         newCell.TakeOwnership(new LineCell);
-      } else if (cell->GetType() == AtlasMesh::CellType::TRIANGLE_CELL) {
+      } else if (cell->GetType() ==
+                 itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
         // Create a new triangle cell
         newCell.TakeOwnership(new TriangleCell);
       } else {
@@ -1787,14 +1754,13 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
 
   for (unsigned int iterationNumber = 0; iterationNumber < radius;
        iterationNumber++) {
-    // std::cout << "iterationNumber: " << iterationNumber << std::endl;
+    //std::cout << "iterationNumber: " << iterationNumber << std::endl;
 
-    // Loop over all outer points, retrieve their neighboring cells, and add
-    // those to the region grown mesh collection, taking advantage of the fact
-    // that no duplicates will be made anyway in the itkMapContainer. Whenever a
-    // vertex is added, check if this is really a new vertex - if it is, it will
-    // form part of the new outer boundary
-    std::set<AtlasMesh::PointIdentifier> newOuterPoints;
+    // Loop over all outer points, retrieve their neighboring cells, and add those to the
+    // region grown mesh collection, taking advantage of the fact that no duplicates will be
+    // made anyway in the itkMapContainer. Whenever a vertex is added, check if this is really
+    // a new vertex - if it is, it will form part of the new outer boundary
+    std::set<AtlasMesh::PointIdentifier>                 newOuterPoints;
     std::set<AtlasMesh::PointIdentifier>::const_iterator outerPointIt =
         outerPoints.begin();
     while (outerPointIt != outerPoints.end()) {
@@ -1802,16 +1768,14 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
       const std::set<AtlasMesh::CellIdentifier> &cellNeighbors =
           cellLinks->ElementAt(*outerPointIt);
 
-      // std::cout << "   Found " << cellNeighbors.size()
-      //          << " neighboring cells of outer point " << *outerPointIt <<
-      //          std::endl;
+      //std::cout << "   Found " << cellNeighbors.size()
+      //          << " neighboring cells of outer point " << *outerPointIt << std::endl;
 
       // Loop over all neighboring cells
       std::set<AtlasMesh::CellIdentifier>::const_iterator neighborIt =
           cellNeighbors.begin();
       while (neighborIt != cellNeighbors.end()) {
-        // std::cout << "    Inspecting cell with id " << *neighborIt <<
-        // std::endl;
+        //std::cout << "    Inspecting cell with id " << *neighborIt << std::endl;
 
         if (regionGrownCells->IndexExists(*neighborIt)) {
           ++neighborIt;
@@ -1821,38 +1785,39 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
         const AtlasMesh::CellType *cell = m_Cells->ElementAt(*neighborIt);
 
         // Create a new cell of the correct type
-        using VertexCell = itk::VertexCell<AtlasMesh::CellType>;
-        using LineCell = itk::LineCell<AtlasMesh::CellType>;
-        using TriangleCell = itk::TriangleCell<AtlasMesh::CellType>;
-        using TetrahedronCell = itk::TetrahedronCell<AtlasMesh::CellType>;
+        typedef itk::VertexCell<AtlasMesh::CellType>      VertexCell;
+        typedef itk::LineCell<AtlasMesh::CellType>        LineCell;
+        typedef itk::TriangleCell<AtlasMesh::CellType>    TriangleCell;
+        typedef itk::TetrahedronCell<AtlasMesh::CellType> TetrahedronCell;
 
         AtlasMesh::CellAutoPointer newCell;
-        if (cell->GetType() == AtlasMesh::CellType::LINE_CELL) {
+        if (cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL) {
           // Create a new line cell
           newCell.TakeOwnership(new LineCell);
 
-          // We know that one the points lies on the outer boundary. The other
-          // one is new and will become part of the new outer boundary
+          // We know that one the points lies on the outer boundary. The other one is new
+          // and will become part of the new outer boundary
           AtlasMesh::CellType::PointIdConstIterator pointIt =
               cell->PointIdsBegin();
           AtlasMesh::PointIdentifier pointId0 = *pointIt;
           ++pointIt;
           AtlasMesh::PointIdentifier pointId1 = *pointIt;
-          // std::cout << "      LineCell wiht id " << *neighborIt << " gave
-          // rise to adding point with id ";
+          //std::cout << "      LineCell wiht id " << *neighborIt << " gave rise to adding point with id ";
           if (*outerPointIt == pointId0) {
             newOuterPoints.insert(pointId1);
-            // std::cout << pointId1;
+            //std::cout << pointId1;
           } else {
             newOuterPoints.insert(pointId0);
-            // std::cout << pointId0;
+            //std::cout << pointId0;
           }
-          // std::cout << " to the outer points." << std::endl;
+          //std::cout << " to the outer points." << std::endl;
 
-        } else if (cell->GetType() == AtlasMesh::CellType::TRIANGLE_CELL) {
+        } else if (cell->GetType() ==
+                   itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
           // Create a new triangle cell
           newCell.TakeOwnership(new TriangleCell);
-        } else if (cell->GetType() == AtlasMesh::CellType::TETRAHEDRON_CELL) {
+        } else if (cell->GetType() ==
+                   itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
           // Create a new tetrahedron cell
           newCell.TakeOwnership(new TetrahedronCell);
         }
@@ -1870,25 +1835,23 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
       ++outerPointIt;
     }
 
-    // Also add the vertex ids of the new outer points, as well as lines
-    // connecting two outer points
+    // Also add the vertex ids of the new outer points, as well as lines connecting two outer points
     outerPointIt = newOuterPoints.begin();
     while (outerPointIt != newOuterPoints.end()) {
       // Get all neigboring cells of this outer vertex
       const std::set<AtlasMesh::CellIdentifier> &cellNeighbors =
           cellLinks->ElementAt(*outerPointIt);
 
-      // Get the one neighbor that is of type VERTEX_CELL, and add it to the
-      // region grown cells
+      // Get the one neighbor that is of type VERTEX_CELL, and add it to the region grown cells
       std::set<AtlasMesh::CellIdentifier>::const_iterator neighborIt =
           cellNeighbors.begin();
       while (neighborIt != cellNeighbors.end()) {
         const AtlasMesh::CellType *cell = m_Cells->ElementAt(*neighborIt);
 
-        if (cell->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
+        if (cell->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
           // Create a new cell of the correct type
-          using VertexCell = itk::VertexCell<AtlasMesh::CellType>;
-          AtlasMesh::CellAutoPointer newCell;
+          typedef itk::VertexCell<AtlasMesh::CellType> VertexCell;
+          AtlasMesh::CellAutoPointer                   newCell;
           newCell.TakeOwnership(new VertexCell);
 
           // Add points to the new cell
@@ -1898,31 +1861,30 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
           regionGrownCells->InsertElement(*neighborIt,
                                           newCell.ReleaseOwnership());
 
-        } else if (cell->GetType() == AtlasMesh::CellType::LINE_CELL) {
+        } else if (cell->GetType() ==
+                   itk::CommonEnums::CellGeometry::LINE_CELL) {
           // Retrieve the other point of this line
           AtlasMesh::CellType::PointIdConstIterator pointIt =
               cell->PointIdsBegin();
           AtlasMesh::PointIdentifier pointId0 = *pointIt;
           ++pointIt;
-          AtlasMesh::PointIdentifier pointId1 = *pointIt;
+          AtlasMesh::PointIdentifier pointId1     = *pointIt;
           AtlasMesh::PointIdentifier otherPointId = pointId0;
           if (*outerPointIt == pointId0) {
             otherPointId = pointId1;
           }
 
-          // If this other point is also on the outer border, we have to add a
-          // line cell
+          // If this other point is also on the outer border, we have to add a line cell
           if (std::find(newOuterPoints.begin(), newOuterPoints.end(),
                         otherPointId) != newOuterPoints.end()) {
             if (!(regionGrownCells->IndexExists(*neighborIt))) {
 
-              // std::cout << "Adding line " << *neighborIt
-              //          << " because it lies between two outer points" <<
-              //          std::endl;
+              //std::cout << "Adding line " << *neighborIt
+              //          << " because it lies between two outer points" << std::endl;
 
               // Create a new line cell
-              using LineCell = itk::LineCell<AtlasMesh::CellType>;
-              AtlasMesh::CellAutoPointer newCell;
+              typedef itk::LineCell<AtlasMesh::CellType> LineCell;
+              AtlasMesh::CellAutoPointer                 newCell;
               newCell.TakeOwnership(new LineCell);
 
               // Add points to the new cell
@@ -1934,7 +1896,8 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
             }
           }
 
-        } else if (cell->GetType() == AtlasMesh::CellType::TRIANGLE_CELL) {
+        } else if (cell->GetType() ==
+                   itk::CommonEnums::CellGeometry::TRIANGLE_CELL) {
           // Retrieve the other two points of this triangle
           AtlasMesh::CellType::PointIdConstIterator pointIt =
               cell->PointIdsBegin();
@@ -1956,21 +1919,19 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
             otherPointId2 = pointId1;
           }
 
-          // If the two other points are also on the outer border, we have to
-          // add a triangle cell
+          // If the two other points are also on the outer border, we have to add a triangle cell
           if ((std::find(newOuterPoints.begin(), newOuterPoints.end(),
                          otherPointId1) != newOuterPoints.end()) &&
               (std::find(newOuterPoints.begin(), newOuterPoints.end(),
                          otherPointId2) != newOuterPoints.end())) {
             if (!(regionGrownCells->IndexExists(*neighborIt))) {
 
-              // std::cout << "Adding triangle " << *neighborIt
-              //          << " because it lies between three outer points" <<
-              //          std::endl;
+              //std::cout << "Adding triangle " << *neighborIt
+              //          << " because it lies between three outer points" << std::endl;
 
               // Create a new line cell
-              using TriangleCell = itk::TriangleCell<AtlasMesh::CellType>;
-              AtlasMesh::CellAutoPointer newCell;
+              typedef itk::TriangleCell<AtlasMesh::CellType> TriangleCell;
+              AtlasMesh::CellAutoPointer                     newCell;
               newCell.TakeOwnership(new TriangleCell);
 
               // Add points to the new cell
@@ -1993,18 +1954,17 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
     outerPoints = newOuterPoints;
   }
 
-  // std::cout << "Created " << regionGrownCells->Size() << " cells." <<
-  // std::endl;
+  //std::cout << "Created " << regionGrownCells->Size() << " cells." << std::endl;
 
-#if 0  
+#if 0
   std::cout << "Outer points for mesh 0: " << std::endl;
   std::set< AtlasMesh::PointIdentifier >::const_iterator  outerPointIt = outerPoints.begin();
   while ( outerPointIt != outerPoints.end() )
     {
-    std::cout << "    " << *outerPointIt << "   (" 
-              << m_Positions[ 0 ]->ElementAt( *outerPointIt )[ 0 ]  << ", " 
+    std::cout << "    " << *outerPointIt << "   ("
+              << m_Positions[ 0 ]->ElementAt( *outerPointIt )[ 0 ]  << ", "
               << m_Positions[ 0 ]->ElementAt( *outerPointIt )[ 1 ] << ")" << std::endl;
-    
+
     ++outerPointIt;
     }
 
@@ -2012,12 +1972,11 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
 
   /**
    *
-   * Part II. Loop over all the cells of the region grown, and copy the
-   * appropriate elements of the mesh collection
+   * Part II. Loop over all the cells of the region grown, and copy the appropriate elements
+   *          of the mesh collection
    *
    */
-  // std::cout << "Creating other mesh collection elements from the cells." <<
-  // std::endl;
+  //std::cout << "Creating other mesh collection elements from the cells." << std::endl;
 
   // Create containers
   std::vector<PointsContainerType::Pointer> regionGrownPositions;
@@ -2031,12 +1990,12 @@ AtlasMeshCollection ::GetRegionGrown(AtlasMesh::CellIdentifier seedId,
       PointDataContainerType::New();
 
   // Loop over all cells
-  CellsContainerType::ConstIterator cellIt = regionGrownCells->Begin();
+  CellsContainerType::ConstIterator cellIt  = regionGrownCells->Begin();
   CellsContainerType::ConstIterator cellEnd = regionGrownCells->End();
   while (cellIt != cellEnd) {
     AtlasMesh::CellType *cell = cellIt.Value();
 
-    if (cell->GetType() == AtlasMesh::CellType::VERTEX_CELL) {
+    if (cell->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL) {
       // Retrieve point id
       AtlasMesh::PointIdentifier pointId = *(cell->PointIdsBegin());
 
@@ -2123,7 +2082,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
   // Loop over all meshes, including reference
   std::vector<PointsContainerType::Pointer> upsampledPositions;
   PointsContainerType::Pointer upsampledReferencePosition = nullptr;
-  CellsContainerType::Pointer upsampledCells;
+  CellsContainerType::Pointer  upsampledCells;
   for (unsigned int meshNumber = 0; meshNumber < this->GetNumberOfMeshes() + 1;
        meshNumber++) {
     //
@@ -2134,9 +2093,8 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
       thisPosition = m_ReferencePosition;
     }
 
-    // Use a mesh source to create a mesh, simply splitting every tetrahedron in
-    // the original mesh into seven sub-tetrahedra
-    using MeshSourceType = itk::AutomaticTopologyMeshSource<AtlasMesh>;
+    // Use a mesh source to create a mesh, simply splitting every tetrahedron in the original mesh into seven sub-tetrahedra
+    typedef itk::AutomaticTopologyMeshSource<AtlasMesh> MeshSourceType;
     MeshSourceType::Pointer meshSource = MeshSourceType::New();
 
 #if 0
@@ -2144,13 +2102,13 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
     while ( cellIt != m_Cells->End() )
       {
       const AtlasMesh::CellType*  cell = cellIt.Value();
-  
-      if( cell->GetType() != AtlasMesh::CellType::TETRAHEDRON_CELL )
+
+      if( cell->GetType() != itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL )
         {
         ++cellIt;
         continue;
         }
-  
+
       // Retrieve ids of the points
       AtlasMesh::CellType::PointIdConstIterator  pointIt = cell->PointIdsBegin();
       AtlasMesh::PointIdentifier  point0Id = *pointIt;
@@ -2160,7 +2118,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
       AtlasMesh::PointIdentifier  point2Id = *pointIt;
       ++pointIt;
       AtlasMesh::PointIdentifier  point3Id = *pointIt;
-      
+
       // Retrieve positions of the points
       AtlasMesh::PointType  point0 = thisPosition->ElementAt( point0Id );
       AtlasMesh::PointType  point1 = thisPosition->ElementAt( point1Id );
@@ -2193,7 +2151,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
       point23[ 1 ] = ( point2[ 1 ] + point3[ 1 ] ) / 2;
       point23[ 2 ] = ( point2[ 2 ] + point3[ 2 ] ) / 2;
 
-      
+
       meshSource->AddTetrahedron( meshSource->AddPoint( point1 ),
                                   meshSource->AddPoint( point12 ),
                                   meshSource->AddPoint( point01 ),
@@ -2222,8 +2180,8 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
                                   meshSource->AddPoint( point23 ),
                                   meshSource->AddPoint( point03 ),
                                   meshSource->AddPoint( point3 ) );
-      
-      
+
+
       // Go to next tetrahedron
       ++cellIt;
       } // End loop over all tetrahedra
@@ -2234,11 +2192,11 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
       precision[i] = 1e5 / static_cast<float>(domainSize[i] - 1);
     }
 
-    // Loop over all tetrahedra, making use of our prior knowledge about how
-    // these tetrahedra were constructed in the first place. From that
-    // information, we can reconstruct all 8 corners of the cube, split it into
+    // Loop over all tetrahedra, making use of our prior knowledge about how these
+    // tetrahedra were constructed in the first place. From
+    // that information, we can reconstruct all 8 corners of the cube, split it into
     // 2^3 = 8 subcubes, and full those subcubes with 5 small tetrahedra
-    int counter = 0;
+    int                  counter = 0;
     AtlasMesh::PointType p0;
     AtlasMesh::PointType p1;
     AtlasMesh::PointType p2;
@@ -2251,7 +2209,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
          cellIt != m_Cells->End(); ++cellIt) {
       const AtlasMesh::CellType *cell = cellIt.Value();
 
-      if (cell->GetType() != AtlasMesh::CellType::TETRAHEDRON_CELL) {
+      if (cell->GetType() != itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
         continue;
       }
 
@@ -2311,9 +2269,9 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
         continue;
       }
 
-      // If we are here, it means we have encountered all 5 tetrahedra belonging
-      // to one cube, and we have collected all corner coordinates Reset the
-      // counter for the next cube, and carry on with the interesting stuff
+      // If we are here, it means we have encountered all 5 tetrahedra belonging to one cube,
+      // and we have collected all corner coordinates
+      // Reset the counter for the next cube, and carry on with the interesting stuff
       counter = 0;
       // std::cout << "Found cube with p0: " << p0 << std::endl;
       // std::cout << "                p1: " << p1 << std::endl;
@@ -2641,7 +2599,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
 
 #if 0
       {
-      // Show all points in the current 
+      // Show all points in the current
       for ( PointsContainerType::ConstIterator  it = meshSource->GetOutput()->GetPoints()->Begin();
             it != meshSource->GetOutput()->GetPoints()->End(); ++ it )
         {
@@ -2700,8 +2658,8 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
 
   } // End loop over all meshes
 
-  // Double-check that all meshes have the same number of points. If not, than
-  // because of some weird numberical errors, points are duplicated
+  // Double-check that all meshes have the same number of points. If not, than because of some weird numberical
+  // errors, points are duplicated
   for (unsigned int meshNumber = 0; meshNumber < this->GetNumberOfMeshes();
        meshNumber++) {
     if (upsampledPositions[meshNumber]->Size() !=
@@ -2712,8 +2670,8 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
     }
   }
 
-  // Assign flat alphas as a starting point. Vertices lying on the border can
-  // not move freely and belong to first class
+  // Assign flat alphas as a starting point. Vertices lying on the border can not move freely and belong to
+  // first class
   PointDataContainerType::Pointer upsampledPointParameters =
       PointDataContainerType::New();
   const unsigned int numberOfClasses =
@@ -2731,7 +2689,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
        pointIt != upsampledPositions[0]->End(); ++pointIt) {
     AtlasMesh::PixelType pointParameters;
 
-    pointParameters.m_Alphas = flatAlphasEntry;
+    pointParameters.m_Alphas          = flatAlphasEntry;
     pointParameters.m_CanChangeAlphas = true;
 
     if ((fabs(pointIt.Value()[0]) < 1e-5) ||
@@ -2787,7 +2745,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetUpsampled() const {
 AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
     AtlasMesh::CellIdentifier edgeId, AtlasMesh::CellIdentifier newVertexId,
     AtlasMesh::PointIdentifier newPointId) const {
-#if 0 
+#if 0
   AtlasMesh::CellIdentifier  oneOfTheTransverseEdgesIdDummy;
   AtlasMesh::CellIdentifier  transverseEdge0IdDummy;
   AtlasMesh::CellIdentifier  transverseEdge1IdDummy;
@@ -2810,8 +2768,8 @@ AtlasMeshCollection ::GetEdgeSwapped(AtlasMesh::CellIdentifier edgeId) const {
   AtlasMesh::PointsContainer::ConstIterator  lastPointIt = m_ReferencePosition->End();
   lastPointIt--;
   const AtlasMesh::CellIdentifier  newVertexId = lastCellIt.Index() + 1;
-  const AtlasMesh::PointIdentifier  newPointId = lastPointIt.Index() + 1; 
-    
+  const AtlasMesh::PointIdentifier  newPointId = lastPointIt.Index() + 1;
+
   AtlasMesh::CellIdentifier  newEdgeIdDummy;
   return this->GetEdgeSwapped( edgeId, newVertexId, newPointId, newEdgeIdDummy );
 #else
@@ -2827,12 +2785,12 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSwapped(
     AtlasMesh::PointIdentifier newPointId,
     AtlasMesh::CellIdentifier &newEdgeId) const {
 
-#if 0  
+#if 0
   // Sanity check
   if ( !m_Cells->IndexExists( edgeId ) )
     return 0;
-    
-  if ( m_Cells->ElementAt( edgeId )->GetType() !=  AtlasMesh::CellType::LINE_CELL )
+
+  if ( m_Cells->ElementAt( edgeId )->GetType() !=  itk::CommonEnums::CellGeometry::LINE_CELL )
     return 0;
 
   // Edges on borders are typically degenerate when swapped; simply forbid such swaps
@@ -2872,10 +2830,10 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSwapped(
 
 
   // Get edge splitted mesh, and remember the id's of the newly created transverse edges
-  //std::cout << "Splitting edge " << edgeId << " (newVertexId: " << newVertexId 
-  //          << ", newPointId: " << newPointId<< ")" << std::endl; 
+  //std::cout << "Splitting edge " << edgeId << " (newVertexId: " << newVertexId
+  //          << ", newPointId: " << newPointId<< ")" << std::endl;
   AtlasMesh::CellIdentifier  transverseEdge0Id;
-  AtlasMeshCollection::Pointer  splitted = this->GetEdgeSplitted( edgeId, newVertexId, newPointId, 
+  AtlasMeshCollection::Pointer  splitted = this->GetEdgeSplitted( edgeId, newVertexId, newPointId,
                                                                     transverseEdge0Id, newEdgeId );
   if ( !splitted )
     {
@@ -2896,32 +2854,32 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSwapped(
     ++pointIt;
     pointToTemporarilyImmbolizeId = *pointIt;
     }
-  const bool  canMoveXInPointToTemporarilyImmbolize = 
+  const bool  canMoveXInPointToTemporarilyImmbolize =
       splitted->GetPointParameters()->ElementAt( pointToTemporarilyImmbolizeId ).m_CanMoveX;
-  const bool  canMoveYInPointToTemporarilyImmbolize = 
+  const bool  canMoveYInPointToTemporarilyImmbolize =
       splitted->GetPointParameters()->ElementAt( pointToTemporarilyImmbolizeId ).m_CanMoveY;
   splitted->GetPointParameters()->ElementAt( pointToTemporarilyImmbolizeId ).m_CanMoveX = false;
   splitted->GetPointParameters()->ElementAt( pointToTemporarilyImmbolizeId ).m_CanMoveY = false;
-  
+
 
   // Now try to collapse one of the newly created transverse edges
   //std::cout << "Now trying to collapse edge with id: " << oneOfTheTransverseEdgesId << std::endl;
   AtlasMeshCollection::Pointer  collapsed;
   std::set< AtlasMesh::CellIdentifier >  disappearingCellsDummy;
-  AtlasMesh::CellIdentifier  unifiedVertexId; 
+  AtlasMesh::CellIdentifier  unifiedVertexId;
   if ( !splitted->GetCollapsed( transverseEdge0Id, collapsed, disappearingCellsDummy, unifiedVertexId ) )
     {
     return 0;
     }
 
   //collapsed->Write( "debugCollapsed.txt" );
-  
+
   // Restore the mobility settings of the unified vertex
-  const AtlasMesh::PointIdentifier  mobilityToRestorePointId = 
+  const AtlasMesh::PointIdentifier  mobilityToRestorePointId =
       *( collapsed->GetCells()->ElementAt( unifiedVertexId )->PointIdsBegin() );
-  collapsed->GetPointParameters()->ElementAt( mobilityToRestorePointId  ).m_CanMoveX = 
+  collapsed->GetPointParameters()->ElementAt( mobilityToRestorePointId  ).m_CanMoveX =
       canMoveXInPointToTemporarilyImmbolize;
-  collapsed->GetPointParameters()->ElementAt( mobilityToRestorePointId ).m_CanMoveY = 
+  collapsed->GetPointParameters()->ElementAt( mobilityToRestorePointId ).m_CanMoveY =
       canMoveYInPointToTemporarilyImmbolize;
 
 
@@ -2959,13 +2917,13 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
 
    */
 
-  
+
 
   // Sanity check
   if ( !m_Cells->IndexExists( edgeId ) )
     return 0;
-    
-  if ( m_Cells->ElementAt( edgeId )->GetType() !=  AtlasMesh::CellType::LINE_CELL )
+
+  if ( m_Cells->ElementAt( edgeId )->GetType() !=  itk::CommonEnums::CellGeometry::LINE_CELL )
     return 0;
 
 
@@ -2980,12 +2938,12 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
   ++pointIt;
   AtlasMesh::PointIdentifier  point2Id = *pointIt;
   AtlasMesh::PointIdentifier  point4Id = newPointId;
-  
+
 
   // Create new reference position container, which is a simple copy of the original one
   // except for the newly added point 4
   PointsContainerType::Pointer  splittedReferencePosition = PointsContainerType::New();
-  for ( PointsContainerType::ConstIterator refIt =  m_ReferencePosition->Begin(); 
+  for ( PointsContainerType::ConstIterator refIt =  m_ReferencePosition->Begin();
         refIt != m_ReferencePosition->End(); ++refIt )
     {
     splittedReferencePosition->InsertElement( refIt.Index(), refIt.Value() );
@@ -3004,7 +2962,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
     {
     PointsContainerType::ConstPointer  thisPosition = m_Positions[ meshNumber ].GetPointer();
     PointsContainerType::Pointer  splittedPosition = PointsContainerType::New();
-    for ( PointsContainerType::ConstIterator  posIt =  thisPosition->Begin(); 
+    for ( PointsContainerType::ConstIterator  posIt =  thisPosition->Begin();
           posIt != thisPosition->End(); ++posIt )
       {
       splittedPosition->InsertElement( posIt.Index(), posIt.Value() );
@@ -3015,7 +2973,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
     point4[ 1 ] = ( thisPosition->ElementAt( point1Id )[ 1 ] +
                      thisPosition->ElementAt( point2Id )[ 1 ] ) / 2;
     splittedPosition->InsertElement( point4Id, point4 );
-    
+
     splittedPositions.push_back( splittedPosition );
     }
 
@@ -3051,7 +3009,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
 
 
   // Construct cells container for newly created mesh, and populate by looping over
-  // cells from original cells container. At the same time, remember the ID's of the 
+  // cells from original cells container. At the same time, remember the ID's of the
   // other points involved
   typedef itk::VertexCell< AtlasMesh::CellType >    VertexCell;
   typedef itk::LineCell< AtlasMesh::CellType >      LineCell;
@@ -3059,7 +3017,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
   AtlasMesh::CellIdentifier  vertex4Id = newVertexId;
   AtlasMesh::CellIdentifier  line14Id = newVertexId + 1;
   AtlasMesh::CellIdentifier  nextFreeCellId = newVertexId + 2;
-  
+
   CellsContainerType::Pointer  splittedCells = CellsContainerType::New();
 
   AtlasMesh::CellAutoPointer  vertex4;
@@ -3078,8 +3036,8 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
          cellIt != m_Cells->End(); ++cellIt )
     {
     const AtlasMesh::CellType*  cell = cellIt.Value();
-    
-    if ( cell->GetType() == AtlasMesh::CellType::VERTEX_CELL )
+
+    if ( cell->GetType() == itk::CommonEnums::CellGeometry::VERTEX_CELL )
       {
       // Copy vertex cell
       AtlasMesh::CellAutoPointer  newVertex;
@@ -3088,7 +3046,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
       newVertex->SetPointId( 0, *pointIt );
       splittedCells->InsertElement( cellIt.Index(), newVertex.ReleaseOwnership() );
       }
-    else if ( cell->GetType() == AtlasMesh::CellType::LINE_CELL  )
+    else if ( cell->GetType() == itk::CommonEnums::CellGeometry::LINE_CELL  )
       {
       // Retrieve point ids of the vertices
       AtlasMesh::CellType::PointIdConstIterator  pointIt = cell->PointIdsBegin();
@@ -3099,7 +3057,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
       if ( ( ( idOfFirstPoint == point1Id ) && ( idOfSecondPoint == point2Id ) ) ||
            ( ( idOfFirstPoint == point2Id ) && ( idOfSecondPoint == point1Id ) ) )
         {
-        // 
+        //
         AtlasMesh::CellAutoPointer  newLine;
         newLine.TakeOwnership( new LineCell );
         newLine->SetPointId( 0, point2Id );
@@ -3135,7 +3093,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
       const bool  configurationIs21X = ( ( idOfFirstPoint == point2Id ) && ( idOfSecondPoint == point1Id ) );
       const bool  configurationIs1X2 = ( ( idOfFirstPoint == point1Id ) && ( idOfThirdPoint == point2Id ) );
 
-      if ( configurationIsX12 || configurationIs12X || configurationIs2X1 || 
+      if ( configurationIsX12 || configurationIs12X || configurationIs2X1 ||
            configurationIsX21 || configurationIs21X || configurationIs1X2 )
         {
         // Triangle 1
@@ -3143,7 +3101,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
         newTriangle1.TakeOwnership( new TriangleCell );
         AtlasMesh::CellIdentifier  newTriangle1Id = nextFreeCellId;
         nextFreeCellId++;
-        
+
         // Triangle 2
         AtlasMesh::CellAutoPointer  newTriangle2;
         newTriangle2.TakeOwnership( new TriangleCell );
@@ -3165,7 +3123,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
           transverseEdge1Id = newLineId;
           }
         nextFreeCellId++;
- 
+
         // Fill in contents
         if ( configurationIsX12 )
           {
@@ -3176,7 +3134,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
           newTriangle2->SetPointId( 0, idOfFirstPoint );
           newTriangle2->SetPointId( 1, point4Id );
           newTriangle2->SetPointId( 2, point2Id );
-          
+
           newLine->SetPointId( 0, idOfFirstPoint );
           newLine->SetPointId( 1, point4Id );
           }
@@ -3189,7 +3147,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
           newTriangle2->SetPointId( 0, idOfThirdPoint );
           newTriangle2->SetPointId( 1, point4Id );
           newTriangle2->SetPointId( 2, point2Id );
-          
+
           newLine->SetPointId( 0, idOfThirdPoint );
           newLine->SetPointId( 1, point4Id );
           }
@@ -3202,7 +3160,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
           newTriangle2->SetPointId( 0, idOfSecondPoint );
           newTriangle2->SetPointId( 1, point4Id );
           newTriangle2->SetPointId( 2, point2Id );
-          
+
           newLine->SetPointId( 0, idOfSecondPoint );
           newLine->SetPointId( 1, point4Id );
           }
@@ -3215,7 +3173,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
           newTriangle2->SetPointId( 0, idOfFirstPoint );
           newTriangle2->SetPointId( 1, point4Id );
           newTriangle2->SetPointId( 2, point1Id );
-          
+
           newLine->SetPointId( 0, idOfFirstPoint );
           newLine->SetPointId( 1, point4Id );
           }
@@ -3228,7 +3186,7 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
           newTriangle2->SetPointId( 0, idOfThirdPoint );
           newTriangle2->SetPointId( 1, point4Id );
           newTriangle2->SetPointId( 2, point1Id );
-          
+
           newLine->SetPointId( 0, idOfThirdPoint );
           newLine->SetPointId( 1, point4Id );
           }
@@ -3241,11 +3199,11 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
           newTriangle2->SetPointId( 0, idOfSecondPoint );
           newTriangle2->SetPointId( 1, point4Id );
           newTriangle2->SetPointId( 2, point1Id );
-          
+
           newLine->SetPointId( 0, idOfSecondPoint );
           newLine->SetPointId( 1, point4Id );
           }
-    
+
 
         // Add newly created cells
         splittedCells->InsertElement( newTriangle1Id, newTriangle1.ReleaseOwnership() );
@@ -3262,15 +3220,15 @@ AtlasMeshCollection::Pointer AtlasMeshCollection ::GetEdgeSplitted(
         newTriangle->SetPointId( 2, idOfThirdPoint );
         splittedCells->InsertElement( cellIt.Index(), newTriangle.ReleaseOwnership() );
         }
-      
+
       }
-      
-      
+
+
 
     } // End loop over all cells
-    
-    
-    
+
+
+
   // Create a new mesh collection to hold the result.
   AtlasMeshCollection::Pointer  splitted = AtlasMeshCollection::New();
   splitted->SetPointParameters( splittedPointParameters );
@@ -3305,8 +3263,8 @@ void AtlasMeshCollection ::FlattenAlphas() {
   borderAlphasEntry.Fill(0.0f);
   borderAlphasEntry[0] = 1.0f;
 
-  // Loop over all points, and replace the alphas with a flat alpha entry if the
-  // alphas can be changed, or border alpha entry otherwise
+  // Loop over all points, and replace the alphas with a flat alpha entry if the alphas can be changed,
+  // or border alpha entry otherwise
   for (PointDataContainerType::Iterator pointParamIt =
            m_PointParameters->Begin();
        pointParamIt != m_PointParameters->End(); ++pointParamIt) {
@@ -3319,13 +3277,12 @@ void AtlasMeshCollection ::FlattenAlphas() {
 }
 
 /*!
-  \fn void AtlasMeshCollection::Transform( int meshNumber, const TransformType*
-  transform ) \brief Applies the given transform to the given mesh. The
-  reference mesh is used when meshNumber = nMeshes+1.
-  m_ReferenceTetrahedronInfos and m_Meshes are cleared forcing a regeneration of
-  those data.
+  \fn void AtlasMeshCollection::Transform( int meshNumber, const TransformType* transform )
+  \brief Applies the given transform to the given mesh. The reference mesh is used when
+  meshNumber = nMeshes+1. m_ReferenceTetrahedronInfos and m_Meshes are cleared forcing
+  a regeneration of those data.
 */
-void AtlasMeshCollection ::Transform(int meshNumber,
+void AtlasMeshCollection ::Transform(int                  meshNumber,
                                      const TransformType *transform) {
   // Sanity check on requested mesh
   if (meshNumber >= static_cast<int>(m_Positions.size())) {
@@ -3355,7 +3312,7 @@ void AtlasMeshCollection ::Transform(int meshNumber,
   }
 
   // Cached data members are no longer valid
-  m_ReferenceTetrahedronInfos = nullptr;
+  m_ReferenceTetrahedronInfos = 0;
   m_Meshes.clear();
 }
 
@@ -3363,26 +3320,27 @@ void AtlasMeshCollection ::Transform(int meshNumber,
 //
 //
 /*!
-  \fn AtlasMesh::CellLinksContainerPointerAtlasMeshCollection::GetCellLinks()
-  const \brief Returns m_CellLinks. Builds the cell links if they do not already
-  exist. A "Cell Link" indicates which points belong to which cells (?).
+  \fn AtlasMesh::CellLinksContainerPointerAtlasMeshCollection::GetCellLinks() const
+  \brief Returns m_CellLinks. Builds the cell links if they do not already exist.
+  A "Cell Link" indicates which points belong to which cells (?).
 */
 AtlasMesh::CellLinksContainerPointer
 AtlasMeshCollection ::GetCellLinks() const {
   if (!m_CellLinks) {
-    // std::cout << "Building cell links..." << std::endl;
+    //std::cout << "Building cell links..." << std::endl;
 
     // Create links back from points to cells.
     AtlasMesh::Pointer tmpMesh = AtlasMesh::New();
     tmpMesh->SetCells(m_Cells);
 #if 1
-    tmpMesh->SetPoints(m_Positions[0]); // Bug in itk::Mesh::BuildCellLinks():
-                                        // Won't do anything w/o points
+    tmpMesh->SetPoints(
+        m_Positions
+            [0]); // Bug in itk::Mesh::BuildCellLinks(): Won't do anything w/o points
 #endif
     tmpMesh->BuildCellLinks();
     m_CellLinks = tmpMesh->GetCellLinks();
 
-    // std::cout << "... done!" << std::endl;
+    //std::cout << "... done!" << std::endl;
   }
 
   return m_CellLinks;
@@ -3397,14 +3355,13 @@ void AtlasMeshCollection ::FillCubeWithTetrahedra(
     const AtlasMesh::PointType &p2, const AtlasMesh::PointType &p3,
     const AtlasMesh::PointType &p4, const AtlasMesh::PointType &p5,
     const AtlasMesh::PointType &p6, const AtlasMesh::PointType &p7) const {
-  // No matter the configuration, there are always five tethrahedra; the first
-  // point of the first tehtrahedron is always p0, the fourth point of the first
-  // tethrahedron is p2, the first point of the second tetrahedron is p7, the
-  // third point of the third tetrahedron is p1, the fourth point of the third
-  // tetrahedron is p5, the third point of the fourth tetrahedron is p6, the
-  // rourth point of the fourth tetrahedron is p4, and the third point of the
-  // fifth tetrahedron is p3. These properties will prove useful when upsampling
-  // a regular mesh collection.
+  // No matter the configuration, there are always five tethrahedra; the first point of
+  // the first tehtrahedron is always p0, the fourth point of the first tethrahedron is p2, the
+  // first point of the second tetrahedron is p7, the third point of the third tetrahedron
+  // is p1, the fourth point of the third tetrahedron is p5, the third point of the fourth
+  // tetrahedron is p6, the rourth point of the fourth tetrahedron is p4, and the third point
+  // of the fifth tetrahedron is p3. These properties will prove useful when upsampling a
+  // regular mesh collection.
   if (flippedConfiguration) {
     meshSource->AddTetrahedron(
         meshSource->AddPoint(p0), meshSource->AddPoint(p4),

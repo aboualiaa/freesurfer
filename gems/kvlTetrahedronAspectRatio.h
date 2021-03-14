@@ -18,9 +18,9 @@ static void Cross(const double x[3], const double y[3], double z[3]) {
   double Zx = x[1] * y[2] - x[2] * y[1];
   double Zy = x[2] * y[0] - x[0] * y[2];
   double Zz = x[0] * y[1] - x[1] * y[0];
-  z[0] = Zx;
-  z[1] = Zy;
-  z[2] = Zz;
+  z[0]      = Zx;
+  z[1]      = Zy;
+  z[2]      = Zz;
 };
 
 static double Norm(const double x[3]) {
@@ -102,8 +102,8 @@ static double TetrahedronRadiusRatio(const AtlasMesh::PointType &p0,
                                      const AtlasMesh::PointType &p1,
                                      const AtlasMesh::PointType &p2,
                                      const AtlasMesh::PointType &p3) {
-  double ab[3], bc[3], ac[3], ad[3], bd[3], cd[3], u[3];
-  double abc, abd, acd, bcd, a, b, c, det;
+  double       ab[3], bc[3], ac[3], ad[3], bd[3], cd[3], u[3];
+  double       abc, abd, acd, bcd, a, b, c, det;
   const double normal_coeff = 1. / 12.;
 
   ab[0] = p1[0] - p0[0];

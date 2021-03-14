@@ -1,14 +1,6 @@
-/**
- * @file  ifh2hdr.c
- *
- */
 /*
  * Original Author: Avi Z. Snyder, Washington University
- *
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2007/05/05 10:45:03 $
- *    $Revision: 1.3 $
+ * 
  *
  * Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
  * Washington University, Mallinckrodt Institute of Radiology.
@@ -23,10 +15,10 @@
  *
  */
 
-#include <stdlib.h>
-#include <string.h>
 #include <Getifh.h>
 #include <endianio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define MAXL 256
 
@@ -35,7 +27,7 @@ void getrange(char *string, float *minval, float *maxval) {
 
   str = strstr(string, "to");
   if (str) {
-    *str = '\0';
+    *str    = '\0';
     *minval = atof(string);
     *maxval = atof(str + 2);
   } else {
@@ -47,22 +39,21 @@ void getrange(char *string, float *minval, float *maxval) {
 extern int Inithdr(struct dsr *phdr, int *imgdim, float *voxdim,
                    char *proto_imgfile);
 
-static char rcsid[] = "$Id: ifh2hdr.c,v 1.3 2007/05/05 10:45:03 nicks Exp $";
 int main(int argc, char *argv[]) {
-  FILE *fp;
+  FILE *     fp;
   struct dsr hdr;
-  IFH ifh;
+  IFH        ifh;
 
-  char filespc[MAXL], imgroot[MAXL];
+  char  filespc[MAXL], imgroot[MAXL];
   float voxsiz[3];
   float fmin = 0.0, fmax = 0.0;
-  int imgdim[4];
+  int   imgdim[4];
 
   /***********/
   /* utility */
   /***********/
   char *str, command[MAXL], program[MAXL];
-  int c, i, k;
+  int   c, i, k;
 
   /*********/
   /* flags */
@@ -71,7 +62,7 @@ int main(int argc, char *argv[]) {
 
   int isbig, swab_flag, range_flag = 0;
 
-  printf("%s\n", rcsid);
+  printf("%s\n", "freesurfer ifh2hdr.c");
   if (!(str = strrchr(argv[0], '/')))
     str = argv[0];
   else
@@ -123,14 +114,14 @@ int main(int argc, char *argv[]) {
 
   Inithdr(&hdr, imgdim, voxsiz, "");
   hdr.dime.datatype = 16; /* float */
-  hdr.dime.bitpix = 32;
-  hdr.hist.orient = ifh.orientation - 2;
+  hdr.dime.bitpix   = 32;
+  hdr.hist.orient   = ifh.orientation - 2;
   if (range_flag) {
     hdr.dime.glmin = fmin;
     hdr.dime.glmax = fmax;
   }
 
-  isbig = !strcmp(ifh.imagedata_byte_order, "bigendian");
+  isbig     = !strcmp(ifh.imagedata_byte_order, "bigendian");
   swab_flag = (CPU_is_bigendian() != 0) != (isbig != 0);
   if (swab_flag)
     swab_hdr(&hdr);

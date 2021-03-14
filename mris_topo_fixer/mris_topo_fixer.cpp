@@ -1,5 +1,4 @@
 /**
- * @file  mris_topo_fixer.cpp
  * @brief optimally correcting the topology of triangulated surface
  *
  * "Genetic Algorithm for the Topology Correction of Cortical Surfaces",
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Florent Segonne
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:34 $
- *    $Revision: 1.29 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,53 +21,53 @@
  */
 
 #include "diag.h"
-#include "version.h"
 #include "timer.h"
 #include "topo_parms.h"
+#include "version.h"
 
 #include "mris_topology.h"
 #include "patchdisk.h"
 
 int main(int argc, char *argv[]);
 
-static int asc = 0;
-static int noint = 1;
+static int asc    = 0;
+static int noint  = 1;
 static int sphere = 1;
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void initTopoFixerParameters();
 static void freeTopoFixerParameters();
 
 const char *Progname;
 
-static const char *brain_name = "brain";
-static const char *wm_name = "wm";
-static const char *orig_name = "orig";
-static const char *input_name = "input";
-// static const char *defect_name  = "defects" ;
+static const char *brain_name  = "brain";
+static const char *wm_name     = "wm";
+static const char *input_name  = "input";
 static const char *sphere_name = "qsphere";
-static const char *out_name = "orig_corrected";
+//static const char *defect_name  = "defects" ;
+const char *orig_name = "orig";
+const char *out_name  = "orig_corrected";
 
-static char sdir[STRLEN] = "";
+static char          sdir[STRLEN] = "";
 static TOPOFIX_PARMS parms;
-static int MGZ = 1; // set to 1 for MGZ
+static int           MGZ = 1; // set to 1 for MGZ
 
 static double pct_over = 1.1;
 
 static void initTopoFixerParameters() {
-  parms.verbose = 1; // minimal mode
-  parms.smooth = 0;  // smoothing
-  parms.match = 1;   // matching using local intensity estimates
-  parms.mode = 0;
-  parms.minimal_mode = 0;
-  parms.nminattempts = 10;
-  parms.l_mri = 0.0;
-  parms.l_curv = 4.0;
-  parms.l_qcurv = 0.0;
-  parms.l_unmri = 1.0;
-  parms.volume_resolution = 3;
-  parms.nattempts_percent = 0.15;
-  parms.minimal_loop_percent = 0.4;
+  parms.verbose               = 1; // minimal mode
+  parms.smooth                = 0; // smoothing
+  parms.match                 = 1; // matching using local intensity estimates
+  parms.mode                  = 0;
+  parms.minimal_mode          = 0;
+  parms.nminattempts          = 10;
+  parms.l_mri                 = 0.0;
+  parms.l_curv                = 4.0;
+  parms.l_qcurv               = 0.0;
+  parms.l_unmri               = 1.0;
+  parms.volume_resolution     = 3;
+  parms.nattempts_percent     = 0.15;
+  parms.minimal_loop_percent  = 0.4;
   parms.no_self_intersections = 1;
   parms.contrast = -2; // contrast (regular==1;inversion== -1 ; detect = -2)
   // does not write out information
@@ -85,21 +80,21 @@ static void initTopoFixerParameters() {
   parms.patchdisk = (void *)disk;
 
   // mri
-  parms.mri = nullptr;
-  parms.mri_wm = nullptr;
+  parms.mri            = nullptr;
+  parms.mri_wm         = nullptr;
   parms.mri_gray_white = nullptr;
-  parms.mri_k1_k2 = nullptr;
+  parms.mri_k1_k2      = nullptr;
   // histo
-  parms.h_k1 = nullptr;
-  parms.h_k2 = nullptr;
-  parms.h_gray = nullptr;
-  parms.h_white = nullptr;
-  parms.h_dot = nullptr;
+  parms.h_k1     = nullptr;
+  parms.h_k2     = nullptr;
+  parms.h_gray   = nullptr;
+  parms.h_white  = nullptr;
+  parms.h_dot    = nullptr;
   parms.h_border = nullptr;
-  parms.h_grad = nullptr;
+  parms.h_grad   = nullptr;
   ;
   parms.transformation_matrix = nullptr;
-  parms.defect_list = nullptr;
+  parms.defect_list           = nullptr;
 }
 
 static void freeTopoFixerParameters() {
@@ -150,11 +145,11 @@ static void freeTopoFixerParameters() {
 
 int main(int argc, char *argv[]) {
 
-  char *hemi, *sname, *cp, fname[STRLEN];
-  int nargs;
+  char *       hemi, *sname, *cp, fname[STRLEN];
+  int          nargs;
   MRI_SURFACE *mris, *mris_corrected;
   // MRI           *mri, *mri_wm ;
-  int msec, nvert, nfaces, nedges, eno, is_valid;
+  int   msec, nvert, nfaces, nedges, eno, is_valid;
   Timer then;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_topo_fixer");
@@ -180,13 +175,13 @@ int main(int argc, char *argv[]) {
 
   print_parameters();
 
-  printf("%s\n",vcid);
-  printf("  %s\n",MRISurfSrcVersion());
+  printf("%s\n",getVersion().c_str());
+  printf("  %s\n",getVersion().c_str());
   fflush(stdout); */
 
   then.reset();
   sname = argv[1];
-  hemi = argv[2];
+  hemi  = argv[2];
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
     if (!cp)
@@ -195,7 +190,12 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
 
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, orig_name);
+  int req =
+      snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi, orig_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   printf("reading input surface %s...\n", fname);
   mris = MRISreadOverAlloc(fname, pct_over);
   if (!mris)
@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
     MRISrestoreVertexPositions(mris, ORIGINAL_VERTICES);
     MRIS *mris_temp = MRISextractMainComponent(mris, 0, 0, &ncpts);
     MRISfree(&mris);
-    mris = mris_temp;
+    mris                       = mris_temp;
     did_extract_main_component = 1;
     // fprintf(stderr,"\nAbort !!!\n");
     // MRISfree(&mris);
@@ -282,7 +282,12 @@ int main(int argc, char *argv[]) {
   }
   MRISsaveVertexPositions(mris, ORIGINAL_VERTICES);
 
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, input_name);
+  req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi,
+                 input_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   MRISwrite(mris, fname);
 
   // number of loops
@@ -298,12 +303,17 @@ int main(int argc, char *argv[]) {
   //  }else {
   if (sphere) {
     if (did_extract_main_component == 0) {
-      // read the spherical coordinates
-      sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, sphere_name);
+      //read the spherical coordinates
+      req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi,
+                     sphere_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (MRISreadVertexPositions(mris, (char *)sphere_name) != NO_ERROR)
         ErrorExit(ERROR_NOFILE, "%s: could not read original surface %s",
                   Progname, orig_name);
-    } else // surface already extracted
+    } else //surface already extracted
       MRISrestoreVertexPositions(mris, CANONICAL_VERTICES);
   } else
     MRISmapOntoSphere(mris);
@@ -320,19 +330,31 @@ int main(int argc, char *argv[]) {
   MRISsaveVertexPositions(mris, CANONICAL_VERTICES);
   //  }
 
-  // read the mri volume
-  sprintf(fname, "%s/%s/mri/%s", sdir, sname, brain_name);
-  if (MGZ)
-    sprintf(fname, "%s.mgz", fname);
+  //read the mri volume
+  if (MGZ) {
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s.mgz", sdir, sname, brain_name);
+  } else {
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, brain_name);
+  }
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   printf("reading brain volume from %s...\n", brain_name);
   parms.mri = MRIread(fname);
   if (!parms.mri)
     ErrorExit(ERROR_NOFILE, "%s: could not read brain volume from %s", Progname,
               fname);
 
-  sprintf(fname, "%s/%s/mri/%s", sdir, sname, wm_name);
-  if (MGZ)
-    sprintf(fname, "%s.mgz", fname);
+  if (MGZ) {
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s.mgz", sdir, sname, wm_name);
+  } else {
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, wm_name);
+  }
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   printf("reading wm segmentation from %s...\n", wm_name);
   parms.mri_wm = MRIread(fname);
   if (!parms.mri_wm)
@@ -341,25 +363,29 @@ int main(int argc, char *argv[]) {
 
   DEFECT_LIST *dl = (DEFECT_LIST *)parms.defect_list;
   for (int n = 0; n < mris->nvertices; n++) {
-    mris->vertices[n].curv = 0;
+    mris->vertices[n].curv    = 0;
     mris->vertices[n].marked2 = 0;
   }
   for (int i = 0; i < dl->ndefects; i++) {
     DEFECT *defect = &dl->defects[i];
     for (int n = 0; n < defect->nvertices; n++) {
-      mris->vertices[defect->vertices[n]].curv = i + 1;
+      mris->vertices[defect->vertices[n]].curv    = i + 1;
       mris->vertices[defect->vertices[n]].marked2 = i + 1;
     }
     for (int n = 0; n < defect->nborder; n++) {
-      mris->vertices[defect->border[n]].curv = i + 1;
+      mris->vertices[defect->border[n]].curv    = i + 1;
       mris->vertices[defect->border[n]].marked2 = i + 1;
     }
   }
 
-  sprintf(fname, "%s/%s/surf/%s.defects", sdir, sname, hemi);
+  req = snprintf(fname, STRLEN, "%s/%s/surf/%s.defects", sdir, sname, hemi);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   MRISwriteCurvature(mris, fname);
 
-  mris_corrected = MRISduplicateOver(mris);
+  mris_corrected       = MRISduplicateOver(mris);
   mris_corrected->type = MRIS_TRIANGULAR_SURFACE;
   // mris becomes useless!
   MRISfree(&mris);
@@ -437,10 +463,20 @@ int main(int argc, char *argv[]) {
   MRISmarkOrientationChanges(mris_corrected);
 
   if (asc) {
-    sprintf(fname, "%s/%s/surf/%s.%s.asc", sdir, sname, hemi, out_name);
+    req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s.asc", sdir, sname, hemi,
+                   out_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRISwrite(mris_corrected, fname);
   } else {
-    sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, out_name);
+    req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi,
+                   out_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRISwrite(mris_corrected, fname);
   }
 
@@ -456,7 +492,7 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -527,15 +563,15 @@ static int get_option(int argc, char *argv[]) {
     asc = 1;
     fprintf(stderr, "writting out surface in asci mode\n");
   } else if (!stricmp(option, (char *)"int")) {
-    noint = 0;
-    nargs = 0;
+    noint                       = 0;
+    nargs                       = 0;
     parms.no_self_intersections = 0;
   } else if (!stricmp(option, (char *)"no_intersection")) {
     parms.no_self_intersections = 1;
     fprintf(stderr, "avoiding self-intersecting patches\n");
   } else if (!stricmp(option, (char *)"minimal")) {
-    parms.minimal_mode = 1;
-    parms.nminattempts = 1;
+    parms.minimal_mode      = 1;
+    parms.nminattempts      = 1;
     parms.nattempts_percent = 0.0f;
     fprintf(stderr, "cuting minimal loop only\n");
   } else if (!stricmp(option, (char *)"loop_pct")) {
@@ -558,6 +594,12 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "setting seed for random number genererator to %d\n",
             atoi(argv[2]));
     nargs = 1;
+  } else if (!stricmp(option, (char *)"out_name")) {
+    out_name = argv[2];
+    nargs    = 1;
+  } else if (!stricmp(option, (char *)"orig_name")) {
+    orig_name = argv[2];
+    nargs     = 1;
   } else
     switch (toupper(*option)) {
     case '?':
@@ -567,7 +609,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     }
 

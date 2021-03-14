@@ -4,12 +4,8 @@
 # func2tal
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2015/12/10 22:51:29 $
-#    $Revision: 1.12 $
 #
-# Copyright (C) 2002-2007,
+# Copyright © 2021
 # The General Hospital Corporation (Boston, MA). 
 # All rights reserved.
 #
@@ -23,7 +19,7 @@
 #
 
 
-set FUNC2TAL_VER = '$Id: func2tal,v 1.12 2015/12/10 22:51:29 zkaufman Exp $';
+set FUNC2TAL_VER = 'func2tal @FS_VERSION@';
 
 set inputargs = ($argv)
 

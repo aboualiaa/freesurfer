@@ -20,8 +20,8 @@
 #ifndef __QVTKWin32Header_h
 #define __QVTKWin32Header_h
 
-#include "vtkConfigure.h"
 #include "vtkABI.h"
+#include "vtkConfigure.h"
 
 #if defined(VTK_BUILD_SHARED_LIBS)
 #if defined(QVTK_EXPORTS) || defined(QVTKWidgetPlugin_EXPORTS)

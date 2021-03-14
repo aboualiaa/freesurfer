@@ -1,16 +1,7 @@
-/**
- * @file  TrackData.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/12/05 20:03:33 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,11 +15,11 @@
 #ifndef TRACKDATA_H
 #define TRACKDATA_H
 
-#include <QObject>
-#include <QStringList>
 #include "Track.h"
-#include <QPair>
 #include <QColor>
+#include <QObject>
+#include <QPair>
+#include <QStringList>
 
 class TrackData : public QObject {
   friend class LayerTrack;
@@ -51,13 +42,13 @@ public slots:
   void Clear();
 
 protected:
-  int m_nDim[3];
-  float m_dVoxelSize[3];
-  int m_nNumberOfScalars;
+  int         m_nDim[3];
+  float       m_dVoxelSize[3];
+  int         m_nNumberOfScalars;
   QStringList m_scalarNames;
-  int m_nNumberOfProperties;
+  int         m_nNumberOfProperties;
   QStringList m_propertyNames;
-  double m_dVoxToRas[4][4];
+  double      m_dVoxToRas[4][4];
 
   int m_nNumberOfTracks;
   int m_nNumberOfPoints;
@@ -66,7 +57,7 @@ protected:
   bool m_bValidVoxToRas;
   bool m_bHasEmbeddedColor;
 
-  QList<Track> m_tracks;
+  QList<Track>                 m_tracks;
   QList<QPair<double, double>> m_rangeScalar;
   QList<QPair<double, double>> m_rangeProperty;
 };

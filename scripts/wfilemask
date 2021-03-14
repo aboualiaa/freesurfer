@@ -3,15 +3,10 @@
 #
 # wfilemask
 #
-# REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/16 17:17:20 $
-#    $Revision: 1.7 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,7 +20,7 @@
 
 # wfilemask
 #
-set VERSION = '$Id: wfilemask,v 1.7 2016/02/16 17:17:20 zkaufman Exp $';
+set VERSION = 'wfilemask @FS_VERSION@';
 set inputargs = ($argv);
 
 set LabelFile = ();

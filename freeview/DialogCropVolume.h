@@ -1,16 +1,11 @@
 /**
- * @file  DialogCropVolume.h
  * @brief Dialog window to apply volume crop
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/09/13 16:11:19 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -51,10 +46,10 @@ protected slots:
 
 private:
   Ui::DialogCropVolume *ui;
-  QSpinBox *m_spinRange[6];
+  QSpinBox *            m_spinRange[6];
 
   LayerMRI *m_mri;
-  bool m_bShowSliceFrame;
+  bool      m_bShowSliceFrame;
 };
 
 #endif // DIALOGCROPVOLUME_H

@@ -15,15 +15,15 @@ namespace sbl {
 //-------------------------------------------
 
 /// convert days to seconds
-inline int daysToSecs(int days) { return days * 24 * 60 * 60; }
+inline int   daysToSecs(int days) { return days * 24 * 60 * 60; }
 inline float daysToSecs(float days) { return days * 24.0f * 60.0f * 60.0f; }
 
 /// convert hours to seconds
-inline int hoursToSecs(int hours) { return hours * 60 * 60; }
+inline int   hoursToSecs(int hours) { return hours * 60 * 60; }
 inline float hoursToSecs(float hours) { return hours * 60.0f * 60.0f; }
 
 /// convert minutes to seconds
-inline int minutesToSecs(int minutes) { return minutes * 60; }
+inline int   minutesToSecs(int minutes) { return minutes * 60; }
 inline float minutesToSecs(float minutes) { return minutes * 60.0f; }
 
 /// get the minute of the day
@@ -78,11 +78,11 @@ int datePartUTC(int timestamp);
 //-------------------------------------------
 
 /// convert timestamp to local-time string
-String tsToStrLocal(int timestamp, bool showSeconds = true);
+String        tsToStrLocal(int timestamp, bool showSeconds = true);
 inline String tsToStrLocal(double timestamp, bool showSeconds = true) {
   return tsToStrLocal((int)timestamp, showSeconds);
 }
-String tsToStrLocal24(int timestamp, bool showSeconds = true);
+String        tsToStrLocal24(int timestamp, bool showSeconds = true);
 inline String tsToStrLocal24(double timestamp, bool showSeconds = true) {
   return tsToStrLocal24((int)timestamp, showSeconds);
 }

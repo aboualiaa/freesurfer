@@ -1,6 +1,5 @@
 % fast_selxavg3.m
 %
-% $Id: fast_selxavg3.m,v 1.112 2015/05/08 21:04:00 greve Exp $
 
 %----------------------------------------------
 %
@@ -13,12 +12,8 @@
 % fast_selxavg3.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: greve $
-%    $Date: 2015/05/08 21:04:00 $
-%    $Revision: 1.112 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -37,7 +32,7 @@ fprintf('%s\n',sess);
 
 
 fprintf('-------------------------\n');
-fprintf('$Id: fast_selxavg3.m,v 1.112 2015/05/08 21:04:00 greve Exp $\n');
+fprintf('fast_selxavg3.m @FS_VERSION@\n');
 which fast_selxavg3
 which fast_ldanaflac
 which MRIread
@@ -64,7 +59,7 @@ if(isempty(flac0))
   if(~monly) quit; end
   return; 
 end
-flac0.sxaversion = '$Id: fast_selxavg3.m,v 1.112 2015/05/08 21:04:00 greve Exp $';
+flac0.sxaversion = 'fast_selxavg3.m @FS_VERSION@';
 
 % remove non-mask when analyzing. This does not change the results
 % at all, it just prevents the processing of voxels that are

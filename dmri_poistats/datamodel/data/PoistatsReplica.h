@@ -1,8 +1,8 @@
 #ifndef __PoistatsReplica_h
 #define __PoistatsReplica_h
 
-#include <itkArray2D.h>
 #include <itkArray.h>
+#include <itkArray2D.h>
 
 #include <itkPointSet.h>
 
@@ -11,10 +11,10 @@
 class PoistatsReplica {
 public:
   typedef itk::Array2D<double> MatrixType;
-  typedef MatrixType *MatrixPointer;
+  typedef MatrixType *         MatrixPointer;
 
   typedef itk::Array<double> ArrayType;
-  typedef ArrayType *ArrayPointer;
+  typedef ArrayType *        ArrayPointer;
 
   PoistatsReplica();
   PoistatsReplica(PoistatsModel *model);
@@ -25,13 +25,13 @@ public:
   void SetModel(PoistatsModel *model);
 
   double GetCurrentMeanEnergy() const;
-  void SetCurrentMeanEnergy(const double energy);
+  void   SetCurrentMeanEnergy(const double energy);
 
   double GetPreviousMeanEnergy() const;
-  void SetPreviousMeanEnergy(const double temperature);
+  void   SetPreviousMeanEnergy(const double temperature);
 
   double GetTemperature();
-  void SetTemperature(const double temperature);
+  void   SetTemperature(const double temperature);
 
   void CopyCurrentToPreviousEnergy();
 
@@ -42,10 +42,10 @@ public:
   void ResetCurrentToPreviousEnergy();
 
   MatrixPointer GetBasePath();
-  void SetBasePath(MatrixPointer basePath);
+  void          SetBasePath(MatrixPointer basePath);
 
   MatrixPointer GetPreviousTrialPath();
-  void SetPreviousTrialPath(MatrixPointer path);
+  void          SetPreviousTrialPath(MatrixPointer path);
 
   MatrixPointer GetCurrentTrialPath();
 
@@ -58,9 +58,9 @@ public:
   void GenerateUnitSphereRandom(MatrixPointer randomUnitSphere);
 
   void GenerateConstrainedRandomPoint3D(vnl_vector<double> currentPoint,
-                                        MatrixPointer possibleNewPoints,
-                                        const double sigma,
-                                        ArrayPointer newRandomPoint);
+                                        MatrixPointer      possibleNewPoints,
+                                        const double       sigma,
+                                        ArrayPointer       newRandomPoint);
 
   void GetPerturbedBasePath(MatrixPointer perturbedPath, const double sigma,
                             const MatrixPointer possibleStartPoints,
@@ -88,7 +88,7 @@ private:
   MatrixPointer m_PreviousTrialPath;
   MatrixPointer m_CurrentTrialPath;
   MatrixPointer m_BestTrialPath;
-  ArrayPointer m_BestTrialPathProbabilities;
+  ArrayPointer  m_BestTrialPathProbabilities;
 
   void DeletePathIfNotNull(MatrixPointer path);
 

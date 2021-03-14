@@ -41,7 +41,7 @@
    based on input by Jamie Zawinski.  */
 
 static time_t timegm(struct tm *t) {
-  time_t tl, tb;
+  time_t     tl, tb;
   struct tm *tg;
 
   tl = mktime(t);
@@ -52,9 +52,9 @@ static time_t timegm(struct tm *t) {
       return -1; /* can't deal with output from strptime */
     tl += 3600;
   }
-  tg = gmtime(&tl);
+  tg           = gmtime(&tl);
   tg->tm_isdst = 0;
-  tb = mktime(tg);
+  tb           = mktime(tg);
   if (tb == -1) {
     tg->tm_hour--;
     tb = mktime(tg);

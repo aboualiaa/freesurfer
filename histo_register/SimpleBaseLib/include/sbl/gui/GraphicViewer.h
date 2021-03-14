@@ -1,8 +1,8 @@
 #ifndef _SBL_GRAPHIC_VIEWER_H_
 #define _SBL_GRAPHIC_VIEWER_H_
-#include <wx/wx.h>
 #include <sbl/core/String.h>
 #include <sbl/math/Geometry.h>
+#include <wx/wx.h>
 namespace sbl {
 
 /// The GraphicViewerHandler class defines an interface for objects that wish to

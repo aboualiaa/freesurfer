@@ -1,11 +1,11 @@
 #ifndef _SIMPLE_PARTICLE_DATA_H_
 #define _SIMPLE_PARTICLE_DATA_H_
 #include <sbl/core/Array.h>
-#include <sbl/core/File.h>
 #include <sbl/core/Config.h>
+#include <sbl/core/File.h>
 #include <sbl/core/Pointer.h>
-#include <sbl/math/Vector.h>
 #include <sbl/image/Image.h>
+#include <sbl/math/Vector.h>
 #include <sbl/system/Timer.h>
 using namespace sbl;
 namespace pvl {
@@ -32,9 +32,9 @@ public:
   void prune(int frameIndex);
 
   // access frame start/end
-  inline int startFrame() const { return m_startFrame; }
-  inline int endFrame() const { return m_endFrame; }
-  inline int length() const { return m_endFrame - m_startFrame + 1; }
+  inline int  startFrame() const { return m_startFrame; }
+  inline int  endFrame() const { return m_endFrame; }
+  inline int  length() const { return m_endFrame - m_startFrame + 1; }
   inline bool active(int frameIndex) const {
     return frameIndex >= m_startFrame && frameIndex <= m_endFrame;
   }
@@ -49,8 +49,8 @@ public:
   inline void setChannel(int frameIndex, int channelIndex, float val) {
     m_channel[channelIndex][frameIndex - m_startFrame] = val;
   }
-  void setChannels(int frameIndex, const Array<ImageGrayF> &chan,
-                   const VectorF *channelBlurKernel);
+  void       setChannels(int frameIndex, const Array<ImageGrayF> &chan,
+                         const VectorF *channelBlurKernel);
   inline int channelCount() const { return m_channel.count(); }
 
   /// position of particle in (an abstract) cluster space
@@ -146,8 +146,8 @@ public:
     return m_simpleParticleSet[index];
   };
   inline int count() const { return m_simpleParticleSet.count(); };
-  int activeCount(int frameIndex) const;
-  int activeCount(int startFrame, int endFrame) const;
+  int        activeCount(int frameIndex) const;
+  int        activeCount(int startFrame, int endFrame) const;
 
   /// min start frame across set of particles
   int minStartFrame() const;

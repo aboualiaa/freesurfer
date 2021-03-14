@@ -1,17 +1,11 @@
 /**
- * @file  mris_merge_parcellations
- * @brief program for merging two parcellations into one, taking some divisions
- * from one and some from the other
+ * @brief program for merging two parcellations into one, taking some divisions from one and some from the other
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:33 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,22 +17,31 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "MARS_DT_Boundary.h"
 #include "diag.h"
-#include "timer.h"
+#include "error.h"
+#include "label.h"
+#include "macros.h"
+#include "mri.h"
 #include "mrisurf.h"
+#include "proto.h"
+#include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_merge_parcellations.c,v 1.6 2011/03/02 00:04:33 nicks Exp $";
-
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
-static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
-                             MRI_SURFACE *mris2, MRI_SURFACE *mris);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
+static int  merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
+                              MRI_SURFACE *mris2, MRI_SURFACE *mris);
 
 const char *Progname;
 static char fsdir[STRLEN] = "";
@@ -46,9 +49,9 @@ static char fsdir[STRLEN] = "";
 int main(int argc, char *argv[]) {
   char **av, *parc1, *parc2, *oname, surf_name[STRLEN], path[STRLEN],
       hemi[STRLEN], *cp, fname[STRLEN];
-  int ac, nargs, msec;
+  int          ac, nargs, msec;
   MRI_SURFACE *mris1, *mris2;
-  Timer then;
+  Timer        then;
   COLOR_TABLE *ct;
 
   nargs = handleVersionOption(argc, argv, "mris_merge_parcellations");
@@ -59,7 +62,7 @@ int main(int argc, char *argv[]) {
   Gdiag |= DIAG_SHOW;
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   ac = argc;
   av = argv;
@@ -75,14 +78,18 @@ int main(int argc, char *argv[]) {
 
   if (strlen(fsdir) == 0) {
     cp = getenv("FREESURFER_HOME");
-    if (cp == nullptr)
+    if (cp == NULL)
       ErrorExit(ERROR_BADPARM,
                 "FRESURFER_HOME must be defined in the environment");
     strcpy(fsdir, cp);
   }
-  sprintf(fname, "%s/FreeSurferColorLUT.txt", fsdir);
+  int req = snprintf(fname, STRLEN, "%s/FreeSurferColorLUT.txt", fsdir);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   ct = CTABreadASCII(fname);
-  if (ct == nullptr)
+  if (ct == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read color table from %s", Progname,
               fname);
 
@@ -92,31 +99,35 @@ int main(int argc, char *argv[]) {
   FileNamePath(parc1, path);
   FileNameOnly(parc1, fname);
   cp = strstr(fname, "h.");
-  if (cp == nullptr)
+  if (cp == NULL)
     ErrorExit(ERROR_UNSUPPORTED, "%s: could not scan hemisphere from fname %s",
               Progname, fname);
   strncpy(hemi, cp - 1, 2);
   hemi[2] = 0;
-  sprintf(surf_name, "%s/../surf/%s.orig", path, hemi);
+  req     = snprintf(surf_name, STRLEN, "%s/../surf/%s.orig", path, hemi);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   mris1 = MRISread(surf_name);
-  if (mris1 == nullptr)
+  if (mris1 == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface %s", Progname,
               surf_name);
   if (MRISreadAnnotation(mris1, parc1) != NO_ERROR)
     ErrorExit(ERROR_BADFILE, "%s:could not open annotation %s", Progname,
               parc1);
-  if (mris1->ct == nullptr)
+  if (mris1->ct == NULL)
     ErrorExit(ERROR_BADFILE, "Annotation %s does not contain a color table",
               parc1);
 
   mris2 = MRISread(surf_name);
-  if (mris2 == nullptr)
+  if (mris2 == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface %s", Progname,
               surf_name);
   if (MRISreadAnnotation(mris2, parc2) != NO_ERROR)
     ErrorExit(ERROR_BADFILE, "%s:could not open annotation %s", Progname,
               parc2);
-  if (mris2->ct == nullptr)
+  if (mris2->ct == NULL)
     ErrorExit(ERROR_BADFILE, "Annotation %s does not contain a color table",
               parc2);
 
@@ -138,7 +149,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -153,7 +164,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -170,17 +181,17 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   printf("usage: %s [options] <surface> <label1> <label2>\n", Progname);
   printf("\t-a <annot name>    compute pairwise HD between all annotations\n");
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   fprintf(stderr,
           "This program computes the Hausdorff distance between two labels on "
@@ -190,15 +201,14 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 /*
   these are actually the same surface, the 1st one has Rahul's parcellation, the
-  2nd one Christophe's. Grab the cingulate subdivisions from Rahul's and put
-  them in Christophe's.
+  2nd one Christophe's. Grab the cingulate subdivisions from Rahul's and put them in Christophe's.
 */
 static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
                              MRI_SURFACE *mris2, MRI_SURFACE *mris) {
@@ -397,8 +407,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
     v->annotation = annot;
   }
 
-  // now diffuse cing sulcal labels into the rest of the cingulate sulcus in
-  // Christophe's labels
+  // now diffuse cing sulcal labels into the rest of the cingulate sulcus in Christophe's labels
   if (Gdiag_no >= 0) {
     int index;
     CTABfindAnnotation(mris1->ct, mris1->vertices[Gdiag_no].annotation, &index);
@@ -424,7 +433,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
     filled = 0;
     for (vno = 0; vno < mris->nvertices; vno++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-      VERTEX *const v = &mris->vertices[vno];
+      VERTEX *const                v  = &mris->vertices[vno];
       if (vno == Gdiag_no)
         DiagBreak();
       if (v->marked == 1) {
@@ -442,8 +451,8 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
           else
             continue;
 
-          v->marked = -1; // marked in this cycle - don't use it until done with
-                          // this iter
+          v->marked =
+              -1; // marked in this cycle - don't use it until done with this iter
           filled++;
           break;
         }
@@ -470,7 +479,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (vno == Gdiag_no)
       DiagBreak();
     if (v->marked == 1) {
@@ -505,7 +514,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
     filled = 0;
     for (vno = 0; vno < mris->nvertices; vno++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-      VERTEX *const v = &mris->vertices[vno];
+      VERTEX *const                v  = &mris->vertices[vno];
       if (vno == Gdiag_no)
         DiagBreak();
       if (v->marked == 1) {
@@ -525,8 +534,8 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
           else
             continue;
 
-          v->marked = -1; // marked in this cycle - don't use it until done with
-                          // this iter
+          v->marked =
+              -1; // marked in this cycle - don't use it until done with this iter
           filled++;
           break;
         }
@@ -542,7 +551,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
 
   // now remove the ctx-?h- from the parcellation unit names
   {
-    int i, max_i = 0;
+    int  i, max_i = 0;
     CTE *cte;
     char buf[STRLEN];
 
@@ -555,7 +564,7 @@ static int merge_annotations(COLOR_TABLE *ct, MRI_SURFACE *mris1,
 
     for (i = 0; i < mris->ct->nentries; i++) {
       cte = mris->ct->entries[i];
-      if (cte == nullptr)
+      if (cte == NULL)
         continue;
       if ((strncmp(cte->name, "ctx-lh-", 7) == 0) ||
           (strncmp(cte->name, "ctx-rh-", 7) == 0)) {

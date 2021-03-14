@@ -1,12 +1,12 @@
 #include <boost/test/unit_test.hpp>
 
-#include "kvlAtlasMeshCollection.h"
-#include "kvlAtlasMeshAlphaDrawer.h"
-#include "kvlAtlasMeshVisitCounter.h"
-#include "kvlAtlasMeshToIntensityImageCostAndGradientCalculator.h"
-#include "itkImageRegionConstIteratorWithIndex.h"
 #include "itkImageFileWriter.h"
+#include "itkImageRegionConstIteratorWithIndex.h"
 #include "itkTimeProbe.h"
+#include "kvlAtlasMeshAlphaDrawer.h"
+#include "kvlAtlasMeshCollection.h"
+#include "kvlAtlasMeshToIntensityImageCostAndGradientCalculator.h"
+#include "kvlAtlasMeshVisitCounter.h"
 
 #include "testfileloader.hpp"
 
@@ -18,8 +18,8 @@ BOOST_AUTO_TEST_CASE(Interpolation) {
   // Set up a timer
   itk::TimeProbe clock;
 
-  // Rasterize the mesh, simply linearly interpolating a probabilistic atlas
-  // across the volume of each tetrahedron
+  // Rasterize the mesh, simply linearly interpolating a probabilistic atlas across the
+  // volume of each tetrahedron
   kvl::AtlasMeshAlphaDrawer::Pointer alphaDrawer =
       kvl::AtlasMeshAlphaDrawer::New();
   alphaDrawer->SetRegions(image->GetLargestPossibleRegion());
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(Interpolation) {
 
   // Write out
   typedef itk::ImageFileWriter<kvl::AtlasMeshAlphaDrawer::ImageType>
-      AlphaWriterType;
+                           AlphaWriterType;
   AlphaWriterType::Pointer alphaWriter = AlphaWriterType::New();
   alphaWriter->SetFileName("testAlpha.nii");
   alphaWriter->SetInput(alphaDrawer->GetImage());
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(Interpolation) {
       alphaIt(alphaDrawer->GetImage(),
               alphaDrawer->GetImage()->GetBufferedRegion());
   itk::ImageRegionConstIteratorWithIndex<kvl::AtlasMeshAlphaDrawer::ImageType>
-      referenceAlphaIt(referenceAlphaDrawer->GetImage(),
+         referenceAlphaIt(referenceAlphaDrawer->GetImage(),
                        referenceAlphaDrawer->GetImage()->GetBufferedRegion());
   double maximumAlphaError = 0.0;
   for (; !alphaIt.IsAtEnd(); ++alphaIt, ++referenceAlphaIt) {
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE(VoxelCount) {
   BOOST_TEST_MESSAGE("Time taken by visit counter: " << clock.GetMean());
 
   itk::ImageRegionConstIteratorWithIndex<kvl::AtlasMeshVisitCounter::ImageType>
-      it(visitCounter->GetImage(),
+       it(visitCounter->GetImage(),
          visitCounter->GetImage()->GetBufferedRegion());
   bool success = true;
   for (; !it.IsAtEnd(); ++it) {
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(VoxelCount) {
 
   // Write out
   typedef itk::ImageFileWriter<kvl::AtlasMeshVisitCounter::ImageType>
-      CountWriterType;
+                           CountWriterType;
   CountWriterType::Pointer countWriter = CountWriterType::New();
   countWriter->SetFileName("testCount.nii");
   countWriter->SetInput(visitCounter->GetImage());
@@ -139,19 +139,19 @@ BOOST_AUTO_TEST_CASE(DeformationGradients) {
   precisions.push_back(0.000731213454142);
 
   // Convert means and precisions to correct format
-  const int numberOfClasses = means.size();
+  const int                       numberOfClasses = means.size();
   std::vector<vnl_vector<double>> means_(numberOfClasses,
                                          vnl_vector<double>(1, 0.0));
   std::vector<vnl_matrix<double>> precisions_(numberOfClasses,
                                               vnl_matrix<double>(1, 1, 0.0));
   for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
-    means_[classNumber][0] = means[classNumber];
+    means_[classNumber][0]         = means[classNumber];
     precisions_[classNumber][0][0] = precisions[classNumber];
   }
 
   // Add in mixtureWeights and numberOfGaussiansPerClass
   std::vector<double> mixtureWeights(numberOfClasses);
-  std::vector<int> numberOfGaussiansPerClass(numberOfClasses);
+  std::vector<int>    numberOfGaussiansPerClass(numberOfClasses);
   for (int i = 0; i < numberOfClasses; i++) {
     mixtureWeights.at(i) = numberOfGaussiansPerClass.at(i) = 1;
   }
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(DeformationGradients) {
     if (curr.size() != 1) {
       throw std::runtime_error("Must have 1x1 precisions matrix");
     }
-    curr(0, 0) = 1 / curr(0, 0);
+    curr(0, 0)      = 1 / curr(0, 0);
     variances.at(i) = curr;
   }
 
@@ -182,9 +182,8 @@ BOOST_AUTO_TEST_CASE(DeformationGradients) {
   BOOST_TEST_MESSAGE(
       "Time taken for first call of gradient calculator: " << clock.GetMean());
 
-  // Let's do the timing also for subsequent iterations. This should be faster
-  // because an internal ITK filter doesn't require updating until new
-  // images/means/precisions are set
+  // Let's do the timing also for subsequent iterations. This should be faster because an internal
+  // ITK filter doesn't require updating until new images/means/precisions are set
   clock.Reset();
   for (int testRunNumber = 0; testRunNumber < 10; testRunNumber++) {
     clock.Start();
@@ -206,15 +205,14 @@ BOOST_AUTO_TEST_CASE(DeformationGradients) {
   clock.Reset();
   clock.Start();
   referenceGradientCalculator->Rasterize(mesh);
-  // referenceGradientCalculator->SetNumberOfThreads( 2 );
+  //referenceGradientCalculator->SetNumberOfThreads( 2 );
   clock.Stop();
   BOOST_TEST_MESSAGE(
       "Time taken for first call of reference gradient calculator: "
       << clock.GetMean());
 
-  // Let's do the timing also for subsequent iterations. This should be faster
-  // because an internal ITK filter doesn't require updating until new
-  // images/means/precisions are set
+  // Let's do the timing also for subsequent iterations. This should be faster because an internal
+  // ITK filter doesn't require updating until new images/means/precisions are set
   clock.Reset();
   for (int testRunNumber = 0; testRunNumber < 10; testRunNumber++) {
     clock.Start();

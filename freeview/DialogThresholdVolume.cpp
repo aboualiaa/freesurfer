@@ -1,7 +1,7 @@
 #include "DialogThresholdVolume.h"
-#include "ui_DialogThresholdVolume.h"
-#include "MainWindow.h"
 #include "LayerMRI.h"
+#include "MainWindow.h"
+#include "ui_DialogThresholdVolume.h"
 #include <QMessageBox>
 
 DialogThresholdVolume::DialogThresholdVolume(QWidget *parent)
@@ -45,7 +45,7 @@ void DialogThresholdVolume::OnButtonReset() {
 
 void DialogThresholdVolume::UpdateVolumes() {
   QList<Layer *> layers = MainWindow::GetMainWindow()->GetLayers("MRI");
-  LayerMRI *src = NULL, *target = NULL;
+  LayerMRI *     src = NULL, *target = NULL;
   if (ui->comboBoxSourceVolume->currentIndex() >= 0)
     src = qobject_cast<LayerMRI *>(
         ui->comboBoxSourceVolume
@@ -87,7 +87,7 @@ bool DialogThresholdVolume::ValidateInputs() {
           ->itemData(ui->comboBoxTargetVolume->currentIndex())
           .value<QObject *>());
   bool ok;
-  int source_frame = ui->lineEditSourceFrame->text().toInt(&ok);
+  int  source_frame = ui->lineEditSourceFrame->text().toInt(&ok);
   if (!ok || source_frame < 0) {
     QMessageBox::warning(this, "Error",
                          "Please enter a valid source frame number.");

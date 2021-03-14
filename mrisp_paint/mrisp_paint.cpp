@@ -1,16 +1,11 @@
 /**
- * @file  mrisp_paint.c
  * @brief extracts an array ("a variable") from surface-registration template
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2016/03/22 14:47:57 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,12 +21,9 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mrisp_paint.c,v 1.12 2016/03/22 14:47:57 fischl Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -39,35 +31,34 @@ static void print_version();
 
 const char *Progname;
 
-static int coords = -1;
+static int coords    = -1;
 static int normalize = 0;
-static int variance = 0;
-static int navgs = 0;
+static int variance  = 0;
+static int navgs     = 0;
 static int sqrt_flag = 0;
 
-static char *surface_names[] = {"inflated", "smoothwm", "smoothwm"};
+const static char *surface_names[] = {"inflated", "smoothwm", "smoothwm"};
 
-static int field_no = -1;
-static char subjects_dir[STRLEN];
+static int   field_no = -1;
+static char  subjects_dir[STRLEN];
 static char *hemi = nullptr;
 static char *subject_name;
 
 static int frame_number = 0;
-static int nframes = 1;
+static int nframes      = 1;
 
 int main(int argc, char *argv[]) {
-  char **av, *surf_fname, *template_fname, *out_fname, *cp;
-  int n, ac, nargs;
-  float sse, var;
-  char fname[STRLEN];
+  char **      av, *surf_fname, *template_fname, *out_fname, *cp;
+  int          n, ac, nargs;
+  float        sse, var;
+  char         fname[STRLEN];
   MRI_SURFACE *mris, *mris_var;
-  MRI_SP *mrisp;
-  VERTEX *v;
+  MRI_SP *     mrisp;
+  VERTEX *     v;
 
   nargs = handleVersionOption(argc, argv, "mrisp_paint");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -88,8 +79,8 @@ int main(int argc, char *argv[]) {
   }
 
   template_fname = argv[1];
-  surf_fname = argv[2];
-  out_fname = argv[3];
+  surf_fname     = argv[2];
+  out_fname      = argv[3];
 
   fprintf(stderr, "reading surface from %s...\n", surf_fname);
   mris = MRISread(surf_fname);
@@ -102,14 +93,14 @@ int main(int argc, char *argv[]) {
     if (cp) /* # explicitly given */
     {
       frame_number = atoi(cp + 1);
-      *cp = 0;
+      *cp          = 0;
     }
   } else {
     cp = strchr(template_fname, '#');
     if (cp) /* # explicitly given */
     {
       frame_number = atoi(cp + 1);
-      *cp = 0;
+      *cp          = 0;
     }
   }
   fprintf(stderr, "reading template parameterization from %s...\n",
@@ -161,16 +152,24 @@ int main(int argc, char *argv[]) {
     /* reading or generating the field */
     if (ReturnFieldName(field_no)) /* read in precomputed curvature file */
     {
-      sprintf(fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
-              ReturnFieldName(field_no));
+      int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", subjects_dir,
+                         subject_name, hemi, ReturnFieldName(field_no));
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (MRISreadCurvatureFile(mris_var, fname) != NO_ERROR) {
         MRISfree(&mris_var);
         ErrorExit(ERROR_BADPARM, "%s: could not load file %s\n", fname);
       }
     } else /* compute curvature of surface */
     {
-      sprintf(fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
-              surface_names[field_no]);
+      int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", subjects_dir,
+                         subject_name, hemi, surface_names[field_no]);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       /*    if(parms->fields[n].field==0) */
       /*     sprintf(fname, "inflated") ; */
       /*    else */
@@ -193,14 +192,14 @@ int main(int argc, char *argv[]) {
     MRISnormalizeField(mris, IsDistanceField(field_no), NORM_MEAN);
     /* save curv into curvbak*/
     for (n = 0; n < mris->nvertices; n++) {
-      v = &mris_var->vertices[n];
+      v          = &mris_var->vertices[n];
       v->curvbak = v->curv;
     }
     /* computing variance */
     MRISfromParameterization(mrisp, mris_var, frame_number + 1);
     for (sse = 0.0f, n = 0; n < mris->nvertices; n++) {
-      v = &mris_var->vertices[n];
-      var = MAX(0.01, v->curv);
+      v       = &mris_var->vertices[n];
+      var     = MAX(0.01, v->curv);
       v->curv = SQR(v->curvbak - mris->vertices[n].curv) / var;
       sse += v->curv;
     }
@@ -233,7 +232,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -257,14 +256,14 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "NFRAMES")) // not implemented yet
   {
     nframes = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("writing out %d frames - NOT IMPLEMENTED YET\n", nframes);
     exit(1);
   } else if (!stricmp(option, "variance")) {
-    variance = 1;
-    hemi = argv[3];
+    variance     = 1;
+    hemi         = argv[3];
     subject_name = argv[2];
-    field_no = atoi(argv[4]);
+    field_no     = atoi(argv[4]);
     if (field_no < 0) {
       fprintf(stderr, "Incorrect Field Number\n");
       exit(-1);
@@ -282,7 +281,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'F':
       frame_number = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       printf("writing out frame %d\n", frame_number);
       break;
     case 'N':
@@ -298,7 +297,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':
@@ -330,7 +329,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

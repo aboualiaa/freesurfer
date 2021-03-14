@@ -6,16 +6,13 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshCollectionModelLikelihoodCalculator : public itk::Object {
 public:
   /** Standard class typedefs */
   typedef AtlasMeshCollectionModelLikelihoodCalculator Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
-  typedef itk::SmartPointer<const Self> ConstPointer;
+  typedef itk::Object                                  Superclass;
+  typedef itk::SmartPointer<Self>                      Pointer;
+  typedef itk::SmartPointer<const Self>                ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -59,14 +56,14 @@ protected:
 
 private:
   AtlasMeshCollectionModelLikelihoodCalculator(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   AtlasMeshCollection::ConstPointer m_MeshCollection;
 
   std::vector<LabelImageType::ConstPointer> m_LabelImages;
-  CompressionLookupTable::ConstPointer m_CompressionLookupTable;
+  CompressionLookupTable::ConstPointer      m_CompressionLookupTable;
 };
 
 } // end namespace kvl

@@ -14,7 +14,7 @@ namespace pvl {
 
 /// computes an update (du, dv) to the flow field using a different resolution
 /// for the image vs. the motion field
-void varMultiResIteration(MotionField &mf,
+void varMultiResIteration(MotionField &            mf,
                           const Array<ImageGrayF> &srcChanScaled,
                           const Array<ImageGrayF> &destChanScaled,
                           const ImageGrayU &maskScaled, Config &varConf);

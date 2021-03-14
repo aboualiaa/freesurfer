@@ -1,8 +1,8 @@
 #ifndef _SBL_VECTOR_H_
 #define _SBL_VECTOR_H_
 #include <sbl/core/Display.h>
-#include <string.h> // for memcpy
 #include <stdlib.h> // for qsort
+#include <string.h> // for memcpy
 namespace sbl {
 
 /// min/max macros conflict with our vector min/max methods
@@ -55,7 +55,7 @@ public:
 
   /// directly access data pointer
   inline const T *dataPtr() const { return m_data; }
-  inline T *dataPtr() { return m_data; }
+  inline T *      dataPtr() { return m_data; }
 
   /// retrieve last element in vector
   inline T endValue() const {
@@ -100,7 +100,7 @@ public:
   //-------------------------------------------
 
   /// compare with another vector
-  bool operator==(const Vector &vector) const;
+  bool        operator==(const Vector &vector) const;
   inline bool operator!=(const Vector &vector) const {
     return !operator==(vector);
   }
@@ -134,7 +134,7 @@ private:
 };
 
 /// append a single value, increasing the vector length by one
-template <typename T> void Vector<T>::append(T val) {
+template <typename T> void std::vector<T>::append(T val) {
   if (m_length == m_allocLength) {
     m_allocLength *= 2;
     T *newData = new T[m_allocLength];
@@ -149,7 +149,7 @@ template <typename T> void Vector<T>::append(T val) {
 
 /// compare with another vector
 template <typename T>
-bool Vector<T>::operator==(const Vector<T> &vector) const {
+bool std::vector<T>::operator==(const std::vector<T> &vector) const {
   if (m_length != vector.length())
     return false;
   for (int i = 0; i < m_length; i++)
@@ -159,7 +159,7 @@ bool Vector<T>::operator==(const Vector<T> &vector) const {
 }
 
 /// true if contains the given value
-template <typename T> bool Vector<T>::contains(T val) const {
+template <typename T> bool std::vector<T>::contains(T val) const {
   for (int i = 0; i < m_length; i++)
     if (m_data[i] == val)
       return true;
@@ -167,7 +167,7 @@ template <typename T> bool Vector<T>::contains(T val) const {
 }
 
 /// the minimum element value
-template <typename T> T Vector<T>::min() const {
+template <typename T> T std::vector<T>::min() const {
   if (m_length == 0)
     return 0;
   T min = m_data[0];
@@ -180,7 +180,7 @@ template <typename T> T Vector<T>::min() const {
 }
 
 /// the maximum element value
-template <typename T> T Vector<T>::max() const {
+template <typename T> T std::vector<T>::max() const {
   if (m_length == 0)
     return 0;
   T max = m_data[0];
@@ -193,7 +193,7 @@ template <typename T> T Vector<T>::max() const {
 }
 
 /// the mean element value
-template <typename T> T Vector<T>::mean() const {
+template <typename T> T std::vector<T>::mean() const {
   if (m_length) {
     double sum = 0;
     for (int i = 0; i < m_length; i++)
@@ -205,7 +205,7 @@ template <typename T> T Vector<T>::mean() const {
 }
 
 /// the sum of element values
-template <typename T> T Vector<T>::sum() const {
+template <typename T> T std::vector<T>::sum() const {
   double sum = 0;
   for (int i = 0; i < m_length; i++)
     sum += m_data[i];
@@ -224,18 +224,18 @@ template <typename T> int compare(const void *v1, const void *v2) {
 }
 
 /// sort the vector elements (ascending) in place
-template <typename T> void Vector<T>::sort() {
+template <typename T> void std::vector<T>::sort() {
   qsort(m_data, m_length, sizeof(T), compare<T>);
 }
 
 /// basic copy constructor
-template <typename T> Vector<T>::Vector(const Vector<T> &vector) {
+template <typename T> std::vector<T>::Vector(const std::vector<T> &vector) {
   alloc(vector.length());
   memcpy(m_data, vector.m_data, m_length * sizeof(T));
 }
 
 /// a wrapper constructor for creating concise unit tests
-template <typename T> Vector<T>::Vector(T v1, T v2, T v3, T v4, T v5) {
+template <typename T> std::vector<T>::Vector(T v1, T v2, T v3, T v4, T v5) {
   alloc(5);
   m_data[0] = v1;
   m_data[1] = v2;
@@ -245,9 +245,9 @@ template <typename T> Vector<T>::Vector(T v1, T v2, T v3, T v4, T v5) {
 }
 
 /// set vector length
-template <typename T> void Vector<T>::alloc(int length) {
+template <typename T> void std::vector<T>::alloc(int length) {
   assertDebug(length >= 0);
-  m_length = length;
+  m_length      = length;
   m_allocLength = length;
   if (m_allocLength == 0)
     m_allocLength = 10;
@@ -256,7 +256,8 @@ template <typename T> void Vector<T>::alloc(int length) {
 }
 
 /// basic assignment operator
-template <typename T> Vector<T> &Vector<T>::operator=(const Vector<T> &vector) {
+template <typename T>
+std::vector<T> &Vector<T>::operator=(const std::vector<T> &vector) {
   if (this != &vector) {
     setLength(vector.length());
     assertDebug(vector.length() == m_length);
@@ -266,10 +267,10 @@ template <typename T> Vector<T> &Vector<T>::operator=(const Vector<T> &vector) {
 }
 
 // common vector types
-typedef Vector<unsigned char> VectorU;
-typedef Vector<int> VectorI;
-typedef Vector<float> VectorF;
-typedef Vector<double> VectorD;
+typedef std::vector<unsigned char> VectorU;
+typedef std::vector<int>           VectorI;
+typedef std::vector<float>         VectorF;
+typedef std::vector<double>        VectorD;
 
 } // end namespace sbl
 #endif // _SBL_VECTOR_H_

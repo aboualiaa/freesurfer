@@ -3,15 +3,9 @@
 #
 # mri-funcvits
 #
-# REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
 #
-# Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/16 17:17:20 $
-#    $Revision: 1.9 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,7 +18,7 @@
 #
 
 
-set FUNCVITS_VER = '$Id: mri-funcvits,v 1.9 2016/02/16 17:17:20 zkaufman Exp $';
+set FUNCVITS_VER = 'mri-funcvits @FS_VERSION@';
 
 set stem     = ();
 set outdir   = ();

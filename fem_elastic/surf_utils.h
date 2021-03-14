@@ -14,8 +14,8 @@ enum SurfaceType { white, pial, other };
 
 struct SurfacePointer {
   MRI_SURFACE *mris;
-  SurfaceType type;
-  void GetTypeFromName(const std::string &name);
+  SurfaceType  type;
+  void         GetTypeFromName(const std::string &name);
 };
 
 typedef std::vector<SurfacePointer> SurfaceVectorType;
@@ -53,7 +53,7 @@ public:
     if (!m_psurf)
       throw std::logic_error("SurfaceVertexIterator - no surface");
 
-    VERTEX *pvtx = &(m_psurf->vertices[0]);
+    VERTEX *     pvtx = &(m_psurf->vertices[0]);
     unsigned int ui = 0, nvertices = m_psurf->nvertices;
 
     for (; ui < nvertices; ++ui, ++pvtx)

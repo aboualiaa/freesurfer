@@ -1,22 +1,23 @@
-#include <sstream>
-#include <cassert>
 #include <algorithm>
+#include <cassert>
+#include <sstream>
 
 #include "argparse.h"
-#include "version.h"
 #include "utils.h"
+#include "version.h"
 
 /// Makes sure option key is valid (i.e it isn't empty and
 /// has the correct number of leading dashes)
 static std::string verifyOption(const std::string &name) {
   if (name.empty())
-    logFatal(1)
+    fs::fatal()
         << "invalid argument configuration. Argument names must not be empty";
-  if ((name.size() == 2 && name[0] != '-') || name.size() == 3)
-    logFatal(1) << "invalid argument configuration for '" << name
+  if ((name.size() == 2 && name[0] != '-') ||
+      (name.size() == 3) && name[0] != '-')
+    fs::fatal() << "invalid argument configuration for '" << name
                 << "'. Short names must begin with '-'";
   if (name.size() > 3 && (name[0] != '-' || name[1] != '-'))
-    logFatal(1) << "invalid argument configuration for '" << name
+    fs::fatal() << "invalid argument configuration for '" << name
                 << "'. Multi-character names must begin with '--'";
   return name;
 }
@@ -79,7 +80,7 @@ ArgumentParser::Argument::Argument(const ArgumentParser::String &_short_name,
   } else {
     // fixed args
     fixed_nargs = min_args = nargs;
-    fixed = true;
+    fixed                  = true;
   }
 
   // set type defaults if not set (default to string except for option flags)
@@ -92,12 +93,12 @@ ArgumentParser::Argument::Argument(const ArgumentParser::String &_short_name,
 
   // check for illogical option flags
   if ((min_args == 0) && (argtype != ArgType::Bool)) {
-    logFatal(1)
+    fs::fatal()
         << "invalid argument configuration for '" << canonicalName() << "'. "
         << "Option flags that accept no input must be of type ArgType::Bool";
   }
   if ((min_args == 0) && required) {
-    logFatal(1) << "invalid argument configuration for '" << canonicalName()
+    fs::fatal() << "invalid argument configuration for '" << canonicalName()
                 << "'. "
                 << "Required flags must accept at least one input";
   }
@@ -106,13 +107,13 @@ ArgumentParser::Argument::Argument(const ArgumentParser::String &_short_name,
 /// Checks if the correct amount of inputs have been parsed for this argument
 void ArgumentParser::Argument::validate() {
   if (positional && consumed < min_args)
-    logFatal(2) << "not enough positional arguments supplied";
+    fs::fatal(2) << "not enough positional arguments supplied";
   if (fixed && fixed_nargs != consumed)
-    logFatal(2) << "not enough inputs passed to option '" << canonicalName()
-                << "' (expected " << fixed_nargs << ")";
+    fs::fatal(2) << "not enough inputs passed to option '" << canonicalName()
+                 << "' (expected " << fixed_nargs << ")";
   if (!fixed && variable_nargs == '+' && consumed < 1)
-    logFatal(2) << "option '" << canonicalName()
-                << "' requires at least one input";
+    fs::fatal(2) << "option '" << canonicalName()
+                 << "' requires at least one input";
 }
 
 /// Returns a valid name for the configured argument
@@ -169,20 +170,19 @@ void ArgumentParser::addArgument(const ArgumentParser::String &short_name,
 
 /// Configures a --help option that prints the supplied xml help text
 void ArgumentParser::addHelp(const unsigned char *text, unsigned int size) {
-  helptext = text;
+  helptext     = text;
   helptextsize = size;
   addArgument("-h", "--help", 0, Bool, false);
 }
 
-
 /// The main parsing routine. This will error out if the command line input
 /// does not match the argument configuration
-void ArgumentParser::parse(size_t ac, char** av)
-{
+void ArgumentParser::parse(size_t ac, char **av) {
   // TODO progname should be an optionally-set member variable, but extracting from argv for now
-  std::string progname;
+  std::string       progname;
   std::stringstream progss(av[0]);
-  while (std::getline(progss, progname, '/'));  // do nothing in loop, just get basename
+  while (std::getline(progss, progname, '/'))
+    ; // do nothing in loop, just get basename
 
   // create argv vector
   StringVector argv = StringVector(av, av + ac);
@@ -191,49 +191,45 @@ void ArgumentParser::parse(size_t ac, char** av)
   if (!argv.empty())
     app_name = argv[0];
 
-  // make sure arguments were provided
-  if ((argv.size() <= 1) && (helptextsize > 0)) {
-    outputHelpXml(helptext, helptextsize);
-    exit(1);
-  }
-
   // first do a quick and dirty sweep of the options, making sure the minimum
   // amount of arguments have been provided
   for (StringVector::const_iterator in = argv.begin() + 1; in < argv.end();
        ++in) {
-    String element = *in;
+    std::string element = *in;
     if (index.count(element) != 0) {
       // count the number of input args following this option
       unsigned int args_following = 0;
       for (StringVector::const_iterator fin = in + 1; fin < argv.end(); fin++) {
-        String future = *fin;
-        if (index.count(future) == 0) args_following++;
+        std::string future = *fin;
+        if (index.count(future) == 0)
+          args_following++;
       }
       if (arguments[index[element]].min_args > args_following) {
-        logFatal(2) << "not enough inputs supplied to '" << element << "'";
+        fs::fatal(2) << "not enough inputs supplied to '" << element << "'";
       }
     }
   }
 
   // init our cursors
   unsigned int posidx = -1;
-  Argument active;
+  Argument     active;
 
   // now do the real parsing, and iterate over each element in the input array
   for (StringVector::const_iterator in = argv.begin() + 1; in < argv.end();
        ++in) {
-    String element = *in;
+    std::string element = *in;
     // check if the element is a known flag
     if (index.count(element) == 0) {
       // it's not, it must be a positional argument
-      if (!active.valid && !positionals.empty()) active = positionals[++posidx];
+      if (!active.valid && !positionals.empty())
+        active = positionals[++posidx];
 
       // has the current active argument reached its required number of inputs?
       if (active.fixed && (active.fixed_nargs == active.consumed)) {
         // if so, let's get the next set of positional arguments
         posidx++;
         if (posidx >= positionals.size()) {
-          logFatal(2) << "unexpected argument '" << element << "'";
+          fs::fatal(2) << "unexpected argument '" << element << "'";
         } else {
           active = positionals[posidx];
         }
@@ -251,7 +247,7 @@ void ArgumentParser::parse(size_t ac, char** av)
           int positionals_remaining = 0;
           for (StringVector::const_iterator fin = in + 1; fin < argv.end();
                fin++) {
-            String future = *fin;
+            std::string future = *fin;
             if (future[0] == '-') {
               // future argument is just a flag, so we ignore it as well as it's
               // potential inputs
@@ -302,9 +298,9 @@ void ArgumentParser::parse(size_t ac, char** av)
           }
         }
       } catch (...) {
-        logFatal(2) << "input '" << element
-                    << "' cannot be converted to expected type ("
-                    << active.typeName() << ")";
+        fs::fatal(2) << "input '" << element
+                     << "' cannot be converted to expected type ("
+                     << active.typeName() << ")";
       }
       variables[N].exists = true;
       active.consumed++;
@@ -317,18 +313,19 @@ void ArgumentParser::parse(size_t ac, char** av)
 
       // if argument is a flag that accept no inputs, set to true
       if (ArgType::Bool && active.fixed && (active.fixed_nargs == 0)) {
-        size_t N = index[active.canonicalName()];
+        size_t N                    = index[active.canonicalName()];
         variables[N].castTo<bool>() = true;
-        variables[N].exists = true;
+        variables[N].exists         = true;
       }
     }
   }
   // validate the final argument
-  if (active.valid) active.validate();
-  
+  if (active.valid)
+    active.validate();
+
   // check if the default --version or --all-info flags were provided
   int numInfoFlags = 0;
-  if (exists("version"))  {
+  if (exists("version")) {
     std::cout << progname << " freesurfer " << getVersion() << std::endl;
     numInfoFlags += 1;
   }
@@ -337,7 +334,8 @@ void ArgumentParser::parse(size_t ac, char** av)
     numInfoFlags += 1;
   }
   // exit cleanly if only --version or --all-info commands were used
-  if ((numInfoFlags > 0) && (ac - numInfoFlags) == 1) exit(0);
+  if ((numInfoFlags > 0) && (ac - numInfoFlags) == 1)
+    exit(0);
 
   // check for the help flag
   if ((helptextsize > 0) && (exists("help"))) {
@@ -350,29 +348,29 @@ void ArgumentParser::parse(size_t ac, char** av)
        it != arguments.end(); ++it) {
     Argument arg = *it;
     if (arg.required && !exists(arg.canonicalName())) {
-      logFatal(2) << "missing required input '" << arg.canonicalName() << "'";
+      fs::fatal(2) << "missing required input '" << arg.canonicalName() << "'";
     }
   }
 }
 
 /// Inserts dashes to the front of a stripped key name if the key
 /// exists (has been configured with addArgument("--name"))
-ArgumentParser::String ArgumentParser::unstrip(const String &name) {
+ArgumentParser::String ArgumentParser::unstrip(const std::string &name) {
   for (IndexMap::iterator it = index.begin(); it != index.end(); it++) {
     if (strip(it->first) == name)
-      return String(it->first);
+      return std::string(it->first);
   }
-  return String(name);
+  return std::string(name);
 }
 
 /// Returns true if inputs for a particular argument key (specified by 'name')
 /// were provided on the command line. The 'name' parameter doesn't have
 /// to be preceded by option dashes in order for the key to be found
-bool ArgumentParser::exists(const String &name) {
+bool ArgumentParser::exists(const std::string &name) {
   // first check if name is a valid argument key
   String unstripped = unstrip(name);
   if (index.count(unstripped) == 0)
-    logFatal(1) << "'" << unstripped << "' is not a known argument";
+    fs::fatal() << "'" << unstripped << "' is not a known argument";
   return variables[index[unstripped]].exists;
 }
 
@@ -398,7 +396,7 @@ void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg) {
       variables.push_back(String());
       break;
     default:
-      logFatal(1) << "unknown argument type for '" << arg.canonicalName()
+      fs::fatal() << "unknown argument type for '" << arg.canonicalName()
                   << "'";
     }
   } else {
@@ -416,16 +414,16 @@ void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg) {
       variables.push_back(StringVector());
       break;
     default:
-      logFatal(1) << "unknown argument type for '" << arg.canonicalName()
+      fs::fatal() << "unknown argument type for '" << arg.canonicalName()
                   << "'";
     }
   }
 
   // make sure name doesn't already exist
   for (IndexMap::iterator it = index.begin(); it != index.end(); it++) {
-    String stripped = strip(it->first);
+    std::string stripped = strip(it->first);
     if (stripped == strip(arg.short_name) || stripped == strip(arg.name)) {
-      logFatal(1) << "invalid argument configuration. '" << arg.canonicalName()
+      fs::fatal() << "invalid argument configuration. '" << arg.canonicalName()
                   << "' is used twice";
     }
   }
@@ -435,7 +433,7 @@ void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg) {
   if (!arg.fixed) {
     if (arg.positional) {
       if (variable_positional) {
-        logFatal(1)
+        fs::fatal()
             << "invalid argument configuration for '" << arg.canonicalName()
             << "'. "
             << "Two positional arguments cannot both have a variable amount of "
@@ -447,7 +445,7 @@ void ArgumentParser::insertArgument(const ArgumentParser::Argument &arg) {
       variable_flag = true;
     }
     if (variable_positional && variable_flag) {
-      logFatal(1) << "invalid argument configuration for '"
+      fs::fatal() << "invalid argument configuration for '"
                   << arg.canonicalName() << "'. "
                   << "A positional argument and flagged argument cannot both "
                      "have a variable "

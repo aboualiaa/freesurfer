@@ -1,17 +1,12 @@
 /**
- * @file  ic12.c
  * @brief ic0.tri - icosahedron
  *
  * in memory version of ic0.tri
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:45 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -48,7 +43,7 @@ MRI_SURFACE *ic12_make_surface(int max_vertices, int max_faces) {
     first_time = 0;
     int vno, fno;
     for (fno = 0; fno < ICO_NFACES; fno++) {
-      vno = ic12_faces[fno].vno[1];
+      vno                    = ic12_faces[fno].vno[1];
       ic12_faces[fno].vno[1] = ic12_faces[fno].vno[2];
       ic12_faces[fno].vno[2] = vno;
     }

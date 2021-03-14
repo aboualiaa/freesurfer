@@ -1,8 +1,8 @@
 // MARS Project (Thomas Yeo and Mert Sabuncu), MIT, CSAIL (c) 2006-2008
 
+#include "min_heap.h"
 #include <cstdio>
 #include <cstdlib>
-#include "min_heap.h"
 
 #define BIG_NO 100000000.0
 
@@ -30,13 +30,13 @@ NOTE: vertNbors is 1-based arrays are 1-based!!
 void MARS_DT_Boundary(int *sv, int numVerts, int maxNeighbors, int *vertNbors,
                       double *costNbors, double *final_cost) {
   MIN_HEAP *MH;
-  int *prev_neighbor, neighbor;
-  int i, result, heap_size;
-  double key;
-  int id;
-  void *data;
-  double queryKey;
-  double cost;
+  int *     prev_neighbor, neighbor;
+  int       i, result, heap_size;
+  double    key;
+  int       id;
+  void *    data;
+  double    queryKey;
+  double    cost;
 
   prev_neighbor = (int *)calloc(
       numVerts, sizeof(int)); /*Note that this is initialized to 0*/

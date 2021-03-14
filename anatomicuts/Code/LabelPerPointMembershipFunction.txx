@@ -1,13 +1,13 @@
 #include <iostream>
 
-#include <fstream>
 #include "LabelPerPointMembershipFunction.h"
+#include <fstream>
 #include <limits>
 
 #include <set>
 template <class TVector>
 LabelPerPointMembershipFunction<TVector>::LabelPerPointMembershipFunction() {
-  this->m_Variance = 0;
+  this->m_Variance   = 0;
   this->m_withCosine = false;
   this->m_withEuclid = false;
 }
@@ -15,12 +15,12 @@ template <class TVector>
 double LabelPerPointMembershipFunction<TVector>::EvaluateNO2(
     const MeasurementVectorType *m1, const MeasurementVectorType *m2) const {
   std::cout << " hola evaluate " << std::endl;
-  double dist = 0.0;
-  double dist_inv = 0.0;
+  double                                           dist     = 0.0;
+  double                                           dist_inv = 0.0;
   typedef typename MeasurementVectorType::CellType CellType;
-  const std::vector<CellType> labels1 = *m1->GetLabels();
-  const std::vector<CellType> labels2 = *m2->GetLabels();
-  std::set<int> set1, set2;
+  const std::vector<CellType>                      labels1 = *m1->GetLabels();
+  const std::vector<CellType>                      labels2 = *m2->GetLabels();
+  std::set<int>                                    set1, set2;
 
   int validLabels = 0;
   for (int i = 0; i < labels2.size(); i++) {
@@ -40,7 +40,7 @@ double LabelPerPointMembershipFunction<TVector>::EvaluateNO2(
       }
     }
   }
-  // return max(dist,dist_inv);
+  //return max(dist,dist_inv);
   return dist * (set1.size() + set2.size()) / 2;
 }
 
@@ -54,7 +54,7 @@ void LabelPerPointMembershipFunction<TVector>::AddChild(
 template <class TVector>
 void LabelPerPointMembershipFunction<TVector>::RecalculateCentroid() {
   this->m_Variance = 0;
-  int numPoints = this->GetCentroid()->GetLabels()->size() - 1;
+  int numPoints    = this->GetCentroid()->GetLabels()->size() - 1;
   MeasurementVectorType averageMv(numPoints * 3);
 
   for (int i = 0; i < this->childs.size(); i++) {
@@ -122,72 +122,68 @@ void LabelPerPointMembershipFunction<TVector>::PrintSelf(
   std::cout << std::endl;
 }
 /*template < class TVector >
-void
+void  
 LabelPerPointMembershipFunction< TVector >
 ::SetCentroid( const MeasurementVectorType* c)
-                {
-                        this->m_Centroid = c;
-                }
+		{
+			this->m_Centroid = c; 
+		}
 template < class TVector >
-                const typedef MeasurementVectorType*
+		const typedef MeasurementVectorType* 
 LabelPerPointMembershipFunction< TVector >::GetCentroid() const {
-                        return this->m_Centroid;
-                }
+			return this->m_Centroid; 
+		}
 
 template < class TVector >
-                std::vector<const MeasurementVectorType*>
+		std::vector<const MeasurementVectorType*>  
 LabelPerPointMembershipFunction< TVector >::GetChilds()
-                {
-                        return this->childs;
-                }
+		{
+			return this->childs;
+		}
 template < class TVector >
-                double
-LabelPerPointMembershipFunction< TVector >::GetVariance(){ return
-this->m_Variance/this->childs.size();}
+		double 
+LabelPerPointMembershipFunction< TVector >::GetVariance(){ return this->m_Variance/this->childs.size();}
 
 template < class TVector >
-                double
-LabelPerPointMembershipFunction< TVector >::Evaluate(const MeasurementVectorType
-*measurement) const{return this->Evaluate(this->GetCentroid(), measurement);}
+		double
+LabelPerPointMembershipFunction< TVector >::Evaluate(const MeasurementVectorType *measurement) const{return this->Evaluate(this->GetCentroid(), measurement);}
 
 template < class TVector >
-                double
-LabelPerPointMembershipFunction< TVector >::Evaluate(const MeasurementVectorType
-&measurement) const{ std::cout << "not implemented " << std::endl;return -1;}
+		double 
+LabelPerPointMembershipFunction< TVector >::Evaluate(const MeasurementVectorType &measurement) const{ std::cout << "not implemented " << std::endl;return -1;}
 
 template < class TVector >
-                void
+		void 
 
 LabelPerPointMembershipFunction< TVector >::WithEuclid(bool on)
-                {
-                        this->m_withEuclid = on;
-                }
+		{
+			this->m_withEuclid = on;
+		}
 template < class TVector >
-                void
+		void 
 LabelPerPointMembershipFunction< TVector >::WithCosine(bool on)
-                {
-                        this->m_withCosine = on;
-                }
+		{
+			this->m_withCosine = on;
+		}
+		
+template < class TVector >
+		void 
+LabelPerPointMembershipFunction< TVector >::ClearChilds(){ this->childs.clear();}
 
 template < class TVector >
-                void
-LabelPerPointMembershipFunction< TVector >::ClearChilds(){
-this->childs.clear();}
-
+		int 
+LabelPerPointMembershipFunction< TVector >::GetNumberOfChilds(){return this->childs.size();}
 template < class TVector >
-                int
-LabelPerPointMembershipFunction< TVector >::GetNumberOfChilds(){return
-this->childs.size();} template < class TVector > void
-LabelPerPointMembershipFunction< TVector
->::AddDirectionalNeighbors(vnl_matrix<int>* neighbors)
-                {
-                        this->m_directionalNeighbors.push_back(neighbors);
-                }
+		void 
+LabelPerPointMembershipFunction< TVector >::AddDirectionalNeighbors(vnl_matrix<int>* neighbors)
+		{
+			this->m_directionalNeighbors.push_back(neighbors);
+		}
 template < class TVector >
-                void
+		void 
 LabelPerPointMembershipFunction< TVector >::ClearDirectionalNeighbors()
-                {
-                        this->m_Variance = 0;
-                        this->m_directionalNeighbors.clear();
-                }
+		{
+			this->m_Variance = 0;
+			this->m_directionalNeighbors.clear();
+		}
 */

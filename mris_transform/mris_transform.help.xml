@@ -22,7 +22,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mris_transform -- transform surfaces</name>
   <synopsis>mris_transform [options] &lt;input&gt; &lt;transform&gt; &lt;output&gt;</synopsis>
@@ -46,7 +45,7 @@
       <explanation>Specify the destination geometry if the transform does not include this information or the path in the M3Z is invalid</explanation>
       <argument>-i, --is-inverse</argument>
       <explanation>Use this option when using a tranform from destination to source space</explanation>
-      </optional-flagged>
+    </optional-flagged>
   </arguments>
   <outputs>
     <output>&lt;output&gt;</output>
@@ -65,4 +64,3 @@
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
   <see-also>mri_transform, mri_convert, mri_info</see-also>
 </help>
-

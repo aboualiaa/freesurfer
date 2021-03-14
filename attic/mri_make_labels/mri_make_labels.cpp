@@ -1,12 +1,12 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 #include "diag.h"
 #include "error.h"
-#include "macros.h"
 #include "label.h"
+#include "macros.h"
 #include "mri.h"
 #include "mrisegment.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 const char *Progname;
 
@@ -14,12 +14,12 @@ static int use_abs;
 static int size_thresh = 10;
 
 int main(int argc, char *argv[]) {
-  double thresh;
-  MRI *mri, *mri_abs;
-  char *out_stem, fname[STRLEN];
+  double            thresh;
+  MRI *             mri, *mri_abs;
+  char *            out_stem, fname[STRLEN];
   MRI_SEGMENTATION *mriseg;
-  int s;
-  LABEL *area;
+  int               s;
+  LABEL *           area;
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   else
     mri_abs = MRIcopy(mri, NULL);
 
-  thresh = atof(argv[2]);
+  thresh   = atof(argv[2]);
   out_stem = argv[3];
 
   mriseg = MRIsegment(mri, thresh, 1e10);

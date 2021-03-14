@@ -36,10 +36,10 @@
 #include "QVTKInteractor.h"
 
 #include <QEvent>
+#include <QGestureEvent>
+#include <QResizeEvent>
 #include <QSignalMapper>
 #include <QTimer>
-#include <QResizeEvent>
-#include <QGestureEvent>
 
 #include "vtkCommand.h"
 
@@ -75,7 +75,7 @@ void QVTKInteractorAdapter::SetDevicePixelRatio(
   }
 }
 
-bool QVTKInteractorAdapter::ProcessEvent(QEvent *e,
+bool QVTKInteractorAdapter::ProcessEvent(QEvent *                   e,
                                          vtkRenderWindowInteractor *iren) {
   if (iren == nullptr || e == nullptr)
     return false;
@@ -83,8 +83,8 @@ bool QVTKInteractorAdapter::ProcessEvent(QEvent *e,
   const QEvent::Type t = e->type();
 
   if (t == QEvent::Resize) {
-    QResizeEvent *e2 = static_cast<QResizeEvent *>(e);
-    QSize size = e2->size();
+    QResizeEvent *e2   = static_cast<QResizeEvent *>(e);
+    QSize         size = e2->size();
     iren->SetSize(static_cast<int>(size.width() * this->DevicePixelRatio +
                                    DevicePixelRatioTolerance),
                   static_cast<int>(size.height() * this->DevicePixelRatio +
@@ -379,8 +379,8 @@ bool QVTKInteractorAdapter::ProcessEvent(QEvent *e,
       return true;
     } else if (QPanGesture *pan =
                    static_cast<QPanGesture *>(e2->gesture(Qt::PanGesture))) {
-      QPointF offset = pan->offset();
-      double translation[2] = {offset.x(), offset.y()};
+      QPointF offset         = pan->offset();
+      double  translation[2] = {offset.x(), offset.y()};
       iren->SetTranslation(translation);
       switch (pan->state()) {
       case Qt::GestureStarted:

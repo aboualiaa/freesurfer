@@ -1,7 +1,7 @@
 #include "LabelTreeWidget.h"
 #include <QContextMenuEvent>
-#include <QMenu>
 #include <QDebug>
+#include <QMenu>
 
 LabelTreeWidget::LabelTreeWidget(QWidget *parent)
     : QTreeWidget(parent), draggedItem(NULL) {}
@@ -9,8 +9,8 @@ LabelTreeWidget::LabelTreeWidget(QWidget *parent)
 void LabelTreeWidget::contextMenuEvent(QContextMenuEvent *e) {
   QTreeWidgetItem *item = currentItem();
   if (item) {
-    QMenu *menu = new QMenu(this);
-    QAction *act = new QAction("Go To Centroid", this);
+    QMenu *  menu = new QMenu(this);
+    QAction *act  = new QAction("Go To Centroid", this);
     connect(act, SIGNAL(triggered()), this, SIGNAL(MenuGoToCentroid()));
     menu->addAction(act);
     act = new QAction("Resample", this);

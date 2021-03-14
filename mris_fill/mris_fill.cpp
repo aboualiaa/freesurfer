@@ -1,5 +1,4 @@
 /**
- * @file  mris_density.c
  * @brief fills the interior of a surface.
  *
  * program to fill the interior of a surface at an arbitrary resolution
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:32 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,35 +19,42 @@
  *
  */
 
-#include "diag.h"
-#include "mrisurf.h"
-#include "version.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-static char vcid[] = "$Id: mris_fill.c,v 1.6 2011/03/02 00:04:32 nicks Exp $";
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "version.h"
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 const char *Progname;
 
-static double resolution = .25;
-static int conform = 0;
-static int use_template = 0;
-static int sample_factor = 1;
+static double resolution    = .25;
+static int    conform       = 0;
+static int    use_template  = 0;
+static int    sample_factor = 1;
 
 static char *vol_fname;
 
 int main(int argc, char *argv[]) {
-  char **av, *out_fname, *in_fname;
-  int ac, nargs;
+  char **      av, *out_fname, *in_fname;
+  int          ac, nargs;
   MRI_SURFACE *mris;
-  MRI *mri_interior, *mri_template = nullptr, *mri_buffer = nullptr;
-
+  MRI *        mri_interior, *mri_template = NULL, *mri_buffer = NULL;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_fill");
 
@@ -63,7 +65,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   ac = argc;
   av = argv;
@@ -76,7 +78,7 @@ int main(int argc, char *argv[]) {
   if (argc != 3)
     usage_exit();
 
-  in_fname = argv[1];
+  in_fname  = argv[1];
   out_fname = argv[2];
 
   fprintf(stderr, "reading surface from %s...\n", in_fname);
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "reading volume from %s...\n", vol_fname);
     mri_template = MRIread(vol_fname);
     MRIcopy(mri_template, mri_buffer);
-    // mri_template = MRIupsample2(mri_template, mri_buffer);
+    //mri_template = MRIupsample2(mri_template, mri_buffer);
     if (sample_factor > 1) {
       fprintf(stderr, "upsampling template by factor %d...", sample_factor);
       mri_template = MRIupsampleN(mri_template, mri_buffer, sample_factor);
@@ -97,6 +99,16 @@ int main(int argc, char *argv[]) {
   if (!mris)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
               in_fname);
+
+  if (!mris->vg.valid) {
+    fs::warning()
+        << "Surface has no geometry information - adding a default geometry. "
+        << "Surface will not align to rasterized volume in this case.";
+    MRI *mri_tmp = MRIallocHeader(256, 256, 256, MRI_UCHAR, 1);
+    MRIScopyVolGeomFromMRI(mris, mri_tmp);
+    MRIfree(&mri_tmp);
+  }
+
   mri_interior = MRISfillInterior(mris, resolution, mri_template);
 
   if (conform) {
@@ -105,23 +117,24 @@ int main(int argc, char *argv[]) {
     MRIsetResolution(mri_tmp, 1.0, 1.0, 1.0);
     mri_tmp->xstart = mri_tmp->ystart = mri_tmp->zstart = -mri_tmp->width / 2;
     mri_tmp->xend = mri_tmp->yend = mri_tmp->zend = mri_tmp->width / 2;
-    mri_tmp->x_r = -1.0;
-    mri_tmp->x_a = 0.0;
-    mri_tmp->x_s = 0.0;
-    mri_tmp->y_r = 0.0;
-    mri_tmp->y_a = 0.0;
-    mri_tmp->y_s = -1.0;
-    mri_tmp->z_r = 0.0;
-    mri_tmp->z_a = 1.0;
-    mri_tmp->z_s = 0.0;
-    mri_tmp->c_r = mris->vg.c_r;
-    mri_tmp->c_a = mris->vg.c_a;
-    mri_tmp->c_s = mris->vg.c_s;
+    mri_tmp->x_r                                  = -1.0;
+    mri_tmp->x_a                                  = 0.0;
+    mri_tmp->x_s                                  = 0.0;
+    mri_tmp->y_r                                  = 0.0;
+    mri_tmp->y_a                                  = 0.0;
+    mri_tmp->y_s                                  = -1.0;
+    mri_tmp->z_r                                  = 0.0;
+    mri_tmp->z_a                                  = 1.0;
+    mri_tmp->z_s                                  = 0.0;
+    mri_tmp->c_r                                  = mris->vg.c_r;
+    mri_tmp->c_a                                  = mris->vg.c_a;
+    mri_tmp->c_s                                  = mris->vg.c_s;
     mri_tmp2 = MRIresample(mri_interior, mri_tmp, SAMPLE_NEAREST);
     MRIfree(&mri_interior);
     MRIfree(&mri_tmp);
     mri_interior = mri_tmp2;
   }
+
   MRIaddCommandLine(mri_interior, cmdline);
   fprintf(stderr, "writing filled volume to %s...\n", out_fname);
   MRIwrite(mri_interior, out_fname);
@@ -135,7 +148,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -147,7 +160,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'R':
       resolution = (double)atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("setting resolution for intermediate calculations to %2.4f\n",
              resolution);
       break;
@@ -157,16 +170,16 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'T':
       use_template = 1;
-      vol_fname = argv[2];
-      nargs = 1;
+      vol_fname    = argv[2];
+      nargs        = 1;
       break;
     case 'S':
       sample_factor = atoi(argv[2]);
-      nargs = 1;
+      nargs         = 1;
       break;
     case '?':
     case 'U':
@@ -182,16 +195,16 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_help();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   printf("usage: %s [options] <input surface> <output volume>\n", Progname);
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("\nThis program floodfills the interior of a surface and writes\n"
          "the results into a volume of the specified resolution.\n");
@@ -203,7 +216,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

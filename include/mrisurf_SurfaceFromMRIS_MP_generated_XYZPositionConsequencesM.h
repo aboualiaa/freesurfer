@@ -1,19 +1,19 @@
 namespace XYZPositionConsequencesM {
 struct Face : public Repr_Elt {
   using Surface = XYZPositionConsequencesM::Surface;
-  using Vertex = XYZPositionConsequencesM::Vertex;
+  using Vertex  = XYZPositionConsequencesM::Vertex;
   inline Face();
   inline Face(Face const &src);
   inline Face(Representation *representation, size_t idx);
   inline Face(AllM::Face const &src);
   int fno() const { return idx; }
 
-  inline Vertex v(size_t i) const;
-  inline float area() const;
+  inline Vertex                v(size_t i) const;
+  inline float                 area() const;
   inline angles_per_triangle_t angle() const;
   inline angles_per_triangle_t orig_angle() const;
-  inline char ripflag() const;
-  inline FloatXYZ norm() const;
+  inline char                  ripflag() const;
+  inline FloatXYZ              norm() const;
 
   inline void set_area(float to);
   inline void set_angle(angles_per_triangle_t to);
@@ -24,7 +24,7 @@ struct Face : public Repr_Elt {
 
 struct Vertex : public Repr_Elt {
   using Surface = XYZPositionConsequencesM::Surface;
-  using Face = XYZPositionConsequencesM::Face;
+  using Face    = XYZPositionConsequencesM::Face;
   inline Vertex();
   inline Vertex(Vertex const &src);
   inline Vertex(Representation *representation, size_t idx);
@@ -69,8 +69,8 @@ struct Vertex : public Repr_Elt {
 
 struct MRIS_MP : public Repr_Elt {
   using Surface = XYZPositionConsequencesM::Surface;
-  using Face = XYZPositionConsequencesM::Face;
-  using Vertex = XYZPositionConsequencesM::Vertex;
+  using Face    = XYZPositionConsequencesM::Face;
+  using Vertex  = XYZPositionConsequencesM::Vertex;
   inline MRIS_MP();
   inline MRIS_MP(MRIS_MP const &src);
   inline MRIS_MP(Representation *representation, size_t idx);
@@ -79,7 +79,7 @@ struct MRIS_MP : public Repr_Elt {
 }; // MRIS_MP
 
 struct Surface : public Repr_Elt {
-  using Face = XYZPositionConsequencesM::Face;
+  using Face   = XYZPositionConsequencesM::Face;
   using Vertex = XYZPositionConsequencesM::Vertex;
   inline Surface();
   inline Surface(Surface const &src);
@@ -90,29 +90,29 @@ struct Surface : public Repr_Elt {
                                 //  MRISreallocVerticesAndFaces et al
   inline int nfaces() const;    //  # of faces on surface, change by calling
                                 //  MRISreallocVerticesAndFaces et al
-  inline Vertex vertices(size_t i) const;
-  inline Face faces(size_t i) const;
-  inline FaceNormCacheEntry faceNormCacheEntries(size_t i) const;
+  inline Vertex                vertices(size_t i) const;
+  inline Face                  faces(size_t i) const;
+  inline FaceNormCacheEntry    faceNormCacheEntries(size_t i) const;
   inline FaceNormDeferredEntry faceNormDeferredEntries(size_t i) const;
-  inline float xctr() const;
-  inline float yctr() const;
-  inline float zctr() const;
-  inline float xlo() const;
-  inline float ylo() const;
-  inline float zlo() const;
-  inline float xhi() const;
-  inline float yhi() const;
-  inline float zhi() const;
-  inline float total_area() const;
-  inline double avg_vertex_area() const;
+  inline float                 xctr() const;
+  inline float                 yctr() const;
+  inline float                 zctr() const;
+  inline float                 xlo() const;
+  inline float                 ylo() const;
+  inline float                 zlo() const;
+  inline float                 xhi() const;
+  inline float                 yhi() const;
+  inline float                 zhi() const;
+  inline float                 total_area() const;
+  inline double                avg_vertex_area() const;
   inline double
   avg_vertex_dist() const; //  set by MRIScomputeAvgInterVertexDist
   inline double std_vertex_dist() const;
-  inline float orig_area() const;
-  inline float neg_area() const;
-  inline float neg_orig_area() const; //  amount of original surface in folds
-  inline double radius() const;       //  radius (if status==MRIS_SPHERE)
-  inline MRIS_Status status() const;  //  type of surface (e.g. sphere, plane)
+  inline float  orig_area() const;
+  inline float  neg_area() const;
+  inline float  neg_orig_area() const; //  amount of original surface in folds
+  inline double radius() const;        //  radius (if status==MRIS_SPHERE)
+  inline MRIS_Status status() const;   //  type of surface (e.g. sphere, plane)
   inline MRIS_Status
   origxyz_status() const;     //  type of surface (e.g. sphere, plane) that this
                               //  origxyz were obtained from

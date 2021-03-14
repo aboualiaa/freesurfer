@@ -1,6 +1,5 @@
 #define COMPILING_MRISURF_TOPOLOGY_FRIEND_CHECKED
 /**
- * @file  gw_ic2562.c
  *
  * GW version of ic2562.c, which creates a "surface" having two separate
  * icosahedons, which can be placed with specific sizes at specific centers.
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Graham Wideman
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:45 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -3033,8 +3028,8 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
 //---------------------------------------------------
 {
   MRI_SURFACE *mris;
-  int vno, fno, n, vn, n1, n2;
-  static int first_time = 1;
+  int          vno, fno, n, vn, n1, n2;
+  static int   first_time = 1;
 
   //-----------------------------------------
   // [GW] For some reason the columns need to be
@@ -3045,7 +3040,7 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
   if (first_time) {
     first_time = 0;
     for (fno = 0; fno < ICO_NFACES; fno++) {
-      vno = gw_ic2562_faces[fno].vno[1];
+      vno                         = gw_ic2562_faces[fno].vno[1];
       gw_ic2562_faces[fno].vno[1] = gw_ic2562_faces[fno].vno[2];
       gw_ic2562_faces[fno].vno[2] = vno;
     }
@@ -3105,7 +3100,7 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
-    vt->v = (int *)calloc(vt->vnum / 2, sizeof(int));
+    vt->v                     = (int *)calloc(vt->vnum / 2, sizeof(int));
     if (!vt->v)
       ErrorExit(ERROR_NOMEMORY, "%s: could not allocate %dth vertex list.",
                 __func__, vno);
@@ -3159,8 +3154,8 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
   //----------------------------------------
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[vno];
-    vt->vtotal = vt->vnum;
-    vt->f = (int *)calloc(vt->num, sizeof(int));
+    vt->vtotal                = vt->vnum;
+    vt->f                     = (int *)calloc(vt->num, sizeof(int));
     if (!vt->f)
       ErrorExit(ERROR_NO_MEMORY, "ic2562: could not allocate %d faces",
                 vt->num);
@@ -3177,8 +3172,8 @@ MRI_SURFACE *ic2562_make_two_icos(float x1, float y1, float z1, float r1,
     FACE *f = &mris->faces[fno];
     for (n = 0; n < VERTICES_PER_FACE; n++) {
       VERTEX_TOPOLOGY *const vt = &mris->vertices_topology[f->v[n]];
-      vt->n[vt->num] = n;
-      vt->f[vt->num++] = fno;
+      vt->n[vt->num]            = n;
+      vt->f[vt->num++]          = fno;
     }
   }
 

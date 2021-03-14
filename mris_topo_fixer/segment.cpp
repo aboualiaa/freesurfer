@@ -1,16 +1,11 @@
 /**
- * @file  segment.cpp
  * @brief topology fixer worker
  *
  */
 /*
  * Original Author: F. Segonne
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,10 +22,10 @@
 #include "segment.h"
 
 Segment::Segment() {
-  npoints = 0;
-  marked = 0;
+  npoints   = 0;
+  marked    = 0;
   maxpoints = NUMBER_OF_POINTS;
-  points = new int[maxpoints];
+  points    = new int[maxpoints];
 }
 
 Segment::~Segment() {
@@ -38,7 +33,7 @@ Segment::~Segment() {
     delete[] points;
 }
 
-int Segment::GetMark() const { return marked; }
+int  Segment::GetMark() const { return marked; }
 void Segment::SetMark(int m) { marked = m; }
 
 void Segment::_ReallocSegment(int new_maxpoints) {
@@ -60,7 +55,7 @@ void Segment::AddPoint(int pt) {
   points[npoints++] = pt;
 }
 
-int Segment::size() const { return npoints; }
+int  Segment::size() const { return npoints; }
 void Segment::clear() { npoints = 0; }
 
 void Segment::AddSegment(Segment *s) {
@@ -78,11 +73,11 @@ void Segment::AddSegment(Segment *s) {
 const int *Segment::GetPointList() const { return points; }
 
 void Segment::Transfer(Segment &b) {
-  npoints = b.npoints;
+  npoints   = b.npoints;
   maxpoints = b.maxpoints;
   delete[] points;
-  points = b.points;
+  points      = b.points;
   b.maxpoints = 0;
-  b.npoints = 0;
-  b.points = nullptr;
+  b.npoints   = 0;
+  b.points    = nullptr;
 }

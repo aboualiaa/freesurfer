@@ -31,12 +31,8 @@
 #     aparcstatsdiff
 #
 # Original Author: Nick Schmansky
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/06/16 15:21:05 $
-#    $Revision: 1.40 $
 #
-# Copyright © 2011-2015 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -49,7 +45,7 @@
 #
 
 
-set VERSION='$Id: test_recon-all.csh,v 1.40 2016/06/16 15:21:05 zkaufman Exp $'
+set VERSION='test_recon-all.csh @FS_VERSION@'
 
 set MAIL_LIST=(zkaufman@nmr.mgh.harvard.edu)
 # failure mailing list:

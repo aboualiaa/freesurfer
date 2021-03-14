@@ -1,16 +1,7 @@
-/**
- * @file  DialogLoadPointSet.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:46 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -48,7 +39,7 @@ protected slots:
 
 private:
   Ui::DialogLoadPointSet *ui;
-  QString m_strLastDir;
+  QString                 m_strLastDir;
 };
 
 #endif // DIALOGLOADPOINTSET_H

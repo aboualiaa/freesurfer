@@ -82,7 +82,7 @@ void AffineTransform3d::invert() {
   inv_t[7] = (t[1] * t[6] - t[0] * t[7]) / fdet;
   inv_t[8] = (t[0] * t[4] - t[1] * t[3]) / fdet;
 
-  inv_t[9] = -t[9] * inv_t[0] - t[10] * inv_t[3] - t[11] * inv_t[6];
+  inv_t[9]  = -t[9] * inv_t[0] - t[10] * inv_t[3] - t[11] * inv_t[6];
   inv_t[10] = -t[9] * inv_t[1] - t[10] * inv_t[4] - t[11] * inv_t[7];
   inv_t[11] = -t[9] * inv_t[2] - t[10] * inv_t[5] - t[11] * inv_t[8];
 
@@ -133,9 +133,9 @@ void DenseDisplacementField::doInput(std::istream &is) {
   using namespace ftags;
 
   typedef itk::ImageRegionIterator<FieldType> FieldIterator;
-  typedef itk::ImageRegionIterator<MaskType> MaskIterator;
-  TagReader tagReader(is);
-  FieldType::RegionType region;
+  typedef itk::ImageRegionIterator<MaskType>  MaskIterator;
+  TagReader                                   tagReader(is);
+  FieldType::RegionType                       region;
 
   FieldPointer field = FieldType::New();
 
@@ -158,14 +158,14 @@ void DenseDisplacementField::doInput(std::istream &is) {
       region.SetIndex(start);
     }
     case tagSpacing: {
-      double spacing[3];
+      double             spacing[3];
       std::istringstream ss(tagReader.m_data);
       for (unsigned int ui = 0; ui < 3; ++ui)
         spacing[ui] = TRead<double>(ss);
       field->SetSpacing(spacing);
     } break;
     case tagOrigin: {
-      double origin[3];
+      double             origin[3];
       std::istringstream ss(tagReader.m_data);
       for (unsigned int ui = 0; ui < 3; ++ui)
         origin[ui] = TRead<float>(ss);
@@ -177,7 +177,7 @@ void DenseDisplacementField::doInput(std::istream &is) {
       field->SetRegions(region);
       field->Allocate();
 
-      std::istringstream ss(tagReader.m_data);
+      std::istringstream   ss(tagReader.m_data);
       FieldType::PixelType v;
 
       FieldIterator it(field, field->GetRequestedRegion());
@@ -299,7 +299,7 @@ DenseDisplacementField::PrepareTagMask(MaskConstPointer mask) const {
   typedef itk::ImageRegionConstIterator<MaskType> MaskConstIterator;
 
   std::ostringstream oss;
-  MaskConstIterator it(mask, mask->GetLargestPossibleRegion());
+  MaskConstIterator  it(mask, mask->GetLargestPossibleRegion());
 
   for (it.GoToBegin(); !it.IsAtEnd(); ++it)
     TWrite(oss, it.Get());
@@ -342,7 +342,7 @@ DeltaTransform3d::~DeltaTransform3d() {
 
 DeltaTransform3d::tCoords DeltaTransform3d::doOwnImg(const tCoords &pt) const {
 
-  double val;
+  double  val;
   tCoords retVal;
 
   // sample the mask first - do this on a nearest neighbor method
@@ -376,9 +376,9 @@ void DeltaTransform3d::doInput(std::istream &is) {
   }
 
   int width, height, depth;
-  width = TRead<int>(is);
+  width  = TRead<int>(is);
   height = TRead<int>(is);
-  depth = TRead<int>(is);
+  depth  = TRead<int>(is);
 
   // alloc volume
   m_field = MRIallocSequence(width, height, depth, MRI_FLOAT, 3);
@@ -393,7 +393,7 @@ void DeltaTransform3d::doInput(std::istream &is) {
   bool hasMask = TRead<bool>(is);
   if (hasMask) {
     unsigned int validCount = 0;
-    m_mask = MRIalloc(width, height, depth, MRI_UCHAR);
+    m_mask                  = MRIalloc(width, height, depth, MRI_UCHAR);
     for (int uk = 0; uk < m_mask->depth; ++uk)
       for (int uj = 0; uj < m_mask->height; ++uj)
         for (int ui = 0; ui < m_mask->width; ++ui) {
@@ -445,7 +445,7 @@ void DeltaTransform3d::invert() {
 //--------------------------------------------------
 
 FemTransform3d::FemTransform3d() : Transform<3>() {
-  m_bdbg = false;
+  m_bdbg           = false;
   m_signalTopology = false;
 }
 
@@ -488,12 +488,12 @@ void FemTransform3d::invert() {
 
 FemTransform3d::TransformType *FemTransform3d::convert_to_delta() const {
   MRI *field = NULL;
-  MRI *mask = NULL;
-  int width(256), height(256), depth(256);
+  MRI *mask  = NULL;
+  int  width(256), height(256), depth(256);
 
   // alloc volume
   field = MRIallocSequence(width, height, depth, MRI_FLOAT, 3);
-  mask = MRIalloc(width, height, depth, MRI_UCHAR);
+  mask  = MRIalloc(width, height, depth, MRI_UCHAR);
 
   tCoords pt, img;
 
@@ -505,7 +505,7 @@ FemTransform3d::TransformType *FemTransform3d::convert_to_delta() const {
         pt(0) = x;
         pt(1) = y;
         pt(2) = z;
-        img = this->img(pt);
+        img   = this->img(pt);
         if (!img.isValid()) {
           MRIvox(mask, x, y, z) = 0;
         } else {
@@ -530,8 +530,8 @@ FemTransform3d::TransformType *FemTransform3d::convert_to_delta() const {
 ****************/
 
 VolumeMorph::VolumeMorph() {
-  m_template = NULL;
-  mriCache = NULL;
+  m_template          = NULL;
+  mriCache            = NULL;
   m_interpolationType = SAMPLE_TRILINEAR;
 
   initVolGeom(&m_vgFixed);
@@ -561,12 +561,12 @@ MRI *VolumeMorph::apply_transforms(MRI *input, bool cacheField,
   }
 
   MRI *mriOut;
-  int nframes = 1;
+  int  nframes = 1;
   if (input->nframes > 1) // for multi-frame volumes
   {
     std::cout << "Multi-frame input \n";
     nframes = input->nframes;
-    mriOut = MRIallocSequence(vg.width, vg.height, vg.depth, input->type,
+    mriOut  = MRIallocSequence(vg.width, vg.height, vg.depth, input->type,
                               input->nframes);
   } else
     mriOut = MRIalloc(vg.width, vg.height, vg.depth, input->type);
@@ -579,10 +579,10 @@ MRI *VolumeMorph::apply_transforms(MRI *input, bool cacheField,
 
   // initialize matrices for RAS 2 matrix stuff
   MATRIX *mat_template = NULL;
-  MATRIX *mat_subject = NULL;
+  MATRIX *mat_subject  = NULL;
   // setup the matrix for the fixed side
   {
-    MATRIX *vox2ras_crt = vg_i_to_r(&vg);
+    MATRIX *vox2ras_crt   = vg_i_to_r(&vg);
     MATRIX *ras2vox_morph = vg_r_to_i(&m_vgFixed);
 
     if (!vox2ras_crt || !ras2vox_morph)
@@ -596,7 +596,7 @@ MRI *VolumeMorph::apply_transforms(MRI *input, bool cacheField,
   // setup the matrix for the moving side
   {
     MATRIX *vox2ras_morph = vg_i_to_r(&m_vgMoving);
-    MATRIX *ras2vox_crt = extract_r_to_i(input);
+    MATRIX *ras2vox_crt   = extract_r_to_i(input);
 
     if (!vox2ras_morph || !ras2vox_crt)
       throw " VolumeMorph apply_transforms - NULL matrix ";
@@ -618,11 +618,11 @@ MRI *VolumeMorph::apply_transforms(MRI *input, bool cacheField,
   }
 
   try {
-    unsigned int voxInvalid(0), voxValid(0);
-    tCoords pt, img;
+    unsigned int                           voxInvalid(0), voxValid(0);
+    tCoords                                pt, img;
     TransformContainerType::const_iterator cit;
-    double val;
-    float valvect[nframes];
+    double                                 val;
+    float                                  valvect[nframes];
 
     if (cacheField)
       for (int z = 0; z < mriOut->depth; ++z)
@@ -631,12 +631,12 @@ MRI *VolumeMorph::apply_transforms(MRI *input, bool cacheField,
             MRIsetVoxVal(mriCache, x, y, z, 3, 0);
 
     VECTOR *vFixed, *vMoving, *vTmp;
-    vFixed = VectorAlloc(4, MATRIX_REAL);
-    VECTOR_ELT(vFixed, 4) = 1.0;
-    vMoving = VectorAlloc(4, MATRIX_REAL);
+    vFixed                 = VectorAlloc(4, MATRIX_REAL);
+    VECTOR_ELT(vFixed, 4)  = 1.0;
+    vMoving                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(vMoving, 4) = 1.0;
-    vTmp = VectorAlloc(4, MATRIX_REAL);
-    VECTOR_ELT(vTmp, 4) = 1.0;
+    vTmp                   = VectorAlloc(4, MATRIX_REAL);
+    VECTOR_ELT(vTmp, 4)    = 1.0;
 
     for (int z = 0; z < mriOut->depth; ++z) {
       if (!(z % 10))
@@ -759,11 +759,11 @@ MRI *VolumeMorph::convert_transforms() const
 
   // initialize matrices for RAS 2 matrix stuff
   MATRIX *mat_template = NULL;
-  MATRIX *mat_subject = NULL;
+  MATRIX *mat_subject  = NULL;
   // setup the matrix for the fixed side
   {
     //    MATRIX* vox2ras_crt = vg_i_to_r(&vg);
-    MATRIX *vox2ras_crt = vg_i_to_r(&m_vgFixed);
+    MATRIX *vox2ras_crt   = vg_i_to_r(&m_vgFixed);
     MATRIX *ras2vox_morph = vg_r_to_i(&m_vgFixed);
 
     if (!vox2ras_crt || !ras2vox_morph)
@@ -806,8 +806,8 @@ MRI *VolumeMorph::convert_transforms() const
                        MRI_FLOAT, 3);
 
   try {
-    unsigned int voxInvalid(0), voxValid(0);
-    tCoords pt, img;
+    unsigned int                           voxInvalid(0), voxValid(0);
+    tCoords                                pt, img;
     TransformContainerType::const_iterator cit;
 
     if (cacheField)
@@ -817,12 +817,12 @@ MRI *VolumeMorph::convert_transforms() const
             MRIsetVoxVal(mriCache, x, y, z, 3, 0);
 
     VECTOR *vFixed, *vMoving, *vTmp;
-    vFixed = VectorAlloc(4, MATRIX_REAL);
-    VECTOR_ELT(vFixed, 4) = 1.0;
-    vMoving = VectorAlloc(4, MATRIX_REAL);
+    vFixed                 = VectorAlloc(4, MATRIX_REAL);
+    VECTOR_ELT(vFixed, 4)  = 1.0;
+    vMoving                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(vMoving, 4) = 1.0;
-    vTmp = VectorAlloc(4, MATRIX_REAL);
-    VECTOR_ELT(vTmp, 4) = 1.0;
+    vTmp                   = VectorAlloc(4, MATRIX_REAL);
+    VECTOR_ELT(vTmp, 4)    = 1.0;
 
     for (int z = 0; z < m_vgFixed.depth; ++z) {
       if (!(z % 10))
@@ -933,12 +933,12 @@ MRIS *VolumeMorph::apply_transforms(MRIS *input) const {
 
 tDblCoords VolumeMorph::image(const tCoords &_pt) const {
   TransformContainerType::const_iterator cit;
-  tCoords pt(_pt), ret;
-  bool bDone(false);
+  tCoords                                pt(_pt), ret;
+  bool                                   bDone(false);
 
   for (cit = m_transforms.begin(); cit != m_transforms.end() && !bDone; ++cit) {
     ret = (*cit)->img(pt);
-    pt = ret;
+    pt  = ret;
     if (!pt.isValid())
       bDone = true;
   }
@@ -1064,7 +1064,7 @@ void VolumeMorph::load(const char *fname, unsigned int bufferMultiplier,
   // for backwards compatibility, read old if extension
 
   // 1. get the extension
-  std::string strFname(fname);
+  std::string            strFname(fname);
   std::string::size_type pos = strFname.find_last_of(".");
   if (pos == std::string::npos)
     throw " Couldn't find extension in filename. ";
@@ -1153,11 +1153,11 @@ void VolumeMorph::load_old(const char *fname, unsigned int bufferMultiplier,
     // init compressor
     ZlibStringCompressor compressor;
     compressor.m_bufferAllocationMultiplier = bufferMultiplier;
-    const std::string strInflated = compressor.inflate(strCompressed);
+    const std::string strInflated           = compressor.inflate(strCompressed);
 
     // read the transform
     std::istringstream is(strInflated, std::ios::binary);
-    TransformPointer t = loadTransform(is);
+    TransformPointer   t = loadTransform(is);
     m_transforms.push_back(t);
   } // next ui
 }
@@ -1166,7 +1166,7 @@ void VolumeMorph::load_old(const char *fname, unsigned int bufferMultiplier,
 void VolumeMorph::load_new(const char *fname, unsigned int bufferMultiplier,
                            bool clearExisting) {
   ZlibStringCompressor compressor; // memory leak in compressor?
-  std::ifstream ifs(fname, std::ios::binary);
+  std::ifstream        ifs(fname, std::ios::binary);
   if (!ifs)
     throw "VolumeMorph load - failed to open input stream";
 
@@ -1193,10 +1193,10 @@ void VolumeMorph::load_new(const char *fname, unsigned int bufferMultiplier,
       compressor.m_bufferAllocationMultiplier = bufferMultiplier;
       std::cout << " data size = " << tagReader.m_len << std::endl;
 
-      const std::string strCompressed(tagReader.m_data, tagReader.m_len);
-      const std::string strInflated = compressor.inflate(strCompressed);
+      const std::string  strCompressed(tagReader.m_data, tagReader.m_len);
+      const std::string  strInflated = compressor.inflate(strCompressed);
       std::istringstream is(strInflated);
-      TransformPointer t = loadTransform(is);
+      TransformPointer   t = loadTransform(is);
       m_transforms.push_back(t);
     } break;
     default:;
@@ -1240,9 +1240,9 @@ void VolumeMorph::ReadTagVolGeom(const std::string &strData, VOL_GEOM &vg) {
 
   vg.valid = TRead<int>(iss);
 
-  vg.width = TRead<int>(iss);
+  vg.width  = TRead<int>(iss);
   vg.height = TRead<int>(iss);
-  vg.depth = TRead<int>(iss);
+  vg.depth  = TRead<int>(iss);
 
   vg.xsize = TRead<float>(iss);
   vg.ysize = TRead<float>(iss);
@@ -1308,9 +1308,9 @@ GCA_MORPH *VolumeMorph::exportGcam(MRI *mriMoving, bool useTemplateBoundingBox,
     std::cout << " padding = " << padding << std::endl;
   } else {
     std::cout << "Not using bounding box\n";
-    box.x = 0;
-    box.y = 0;
-    box.z = 0;
+    box.x  = 0;
+    box.y  = 0;
+    box.z  = 0;
     box.dx = m_template->width;
     box.dy = m_template->height;
     box.dz = m_template->depth;
@@ -1320,8 +1320,8 @@ GCA_MORPH *VolumeMorph::exportGcam(MRI *mriMoving, bool useTemplateBoundingBox,
             << box.dx << " , " << box.dy << " , " << box.dz << std::endl;
 
   GCA_MORPH *gcam = GCAMalloc(box.dx, box.dy, box.dz);
-  gcam->type = GCAM_VOX;
-  gcam->spacing = 1;
+  gcam->type      = GCAM_VOX;
+  gcam->spacing   = 1;
 
   // assign atlas geometry
   //
@@ -1352,13 +1352,13 @@ GCA_MORPH *VolumeMorph::exportGcam(MRI *mriMoving, bool useTemplateBoundingBox,
           pnode->x = pnode->origx = 0;
           pnode->y = pnode->origy = 0;
           pnode->z = pnode->origz = 0;
-          pnode->label = 0;
+          pnode->label            = 0;
           ++gcamInvalidVoxels;
           continue;
         }
 
         pnode->invalid = GCAM_VALID;
-        pnode->x = pnode->origx =
+        pnode->x       = pnode->origx =
             MRIgetVoxVal(mriCache, xbox, ybox, zbox, 0) + x;
         pnode->y = pnode->origy =
             MRIgetVoxVal(mriCache, xbox, ybox, zbox, 1) + y;
@@ -1426,7 +1426,7 @@ void VolumeMorph::invert() {
 
 void VolumeMorph::serialize() {
   TransformContainerType::iterator it = m_transforms.begin();
-  TransformPointer pt;
+  TransformPointer                 pt;
 
   while (it != m_transforms.end()) {
     if ((pt = (*it)->initial())) {
@@ -1450,10 +1450,10 @@ std::shared_ptr<Transform<3>> loadTransform(std::istream &is,
   std::string strDescription(buffer, uilen);
   delete[] buffer;
 
-  std::string strName;
+  std::string            strName;
   std::string::size_type sepPos = strDescription.find("|");
   if (sepPos != std::string::npos) {
-    strName = strDescription.substr(sepPos + 1);
+    strName        = strDescription.substr(sepPos + 1);
     strDescription = strDescription.substr(0, sepPos);
   }
 

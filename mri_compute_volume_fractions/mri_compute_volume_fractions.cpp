@@ -1,5 +1,4 @@
 /**
- * @file  mri_compute_volume_fraction.c
  * @brief compute the % of gm, wm and CSF in each voxel in a volume
  *
  * Program to compute partial volume fractions for every voxel in e.g. an EPI
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2015/09/14 12:25:01 $
- *    $Revision: 1.22 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,18 +22,18 @@
 
 #include <sys/utsname.h>
 
-#include "version.h"
+#include "cma.h"
 #include "cmdargs.h"
 #include "diag.h"
+#include "fmriutils.h"
 #include "mri2.h"
 #include "mrisutils.h"
-#include "cma.h"
-#include "timer.h"
-#include "fmriutils.h"
 #include "registerio.h"
+#include "timer.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
-static int parse_commandline(int argc, char **argv);
+int         main(int argc, char *argv[]);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -46,45 +41,44 @@ static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
 
-static char vcid[] = "$Id: mri_compute_volume_fractions.c,v 1.22 2015/09/14 "
-                     "12:25:01 fischl Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *TempVolFile = nullptr;
-char *subject, *subjectoverride = nullptr, *SUBJECTS_DIR;
-char *regfile = nullptr;
-char *outstem = nullptr, *stackfile = nullptr, *gmfile = nullptr;
-int USF = 2;
-char *wsurf = "white";
-char *psurf = "pial";
-char *asegfile = "aseg.mgz", *outsegfile = nullptr, *ttsegfile = nullptr,
-     *ttsegctabfile = nullptr;
-char *csfmaskfile = nullptr;
-COLOR_TABLE *ct = nullptr;
-char tmpstr[5000];
-char *fmt = "mgz";
-LTA *aseg2vol = nullptr;
-int regtype;
-int nOptUnknown = 0;
-int UseAseg = 1;
-int FillCSF = 1;
-int nDil = 3;
-int RegHeader = 0;
-double resmm = 0;
+char *       TempVolFile = NULL;
+char *       subject, *subjectoverride = NULL, *SUBJECTS_DIR;
+char *       regfile = NULL;
+char *       outstem = NULL, *stackfile = NULL, *gmfile = NULL;
+int          USF        = 2;
+const char * wsurf      = "white";
+const char * psurf      = "pial";
+const char * asegfile   = "aseg.mgz";
+char *       outsegfile = NULL, *ttsegfile = NULL, *ttsegctabfile = NULL;
+char *       csfmaskfile = NULL;
+COLOR_TABLE *ct          = NULL;
+char         tmpstr[5000];
+const char * fmt      = "mgz";
+LTA *        aseg2vol = NULL;
+int          regtype;
+int          nOptUnknown = 0;
+int          UseAseg     = 1;
+int          FillCSF     = 1;
+int          nDil        = 3;
+int          RegHeader   = 0;
+double       resmm       = 0;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, err, tt, nTT;
-  MRI *aseg, *pvf, *mritmp, *csfmask;
+  int   nargs, err, tt, nTT;
+  MRI * aseg, *pvf, *mritmp, *csfmask;
   MRIS *lhw, *lhp, *rhw, *rhp;
   Timer start;
 
   nargs = handleVersionOption(argc, argv, "mri_compute_volume_fractions");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -230,7 +224,7 @@ int main(int argc, char *argv[]) {
       sprintf(tmpstr, "%s.%s.%s", outstem,
               ct->ctabTissueType->entries[tt + 1]->name, fmt);
       mritmp = fMRIframe(pvf, tt, nullptr);
-      err = MRIwrite(mritmp, tmpstr);
+      err    = MRIwrite(mritmp, tmpstr);
       if (err)
         exit(1);
       MRIfree(&mritmp);
@@ -245,9 +239,9 @@ int main(int argc, char *argv[]) {
 
   if (gmfile) {
     MRI *ctx, *subctxgm, *gm;
-    ctx = fMRIframe(pvf, 0, nullptr);
+    ctx      = fMRIframe(pvf, 0, nullptr);
     subctxgm = fMRIframe(pvf, 1, nullptr);
-    gm = MRIadd(ctx, subctxgm, nullptr);
+    gm       = MRIadd(ctx, subctxgm, nullptr);
     MRIcopyPulseParameters(pvf, gm);
     err = MRIwrite(gm, gmfile);
     if (err)
@@ -266,7 +260,7 @@ int main(int argc, char *argv[]) {
 /*---------------------------------------------*/
 // Note: some of the command-line parsing is needed for backwards compatibility
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -306,9 +300,9 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--reg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      regfile = pargv[0];
+      regfile   = pargv[0];
       nargsused = 1;
-      regtype = TransformFileNameType(regfile);
+      regtype   = TransformFileNameType(regfile);
       if (regtype == REGISTER_DAT) {
         if (nargc < 2 || CMDisFlag(pargv[1])) {
           printf("ERROR: registration file %s is not an LTA so --reg requires "
@@ -322,14 +316,14 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--regheader")) {
       if (nargc < 2)
         CMDargNErr(option, 2);
-      subject = pargv[0];
+      subject     = pargv[0];
       TempVolFile = pargv[1];
-      RegHeader = 1;
-      nargsused = 2;
+      RegHeader   = 1;
+      nargsused   = 2;
     } else if (!strcasecmp(option, "--o") || !strcasecmp(option, "--pvf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      outstem = pargv[0];
+      outstem   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--stack")) {
       if (nargc < 1)
@@ -339,23 +333,23 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcasecmp(option, "--gm")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      gmfile = pargv[0];
+      gmfile    = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--csf-mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       csfmaskfile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcasecmp(option, "--seg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      asegfile = pargv[0];
+      asegfile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--out-seg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       outsegfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--ttseg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -365,22 +359,22 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       ttsegctabfile = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcasecmp(option, "--wsurf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      wsurf = pargv[0];
+      wsurf     = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--psurf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      psurf = pargv[0];
+      psurf     = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "-s") || !strcasecmp(option, "--s")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       subjectoverride = pargv[0];
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcasecmp(option, "-nii.gz"))
       fmt = "nii.gz";
     else if (!strcasecmp(option, "-nii"))
@@ -402,7 +396,7 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       setenv("SUBJECTS_DIR", pargv[0], 1);
       SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--usf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -423,7 +417,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &resolution);
-      USF = nint(1 / resolution);
+      USF       = nint(1 / resolution);
       nargsused = 1;
     } else if (!strcasecmp(option, "--diag-no")) {
       if (nargc < 1)
@@ -438,16 +432,16 @@ static int parse_commandline(int argc, char **argv) {
     } else {
       // Make backwards compatible for flagless inputs
       if (nOptUnknown == 0) {
-        regfile = option;
+        regfile   = option;
         nargsused = 0;
-        regtype = TransformFileNameType(regfile);
+        regtype   = TransformFileNameType(regfile);
         printf("Setting registration file to %s\n", regfile);
       } else if (nOptUnknown == 1) {
         TempVolFile = option;
-        nargsused = 0;
+        nargsused   = 0;
         printf("Setting template volume to %s\n", TempVolFile);
       } else if (nOptUnknown == 2) {
-        outstem = option;
+        outstem   = option;
         nargsused = 0;
         printf("Setting outstem to %s\n", outstem);
       } else {
@@ -521,7 +515,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /*---------------------------------------------*/
@@ -541,8 +535,8 @@ static void print_help() {
   exit(1);
 }
 /*---------------------------------------------*/
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /*---------------------------------------------*/
@@ -601,7 +595,7 @@ static void check_options() {
 /*---------------------------------------------*/
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "sysname  %s\n", uts.sysname);
   fprintf(fp, "hostname %s\n", uts.nodename);
   fprintf(fp, "machine  %s\n", uts.machine);

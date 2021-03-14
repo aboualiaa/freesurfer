@@ -1,5 +1,4 @@
 /**
- * @file  LayerPropertyROI.cxx
  * @brief Implementation for ROI layer properties.
  *
  * In 2D, the MRI is viewed as a single slice, and controls are
@@ -9,12 +8,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/08 21:01:00 $
- *    $Revision: 1.10 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,20 +22,18 @@
  *
  */
 
-#include <assert.h>
 #include "LayerPropertyROI.h"
 #include "vtkRGBAColorTransferFunction.h"
 #include <QDebug>
-
-using namespace std;
+#include <assert.h>
 
 LayerPropertyROI::LayerPropertyROI(QObject *parent) : LayerProperty(parent) {
-  mOpacity = 0.7;
-  mRGB[0] = 1;
-  mRGB[1] = 1;
-  mRGB[2] = 0;
-  m_dThreshold = 0;
-  m_nColorCode = SolidColor;
+  mOpacity         = 0.7;
+  mRGB[0]          = 1;
+  mRGB[1]          = 1;
+  mRGB[2]          = 0;
+  m_dThreshold     = 0;
+  m_nColorCode     = SolidColor;
   m_dValueRange[0] = 0;
   m_dValueRange[1] = 1;
 

@@ -1,8 +1,8 @@
 #ifndef _SBL_OPTIMIZER_H_
 #define _SBL_OPTIMIZER_H_
 #include <sbl/core/String.h>
-#include <sbl/math/Vector.h>
 #include <sbl/math/Matrix.h>
+#include <sbl/math/Vector.h>
 namespace sbl {
 
 //----------------------------------
@@ -113,11 +113,11 @@ protected:
   double m_finalTolerance;
 
   // history of best and eval points
-  bool m_storeHistory;
+  bool           m_storeHistory;
   Array<VectorD> m_bestPoints;
-  VectorD m_bestValues;
+  VectorD        m_bestValues;
   Array<VectorD> m_evalPoints;
-  VectorD m_evalValues;
+  VectorD        m_evalValues;
 
 private:
   // disable copy constructor and assignment operator
@@ -135,7 +135,7 @@ class SimplexOptimizer : public Optimizer {
 public:
   // basic constructor
   SimplexOptimizer(Objective &objective) : Optimizer(objective) {
-    m_startFrac = 0.1;
+    m_startFrac      = 0.1;
     m_reductionCount = 0;
   }
   virtual ~SimplexOptimizer() {}

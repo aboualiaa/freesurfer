@@ -1,21 +1,18 @@
 #ifndef __kvlAtlasMeshVisitCounter_h
 #define __kvlAtlasMeshVisitCounter_h
 
-#include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshRasterizor.h"
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshVisitCounter : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshVisitCounter;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshVisitCounter         Self;
+  typedef AtlasMeshRasterizor           Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -24,7 +21,7 @@ public:
   itkTypeMacro(AtlasMeshVisitCounter, itk::Object);
 
   /** Some typedefs */
-  using ImageType = itk::Image<int, 3>;
+  typedef itk::Image<int, 3> ImageType;
 
   /** */
   void SetRegions(const ImageType::RegionType &region) {
@@ -42,13 +39,13 @@ protected:
   virtual ~AtlasMeshVisitCounter();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
 private:
-  AtlasMeshVisitCounter(const Self &); // purposely not implemented
-  void operator=(const Self &);        // purposely not implemented
+  AtlasMeshVisitCounter(const Self &); //purposely not implemented
+  void operator=(const Self &);        //purposely not implemented
 
   //
   ImageType::Pointer m_Image;

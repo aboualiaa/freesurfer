@@ -39,11 +39,11 @@ public slots:
 private:
   void SetColorMapChanged();
 
-  double m_dThreshold;
-  double m_dSigma;
-  int m_nMinArea;
+  double                                        m_dThreshold;
+  double                                        m_dSigma;
+  int                                           m_nMinArea;
   vtkSmartPointer<vtkRGBAColorTransferFunction> mLUTTable;
-  double mOpacity;
+  double                                        mOpacity;
 };
 
 #endif // LAYERPROPERTYFCD_H

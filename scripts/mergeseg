@@ -1,7 +1,7 @@
 #!/bin/tcsh -f
 # mergeseg
 
-set VERSION = '$Id: mergeseg,v 1.3 2016/02/16 17:17:20 zkaufman Exp $';
+set VERSION = 'mergeseg @FS_VERSION@';
 
 set outseg = ();
 set mergeseg = ();
@@ -48,8 +48,7 @@ set outdir = `pwd`;
 popd > /dev/null
 
 if($#tmpdir == 0) then
-  if(-dw /scratch)   set tmpdir = /scratch/tmpdir.mergeseg.$$
-  if(! -dw /scratch) set tmpdir = $outdir/tmpdir.mergeseg.$$
+  set tmpdir = `fs_temp_dir --scratch --base $outdir`
 endif
 mkdir -p $tmpdir
 

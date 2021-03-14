@@ -1,5 +1,4 @@
 /**
- * @file  mri_robust_template.cpp
  * @brief combine multiple volumes by mean or median
  *
  * Creation of robust template of several volumes together with
@@ -8,12 +7,8 @@
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2016/05/05 21:17:08 $
- *    $Revision: 1.54 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,8 +20,26 @@
  *
  */
 
+#include <cassert>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+// for rand:
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include "MultiRegistration.h"
 
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mrimorph.h"
 #include "timer.h"
 #include "version.h"
 
@@ -50,10 +63,11 @@ using namespace std;
 //     //unsigned lib;//        library
 //     //unsigned data;//       data/stack
 //     //unsigned dt;//         dirty pages (unused in Linux 2.6)
-//     //fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share,
-//     &text, &lib, &data*/); fscanf(pf, "%u" , &size);
-//     //DOMSGCAT(MSTATS, std::setprecision(4) << size / (1024.0) << "MB mem
-//     used"); cout <<  size / (1024.0) << " MB mem used" << endl; fclose(pf);
+//     //fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share, &text, &lib, &data*/);
+//     fscanf(pf, "%u" , &size);
+//     //DOMSGCAT(MSTATS, std::setprecision(4) << size / (1024.0) << "MB mem used");
+//     cout <<  size / (1024.0) << " MB mem used" << endl;
+//     fclose(pf);
 //   }
 // // while (1)
 // // {
@@ -66,43 +80,43 @@ using namespace std;
 struct Parameters {
   vector<std::string> mov;
   vector<std::string> masks;
-  string mean;
-  vector<string> iltas;
-  vector<string> nltas;
-  vector<string> nweights;
-  vector<string> mapmovhdr;
-  bool fixvoxel;
-  bool floattype;
-  bool lta_vox2vox;
-  bool affine;
-  bool iscale;
-  bool iscaleonly;
-  bool transonly;
-  bool leastsquares;
-  bool nomulti;
-  int iterate;
-  double epsit;
-  double sat;
-  vector<string> nwarps;
-  int debug;
-  int average;
-  int inittp;
-  bool noit;
-  bool quick;
-  int subsamplesize;
-  bool fixtp;
-  bool satit;
-  string conform;
-  bool doubleprec;
-  bool oneminusweights;
-  vector<string> iscalein;
-  vector<string> iscaleout;
-  int finalinterp;
-  int highit;
-  unsigned int seed;
-  bool crascenter;
-  int pairiterate;
-  double pairepsit;
+  string              mean;
+  vector<string>      iltas;
+  vector<string>      nltas;
+  vector<string>      nweights;
+  vector<string>      mapmovhdr;
+  bool                fixvoxel;
+  bool                floattype;
+  bool                lta_vox2vox;
+  bool                affine;
+  bool                iscale;
+  bool                iscaleonly;
+  bool                transonly;
+  bool                leastsquares;
+  bool                nomulti;
+  int                 iterate;
+  double              epsit;
+  double              sat;
+  vector<string>      nwarps;
+  int                 debug;
+  int                 average;
+  int                 inittp;
+  bool                noit;
+  bool                quick;
+  int                 subsamplesize;
+  bool                fixtp;
+  bool                satit;
+  string              conform;
+  bool                doubleprec;
+  bool                oneminusweights;
+  vector<string>      iscalein;
+  vector<string>      iscaleout;
+  int                 finalinterp;
+  int                 highit;
+  unsigned int        seed;
+  bool                crascenter;
+  int                 pairiterate;
+  double              pairepsit;
 };
 
 // Initializations:
@@ -146,12 +160,10 @@ static struct Parameters P = {vector<string>(0),
                               5,
                               0.01};
 
-static void printUsage();
+static void printUsage(void);
 static bool parseCommandLine(int argc, char *argv[], Parameters &P);
 
-static char vcid[] =
-    "$Id: mri_robust_template.cpp,v 1.54 2016/05/05 21:17:08 mreuter Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 int getRandomNumber(int start, int end, unsigned int &seed)
 // return n in [start,end]
@@ -159,7 +171,7 @@ int getRandomNumber(int start, int end, unsigned int &seed)
 {
 
   if (seed == 0) {
-    seed = time(nullptr);
+    seed = time(NULL);
   }
 
   // initialize random seed:
@@ -173,7 +185,7 @@ int getRandomNumber(int start, int end, unsigned int &seed)
 
 int main(int argc, char *argv[]) {
   {
-    cout << vcid << endl << endl;
+    cout << getVersion() << endl << endl;
     // set the environment variable
     //  setenv("SURFER_FRONTDOOR","",1) ;
     // to store mri as chunk in memory:
@@ -181,8 +193,7 @@ int main(int argc, char *argv[]) {
 
     // Default initialization
     int nargs = handleVersionOption(argc, argv, "mri_robust_template");
-    if (nargs && argc - nargs == 1)
-    {
+    if (nargs && argc - nargs == 1) {
       exit(0);
     }
     argc -= nargs;
@@ -200,7 +211,7 @@ int main(int argc, char *argv[]) {
 
     // Timer
     Timer start;
-    int msec, minutes, seconds;
+    int   msec, minutes, seconds;
     start.reset();
     ///////////////////////////////////////////////////////////////
 
@@ -238,9 +249,9 @@ int main(int argc, char *argv[]) {
     MR.useCRAS(P.crascenter);
 
     // init MultiRegistration and load movables
-    // int nnin = (int) P.mov.size();
-    // assert (P.mov.size() >1);
-    // assert (MR.loadMovables(P.mov)==nin);
+    //int nnin = (int) P.mov.size();
+    //assert (P.mov.size() >1);
+    //assert (MR.loadMovables(P.mov)==nin);
     int nin = MR.loadMovables(P.mov, P.masks);
     if (nin <= 1) {
       std::cerr << "Could not load movables!" << std::endl;
@@ -279,8 +290,7 @@ int main(int argc, char *argv[]) {
            << P.seed << " )." << endl;
     }
 
-    if (P.noit) // no registration to mean space, only initial reg. and
-                // averaging
+    if (P.noit) // no registration to mean space, only initial reg. and averaging
     {
       // if no initial xforms are given, use initialization to median space
       //   by registering everything first to inittp
@@ -307,9 +317,9 @@ int main(int argc, char *argv[]) {
       MR.setSampleType(P.finalinterp);
       MR.mapAndAverageMov(0);
 
-      //    // here default params are adjusted for just 2 images (if not
-      //    passed): if (P.iterate == -1) P.iterate = 5; if (P.epsit <= 0)
-      //    P.epsit   = 0.01;
+      //    // here default params are adjusted for just 2 images (if not passed):
+      //    if (P.iterate == -1) P.iterate = 5;
+      //    if (P.epsit <= 0)    P.epsit   = 0.01;
       //    MR.halfWayTemplate(0,P.iterate,P.epsit,P.lta_vox2vox);
     } else {
       // if no initial xforms are given, use initialization to median space
@@ -318,15 +328,13 @@ int main(int argc, char *argv[]) {
       //   b) res 0: up to highest res., eps 0.01 accurate reg.
       //   turns out accurate b) performs better and saves us
       //   from more global iterations (reg to template) later
-      // remains open if subsampling speeds up things w/o increasing iterations
-      // later
+      // remains open if subsampling speeds up things w/o increasing iterations later
       if (P.iltas.size() == 0 && P.inittp > 0) {
         MR.initialXforms(P.inittp, P.fixtp, 0, 5, 0.01);
       }
-      // MR.initialXforms(P.inittp,1,5,0.05);
+      //MR.initialXforms(P.inittp,1,5,0.05);
 
-      // here default is adjusted for several images (and real mean/median
-      // target):
+      // here default is adjusted for several images (and real mean/median target):
       if (P.iterate == -1) {
         P.iterate = 6;
       }
@@ -371,13 +379,13 @@ int main(int argc, char *argv[]) {
     MR.clear();
 
     ///////////////////////////////////////////////////////////////
-    msec = start.milliseconds();
+    msec    = start.milliseconds();
     seconds = nint((float)msec / 1000.0f);
     minutes = seconds / 60;
     seconds = seconds % 60;
     cout << "registration took " << minutes << " minutes and " << seconds
          << " seconds." << endl;
-    // if (diag_fp) fclose(diag_fp) ;
+    //if (diag_fp) fclose(diag_fp) ;
 
     cout << endl << " Thank you for using RobustTemplate! " << endl;
     cout << " If you find it useful and use it for a publication, please cite: "
@@ -399,7 +407,7 @@ int main(int argc, char *argv[]) {
 /*----------------------------------------------------------------------
  ----------------------------------------------------------------------*/
 #include "mri_robust_template.help.xml.h"
-static void printUsage() {
+static void printUsage(void) {
   outputHelpXml(mri_robust_template_help_xml, mri_robust_template_help_xml_len);
 }
 
@@ -412,7 +420,7 @@ static void printUsage() {
  \returns       number of used arguments for this command
  */
 static int parseNextCommand(int argc, char *argv[], Parameters &P) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[0] + 1; // remove '-'
@@ -421,7 +429,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   }
   StrUpper(option);
 
-  // cout << " option: " << option << endl;
+  //cout << " option: " << option << endl;
 
   if (!strcmp(option, "MOV")) {
     nargs = 0;
@@ -441,12 +449,11 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   //  {
   //     P.outdir = string(argv[1]);
   //     nargs = 1;
-  //     cout << "--outdir: Using "<< P.outdir << " as output directory." <<
-  //     endl;
+  //     cout << "--outdir: Using "<< P.outdir << " as output directory." << endl;
   //  }
   else if (!strcmp(option, "TEMPLATE")) {
     P.mean = string(argv[1]);
-    nargs = 1;
+    nargs  = 1;
     cout << "--template: Using " << P.mean << " as template output volume."
          << endl;
   } else if (!strcmp(option, "LTA")) {
@@ -456,7 +463,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
       if (option[0] != '-') {
         nargs++;
         P.nltas.push_back(string(argv[nargs]));
-        // cout << "Using "<< P.nltas.back() << " as LTA." << endl;
+        //cout << "Using "<< P.nltas.back() << " as LTA." << endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
     assert(nargs > 0);
@@ -468,7 +475,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
       if (option[0] != '-') {
         nargs++;
         P.masks.push_back(string(argv[nargs]));
-        // cout << "Using "<< P.nltas.back() << " as LTA." << endl;
+        //cout << "Using "<< P.nltas.back() << " as LTA." << endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
     assert(nargs > 0);
@@ -505,14 +512,14 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
         nargs++;
 
         P.iltas.push_back(string(argv[nargs]));
-        // cout << "Using "<< P.nltas.back() << " as LTA." << endl;
+        //cout << "Using "<< P.nltas.back() << " as LTA." << endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
     assert(nargs > 0);
     cout << "--ixforms: Will use init XFORMS." << endl;
   } else if (!strcmp(option, "AVERAGE")) {
     P.average = atoi(argv[1]);
-    nargs = 1;
+    nargs     = 1;
     cout << "--average: Using method " << P.average
          << " for template computation." << endl;
   } else if (!strcmp(option, "VOX2VOX")) {
@@ -528,10 +535,10 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     P.transonly = true;
     cout << "--transonly: Using only translation!" << endl;
   } else if (!strcmp(option, "ISCALEONLY")) {
-    P.iscale = true;
+    P.iscale     = true;
     P.iscaleonly = true;
-    P.transonly = false;
-    P.affine = false;
+    P.transonly  = false;
+    P.affine     = false;
     cout << "--iscaleonly: Computing only global scaling!" << endl;
   } else if (!strcmp(option, "NOMULTI")) {
     P.nomulti = true;
@@ -542,29 +549,29 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
          << endl;
   } else if (!strcmp(option, "MAXIT")) {
     P.iterate = atoi(argv[1]);
-    nargs = 1;
+    nargs     = 1;
     cout << "--maxit: Performing maximal " << P.iterate
          << " iterations on each resolution." << endl;
   } else if (!strcmp(option, "HIGHIT")) {
     P.highit = atoi(argv[1]);
-    nargs = 1;
+    nargs    = 1;
     cout << "--highit: Performing maximal " << P.highit
          << " iterations on highest resolution" << endl;
   } else if (!strcmp(option, "EPSIT")) {
     P.epsit = atof(argv[1]);
-    nargs = 1;
+    nargs   = 1;
     cout << "--epsit: Stop iterations when change is less than " << P.epsit
          << " . " << endl;
   } else if (!strcmp(option, "PAIRMAXIT")) {
     P.pairiterate = atoi(argv[1]);
-    nargs = 1;
+    nargs         = 1;
     cout << "--pairmaxit: Performing maximal " << P.pairiterate
          << " iterations on each resolution for individual pairwise "
             "registrations."
          << endl;
   } else if (!strcmp(option, "PAIREPSIT")) {
     P.pairepsit = atof(argv[1]);
-    nargs = 1;
+    nargs       = 1;
     cout << "--pairepsit: Stop individual pairwise iterations when change is "
             "less than "
          << P.pairepsit << " . " << endl;
@@ -574,7 +581,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     cout << "--sat: Using saturation " << P.sat << " in M-estimator!" << endl;
   } else if (!strcmp(option, "SUBSAMPLE")) {
     P.subsamplesize = atoi(argv[1]);
-    nargs = 1;
+    nargs           = 1;
     if (P.subsamplesize >= 0) {
       cout << "--subsample: Will subsample if size is larger than "
            << P.subsamplesize << " on all axes!" << endl;
@@ -583,23 +590,23 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     }
   } else if (!strcmp(option, "DEBUG")) {
     P.debug = 1;
-    nargs = 0;
+    nargs   = 0;
     cout << "--debug: Will output debug info and files!" << endl;
   } else if (!strcmp(option, "NOIT")) {
     P.noit = true;
-    nargs = 0;
+    nargs  = 0;
     cout << "--noit: Will output only first template (no iterations)!" << endl;
   } else if (!strcmp(option, "FIXTP")) {
     P.fixtp = true;
-    nargs = 0;
+    nargs   = 0;
     cout << "--fixtp: Will map everything to init TP!" << endl;
   } else if (!strcmp(option, "SATIT")) {
     P.satit = true;
-    nargs = 0;
+    nargs   = 0;
     cout << "--satit: Will estimate SAT iteratively!" << endl;
   } else if (!strcmp(option, "DOUBLEPREC")) {
     P.doubleprec = true;
-    nargs = 0;
+    nargs        = 0;
     cout << "--doubleprec: Will perform algorithm with double precision "
             "(higher mem usage)!"
          << endl;
@@ -610,8 +617,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
       if (option[0] != '-') {
         nargs++;
         P.nweights.push_back(string(argv[nargs]));
-        // cout << "Using "<< P.nweights.back() << " as weights volume." <<
-        // endl;
+        //cout << "Using "<< P.nweights.back() << " as weights volume." << endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
     assert(nargs > 0);
@@ -623,7 +629,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
       if (option[0] != '-') {
         nargs++;
         P.nwarps.push_back(string(argv[nargs]));
-        // cout << "Using "<< P.nwarps.back() << " as weights volume." << endl;
+        //cout << "Using "<< P.nwarps.back() << " as weights volume." << endl;
       }
     } while (nargs + 1 < argc && option[0] != '-');
     assert(nargs > 0);
@@ -647,7 +653,7 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     exit(0);
   } else if (!strcmp(option, "CONFORM")) {
     P.conform = argv[1];
-    nargs = 1;
+    nargs     = 1;
     cout << "--conform: Will output conform template (256^3 and 1mm voxels)!"
          << endl;
   }
@@ -659,18 +665,18 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
   //   }
   else if (!strcmp(option, "FLOATTYPE")) {
     P.floattype = true;
-    nargs = 0;
+    nargs       = 0;
     cout << "--floattype: Use float images internally (independent of input)!"
          << endl;
   } else if (!strcmp(option, "FINALNEAREST")) {
     P.finalinterp = SAMPLE_NEAREST;
-    nargs = 0;
+    nargs         = 0;
     cout << "--finalnearest: Use nearest neighbor interpolation for final "
             "average!"
          << endl;
   } else if (!strcmp(option, "INITTP")) {
     P.inittp = atoi(argv[1]);
-    nargs = 1;
+    nargs    = 1;
     if (P.inittp == 0) {
       cout << "--inittp 0: No initialization, construct first mean from "
               "original TPs"
@@ -681,17 +687,17 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     }
   } else if (!strcmp(option, "ONEMINUSW")) {
     P.oneminusweights = false;
-    nargs = 0;
+    nargs             = 0;
     cout << "--oneminusw: Will output 1-weights (zero=outlier), as in earlier "
             "versions!"
          << endl;
   } else if (!strcmp(option, "SEED")) {
     P.seed = atoi(argv[1]);
-    nargs = 1;
+    nargs  = 1;
     cout << "--seed: Will use random seed " << P.seed << endl;
   } else if (!strcmp(option, "CRAS")) {
     P.crascenter = true;
-    nargs = 0;
+    nargs        = 0;
     cout << "--cras: Will center template at avgerage CRAS!" << endl;
   } else if (!stricmp(option, "HELP") || !stricmp(option, "USAGE") ||
              !stricmp(option, "h") || !stricmp(option, "u")) {

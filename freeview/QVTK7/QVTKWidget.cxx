@@ -34,12 +34,12 @@
 
 #include "QVTKWidget.h"
 
-#include "QVTKPaintEngine.h"
-#include "QVTKInteractorAdapter.h"
 #include "QVTKInteractor.h"
+#include "QVTKInteractorAdapter.h"
+#include "QVTKPaintEngine.h"
 
-#include "qevent.h"
 #include "qapplication.h"
+#include "qevent.h"
 #include "qpainter.h"
 #include "qsignalmapper.h"
 #include "qtimer.h"
@@ -51,22 +51,22 @@
 #endif
 
 #if defined(Q_OS_WIN)
-#include <windows.h>
 #include <QSysInfo>
+#include <windows.h>
 #endif
 
-#include "vtkInteractorStyleTrackballCamera.h"
-#include "vtkRenderWindow.h"
+#include "vtkCallbackCommand.h"
 #include "vtkCommand.h"
+#include "vtkConfigure.h"
+#include "vtkImageData.h"
+#include "vtkInteractorStyleTrackballCamera.h"
 #include "vtkOStrStreamWrapper.h"
 #include "vtkObjectFactory.h"
-#include "vtkCallbackCommand.h"
-#include "vtkConfigure.h"
-#include "vtkUnsignedCharArray.h"
-#include "vtkImageData.h"
 #include "vtkPointData.h"
+#include "vtkRenderWindow.h"
 #include "vtkRenderer.h"
 #include "vtkRendererCollection.h"
+#include "vtkUnsignedCharArray.h"
 
 #if defined(VTK_USE_TDX) && (defined(Q_WS_X11) || defined(Q_OS_LINUX))
 #include "vtkTDxUnixDevice.h"
@@ -410,8 +410,8 @@ void QVTKWidget::paintEvent(QPaintEvent *) {
 
   // In Qt 4.1+ let's support redirected painting
   // if redirected, let's grab the image from VTK, and paint it to the device
-  QPaintDevice *device = QPainter::redirected(this);
-  bool usingRedirectedDevice = (device != NULL && device != this);
+  QPaintDevice *device                = QPainter::redirected(this);
+  bool          usingRedirectedDevice = (device != NULL && device != this);
 
   // if we have a saved image, use it
   if (this->paintCachedImage() == false) {
@@ -430,9 +430,9 @@ void QVTKWidget::paintEvent(QPaintEvent *) {
   if (usingRedirectedDevice) {
     Q_ASSERT(device);
 
-    int w = this->width();
-    int h = this->height();
-    QImage img(w, h, QImage::Format_RGB32);
+    int                   w = this->width();
+    int                   h = this->height();
+    QImage                img(w, h, QImage::Format_RGB32);
     vtkUnsignedCharArray *pixels = vtkUnsignedCharArray::New();
     pixels->SetArray(img.bits(), w * h * 4, 1);
     this->mRenWin->GetRGBACharPixelData(0, 0, w - 1, h - 1, 1, pixels);
@@ -612,17 +612,17 @@ void QVTKWidget::x11_setup_window() {
   // not enough to get a decent graphics window
 
   // save widget states
-  bool tracking = this->hasMouseTracking();
+  bool            tracking     = this->hasMouseTracking();
   Qt::FocusPolicy focus_policy = focusPolicy();
-  bool visible = isVisible();
+  bool            visible      = isVisible();
   if (visible) {
     hide();
   }
 
   // get visual and colormap from VTK
-  XVisualInfo *vi = 0;
-  Colormap cmap = 0;
-  Display *display =
+  XVisualInfo *vi   = 0;
+  Colormap     cmap = 0;
+  Display *    display =
       reinterpret_cast<Display *>(mRenWin->GetGenericDisplayId());
 
   // check ogl and mesa and get information we need to create a decent window
@@ -630,7 +630,7 @@ void QVTKWidget::x11_setup_window() {
   vtkXOpenGLRenderWindow *ogl_win =
       vtkXOpenGLRenderWindow::SafeDownCast(mRenWin);
   if (ogl_win) {
-    vi = ogl_win->GetDesiredVisualInfo();
+    vi   = ogl_win->GetDesiredVisualInfo();
     cmap = ogl_win->GetDesiredColormap();
   }
 #endif
@@ -646,8 +646,8 @@ void QVTKWidget::x11_setup_window() {
 
   // create the X window based on information VTK gave us
   XSetWindowAttributes attrib;
-  attrib.colormap = cmap;
-  attrib.border_pixel = 0;
+  attrib.colormap         = cmap;
+  attrib.border_pixel     = 0;
   attrib.background_pixel = 0;
 
   Window p = RootWindow(display, DefaultScreen(display));
@@ -665,7 +665,7 @@ void QVTKWidget::x11_setup_window() {
   // backup colormap stuff
   Window *cmw;
   Window *cmwret;
-  int count;
+  int     count;
   if (XGetWMColormapWindows(display, topLevelWidget()->winId(), &cmwret,
                             &count)) {
     cmw = new Window[count + 1];
@@ -682,8 +682,8 @@ void QVTKWidget::x11_setup_window() {
       cmw[count++] = win;
     }
   } else {
-    count = 1;
-    cmw = new Window[count];
+    count  = 1;
+    cmw    = new Window[count];
     cmw[0] = win;
   }
 

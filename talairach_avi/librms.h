@@ -1,14 +1,6 @@
-/**
- * @file  librms.h
- *
- */
 /*
  * Original Author: Avi Z. Snyder, Washington University
- *
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2007/05/05 00:00:07 $
- *    $Revision: 1.2 $
+ * 
  *
  * Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
  * Washington University, Mallinckrodt Institute of Radiology.
@@ -26,7 +18,7 @@
 /************/
 /* imgpad.f */
 /************/
-int npad_(int *n, int *m);
+int  npad_(int *n, int *m);
 void imgpad_(float *imag, int *nx, int *ny, int *nz, float *imagp, int *nxp,
              int *nyp, int *nzp);
 void imgdap_(float *imag, int *nx, int *ny, int *nz, float *imagp, int *nxp,

@@ -1,17 +1,6 @@
-/**
- * @file  mris_remove_variance.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:33 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,18 +16,15 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_remove_variance.c,v 1.7 2011/03/02 00:04:33 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-int MRISremoveValueVarianceFromCurvature(MRI_SURFACE *mris);
-double MRIScomputeCurvatureValueCorrelationCoefficient(MRI_SURFACE *mris);
+int         MRISremoveValueVarianceFromCurvature(MRI_SURFACE *mris);
+double      MRIScomputeCurvatureValueCorrelationCoefficient(MRI_SURFACE *mris);
 
 const char *Progname;
 
@@ -47,9 +33,9 @@ static int navgs = 0;
 int main(int argc, char *argv[]) {
   char **av, *in_fname, *in_curv, *var_curv, *out_curv, fname[200], hemi[10],
       path[200], name[200], *cp;
-  int ac, nargs;
+  int          ac, nargs;
   MRI_SURFACE *mris;
-  double r;
+  double       r;
 
   nargs = handleVersionOption(argc, argv, "mris_remove_variance");
   if (nargs && argc - nargs == 1)
@@ -72,7 +58,7 @@ int main(int argc, char *argv[]) {
     usage_exit();
 
   in_fname = argv[1];
-  in_curv = argv[2];
+  in_curv  = argv[2];
   var_curv = argv[3];
   out_curv = argv[4];
 
@@ -114,7 +100,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -131,7 +117,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -168,16 +154,16 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 int MRISremoveValueVarianceFromCurvature(MRI_SURFACE *mris) {
-  int vno;
+  int     vno;
   VERTEX *v;
-  double len, dot, mean_curv, mean_val, n, val;
-  float min_curv, max_curv;
+  double  len, dot, mean_curv, mean_val, n, val;
+  float   min_curv, max_curv;
 
   /* compute means of two vectors */
   n = (double)mris->nvertices;
@@ -234,8 +220,8 @@ int MRISremoveValueVarianceFromCurvature(MRI_SURFACE *mris) {
   }
 
   /* recompute min, max and mean curvature */
-  min_curv = 10000.0f;
-  max_curv = -min_curv;
+  min_curv  = 10000.0f;
+  max_curv  = -min_curv;
   mean_curv = 0.0f;
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -259,8 +245,8 @@ int MRISremoveValueVarianceFromCurvature(MRI_SURFACE *mris) {
 }
 
 double MRIScomputeCurvatureValueCorrelationCoefficient(MRI_SURFACE *mris) {
-  double r, mean_val, mean_curv, s_val, s_curv, n;
-  int vno;
+  double  r, mean_val, mean_curv, s_val, s_curv, n;
+  int     vno;
   VERTEX *v;
 
   /* first build normalized vector in vertex->val field */
@@ -287,7 +273,7 @@ double MRIScomputeCurvatureValueCorrelationCoefficient(MRI_SURFACE *mris) {
 
   s_val /= (n - 1.0);
   s_curv /= (n - 1.0);
-  s_val = sqrt(s_val);
+  s_val  = sqrt(s_val);
   s_curv = sqrt(s_curv);
 
   /* measure length of val vector */

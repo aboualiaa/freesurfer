@@ -1,14 +1,12 @@
 /**
- * @file  coffin.cxx
  * @brief Container of tractography data and methods
  *
  * Container of tractography data and methods
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
  *
- * Copyright © 2011-2016 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -21,27 +19,32 @@
  */
 
 #include <coffin.h>
+
+#include <algorithm>
+#include <iomanip>
 #include <random>
+#include <sstream>
+
 using namespace std;
 
-const unsigned int Aeon::mDiffStep = 3;
-int Aeon::mMaxAPosterioriPath;
-unsigned int Aeon::mMaxAPosterioriPath0;
-vector<float> Aeon::mPriorSamples;
+const unsigned int  Aeon::mDiffStep = 3;
+int                 Aeon::mMaxAPosterioriPath;
+unsigned int        Aeon::mMaxAPosterioriPath0;
+vector<float>       Aeon::mPriorSamples;
 vector<vector<int>> Aeon::mBasePathPointSamples;
-MRI *Aeon::mBaseMask;
+MRI *               Aeon::mBaseMask;
 
 const unsigned int Coffin::mMaxTryMask = 100, Coffin::mMaxTryWhite = 10,
                    Coffin::mDiffStep = 3;
-const float Coffin::mTangentBinSize = 1 / 3.0, // 0.1,
-    Coffin::mCurvatureBinSize = 0.01;          // 0.002;
+const float Coffin::mTangentBinSize  = 1 / 3.0, // 0.1,
+    Coffin::mCurvatureBinSize        = 0.01;    // 0.002;
 
 //
 // A single point in time
 //
 Aeon::Aeon() {
   mNx = mNy = mNz = mNxy = mNumVox = 0;
-  mMask = 0;
+  mMask                            = 0;
   ClearPath();
 }
 
@@ -76,24 +79,25 @@ void Aeon::SetPathMap(unsigned int PathIndex) {
 //
 // Read data specific to a single time point
 //
-void Aeon::ReadData(const char *RootDir, const char *DwiFile,
-                    const char *GradientFile, const char *BvalueFile,
-                    const char *MaskFile, const char *BedpostDir,
-                    const int NumTract, const float FminPath,
-                    const char *BaseXfmFile) {
-  string dwifile, gradfile, bvalfile, maskfile, bpdir;
-  char fname[PATH_MAX];
+void Aeon::ReadData(const std::string RootDir, const std::string DwiFile,
+                    const std::string GradientFile,
+                    const std::string BvalueFile, const std::string MaskFile,
+                    const std::string BedpostDir, const int NumTract,
+                    const float FminPath, const std::string BaseXfmFile) {
+  string      dwifile, gradfile, bvalfile, maskfile, bpdir;
+  std::string fname;
   MRI *dwi, *phi[NumTract], *theta[NumTract], *f[NumTract], *v0[NumTract],
       *f0[NumTract], *d0;
 
-  if (RootDir)
-    mRootDir = string(RootDir) + "/";
+  if (!RootDir.empty()) {
+    mRootDir = RootDir + "/";
+  }
 
-  dwifile = mRootDir + DwiFile;
+  dwifile  = mRootDir + DwiFile;
   gradfile = mRootDir + GradientFile;
   bvalfile = mRootDir + BvalueFile;
   maskfile = mRootDir + MaskFile;
-  bpdir = mRootDir + BedpostDir;
+  bpdir    = mRootDir + BedpostDir;
 
   // Read diffusion-weighted images
   cout << "Loading DWIs from " << dwifile << endl;
@@ -104,9 +108,9 @@ void Aeon::ReadData(const char *RootDir, const char *DwiFile,
   }
 
   // Size of diffusion-weighted images
-  mNx = dwi->width;
-  mNy = dwi->height;
-  mNz = dwi->depth;
+  mNx  = dwi->width;
+  mNy  = dwi->height;
+  mNz  = dwi->depth;
   mNxy = mNx * mNy;
 
   // Read mask
@@ -120,40 +124,42 @@ void Aeon::ReadData(const char *RootDir, const char *DwiFile,
   // Read parameter samples from BEDPOST directory
   cout << "Loading BEDPOST parameter samples from " << bpdir << endl;
   for (int itract = 0; itract < NumTract; itract++) {
-    sprintf(fname, "%s/merged_ph%usamples.nii.gz", bpdir.c_str(), itract + 1);
-    phi[itract] = MRIread(fname);
+    fname =
+        bpdir + "/merged_ph" + std::to_string(itract + 1) + "samples.nii.gz";
+    phi[itract] = MRIread(fname.c_str());
     if (!phi[itract]) {
       cout << "ERROR: Could not read " << fname << endl;
       exit(1);
     }
-    sprintf(fname, "%s/merged_th%usamples.nii.gz", bpdir.c_str(), itract + 1);
-    theta[itract] = MRIread(fname);
+    fname =
+        bpdir + "/merged_th" + std::to_string(itract + 1) + "samples.nii.gz";
+    theta[itract] = MRIread(fname.c_str());
     if (!theta[itract]) {
       cout << "ERROR: Could not read " << fname << endl;
       exit(1);
     }
-    sprintf(fname, "%s/merged_f%usamples.nii.gz", bpdir.c_str(), itract + 1);
-    f[itract] = MRIread(fname);
+    fname = bpdir + "/merged_f" + std::to_string(itract + 1) + "samples.nii.gz";
+    f[itract] = MRIread(fname.c_str());
     if (!f[itract]) {
       cout << "ERROR: Could not read " << fname << endl;
       exit(1);
     }
-    sprintf(fname, "%s/dyads%u.nii.gz", bpdir.c_str(), itract + 1);
-    v0[itract] = MRIread(fname);
+    fname      = bpdir + "/dyads" + std::to_string(itract + 1) + ".nii.gz";
+    v0[itract] = MRIread(fname.c_str());
     if (!v0[itract]) {
       cout << "ERROR: Could not read " << fname << endl;
       exit(1);
     }
-    sprintf(fname, "%s/mean_f%usamples.nii.gz", bpdir.c_str(), itract + 1);
-    f0[itract] = MRIread(fname);
+    fname = bpdir + "/mean_f" + std::to_string(itract + 1) + "samples.nii.gz";
+    f0[itract] = MRIread(fname.c_str());
     if (!f0[itract]) {
       cout << "ERROR: Could not read " << fname << endl;
       exit(1);
     }
   }
 
-  sprintf(fname, "%s/mean_dsamples.nii.gz", bpdir.c_str());
-  d0 = MRIread(fname);
+  fname = bpdir + "/mean_dsamples.nii.gz";
+  d0    = MRIread(fname.c_str());
   if (!d0) {
     cout << "ERROR: Could not read " << fname << endl;
     exit(1);
@@ -210,7 +216,7 @@ void Aeon::ReadData(const char *RootDir, const char *DwiFile,
 
   // Read transform from base template space to native DWI space
   // (only used for longitudinal data)
-  if (BaseXfmFile) {
+  if (!BaseXfmFile.empty()) {
     string regfile = mRootDir + BaseXfmFile;
     if (!mBaseMask) {
       cout << "ERROR: Cannot load base-to-DWI transform without base mask"
@@ -252,7 +258,7 @@ void Aeon::FreeMask() { MRIfree(&mMask); }
 //
 // Set this time point's output directory for the current pathway
 //
-void Aeon::SetOutputDir(const char *OutDir) {
+void Aeon::SetOutputDir(const std::string OutDir) {
   string cmdline("mkdir -p ");
 
   mOutDir = mRootDir + OutDir;
@@ -275,7 +281,7 @@ const string &Aeon::GetOutputDir() const { return mOutDir; }
 //
 void Aeon::ClearPath() {
   // Path-related variables that are common among all time points
-  mMaxAPosterioriPath = -1;
+  mMaxAPosterioriPath  = -1;
   mMaxAPosterioriPath0 = 0;
   mPriorSamples.clear();
   mBasePathPointSamples.clear();
@@ -291,27 +297,27 @@ void Aeon::ClearPath() {
 
   mDataFitSamples.clear();
 
-  mRejectF = false;
-  mAcceptF = false;
+  mRejectF     = false;
+  mAcceptF     = false;
   mRejectTheta = false;
   mAcceptTheta = false;
   mLog.clear();
   mErrorPoint.clear();
 
-  mPathLength = 0;
-  mPathLengthNew = 0;
-  mLikelihoodOnPath = 0;
-  mLikelihoodOnPathNew = 0;
-  mPriorOnPath = 0;
-  mPriorOnPathNew = 0;
-  mPosteriorOnPath = 0;
-  mPosteriorOnPathNew = 0;
-  mLikelihoodOffPath = 0;
+  mPathLength           = 0;
+  mPathLengthNew        = 0;
+  mLikelihoodOnPath     = 0;
+  mLikelihoodOnPathNew  = 0;
+  mPriorOnPath          = 0;
+  mPriorOnPathNew       = 0;
+  mPosteriorOnPath      = 0;
+  mPosteriorOnPathNew   = 0;
+  mLikelihoodOffPath    = 0;
   mLikelihoodOffPathNew = 0;
-  mPriorOffPath = 0;
-  mPriorOffPathNew = 0;
-  mPosteriorOffPath = 0;
-  mPosteriorOffPathNew = 0;
+  mPriorOffPath         = 0;
+  mPriorOffPathNew      = 0;
+  mPosteriorOffPath     = 0;
+  mPosteriorOffPathNew  = 0;
 }
 
 //
@@ -320,8 +326,8 @@ void Aeon::ClearPath() {
 //
 bool Aeon::MapPathFromBase(Spline &BaseSpline) {
   vector<float>::const_iterator tangbegin, tangend;
-  vector<float>::iterator iphi, itheta;
-  vector<float> diff1;
+  vector<float>::iterator       iphi, itheta;
+  vector<float>                 diff1;
 
   if (mBaseReg.IsEmpty()) { // Single time point, there is no base
     // Copy spline points
@@ -334,9 +340,9 @@ bool Aeon::MapPathFromBase(Spline &BaseSpline) {
     BaseSpline.ComputeTangent();
 
     tangbegin = BaseSpline.GetTangentBegin();
-    tangend = BaseSpline.GetTangentEnd();
+    tangend   = BaseSpline.GetTangentEnd();
   } else { // Multiple time points, must map path from base
-    vector<int> point(3);
+    vector<int>   point(3);
     vector<float> pointf(3), pathsmooth;
 
     // Map spline points from base to native DWI space, making sure there are
@@ -374,7 +380,7 @@ bool Aeon::MapPathFromBase(Spline &BaseSpline) {
     CurveFiniteDifferences(diff1, pathsmooth, mDiffStep);
 
     tangbegin = diff1.begin();
-    tangend = diff1.end();
+    tangend   = diff1.end();
   }
 
   // Find path length in the native space
@@ -388,7 +394,7 @@ bool Aeon::MapPathFromBase(Spline &BaseSpline) {
 
   for (vector<float>::const_iterator itang = tangbegin; itang < tangend;
        itang += 3) {
-    *iphi = atan2(itang[1], itang[0]);
+    *iphi   = atan2(itang[1], itang[0]);
     *itheta = acos(itang[2] / sqrt(itang[0] * itang[0] + itang[1] * itang[1] +
                                    itang[2] * itang[2]));
 
@@ -403,8 +409,8 @@ bool Aeon::MapPathFromBase(Spline &BaseSpline) {
 // Find duplicate consecutive points along the current path
 //
 void Aeon::FindDuplicatePathPoints(vector<bool> &IsDuplicate) {
-  vector<bool>::iterator idup = IsDuplicate.begin();
-  vector<int>::const_iterator ipt = mPathPoints.begin();
+  vector<bool>::iterator      idup = IsDuplicate.begin();
+  vector<int>::const_iterator ipt  = mPathPoints.begin();
 
   while (ipt < mPathPoints.end()) {
     vector<int>::const_iterator iptnext = ipt + 3;
@@ -434,8 +440,8 @@ void Aeon::FindDuplicatePathPoints(vector<bool> &IsDuplicate) {
 //
 void Aeon::RemovePathPoints(vector<bool> &DoRemove, unsigned int NewSize) {
   vector<int>::const_iterator ipt;
-  vector<int>::iterator iptnew;
-  vector<int> newpath;
+  vector<int>::iterator       iptnew;
+  vector<int>                 newpath;
 
   if (NewSize > 0)
     newpath.resize(NewSize);
@@ -450,7 +456,7 @@ void Aeon::RemovePathPoints(vector<bool> &DoRemove, unsigned int NewSize) {
     newpath.resize(newsize);
   }
 
-  ipt = mPathPoints.begin();
+  ipt    = mPathPoints.begin();
   iptnew = newpath.begin();
 
   for (vector<bool>::const_iterator irem = DoRemove.begin();
@@ -496,20 +502,20 @@ void Aeon::ProposeDiffusionParameters() {
 bool Aeon::ComputePathDataFit() {
   vector<float>::const_iterator iphi, itheta;
 
-  mRejectF = false;
-  mAcceptF = false;
+  mRejectF     = false;
+  mAcceptF     = false;
   mRejectTheta = false;
   mAcceptTheta = false;
   mLog.clear();
   mErrorPoint.clear();
 
   // Compute data-fit terms on proposed path
-  mLikelihoodOnPathNew = 0;
-  mPriorOnPathNew = 0;
+  mLikelihoodOnPathNew  = 0;
+  mPriorOnPathNew       = 0;
   mLikelihoodOffPathNew = 0;
-  mPriorOffPathNew = 0;
-  iphi = mPathPhiNew.begin();
-  itheta = mPathThetaNew.begin();
+  mPriorOffPathNew      = 0;
+  iphi                  = mPathPhiNew.begin();
+  itheta                = mPathThetaNew.begin();
 
   for (vector<int>::iterator ipt = mPathPointsNew.begin();
        ipt < mPathPointsNew.end(); ipt += 3) {
@@ -552,16 +558,16 @@ bool Aeon::ComputePathDataFit() {
     itheta++;
   }
 
-  mPosteriorOnPathNew = mLikelihoodOnPathNew + mPriorOnPathNew;
+  mPosteriorOnPathNew  = mLikelihoodOnPathNew + mPriorOnPathNew;
   mPosteriorOffPathNew = mLikelihoodOffPathNew + mPriorOffPathNew;
 
   // Compute data-fit terms on current path
-  mLikelihoodOnPath = 0;
-  mPriorOnPath = 0;
+  mLikelihoodOnPath  = 0;
+  mPriorOnPath       = 0;
   mLikelihoodOffPath = 0;
-  mPriorOffPath = 0;
-  iphi = mPathPhi.begin();
-  itheta = mPathTheta.begin();
+  mPriorOffPath      = 0;
+  iphi               = mPathPhi.begin();
+  itheta             = mPathTheta.begin();
 
   for (vector<int>::iterator ipt = mPathPoints.begin(); ipt < mPathPoints.end();
        ipt += 3) {
@@ -604,7 +610,7 @@ bool Aeon::ComputePathDataFit() {
     itheta++;
   }
 
-  mPosteriorOnPath = mLikelihoodOnPath + mPriorOnPath;
+  mPosteriorOnPath  = mLikelihoodOnPath + mPriorOnPath;
   mPosteriorOffPath = mLikelihoodOffPath + mPriorOffPath;
 
   return true;
@@ -631,7 +637,7 @@ int Aeon::FindErrorSegment(Spline &BaseSpline) {
         break;
       }
   } else { // Multiple time points, must map path from base
-    vector<int> point(3);
+    vector<int>   point(3);
     vector<float> pointf(3);
 
     for (vector<int>::const_iterator iptbase = BaseSpline.GetAllPointsBegin();
@@ -669,13 +675,13 @@ void Aeon::UpdatePath() {
   mPathTheta.resize(mPathThetaNew.size());
   copy(mPathThetaNew.begin(), mPathThetaNew.end(), mPathTheta.begin());
 
-  mPathLength = mPathLengthNew;
-  mLikelihoodOnPath = mLikelihoodOnPathNew;
+  mPathLength        = mPathLengthNew;
+  mLikelihoodOnPath  = mLikelihoodOnPathNew;
   mLikelihoodOffPath = mLikelihoodOffPathNew;
-  mPriorOnPath = mPriorOnPathNew;
-  mPriorOffPath = mPriorOffPathNew;
-  mPosteriorOnPath = mPosteriorOnPathNew;
-  mPosteriorOffPath = mPosteriorOffPathNew;
+  mPriorOnPath       = mPriorOnPathNew;
+  mPriorOffPath      = mPriorOffPathNew;
+  mPosteriorOnPath   = mPosteriorOnPathNew;
+  mPosteriorOffPath  = mPosteriorOffPathNew;
 }
 
 //
@@ -700,20 +706,20 @@ void Aeon::SavePath() { mPathPointSamples.push_back(mPathPoints); }
 // Write output files for this time point
 //
 void Aeon::WriteOutputs() {
-  char outorient[4];
-  MATRIX *outv2r;
-  CTrackWriter trkwriter;
-  TRACK_HEADER trkheadout;
-  vector<int> lengths(mPathPointSamples.size()), cptsmap, cptsmap0;
+  char                  outorient[4];
+  MATRIX *              outv2r;
+  CTrackWriter          trkwriter;
+  TRACK_HEADER          trkheadout;
+  vector<int>           lengths(mPathPointSamples.size()), cptsmap, cptsmap0;
   vector<int>::iterator ilen;
-  vector<int>::const_iterator iptbase;
-  vector<float> fpath;
-  vector<float>::iterator ifpt;
-  vector<float>::const_iterator ipr;
+  vector<int>::const_iterator         iptbase;
+  vector<float>                       fpath;
+  vector<float>::iterator             ifpt;
+  vector<float>::const_iterator       ipr;
   vector<vector<int>>::const_iterator pathmap, basepathmap;
-  string fname;
-  ofstream mapfile;
-  MRI *pdvol;
+  string                              fname;
+  ofstream                            mapfile;
+  MRI *                               pdvol;
 
   // Find maximum a posteriori path, if it hasn't been found yet:
   // Case where this is the first of multiple time points
@@ -837,7 +843,7 @@ void Aeon::WriteOutputs() {
 
   if (!mBasePathPointSamples.empty()) {
     basepathmap = mBasePathPointSamples.begin() + mMaxAPosterioriPath;
-    iptbase = basepathmap->begin();
+    iptbase     = basepathmap->begin();
   }
 
   // Save maximum a posteriori path coordinates
@@ -1035,30 +1041,31 @@ double Aeon::GetDataFit() const {
 //
 // The main container
 //
-Coffin::Coffin(const char *OutDir, vector<char *> InDirList,
-               const char *DwiFile, const char *GradientFile,
-               const char *BvalueFile, const char *MaskFile,
-               const char *BedpostDir, const int NumTract, const float FminPath,
-               const char *BaseXfmFile, const char *BaseMaskFile,
-               const char *InitFile, const char *RoiFile1, const char *RoiFile2,
-               const char *RoiMeshFile1, const char *RoiMeshFile2,
-               const char *RoiRefFile1, const char *RoiRefFile2,
-               const char *XyzPriorFile0, const char *XyzPriorFile1,
-               const char *TangPriorFile, const char *CurvPriorFile,
-               const char *NeighPriorFile, const char *NeighIdFile,
-               const int NeighPriorSet, const char *LocalPriorFile,
-               const char *LocalIdFile, const int LocalPriorSet,
-               const vector<char *> AsegList, const char *AffineXfmFile,
-               const char *NonlinXfmFile, const int NumBurnIn,
-               const int NumSample, const int KeepSampleNth,
-               const int UpdatePropNth, const char *PropStdFile,
-               const bool Debug)
+Coffin::Coffin(const std::string OutDir, vector<std::string> InDirList,
+               const std::string DwiFile, const std::string GradientFile,
+               const std::string BvalueFile, const std::string MaskFile,
+               const std::string BedpostDir, const int NumTract,
+               const float FminPath, const std::string BaseXfmFile,
+               const std::string BaseMaskFile, const std::string InitFile,
+               const std::string RoiFile1, const std::string RoiFile2,
+               const std::string RoiMeshFile1, const std::string RoiMeshFile2,
+               const std::string RoiRefFile1, const std::string RoiRefFile2,
+               const std::string XyzPriorFile0, const std::string XyzPriorFile1,
+               const std::string TangPriorFile, const std::string CurvPriorFile,
+               const std::string NeighPriorFile, const std::string NeighIdFile,
+               const int NeighPriorSet, const std::string LocalPriorFile,
+               const std::string LocalIdFile, const int LocalPriorSet,
+               const vector<std::string> AsegList,
+               const std::string AffineXfmFile, const std::string NonlinXfmFile,
+               const int NumBurnIn, const int NumSample,
+               const int KeepSampleNth, const int UpdatePropNth,
+               const std::string PropStdFile, const bool Debug)
     : mDebug(Debug), mPriorSetLocal(LocalPriorSet),
       mPriorSetNear(NeighPriorSet), mMask(0), mRoi1(0), mRoi2(0), mXyzPrior0(0),
       mXyzPrior1(0) {
-  vector<char *>::const_iterator idir;
-  MRI *atlasref;
-  ostringstream infostr;
+  vector<std::string>::const_iterator idir;
+  MRI *                               atlasref;
+  ostringstream                       infostr;
 
   // Save input info for logging
   if (!InDirList.empty()) {
@@ -1074,29 +1081,29 @@ Coffin::Coffin(const char *OutDir, vector<char *> InDirList,
           << "BEDPOST directory: " << BedpostDir << endl
           << "Max number of tracts per voxel: " << NumTract << endl
           << "Tract volume fraction threshold: " << FminPath << endl;
-  if (BaseXfmFile)
+  if (!BaseXfmFile.empty())
     infostr << "Base-to-DWI affine registration: " << BaseXfmFile << endl;
-  if (BaseMaskFile)
+  if (!BaseMaskFile.empty())
     infostr << "Base mask: " << BaseMaskFile << endl;
-  if (AffineXfmFile)
-    infostr << (BaseMaskFile ? "Base" : "DWI")
+  if (!AffineXfmFile.empty())
+    infostr << (!BaseMaskFile.empty() ? "Base" : "DWI")
             << "-to-atlas affine registration: " << AffineXfmFile << endl;
-  if (NonlinXfmFile)
-    infostr << (BaseMaskFile ? "Base" : "DWI")
+  if (!NonlinXfmFile.empty())
+    infostr << (!BaseMaskFile.empty() ? "Base" : "DWI")
             << "-to-atlas nonlinear registration: " << NonlinXfmFile << endl;
   if (!AsegList.empty()) {
     infostr << "Segmentation map: ";
-    for (vector<char *>::const_iterator ifile = AsegList.begin();
-         ifile < AsegList.end(); ifile++)
+    for (auto ifile = AsegList.begin(); ifile < AsegList.end(); ifile++) {
       infostr << " " << *ifile;
+    }
     infostr << endl;
   }
   mInfoGeneral = infostr.str();
 
   // Read base template mask for longitudinal data
-  if (BaseMaskFile) {
+  if (!BaseMaskFile.empty()) {
     cout << "Loading base mask from " << BaseMaskFile << endl;
-    mMask = MRIread(BaseMaskFile);
+    mMask = MRIread(BaseMaskFile.c_str());
     if (!mMask) {
       cout << "ERROR: Could not read " << BaseMaskFile << endl;
       exit(1);
@@ -1125,9 +1132,9 @@ Coffin::Coffin(const char *OutDir, vector<char *> InDirList,
     mMask = mDwi[0].GetMask();
 
   // Size of base image
-  mNx = mMask->width;
-  mNy = mMask->height;
-  mNz = mMask->depth;
+  mNx  = mMask->width;
+  mNy  = mMask->height;
+  mNz  = mMask->depth;
   mNxy = mNx * mNy;
 
   // Resolution of DWI space relative to base space (used to determine how big
@@ -1165,9 +1172,9 @@ Coffin::Coffin(const char *OutDir, vector<char *> InDirList,
 
   // Read start ROI as atlas-space reference volume
   // TODO: Use more general reference volume if ROI isn't specified
-  if (RoiFile1) {
+  if (!RoiFile1.empty()) {
     cout << "Loading atlas reference volume from " << RoiFile1 << endl;
-    atlasref = MRIread(RoiFile1);
+    atlasref = MRIread(RoiFile1.c_str());
     if (!atlasref) {
       cout << "ERROR: Could not read " << RoiFile1 << endl;
       exit(1);
@@ -1176,13 +1183,17 @@ Coffin::Coffin(const char *OutDir, vector<char *> InDirList,
 
   // Read DWI-to-atlas registration
 #ifndef NO_CVS_UP_IN_HERE
-  if (NonlinXfmFile) {
-    mAffineReg.ReadXfm(AffineXfmFile, mMask, 0);
-    mNonlinReg.ReadXfm(NonlinXfmFile, atlasref);
-  } else
+  if (!NonlinXfmFile.empty()) {
+    mAffineReg.ReadXfm(AffineXfmFile.c_str(), mMask, 0);
+    mNonlinReg.ReadXfm(NonlinXfmFile.c_str(), atlasref);
+  } else {
 #endif
-      if (AffineXfmFile)
-    mAffineReg.ReadXfm(AffineXfmFile, mMask, atlasref);
+    if (!AffineXfmFile.empty()) {
+      mAffineReg.ReadXfm(AffineXfmFile.c_str(), mMask, atlasref);
+    }
+#ifndef NO_CVS_UP_IN_HERE
+  }
+#endif
 
   /*
 vector<float> pt(3);
@@ -1192,18 +1203,17 @@ mAffineReg.ApplyXfm(pt, pt.begin());
 mNonlinReg.ApplyXfm(pt, pt.begin());
 cout << "In atlas space: " << pt[0] << " " << pt[1] << " " << pt[2] << endl;
 exit(1);
-  */
+	*/
 
   // Free atlas-space reference volume
   MRIfree(&atlasref);
 
   // Read segmentation map
-  for (vector<char *>::const_iterator ifile = AsegList.begin();
-       ifile < AsegList.end(); ifile++) {
+  for (auto ifile = AsegList.begin(); ifile < AsegList.end(); ifile++) {
     MRI *aseg = 0;
 
     cout << "Loading segmentation map from " << *ifile << endl;
-    aseg = MRIread(*ifile);
+    aseg = MRIread((*ifile).c_str());
     if (!aseg) {
       cout << "ERROR: Could not read " << *ifile << endl;
       exit(1);
@@ -1249,7 +1259,7 @@ Coffin::~Coffin() {
 //
 // Set output directory for each time point
 //
-void Coffin::SetOutputDir(const char *OutDir) {
+void Coffin::SetOutputDir(const std::string OutDir) {
   for (vector<Aeon>::iterator idwi = mDwi.begin(); idwi < mDwi.end(); idwi++)
     idwi->SetOutputDir(OutDir);
 
@@ -1259,77 +1269,79 @@ void Coffin::SetOutputDir(const char *OutDir) {
 //
 // Set atlas-derived information specific to a given pathway
 //
-void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
-                        const char *RoiFile2, const char *RoiMeshFile1,
-                        const char *RoiMeshFile2, const char *RoiRefFile1,
-                        const char *RoiRefFile2, const char *XyzPriorFile0,
-                        const char *XyzPriorFile1, const char *TangPriorFile,
-                        const char *CurvPriorFile, const char *NeighPriorFile,
-                        const char *NeighIdFile, const char *LocalPriorFile,
-                        const char *LocalIdFile) {
+void Coffin::SetPathway(
+    const std::string InitFile, const std::string RoiFile1,
+    const std::string RoiFile2, const std::string RoiMeshFile1,
+    const std::string RoiMeshFile2, const std::string RoiRefFile1,
+    const std::string RoiRefFile2, const std::string XyzPriorFile0,
+    const std::string XyzPriorFile1, const std::string TangPriorFile,
+    const std::string CurvPriorFile, const std::string NeighPriorFile,
+    const std::string NeighIdFile, const std::string LocalPriorFile,
+    const std::string LocalIdFile) {
   int dirs[45] = {0,  0,  0, 1, 0, 0,  -1, 0, 0,  0,  1,  0,  0,  -1, 0,
                   0,  0,  1, 0, 0, -1, 1,  1, 1,  -1, 1,  1,  1,  -1, 1,
                   -1, -1, 1, 1, 1, -1, -1, 1, -1, 1,  -1, -1, -1, -1, -1};
-  ostringstream infostr;
+  ostringstream                infostr;
   vector<vector<unsigned int>> segids, neighids, localids;
-  vector<vector<float>> neighpr, localpr;
+  vector<vector<float>>        neighpr, localpr;
 
   // Save input info for logging
   infostr << "Initial control point file: " << InitFile << endl
           << "End ROI 1: " << RoiFile1 << endl;
-  if (RoiMeshFile1)
+  if (!RoiMeshFile1.empty())
     infostr << "End ROI 1 mesh: " << RoiMeshFile1 << endl
             << "End ROI 1 reference volume: " << RoiRefFile1 << endl;
   infostr << "End ROI 2: " << RoiFile2 << endl;
-  if (RoiMeshFile2)
+  if (!RoiMeshFile2.empty())
     infostr << "End ROI 2 mesh: " << RoiMeshFile2 << endl
             << "End ROI 2 reference volume: " << RoiRefFile2 << endl;
-  if (XyzPriorFile0)
+  if (!XyzPriorFile0.empty())
     infostr << "Spatial prior (off path): " << XyzPriorFile0 << endl
             << "Spatial prior (on path): " << XyzPriorFile1 << endl;
-  if (TangPriorFile)
+  if (!TangPriorFile.empty())
     infostr << "Tangent prior: " << TangPriorFile << endl;
-  if (CurvPriorFile)
+  if (!CurvPriorFile.empty())
     infostr << "Curvature prior: " << CurvPriorFile << endl;
-  if (NeighPriorFile)
+  if (!NeighPriorFile.empty())
     infostr << "Neighbor aseg prior: " << NeighPriorFile << endl
             << "Neighbor aseg label ID list: " << NeighIdFile << endl;
-  if (LocalPriorFile)
+  if (!LocalPriorFile.empty())
     infostr << "Local aseg prior: " << LocalPriorFile << endl
             << "Local aseg label ID list: " << LocalIdFile << endl;
   mInfoPathway = infostr.str();
 
   // Read start ROI
-  if (RoiFile1) {
+  if (!RoiFile1.empty()) {
     if (mRoi1)
       MRIfree(&mRoi1);
 
     cout << "Loading end ROI from " << RoiFile1 << endl;
-    mRoi1 = MRIread(RoiFile1);
+    mRoi1 = MRIread(RoiFile1.c_str());
     if (!mRoi1) {
       cout << "ERROR: Could not read " << RoiFile1 << endl;
       exit(1);
     }
 
-    if (RoiMeshFile1) {
+    if (!RoiMeshFile1.empty()) {
       cout << "ERROR: .label ROIs not supported" << endl;
       exit(1);
     }
   }
 
   // Read end ROI
-  if (RoiFile2) {
-    if (mRoi2)
+  if (!RoiFile2.empty()) {
+    if (mRoi2) {
       MRIfree(&mRoi2);
+    }
 
     cout << "Loading end ROI from " << RoiFile2 << endl;
-    mRoi2 = MRIread(RoiFile2);
+    mRoi2 = MRIread(RoiFile2.c_str());
     if (!mRoi2) {
       cout << "ERROR: Could not read " << RoiFile2 << endl;
       exit(1);
     }
 
-    if (RoiMeshFile2) {
+    if (!RoiMeshFile2.empty()) {
       cout << "ERROR: .label ROIs not supported" << endl;
       exit(1);
     }
@@ -1350,22 +1362,24 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
   }
 
   // Read spatial path priors
-  if (XyzPriorFile0 && XyzPriorFile1) {
-    if (mXyzPrior0)
+  if ((!XyzPriorFile0.empty()) && (!XyzPriorFile1.empty())) {
+    if (mXyzPrior0) {
       MRIfree(&mXyzPrior0);
+    }
 
     cout << "Loading spatial path prior from " << XyzPriorFile0 << endl;
-    mXyzPrior0 = MRIread(XyzPriorFile0);
+    mXyzPrior0 = MRIread(XyzPriorFile0.c_str());
     if (!mXyzPrior0) {
       cout << "ERROR: Could not read " << XyzPriorFile0 << endl;
       exit(1);
     }
 
-    if (mXyzPrior1)
+    if (mXyzPrior1) {
       MRIfree(&mXyzPrior1);
+    }
 
     cout << "Loading spatial path prior from " << XyzPriorFile1 << endl;
-    mXyzPrior1 = MRIread(XyzPriorFile1);
+    mXyzPrior1 = MRIread(XyzPriorFile1.c_str());
     if (!mXyzPrior1) {
       cout << "ERROR: Could not read " << XyzPriorFile1 << endl;
       exit(1);
@@ -1378,10 +1392,10 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
   mNumArc = 0;
 
   // Read path tangent prior
-  if (TangPriorFile) {
+  if (!TangPriorFile.empty()) {
     const int nbin = (int)ceil(2 / mTangentBinSize), nbin2 = nbin * nbin;
-    string prline;
-    ifstream prfile;
+    string    prline;
+    ifstream  prfile;
 
     mPriorTangent.clear();
 
@@ -1394,7 +1408,7 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
     }
 
     while (getline(prfile, prline)) {
-      float pr;
+      float         pr;
       vector<float> prior;
       istringstream prstr(prline);
 
@@ -1416,8 +1430,8 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
   }
 
   // Read path curvature prior
-  if (CurvPriorFile) {
-    string prline;
+  if (!CurvPriorFile.empty()) {
+    string   prline;
     ifstream prfile;
 
     mPriorCurvature.clear();
@@ -1431,7 +1445,7 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
     }
 
     while (getline(prfile, prline)) {
-      float pr;
+      float         pr;
       vector<float> prior;
       istringstream prstr(prline);
 
@@ -1454,7 +1468,7 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
   }
 
   // Read neighbor aseg priors
-  if (NeighPriorFile && NeighIdFile) {
+  if ((!NeighPriorFile.empty()) && (!NeighIdFile.empty())) {
     mPriorNear.clear();
     mIdsNear.clear();
     mDirNear.clear();
@@ -1467,35 +1481,36 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
 
     for (vector<int>::const_iterator idir = mDirNear.begin();
          idir < mDirNear.end(); idir += 3) {
-      const int idx = idir[0], idy = idir[1], idz = idir[2];
-      char prname[PATH_MAX], idname[PATH_MAX];
-      string prline, idline;
-      ifstream prfile, idfile;
+      const int         idx = idir[0], idy = idir[1], idz = idir[2];
+      std::stringstream prname, idname;
+      string            prline, idline;
+      ifstream          prfile, idfile;
 
-      sprintf(prname, "%s_%d_%d_%d.txt", NeighPriorFile, idx, idy, idz);
-      sprintf(idname, "%s_%d_%d_%d.txt", NeighIdFile, idx, idy, idz);
+      prname << NeighPriorFile << '_' << idx << '_' << idy << '_' << idz
+             << ".txt";
+      idname << NeighIdFile << '_' << idx << '_' << idy << '_' << idz << ".txt";
 
-      cout << "Loading nearest neighbor prior from " << prname
-           << " with label IDs from " << idname << endl;
+      cout << "Loading nearest neighbor prior from " << prname.str()
+           << " with label IDs from " << idname.str() << endl;
 
-      prfile.open(prname, ios::in);
+      prfile.open(prname.str(), ios::in);
       if (!prfile) {
-        cout << "ERROR: Could not open " << prname << endl;
+        cout << "ERROR: Could not open " << prname.str() << endl;
         exit(1);
       }
 
-      idfile.open(idname, ios::in);
+      idfile.open(idname.str(), ios::in);
       if (!idfile) {
-        cout << "ERROR: Could not open " << idname << endl;
+        cout << "ERROR: Could not open " << idname.str() << endl;
         exit(1);
       }
 
       while (getline(prfile, prline) && getline(idfile, idline)) {
-        unsigned int id;
-        float pr;
+        unsigned int         id;
+        float                pr;
         vector<unsigned int> idlist;
-        vector<float> prior;
-        istringstream prstr(prline), idstr(idline);
+        vector<float>        prior;
+        istringstream        prstr(prline), idstr(idline);
 
         while (prstr >> pr)
           prior.push_back(pr);
@@ -1504,8 +1519,9 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
           idlist.push_back(id);
 
         if (prior.size() != idlist.size() + 1) {
-          cout << "ERROR: Line length mismatch between " << prname << " ("
-               << prline << ") and " << idname << " (" << idline << ")" << endl;
+          cout << "ERROR: Line length mismatch between " << prname.str() << " ("
+               << prline << ") and " << idname.str() << " (" << idline << ")"
+               << endl;
           exit(1);
         }
 
@@ -1521,9 +1537,9 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
       mNumArc = (int)(mPriorNear.size() / mPriorSetNear);
     else if (mNumArc != (int)(mPriorNear.size() / mPriorSetNear)) {
       cout << "ERROR: Mismatch between the numbers of arc segments in ";
-      if (TangPriorFile)
+      if (!TangPriorFile.empty())
         cout << TangPriorFile << " (" << mPriorTangent.size() << "), ";
-      if (CurvPriorFile)
+      if (!CurvPriorFile.empty())
         cout << CurvPriorFile << " (" << mPriorCurvature.size() << "), ";
       cout << NeighPriorFile << " (" << mPriorNear.size() / mPriorSetNear << ")"
            << endl;
@@ -1531,7 +1547,7 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
   }
 
   // Read local aseg priors
-  if (LocalPriorFile && LocalIdFile) {
+  if ((!LocalPriorFile.empty()) && (!LocalIdFile.empty())) {
     mPriorLocal.clear();
     mIdsLocal.clear();
     mDirLocal.clear();
@@ -1546,45 +1562,49 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
 
     for (vector<int>::const_iterator idir = mDirLocal.begin();
          idir < mDirLocal.end(); idir += 3) {
-      const int idx = idir[0], idy = idir[1], idz = idir[2];
-      char prname[PATH_MAX], idname[PATH_MAX];
-      string prline, idline;
-      ifstream prfile, idfile;
+      const int         idx = idir[0], idy = idir[1], idz = idir[2];
+      std::stringstream prname, idname;
+      string            prline, idline;
+      ifstream          prfile, idfile;
 
-      sprintf(prname, "%s_%d_%d_%d.txt", LocalPriorFile, idx, idy, idz);
-      sprintf(idname, "%s_%d_%d_%d.txt", LocalIdFile, idx, idy, idz);
+      prname << LocalPriorFile << "_" << idx << "_" << idy << '_' << idz
+             << ".txt";
+      idname << LocalIdFile << '_' << idx << "_" << idy << '_' << idz << ".txt";
 
-      cout << "Loading local prior from " << prname << " with label IDs from "
-           << idname << endl;
+      cout << "Loading local prior from " << prname.str()
+           << " with label IDs from " << idname.str() << endl;
 
-      prfile.open(prname, ios::in);
+      prfile.open(prname.str(), ios::in);
       if (!prfile) {
-        cout << "ERROR: Could not open " << prname << endl;
+        cout << "ERROR: Could not open " << prname.str() << endl;
         exit(1);
       }
 
-      idfile.open(idname, ios::in);
+      idfile.open(idname.str(), ios::in);
       if (!idfile) {
-        cout << "ERROR: Could not open " << idname << endl;
+        cout << "ERROR: Could not open " << idname.str() << endl;
         exit(1);
       }
 
       while (getline(prfile, prline) && getline(idfile, idline)) {
-        unsigned int id;
-        float pr;
+        unsigned int         id;
+        float                pr;
         vector<unsigned int> idlist;
-        vector<float> prior;
-        istringstream prstr(prline), idstr(idline);
+        vector<float>        prior;
+        istringstream        prstr(prline), idstr(idline);
 
-        while (prstr >> pr)
+        while (prstr >> pr) {
           prior.push_back(pr);
+        }
 
-        while (idstr >> id)
+        while (idstr >> id) {
           idlist.push_back(id);
+        }
 
         if (prior.size() != idlist.size() + 1) {
-          cout << "ERROR: Line length mismatch between " << prname << " ("
-               << prline << ") and " << idname << " (" << idline << ")" << endl;
+          cout << "ERROR: Line length mismatch between " << prname.str() << " ("
+               << prline << ") and " << idname.str() << " (" << idline << ")"
+               << endl;
           exit(1);
         }
 
@@ -1596,15 +1616,15 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
       idfile.close();
     }
 
-    if (mNumArc == 0)
+    if (mNumArc == 0) {
       mNumArc = (int)(mPriorLocal.size() / mPriorSetLocal);
-    else if (mNumArc != (int)(mPriorLocal.size() / mPriorSetLocal)) {
+    } else if (mNumArc != (int)(mPriorLocal.size() / mPriorSetLocal)) {
       cout << "ERROR: Mismatch between the numbers of arc segments in ";
-      if (TangPriorFile)
+      if (!TangPriorFile.empty())
         cout << TangPriorFile << " (" << mPriorTangent.size() << "), ";
-      if (CurvPriorFile)
+      if (!CurvPriorFile.empty())
         cout << CurvPriorFile << " (" << mPriorCurvature.size() << "), ";
-      if (NeighPriorFile)
+      if (!NeighPriorFile.empty())
         cout << NeighPriorFile << " (" << mPriorNear.size() / mPriorSetNear
              << "), ";
       cout << LocalPriorFile << " (" << mPriorLocal.size() / mPriorSetLocal
@@ -1619,7 +1639,7 @@ void Coffin::SetPathway(const char *InitFile, const char *RoiFile1,
 //
 void Coffin::SetMcmcParameters(const int NumBurnIn, const int NumSample,
                                const int KeepSampleNth, const int UpdatePropNth,
-                               const char *PropStdFile) {
+                               const std::string PropStdFile) {
   ostringstream infostr;
 
   // Save input info for logging
@@ -1627,13 +1647,14 @@ void Coffin::SetMcmcParameters(const int NumBurnIn, const int NumSample,
           << "Number of post-burn-in samples: " << NumSample << endl
           << "Keep every: " << KeepSampleNth << "-th sample" << endl
           << "Update proposal every: " << UpdatePropNth << "-th sample" << endl;
-  if (PropStdFile)
+  if (!PropStdFile.empty()) {
     infostr << "Initial proposal SD file: " << PropStdFile << endl;
+  }
   mInfoMcmc = infostr.str();
 
   // Set sampling parameters
-  mNumBurnIn = NumBurnIn;
-  mNumSample = NumSample;
+  mNumBurnIn     = NumBurnIn;
+  mNumSample     = NumSample;
   mKeepSampleNth = KeepSampleNth;
   mUpdatePropNth = UpdatePropNth;
 
@@ -1649,8 +1670,8 @@ void Coffin::SetMcmcParameters(const int NumBurnIn, const int NumSample,
 //
 // Read initial control points
 //
-void Coffin::ReadControlPoints(const char *ControlPointFile) {
-  float coord;
+void Coffin::ReadControlPoints(const std::string ControlPointFile) {
+  float    coord;
   ifstream infile(ControlPointFile, ios::in);
 
   if (!infile) {
@@ -1752,7 +1773,7 @@ void Coffin::ReadControlPoints(const char *ControlPointFile) {
                 ixmin = ix;
                 iymin = iy;
                 izmin = iz;
-                dmin = dist;
+                dmin  = dist;
               }
             }
 
@@ -1769,7 +1790,7 @@ void Coffin::ReadControlPoints(const char *ControlPointFile) {
     vector<int>::iterator icpt = mControlPoints.begin();
 
     if (!IsInRoi(icpt, mRoi1)) {
-      int dmin = 1000000, ixmin = 0, iymin = 0, izmin = 0;
+      int         dmin = 1000000, ixmin = 0, iymin = 0, izmin = 0;
       vector<int> newpoint(3);
 
       cout << "WARN: Initial start point " << icpt[0] << " " << icpt[1] << " "
@@ -1791,7 +1812,7 @@ void Coffin::ReadControlPoints(const char *ControlPointFile) {
                 ixmin = ix;
                 iymin = iy;
                 izmin = iz;
-                dmin = dist;
+                dmin  = dist;
               }
             }
           }
@@ -1809,7 +1830,7 @@ void Coffin::ReadControlPoints(const char *ControlPointFile) {
     vector<int>::iterator icpt = mControlPoints.end() - 3;
 
     if (!IsInRoi(icpt, mRoi2)) {
-      int dmin = 1000000, ixmin = 0, iymin = 0, izmin = 0;
+      int         dmin = 1000000, ixmin = 0, iymin = 0, izmin = 0;
       vector<int> newpoint(3);
 
       cout << "WARN: Initial end point " << icpt[0] << " " << icpt[1] << " "
@@ -1831,7 +1852,7 @@ void Coffin::ReadControlPoints(const char *ControlPointFile) {
                 ixmin = ix;
                 iymin = iy;
                 izmin = iz;
-                dmin = dist;
+                dmin  = dist;
               }
             }
           }
@@ -1848,11 +1869,11 @@ void Coffin::ReadControlPoints(const char *ControlPointFile) {
 //
 // Read initial proposal standard deviations for control point perturbations
 //
-void Coffin::ReadProposalStds(const char *PropStdFile) {
+void Coffin::ReadProposalStds(const std::string PropStdFile) {
   mProposalStdInit.clear();
 
-  if (PropStdFile) {
-    float val;
+  if (!PropStdFile.empty()) {
+    float    val;
     ifstream infile(PropStdFile, ios::in);
 
     if (!infile) {
@@ -1869,10 +1890,11 @@ void Coffin::ReadProposalStds(const char *PropStdFile) {
     mProposalStdInit.resize(mControlPoints.size());
     istd = mProposalStdInit.begin();
 
-    copy(mResolution.begin(), mResolution.end(), istd); // x5.0
-    for (istd += 3; istd < mProposalStdInit.end() - 3; istd += 3)
-      copy(mResolution.begin(), mResolution.end(), istd); // x1.0
-    copy(mResolution.begin(), mResolution.end(), istd);   // x5.0
+    copy(mResolution.begin(), mResolution.end(), istd); //x5.0
+    for (istd += 3; istd < mProposalStdInit.end() - 3; istd += 3) {
+      copy(mResolution.begin(), mResolution.end(), istd); //x1.0
+    }
+    copy(mResolution.begin(), mResolution.end(), istd); //x5.0
   }
 }
 
@@ -1880,12 +1902,12 @@ void Coffin::ReadProposalStds(const char *PropStdFile) {
 // Run MCMC (full spline updates)
 //
 bool Coffin::RunMcmcFull() {
-  int iprop, ikeep;
-  char fname[PATH_MAX];
-  string cmdline;
+  int         iprop, ikeep;
+  std::string fname;
+  string      cmdline;
 
   // Open log file in first time point's output directory
-  sprintf(fname, "%s/log.txt", mOutDir.c_str());
+  fname = mOutDir + "/log.txt";
   mLog.open(fname, ios::out | ios::app);
   if (!mLog) {
     cout << "ERROR: Could not open " << fname << " for writing" << endl;
@@ -1904,8 +1926,8 @@ bool Coffin::RunMcmcFull() {
   }
 
   if (mDebug) {
-    sprintf(fname, "%s/Finit.nii.gz", mOutDir.c_str());
-    mSpline.WriteVolume(fname, true);
+    fname = mOutDir + "/Finit.nii.gz";
+    mSpline.WriteVolume(fname.c_str(), true);
   }
 
   cout << "Running MCMC burn-in jumps" << endl;
@@ -1917,17 +1939,21 @@ bool Coffin::RunMcmcFull() {
       UpdateAcceptanceRateFull();
 
       if (mDebug) {
-        sprintf(fname, "%s/Faccept_b%05d.nii.gz", mOutDir.c_str(),
-                mNumBurnIn - ijump + 1);
-        mSpline.WriteVolume(fname, true);
+        std::stringstream tmp;
+        tmp << mOutDir << '/' << "Faccept_b" << std::setw(5)
+            << std::setfill('0') << mNumBurnIn - ijump + 1 << ".nii.gz";
+        fname = tmp.str();
+        mSpline.WriteVolume(fname.c_str(), true);
       }
     } else { // Reject new path
       UpdateRejectionRateFull();
 
       if (mDebug) {
-        sprintf(fname, "%s/Freject_b%05d.nii.gz", mOutDir.c_str(),
-                mNumBurnIn - ijump + 1);
-        mSpline.WriteVolume(fname, true);
+        std::stringstream tmp;
+        tmp << mOutDir << '/' << "Freject_b" << std::setw(5)
+            << std::setfill('0') << mNumBurnIn - ijump + 1 << ".nii.gz";
+        fname = tmp.str();
+        mSpline.WriteVolume(fname.c_str(), true);
       }
     }
 
@@ -1951,18 +1977,22 @@ bool Coffin::RunMcmcFull() {
       UpdateAcceptanceRateFull();
 
       if (mDebug) {
-        sprintf(fname, "%s/Faccept_%05d.nii.gz", mOutDir.c_str(),
-                mNumSample - ijump + 1);
-        mSpline.WriteVolume(fname, true);
+        std::stringstream tmp;
+        tmp << mOutDir << '/' << "Faccept_" << std::setw(5) << std::setfill('0')
+            << mNumSample - ijump + 1 << ".nii.gz";
+        fname = tmp.str();
+        mSpline.WriteVolume(fname.c_str(), true);
       }
     } else { // Reject new path
       SavePathPosterior(false);
       UpdateRejectionRateFull();
 
       if (mDebug) {
-        sprintf(fname, "%s/Freject_%05d.nii.gz", mOutDir.c_str(),
-                mNumSample - ijump + 1);
-        mSpline.WriteVolume(fname, true);
+        std::stringstream tmp;
+        tmp << mOutDir << '/' << "Freject_" << std::setw(5) << std::setfill('0')
+            << mNumSample - ijump + 1 << ".nii.gz";
+        fname = tmp.str();
+        mSpline.WriteVolume(fname.c_str(), true);
       }
     }
 
@@ -2002,14 +2032,14 @@ bool Coffin::RunMcmcFull() {
 // Run MCMC (single control point updates)
 //
 bool Coffin::RunMcmcSingle() {
-  int iprop, ikeep;
-  char fname[PATH_MAX];
-  string cmdline;
-  vector<int> cptorder(mNumControl);
+  int                         iprop, ikeep;
+  std::string                 fname;
+  string                      cmdline;
+  vector<int>                 cptorder(mNumControl);
   vector<int>::const_iterator icpt;
 
   // Open log file in first time point's output directory
-  sprintf(fname, "%s/log.txt", mOutDir.c_str());
+  fname = mOutDir + "/log.txt";
   mLog.open(fname, ios::out | ios::app);
   if (!mLog) {
     cout << "ERROR: Could not open " << fname << " for writing" << endl;
@@ -2028,46 +2058,54 @@ bool Coffin::RunMcmcSingle() {
   }
 
   if (mDebug) {
-    sprintf(fname, "%s/Finit.nii.gz", mOutDir.c_str());
-    mSpline.WriteVolume(fname, true);
+    fname = mOutDir + "/Finit.nii.gz";
+    mSpline.WriteVolume(fname.c_str(), true);
   }
+
+  std::random_device rd;
+  std::mt19937       g(rd());
 
   cout << "Running MCMC burn-in jumps" << endl;
   mLog << "Running MCMC burn-in jumps" << endl;
   iprop = 1;
-  random_device rd;
-  mt19937 g(rd());
   for (int ijump = mNumBurnIn; ijump > 0; ijump--) {
     // Perturb control points in random order
-    for (int k = 0; k < mNumControl; k++)
+    for (int k = 0; k < mNumControl; k++) {
       cptorder[k] = k;
-    shuffle(cptorder.begin(), cptorder.end(), g);
+    }
+    std::shuffle(cptorder.begin(), cptorder.end(), g);
 
     fill(mRejectControl.begin(), mRejectControl.end(), false);
 
     for (icpt = cptorder.begin(); icpt != cptorder.end(); icpt++) {
-      mRejectSpline = false;
-      mRejectF = false;
-      mAcceptF = false;
-      mRejectTheta = false;
-      mAcceptTheta = false;
+      mRejectSpline    = false;
+      mRejectF         = false;
+      mAcceptF         = false;
+      mRejectTheta     = false;
+      mAcceptTheta     = false;
       mRejectPosterior = false;
 
       if (JumpMcmcSingle(*icpt) || mAcceptF || mAcceptTheta) { // Accept point
         UpdatePath();
 
         if (mDebug) {
-          sprintf(fname, "%s/Faccept_b%05d_%d.nii.gz", mOutDir.c_str(),
-                  mNumBurnIn - ijump + 1, *icpt);
-          mSpline.WriteVolume(fname, true);
+          std::stringstream tmp;
+          tmp << mOutDir << '/' << "Faccept_b" << std::setw(5)
+              << std::setfill('0') << mNumBurnIn - ijump + 1 << '_' << *icpt
+              << ".nii.gz";
+          fname = tmp.str();
+          mSpline.WriteVolume(fname.c_str(), true);
         }
       } else { // Reject point
         mRejectControl[*icpt] = true;
 
         if (mDebug) {
-          sprintf(fname, "%s/Freject_b%05d_%d.nii.gz", mOutDir.c_str(),
-                  mNumBurnIn - ijump + 1, *icpt);
-          mSpline.WriteVolume(fname, true);
+          std::stringstream tmp;
+          tmp << mOutDir << '/' << "Freject_b" << std::setw(5)
+              << std::setfill('0') << mNumBurnIn - ijump + 1 << '_' << *icpt
+              << ".nii.gz";
+          fname = tmp.str();
+          mSpline.WriteVolume(fname.c_str(), true);
         }
       }
     }
@@ -2087,22 +2125,20 @@ bool Coffin::RunMcmcSingle() {
   mLog << "Running MCMC main jumps" << endl;
   iprop = 1;
   ikeep = 1;
-  random_device rd2;
-  mt19937 g2(rd2());
   for (int ijump = mNumSample; ijump > 0; ijump--) {
     // Perturb control points in random order
     for (int k = 0; k < mNumControl; k++)
       cptorder[k] = k;
-    shuffle(cptorder.begin(), cptorder.end(), g2);
+    std::shuffle(cptorder.begin(), cptorder.end(), g);
 
     fill(mRejectControl.begin(), mRejectControl.end(), false);
 
     for (icpt = cptorder.begin(); icpt != cptorder.end(); icpt++) {
-      mRejectSpline = false;
-      mRejectF = false;
-      mAcceptF = false;
-      mRejectTheta = false;
-      mAcceptTheta = false;
+      mRejectSpline    = false;
+      mRejectF         = false;
+      mAcceptF         = false;
+      mRejectTheta     = false;
+      mAcceptTheta     = false;
       mRejectPosterior = false;
 
       if (JumpMcmcSingle(*icpt) || mAcceptF || mAcceptTheta) { // Accept point
@@ -2110,18 +2146,22 @@ bool Coffin::RunMcmcSingle() {
         UpdatePath();
 
         if (mDebug) {
-          sprintf(fname, "%s/Faccept_%05d_%d.nii.gz", mOutDir.c_str(),
-                  mNumSample - ijump + 1, *icpt);
-          mSpline.WriteVolume(fname, true);
+          std::stringstream tmp;
+          tmp << mOutDir << '/' << "Faccept_" << std::setw(5)
+              << std::setfill('0') << mNumSample - ijump + 1 << '_' << *icpt;
+          fname = tmp.str();
+          mSpline.WriteVolume(fname.c_str(), true);
         }
       } else { // Reject point
         SavePathPosterior(false);
         mRejectControl[*icpt] = true;
 
         if (mDebug) {
-          sprintf(fname, "%s/Freject_%05d_%d.nii.gz", mOutDir.c_str(),
-                  mNumSample - ijump + 1, *icpt);
-          mSpline.WriteVolume(fname, true);
+          std::stringstream tmp;
+          tmp << mOutDir << '/' << "Freject_" << std::setw(5)
+              << std::setfill('0') << mNumSample - ijump + 1 << '_' << *icpt;
+          fname = tmp.str();
+          mSpline.WriteVolume(fname.c_str(), true);
         }
       }
     }
@@ -2164,9 +2204,9 @@ bool Coffin::RunMcmcSingle() {
 // Initialize path and MCMC proposals
 //
 bool Coffin::InitializeMcmc() {
-  bool success = true, doinit = true, firstinit = true;
-  int failseg = -1;
-  vector<int> atlaspoints;
+  bool                  success = true, doinit = true, firstinit = true;
+  int                   failseg = -1;
+  vector<int>           atlaspoints;
   vector<int>::iterator iptatlas;
 
   // Initialize control point proposal distribution
@@ -2245,7 +2285,7 @@ bool Coffin::InitializeMcmc() {
                           mSpline.GetAllPointsEnd());
 
     // Compute data-fit terms on initial path for all time points
-    mDataPosteriorOnPathNew = 0;
+    mDataPosteriorOnPathNew  = 0;
     mDataPosteriorOffPathNew = 0;
 
     for (vector<Aeon>::iterator idwi = mDwi.begin(); idwi < mDwi.end();
@@ -2298,7 +2338,7 @@ bool Coffin::InitializeMcmc() {
     UpdatePath();
 
     if (!success && firstinit) { // Initial path goes off white matter
-      doinit = !InitializeFixOffWhite(failseg);
+      doinit    = !InitializeFixOffWhite(failseg);
       firstinit = false;
     } else
       doinit = false;
@@ -2312,7 +2352,7 @@ bool Coffin::InitializeMcmc() {
 //
 bool Coffin::InitializeFixOffMask(int FailSegment) {
   bool success = false;
-  int failseg = FailSegment, perturbfirst = failseg,
+  int  failseg = FailSegment, perturbfirst = failseg,
       perturblast = (failseg == mNumControl - 1) ? failseg : failseg + 1;
   const float maxdist2 =
       4 *
@@ -2353,16 +2393,16 @@ bool Coffin::InitializeFixOffMask(int FailSegment) {
         int failsegnew = FindErrorSegment();
 
         if (failsegnew > -1) {
-          failseg = failsegnew;
+          failseg      = failsegnew;
           perturbfirst = failseg;
-          perturblast = (failseg == mNumControl - 1) ? failseg : failseg + 1;
+          perturblast  = (failseg == mNumControl - 1) ? failseg : failseg + 1;
         } else
           for (vector<Aeon>::iterator idwi = mDwi.begin(); idwi < mDwi.end();
                idwi++) {
             failsegnew = idwi->FindErrorSegment(mSpline);
 
             if (failsegnew > -1) {
-              failseg = failsegnew;
+              failseg      = failsegnew;
               perturbfirst = failseg;
               perturblast =
                   (failseg == mNumControl - 1) ? failseg : failseg + 1;
@@ -2389,18 +2429,22 @@ bool Coffin::InitializeFixOffMask(int FailSegment) {
 //
 bool Coffin::InitializeFixOffWhite(int FailSegment) {
   bool success = true, improved = true;
-  int failseg = FailSegment, perturbfirst = failseg,
+  int  failseg = FailSegment, perturbfirst = failseg,
       perturblast = (failseg == mNumControl - 1) ? failseg : failseg + 1;
-  char fname[PATH_MAX];
+  std::string fname;
   vector<int> controlorig(mControlPoints);
 
   // Set proposal standard deviations to a conservative value for this
-  if (mMaxTryWhite > 0)
+  if (mMaxTryWhite > 0) {
     for (vector<float>::iterator istd = mProposalStd.begin();
-         istd < mProposalStd.end(); istd += 3)
-      for (int k = 0; k < 3; k++)
-        if (istd[k] > mResolution[k])
+         istd < mProposalStd.end(); istd += 3) {
+      for (int k = 0; k < 3; k++) {
+        if (istd[k] > mResolution[k]) {
           istd[k] = mResolution[k];
+        }
+      }
+    }
+  }
 
   // Perturb control points to find a valid initial path
   for (unsigned int itry = 0; itry < mMaxTryWhite; itry++) {
@@ -2412,11 +2456,11 @@ bool Coffin::InitializeFixOffWhite(int FailSegment) {
     fill(mRejectControl.begin(), mRejectControl.end(), false);
 
     for (int icpt = perturbfirst; icpt <= perturblast; icpt++) {
-      mRejectSpline = false;
-      mRejectF = false;
-      mAcceptF = false;
-      mRejectTheta = false;
-      mAcceptTheta = false;
+      mRejectSpline    = false;
+      mRejectF         = false;
+      mAcceptF         = false;
+      mRejectTheta     = false;
+      mAcceptTheta     = false;
       mRejectPosterior = false;
 
       // If the new path is on the white matter, accept it
@@ -2438,16 +2482,19 @@ bool Coffin::InitializeFixOffWhite(int FailSegment) {
 
         improved = ((noffnew / (float)ntotnew) < (noff / (float)ntot) &&
                     AcceptPath(true));
-      } else
+      } else {
         improved = success;
+      }
 
       if (success || improved) { // Accept point
         UpdatePath();
 
         if (mDebug) {
-          sprintf(fname, "%s/Faccept_f%05d_%d.nii.gz", mOutDir.c_str(),
-                  itry + 1, icpt);
-          mSpline.WriteVolume(fname, true);
+          std::stringstream tmp;
+          tmp << mOutDir << '/' << "Faccept_f" << std::setw(5)
+              << std::setfill('0') << itry + 1 << '_' << icpt << ".nii.gz";
+          fname = tmp.str();
+          mSpline.WriteVolume(fname.c_str(), true);
         }
 
         if (success)
@@ -2458,7 +2505,7 @@ bool Coffin::InitializeFixOffWhite(int FailSegment) {
             const int failsegnew = idwi->FindErrorSegment(mSpline);
 
             if (failsegnew > -1 && failseg != failsegnew) {
-              failseg = failsegnew;
+              failseg      = failsegnew;
               perturbfirst = failseg;
               perturblast =
                   (failseg == mNumControl - 1) ? failseg : failseg + 1;
@@ -2469,9 +2516,11 @@ bool Coffin::InitializeFixOffWhite(int FailSegment) {
         mRejectControl[icpt] = true;
 
         if (mDebug) {
-          sprintf(fname, "%s/Freject_f%05d_%d.nii.gz", mOutDir.c_str(),
-                  itry + 1, icpt);
-          mSpline.WriteVolume(fname, true);
+          std::stringstream tmp;
+          tmp << mOutDir << '/' << "Freject_f" << std::setw(5)
+              << std::setfill('0') << itry + 1 << '_' << icpt << ".nii.gz";
+          fname = tmp.str();
+          mSpline.WriteVolume(fname.c_str(), true);
         }
       }
     }
@@ -2525,11 +2574,11 @@ int Coffin::FindErrorSegment() {
 //
 bool Coffin::JumpMcmcFull() {
   fill(mRejectControl.begin(), mRejectControl.end(), false);
-  mRejectSpline = false;
-  mRejectF = false;
-  mAcceptF = false;
-  mRejectTheta = false;
-  mAcceptTheta = false;
+  mRejectSpline    = false;
+  mRejectF         = false;
+  mAcceptF         = false;
+  mRejectTheta     = false;
+  mAcceptTheta     = false;
   mRejectPosterior = false;
 
   if (!ProposePathFull())
@@ -2562,12 +2611,12 @@ bool Coffin::JumpMcmcSingle(int ControlIndex) {
 // Propose path by perturbing all control points
 //
 bool Coffin::ProposePathFull() {
-  vector<bool>::iterator isrej;
-  vector<int>::const_iterator coord = mControlPoints.begin();
-  vector<int>::const_iterator cpoint = mControlPointsNew.begin();
-  vector<int>::iterator newcoord = mControlPointsNew.begin();
-  vector<float>::const_iterator pstd = mProposalStd.begin();
-  vector<float>::iterator jump = mControlPointJumps.begin();
+  vector<bool>::iterator        isrej;
+  vector<int>::const_iterator   coord    = mControlPoints.begin();
+  vector<int>::const_iterator   cpoint   = mControlPointsNew.begin();
+  vector<int>::iterator         newcoord = mControlPointsNew.begin();
+  vector<float>::const_iterator pstd     = mProposalStd.begin();
+  vector<float>::iterator       jump     = mControlPointJumps.begin();
 
   // Perturb current control points
   if (mDebug)
@@ -2576,7 +2625,7 @@ bool Coffin::ProposePathFull() {
     double norm = 0;
 
     for (int ii = 0; ii < 3; ii++) {
-      *jump = round((*pstd) * PDFgaussian());
+      *jump     = round((*pstd) * PDFgaussian());
       *newcoord = *coord + (int)*jump;
 
       *jump *= *jump;
@@ -2695,19 +2744,19 @@ bool Coffin::ProposePathFull() {
 // Propose path by perturbing a single control point
 //
 bool Coffin::ProposePathSingle(int ControlIndex) {
-  const int offset = ControlIndex * 3;
-  double norm = 0;
-  vector<int>::const_iterator coord = mControlPoints.begin() + offset;
-  vector<int>::const_iterator cpoint = mControlPointsNew.begin() + offset;
-  vector<int>::iterator newcoord = mControlPointsNew.begin() + offset;
-  vector<float>::const_iterator pstd = mProposalStd.begin() + offset;
-  vector<float>::iterator jump = mControlPointJumps.begin() + offset;
+  const int                     offset   = ControlIndex * 3;
+  double                        norm     = 0;
+  vector<int>::const_iterator   coord    = mControlPoints.begin() + offset;
+  vector<int>::const_iterator   cpoint   = mControlPointsNew.begin() + offset;
+  vector<int>::iterator         newcoord = mControlPointsNew.begin() + offset;
+  vector<float>::const_iterator pstd     = mProposalStd.begin() + offset;
+  vector<float>::iterator       jump     = mControlPointJumps.begin() + offset;
 
   copy(mControlPoints.begin(), mControlPoints.end(), mControlPointsNew.begin());
 
   // Perturb current control point
   for (int ii = 0; ii < 3; ii++) {
-    *jump = round((*pstd) * PDFgaussian());
+    *jump     = round((*pstd) * PDFgaussian());
     *newcoord = *coord + (int)*jump;
 
     *jump *= *jump;
@@ -2800,22 +2849,22 @@ void Coffin::ProposeDiffusionParameters() {
 // Determine if proposed path will be accepted
 //
 bool Coffin::AcceptPath(bool UsePriorOnly) {
-  double neglogratio;
-  vector<int> atlaspoints;
+  double                neglogratio;
+  vector<int>           atlaspoints;
   vector<int>::iterator iptatlas;
 
-  mDataPosteriorOnPathNew = 0;
+  mDataPosteriorOnPathNew  = 0;
   mDataPosteriorOffPathNew = 0;
-  mDataPosteriorOnPath = 0;
-  mDataPosteriorOffPath = 0;
+  mDataPosteriorOnPath     = 0;
+  mDataPosteriorOffPath    = 0;
 
   // Compute data-fit terms for all time points on proposed and current path
   if (!UsePriorOnly)
     for (vector<Aeon>::iterator idwi = mDwi.begin(); idwi < mDwi.end();
          idwi++) {
       if (!idwi->ComputePathDataFit()) {
-        mRejectF = idwi->RejectF();
-        mAcceptF = idwi->AcceptF();
+        mRejectF     = idwi->RejectF();
+        mAcceptF     = idwi->AcceptF();
         mRejectTheta = idwi->RejectTheta();
         mAcceptTheta = idwi->AcceptTheta();
 
@@ -2858,7 +2907,7 @@ bool Coffin::AcceptPath(bool UsePriorOnly) {
 
   // Compute atlas-derived prior terms on proposed path
   mXyzPriorOffPathNew = ComputeXyzPriorOffPath(atlaspoints);
-  mXyzPriorOnPathNew = ComputeXyzPriorOnPath(atlaspoints);
+  mXyzPriorOnPathNew  = ComputeXyzPriorOnPath(atlaspoints);
 
   mAnatomicalPriorNew = ComputeAnatomicalPrior(atlaspoints);
 
@@ -2936,10 +2985,10 @@ double Coffin::ComputeXyzPriorOnPath(std::vector<int> &PathAtlasPoints) {
 // Compute prior on path given its tangent vector and curvature
 //
 double Coffin::ComputeShapePrior(vector<int> &PathAtlasPoints) {
-  const int nbin = (int)ceil(2 / mTangentBinSize);
+  const int    nbin = (int)ceil(2 / mTangentBinSize);
   const double darc = mNumArc / (double)(PathAtlasPoints.size() / 3);
-  double larc = 0, prior = 0;
-  vector<float>::const_iterator id1, id2;
+  double       larc = 0, prior = 0;
+  vector<float>::const_iterator         id1, id2;
   vector<vector<float>>::const_iterator iprtang = mPriorTangent.begin(),
                                         iprcurv = mPriorCurvature.begin();
   vector<float> pathsmooth(PathAtlasPoints.size()),
@@ -2949,7 +2998,7 @@ double Coffin::ComputeShapePrior(vector<int> &PathAtlasPoints) {
     return 0;
 
   // FILL THE PATH FOR ALL PRIORS?
-  // vector<int> pathfilled = CurveFill(PathAtlasPoints);
+  //vector<int> pathfilled = CurveFill(PathAtlasPoints);
 
   // Smooth discrete point coordinates
   CurveSmooth(pathsmooth, PathAtlasPoints);
@@ -2965,8 +3014,8 @@ double Coffin::ComputeShapePrior(vector<int> &PathAtlasPoints) {
   id2 = diff2.begin();
 
   for (id1 = diff1.begin(); id1 < diff1.end(); id1 += 3) {
-    int ix, iy;
-    float tangx, tangy, curv;
+    int         ix, iy;
+    float       tangx, tangy, curv;
     const float nrm = sqrt(id1[0] * id1[0] + id1[1] * id1[1] + id1[2] * id1[2]);
 
     if (nrm > 0) {
@@ -2987,7 +3036,7 @@ double Coffin::ComputeShapePrior(vector<int> &PathAtlasPoints) {
     } else {
       tangx = 0;
       tangy = 0;
-      curv = 0;
+      curv  = 0;
     }
 
     // Find prior given tangent vector
@@ -3021,13 +3070,13 @@ double Coffin::ComputeShapePrior(vector<int> &PathAtlasPoints) {
 // Compute prior on path given anatomical segmentation labels around path
 //
 double Coffin::ComputeAnatomicalPrior(vector<int> &PathAtlasPoints) {
-  const double darc = mNumArc / (double)(PathAtlasPoints.size() / 3);
-  double larc = 0, prior = 0;
+  const double            darc = mNumArc / (double)(PathAtlasPoints.size() / 3);
+  double                  larc = 0, prior = 0;
   vector<float>::iterator iseg0;
-  vector<unsigned int>::const_iterator imatch;
+  vector<unsigned int>::const_iterator         imatch;
   vector<vector<unsigned int>>::const_iterator iidlocal = mIdsLocal.begin(),
-                                               iidnear = mIdsNear.begin(), iid;
-  vector<vector<float>>::const_iterator iprlocal = mPriorLocal.begin(),
+                                               iidnear  = mIdsNear.begin(), iid;
+  vector<vector<float>>::const_iterator iprlocal        = mPriorLocal.begin(),
                                         iprnear = mPriorNear.begin(), ipr;
   vector<float> seg0(mAseg.size());
 
@@ -3135,14 +3184,14 @@ void Coffin::UpdatePath() {
   mPathPoints.resize(mPathPointsNew.size());
   copy(mPathPointsNew.begin(), mPathPointsNew.end(), mPathPoints.begin());
 
-  mDataPosteriorOnPath = mDataPosteriorOnPathNew;
+  mDataPosteriorOnPath  = mDataPosteriorOnPathNew;
   mDataPosteriorOffPath = mDataPosteriorOffPathNew;
-  mXyzPriorOnPath = mXyzPriorOnPathNew;
-  mXyzPriorOffPath = mXyzPriorOffPathNew;
-  mAnatomicalPrior = mAnatomicalPriorNew;
-  mShapePrior = mShapePriorNew;
-  mPosteriorOnPath = mPosteriorOnPathNew;
-  mPosteriorOffPath = mPosteriorOffPathNew;
+  mXyzPriorOnPath       = mXyzPriorOnPathNew;
+  mXyzPriorOffPath      = mXyzPriorOffPathNew;
+  mAnatomicalPrior      = mAnatomicalPriorNew;
+  mShapePrior           = mShapePriorNew;
+  mPosteriorOnPath      = mPosteriorOnPathNew;
+  mPosteriorOffPath     = mPosteriorOffPathNew;
 }
 
 //
@@ -3196,11 +3245,11 @@ void Coffin::UpdateRejectionRateFull() {
 // Update control point acceptance/rejection rates (for single control updates)
 //
 void Coffin::UpdateAcceptRejectRateSingle() {
-  vector<int>::iterator acount = mAcceptCount.begin();
-  vector<int>::iterator rcount = mRejectCount.begin();
-  vector<float>::const_iterator jump = mControlPointJumps.begin();
-  vector<float>::iterator aspan = mAcceptSpan.begin();
-  vector<float>::iterator rspan = mRejectSpan.begin();
+  vector<int>::iterator         acount = mAcceptCount.begin();
+  vector<int>::iterator         rcount = mRejectCount.begin();
+  vector<float>::const_iterator jump   = mControlPointJumps.begin();
+  vector<float>::iterator       aspan  = mAcceptSpan.begin();
+  vector<float>::iterator       rspan  = mRejectSpan.begin();
 
   for (vector<bool>::const_iterator isrej = mRejectControl.begin();
        isrej < mRejectControl.end(); isrej++)
@@ -3354,11 +3403,11 @@ void Coffin::SavePath() {
 // a lower-resolution native space
 //
 void Coffin::RemoveDuplicatePathPoints() {
-  unsigned int newsize = 0;
+  unsigned int                newsize = 0;
   vector<int>::const_iterator ipt;
-  vector<int>::iterator iptnew;
-  vector<bool> isdup(mPathPoints.size() / 3, false);
-  vector<int> newpath;
+  vector<int>::iterator       iptnew;
+  vector<bool>                isdup(mPathPoints.size() / 3, false);
+  vector<int>                 newpath;
 
   // Find duplicate path points
   for (vector<Aeon>::iterator idwi = mDwi.begin(); idwi < mDwi.end(); idwi++)
@@ -3372,7 +3421,7 @@ void Coffin::RemoveDuplicatePathPoints() {
 
   newpath.resize(newsize);
 
-  ipt = mPathPoints.begin();
+  ipt    = mPathPoints.begin();
   iptnew = newpath.begin();
 
   for (vector<bool>::const_iterator idup = isdup.begin(); idup < isdup.end();
@@ -3421,7 +3470,7 @@ bool Coffin::IsInRoi(vector<int>::const_iterator Point, MRI *Roi) {
 // would cause a zig-zag in the path:
 // A zig-zag is detected as two consecutive acute angles between path segments
 //
-bool Coffin::IsZigZag(vector<int> &ControlPoints,
+bool Coffin::IsZigZag(vector<int> &               ControlPoints,
                       vector<int>::const_iterator FirstPerturbedPoint,
                       vector<int>::const_iterator LastPerturbedPoint) {
   vector<int>::const_iterator curpoint, checkfirst, checklast;
@@ -3442,13 +3491,13 @@ bool Coffin::IsZigZag(vector<int> &ControlPoints,
   // When a single control point is perturbed, there are
   // up to 4 neighboring spots that need to be checked for a potential zig-zag
   // First spot to check:
-  curpoint = FirstPerturbedPoint - 3;
+  curpoint   = FirstPerturbedPoint - 3;
   checkfirst = ControlPoints.begin() + 6;
   if (curpoint > checkfirst)
     checkfirst = curpoint;
 
   // Last spot to check:
-  curpoint = LastPerturbedPoint + 6;
+  curpoint  = LastPerturbedPoint + 6;
   checklast = ControlPoints.end() - 6;
   if (curpoint < checklast)
     checklast = curpoint;
@@ -3456,9 +3505,9 @@ bool Coffin::IsZigZag(vector<int> &ControlPoints,
   if (checkfirst > checklast) // If spline has fewer than 4 control points
     return false;
   else {
-    int dot1, dot2;
+    int                         dot1, dot2;
     vector<int>::const_iterator x1, x2, x3, x4;
-    vector<int> diff12(3), diff32(3), diff43(3);
+    vector<int>                 diff12(3), diff32(3), diff43(3);
 
     // Check at first zig-zag candidate spot
     curpoint = checkfirst;
@@ -3511,7 +3560,7 @@ bool Coffin::IsZigZag(vector<int> &ControlPoints,
 //
 // Map point coordinates from diffusion/base space to atlas space
 //
-void Coffin::MapPointToAtlas(vector<int>::iterator OutPoint,
+void Coffin::MapPointToAtlas(vector<int>::iterator       OutPoint,
                              vector<int>::const_iterator InPoint) {
   if (!mAffineReg.IsEmpty()) {
     vector<float> point(InPoint, InPoint + 3);
@@ -3683,7 +3732,7 @@ bool Aeon::IsInMask(vector<int>::const_iterator Point) {
 //
 // Compute leengths of path samples
 //
-void Aeon::ComputePathLengths(vector<int> &PathLengths,
+void Aeon::ComputePathLengths(vector<int> &        PathLengths,
                               vector<vector<int>> &PathSamples) {
   vector<int>::iterator ilen = PathLengths.begin();
 
@@ -3717,8 +3766,8 @@ int Aeon::FindMaxAPosterioriPath(vector<vector<int>> &PathSamples,
                                  vector<int> &PathLengths, MRI *PathHisto) {
   const int lmin = *min_element(PathLengths.begin(), PathLengths.end()),
             lmax = *max_element(PathLengths.begin(), PathLengths.end());
-  float lnorm, pathnorm = 0.0, probmax = 0.0;
-  vector<int>::const_iterator ilen;
+  float                               lnorm, pathnorm = 0.0, probmax = 0.0;
+  vector<int>::const_iterator         ilen;
   vector<vector<int>>::const_iterator ipathmap;
   vector<float> lhisto(lmax - lmin + 1, 0), lhistofilt(lhisto.size(), 0);
   vector<float>::iterator ihistofilt = lhistofilt.begin();
@@ -3767,7 +3816,7 @@ int Aeon::FindMaxAPosterioriPath(vector<vector<int>> &PathSamples,
 
     if (prob > probmax) {
       ipathmap = ipath;
-      probmax = prob;
+      probmax  = prob;
     }
 
     ilen++;

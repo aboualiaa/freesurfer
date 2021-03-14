@@ -8,9 +8,9 @@ namespace kvl {
 class ReadImage : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef ReadImage Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef ReadImage                     Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -20,7 +20,7 @@ public:
   itkTypeMacro(ReadImage, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // [ image, transform ] = kvlReadImage( imageFileName )
@@ -40,7 +40,7 @@ public:
     // Convert the image to float
     typedef itk::Image<float, 3> ImageType;
     typedef itk::CastImageFilter<kvl::CroppedImageReader::ImageType, ImageType>
-        CasterType;
+                        CasterType;
     CasterType::Pointer caster = CasterType::New();
     caster->SetInput(reader->GetImage());
     caster->Update();
@@ -64,11 +64,11 @@ public:
   }
 
 protected:
-  ReadImage()= default;;
-  ~ReadImage() override= default;;
+  ReadImage(){};
+  virtual ~ReadImage(){};
 
-  ReadImage(const Self &);      // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  ReadImage(const Self &);      //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

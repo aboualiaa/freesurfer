@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_em_register</name>
-	<synopsis>mri_em_register [options] &lt;in brain volume&gt; &lt;template gca&gt; &lt;output transform name&gt;</synopsis>
-	<description>This program creates a tranform in lta format</description>
+  <name>mri_em_register</name>
+  <synopsis>mri_em_register [options] &lt;in brain volume&gt; &lt;template gca&gt; &lt;output transform name&gt;</synopsis>
+  <description>This program creates a tranform in lta format</description>
   <arguments>
     <positional>
       <argument>&lt;in brain volume&gt;</argument>
@@ -38,7 +37,7 @@
     <required-flagged>
       <intro>None</intro>
     </required-flagged>
-    <optional-flagged> 
+    <optional-flagged>
       <argument>-dist distance</argument>
       <argument>-nomap</argument>
       <argument>-flash</argument>
@@ -138,7 +137,7 @@
     <output>tranform</output>
     <explanation>transform in lta format</explanation>
   </outputs>
-	<example>mri_em_register -mask subject1/mri/brain subject1/mri/nu single_one.gca subject1/mri/transforms/talairach_one.lta</example>
+  <example>mri_em_register -mask subject1/mri/brain subject1/mri/nu single_one.gca subject1/mri/transforms/talairach_one.lta</example>
   <bugs>None</bugs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>

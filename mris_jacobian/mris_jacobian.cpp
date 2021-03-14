@@ -1,15 +1,10 @@
 /**
- * @file  mris_jacobian.c
  * @brief computes the jacobian of a surface mapping
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: zkaufman $
- *    $Date: 2015/02/05 23:34:40 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,39 +20,35 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_jacobian.c,v 1.11 2015/02/05 23:34:40 zkaufman Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
-static int compute_area_ratios(MRI_SURFACE *mris, int noscale);
-static int log_ratios(MRI_SURFACE *mris);
-static int invert_ratios(MRI_SURFACE *mris);
+static int  compute_area_ratios(MRI_SURFACE *mris, int noscale);
+static int  log_ratios(MRI_SURFACE *mris);
+static int  invert_ratios(MRI_SURFACE *mris);
 
-static int log_flag = 0;
+static int log_flag    = 0;
 static int invert_flag = 0;
-static int noscale = 0;
+static int noscale     = 0;
 
 const char *Progname;
 
 int main(int argc, char *argv[]) {
-  char **av, *orig_surf, *mapped_surf, *out_fname;
-  int ac, nargs;
+  char **      av, *orig_surf, *mapped_surf, *out_fname;
+  int          ac, nargs;
   MRI_SURFACE *mris;
 
   nargs = handleVersionOption(argc, argv, "mris_jacobian");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
-  Gdiag = DIAG_SHOW;
+  Gdiag    = DIAG_SHOW;
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
@@ -74,9 +65,9 @@ int main(int argc, char *argv[]) {
     usage_exit();
   }
 
-  orig_surf = argv[1];
+  orig_surf   = argv[1];
   mapped_surf = argv[2];
-  out_fname = argv[3];
+  out_fname   = argv[3];
 
   fprintf(stderr, "reading surface from %s...\n", orig_surf);
   mris = MRISread(orig_surf);
@@ -111,7 +102,7 @@ int main(int argc, char *argv[]) {
   Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -133,7 +124,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':
@@ -165,15 +156,15 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 static int compute_area_ratios(MRI_SURFACE *mris, int noscale) {
   VERTEX *v;
-  int vno;
-  float area_scale;
+  int     vno;
+  float   area_scale;
 
   if (noscale) {
     area_scale = 1;
@@ -190,12 +181,12 @@ static int compute_area_ratios(MRI_SURFACE *mris, int noscale) {
     if (v->origarea < SMALL) {
       v->origarea = SMALL;
     }
-    v->curv = v->area / (v->origarea*area_scale) ;
+    v->curv = v->area / (v->origarea * area_scale);
     if (!std::isfinite(v->curv))
-      ErrorPrintf
-      (ERROR_BADPARM,
-       "vertex %d not finite (area %2.1f, origarea %2.1f, scale %2.1f",
-       vno, v->area, v->origarea, area_scale) ;
+      ErrorPrintf(
+          ERROR_BADPARM,
+          "vertex %d not finite (area %2.1f, origarea %2.1f, scale %2.1f", vno,
+          v->area, v->origarea, area_scale);
   }
 
   return (NO_ERROR);
@@ -203,8 +194,8 @@ static int compute_area_ratios(MRI_SURFACE *mris, int noscale) {
 
 static int log_ratios(MRI_SURFACE *mris) {
   VERTEX *v;
-  int vno;
-  float area_scale;
+  int     vno;
+  float   area_scale;
 
   area_scale = mris->total_area / mris->orig_area;
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -216,10 +207,9 @@ static int log_ratios(MRI_SURFACE *mris) {
     if (v->curv < SMALL) {
       v->curv = SMALL;
     }
-    v->curv = log10(v->curv) ;
-    if (!std::isfinite(v->curv))
-    {
-      ErrorPrintf(ERROR_BADPARM, "vertex %d log not finite", vno) ;
+    v->curv = log10(v->curv);
+    if (!std::isfinite(v->curv)) {
+      ErrorPrintf(ERROR_BADPARM, "vertex %d log not finite", vno);
     }
   }
 
@@ -228,8 +218,8 @@ static int log_ratios(MRI_SURFACE *mris) {
 
 static int invert_ratios(MRI_SURFACE *mris) {
   VERTEX *v;
-  int vno;
-  float area_scale;
+  int     vno;
+  float   area_scale;
 
   area_scale = mris->total_area / mris->orig_area;
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -244,9 +234,8 @@ static int invert_ratios(MRI_SURFACE *mris) {
     if (v->curv < 1) {
       v->curv = -1 / v->curv;
     }
-    if (!std::isfinite(v->curv))
-    {
-      ErrorPrintf(ERROR_BADPARM, "vertex %d log not finite", vno) ;
+    if (!std::isfinite(v->curv)) {
+      ErrorPrintf(ERROR_BADPARM, "vertex %d log not finite", vno);
     }
   }
 

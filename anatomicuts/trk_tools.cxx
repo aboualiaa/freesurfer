@@ -1,29 +1,31 @@
+#include "GetPot.h"
+#include "MeshToImageFilter.h"
+#include "PolylineMeshToVTKPolyDataFilter.h"
+#include "TrkVTKPolyDataFilter.txx"
+#include "VTKPolyDataToPolylineMeshFilter.h"
+#include "itkImage.h"
+#include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
+#include "itkMesh.h"
+#include "mri.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 #include <iostream>
-#include "itkImageFileReader.h"
-#include "GetPot.h"
-#include "itkImage.h"
-#include "itkMesh.h"
-#include "TrkVTKPolyDataFilter.txx"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "VTKPolyDataToPolylineMeshFilter.h"
-#include "itkImageFileWriter.h"
-#include "MeshToImageFilter.h"
+#include <string>
 
 int main(int narg, char *arg[]) {
   enum { Dimension = 3 };
-  using PixelType = int;
-  using ImageType = itk::Image<PixelType, Dimension>;
+  typedef int                              PixelType;
+  typedef itk::Image<PixelType, Dimension> ImageType;
   // typedef ImageType::IndexType 			IndexType;
-  using MeshType = itk::Mesh<PixelType, Dimension>;
-  using WriterType = itk::ImageFileWriter<ImageType>;
-  // typedef itk::ImageFileReader<ImageType> ReaderType;
-  using MeshToImageType = MeshToImageFilter<MeshType, ImageType>;
-  using MeshConverterType = VTKPolyDataToPolylineMeshFilter<MeshType>;
-  using ImageReaderType = itk::ImageFileReader<ImageType>;
-  using VTKConverterType = PolylineMeshToVTKPolyDataFilter<MeshType>;
+  typedef itk::Mesh<PixelType, Dimension> MeshType;
+  typedef itk::ImageFileWriter<ImageType> WriterType;
+  //typedef itk::ImageFileReader<ImageType>                               ReaderType;
+  typedef MeshToImageFilter<MeshType, ImageType>    MeshToImageType;
+  typedef VTKPolyDataToPolylineMeshFilter<MeshType> MeshConverterType;
+  typedef itk::ImageFileReader<ImageType>           ImageReaderType;
+  typedef PolylineMeshToVTKPolyDataFilter<MeshType> VTKConverterType;
 
   GetPot cl(narg, const_cast<char **>(arg));
   if (cl.size() == 1 || cl.search(2, "--help", "-h")) {
@@ -37,17 +39,17 @@ int main(int narg, char *arg[]) {
               << std::endl;
     return -1;
   }
-  const char *imageFile = cl.follow("", "-i");
-  const char *fiberFile = cl.follow("", "-f");
-  const char *output = cl.follow("", "-o");
+  const char *imageFile   = cl.follow("", "-i");
+  const char *fiberFile   = cl.follow("", "-f");
+  const char *output      = cl.follow("", "-o");
   const char *outputImage = cl.follow("", "-e");
-  // MRI *outref = 0;
-  // MATRIX *outv2r;
+  //MRI *outref = 0;
+  //MATRIX *outv2r;
 
-  // outref = MRIread(imageFile);
+  //outref = MRIread(imageFile);
 
   // Output space orientation information
-  // outv2r = MRIgetVoxelToRasXform(outref);
+  //outv2r = MRIgetVoxelToRasXform(outref);
 
   MeshConverterType::Pointer converter = MeshConverterType::New();
 

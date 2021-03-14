@@ -6,12 +6,8 @@
 # aligns all tps norm.mgz and aseg.mgz to the base space
 #
 # Original Author: Martin Reuter
-# CVS Revision Info:
-#    $Author: nicks $
-#    $Date: 2011/03/02 20:16:39 $
-#    $Revision: 1.3 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,7 +20,7 @@
 #
 
 
-set VERSION = '$Id: mri_align_long.csh,v 1.3 2011/03/02 20:16:39 nicks Exp $';
+set VERSION = 'mri_align_long.csh @FS_VERSION@';
 
 
 if ($#argv < 1) then

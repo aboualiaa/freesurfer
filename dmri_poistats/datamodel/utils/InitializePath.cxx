@@ -10,9 +10,9 @@
 
 InitializePath::InitializePath() {
   m_PoistatsModel = NULL;
-  m_SeedVolume = NULL;
-  m_SeedValues = NULL;
-  m_InitialPath = NULL;
+  m_SeedVolume    = NULL;
+  m_SeedValues    = NULL;
+  m_InitialPath   = NULL;
 
   // this will be the seed value we use for getting random numbers
   std::srand((unsigned)time(0));
@@ -86,9 +86,9 @@ std::vector<int *> InitializePath::GetSeedPoints(const int label) {
         // for, then save the location
         if (label == currentVoxel) {
           int *seed = new int[3];
-          seed[0] = x;
-          seed[1] = y;
-          seed[2] = z;
+          seed[0]   = x;
+          seed[1]   = y;
+          seed[2]   = z;
           seeds.push_back(seed);
         }
       }

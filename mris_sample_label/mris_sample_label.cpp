@@ -1,17 +1,6 @@
-/**
- * @file  mris_sample_label.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2012/10/01 18:59:32 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,8 +12,19 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "label.h"
+#include "macros.h"
 #include "mrisurf.h"
+#include "version.h"
 
 static char vcid[] =
     "$Id: mris_sample_label.c,v 1.5 2012/10/01 18:59:32 fischl Exp $";
@@ -35,7 +35,7 @@ static char vcid[] =
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -44,15 +44,15 @@ static void print_version();
 /*-------------------------------- DATA ----------------------------*/
 
 const char *Progname;
-static int voxval = 1;
+static int  voxval = 1;
 
 /*-------------------------------- FUNCTIONS ----------------------------*/
 
 int main(int argc, char *argv[]) {
   MRI_SURFACE *mris;
-  char **av, *in_label_fname, *out_label_fname, *surf_fname, ext[STRLEN];
+  char **      av, *in_label_fname, *out_label_fname, *surf_fname, ext[STRLEN];
   ;
-  int ac, nargs;
+  int    ac, nargs;
   LABEL *label, *label_out;
 
   Progname = argv[0];
@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit();
 
-  in_label_fname = argv[1];
-  surf_fname = argv[2];
+  in_label_fname  = argv[1];
+  surf_fname      = argv[2];
   out_label_fname = argv[3];
 
   printf("reading label from %s...\n", in_label_fname);
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -159,7 +159,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

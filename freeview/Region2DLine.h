@@ -1,16 +1,11 @@
 /**
- * @file  Region2DLine.h
  * @brief Region2DLine data object.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/10/07 20:01:59 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -69,9 +64,9 @@ protected:
   void UpdateWorldCoords();
 
   vtkSmartPointer<vtkActor2D> m_actorLine;
-  int m_nX1, m_nX2, m_nY1, m_nY2;
-  double m_dPt1[3];
-  double m_dPt2[3];
+  int                         m_nX1, m_nX2, m_nY1, m_nY2;
+  double                      m_dPt1[3];
+  double                      m_dPt2[3];
 };
 
 #endif

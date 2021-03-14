@@ -1,16 +1,11 @@
 /**
- * @file  Cursor2D.h
  * @brief Cursor for 2D view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/06/10 19:52:40 $
- *    $Revision: 1.19 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -46,7 +41,7 @@ public:
   void SetPosition2(double *pos);
 
   double *GetPosition();
-  void GetPosition(double *pos);
+  void    GetPosition(double *pos);
 
   void SetInterpolationPoints(std::vector<double> pts);
 
@@ -86,8 +81,8 @@ private:
 
   RenderView2D *m_view;
 
-  double m_dPosition[3];
-  double m_dPosition2[3];
+  double              m_dPosition[3];
+  double              m_dPosition2[3];
   std::vector<double> m_dInterpolationPoints;
 
   int m_nSize;

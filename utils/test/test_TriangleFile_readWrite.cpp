@@ -1,8 +1,8 @@
 #include "stdio.h"
 
-#include "mrisurf.h"
 #include "../mrisurf_topology.h"
 #include "icosahedron.h"
+#include "mrisurf.h"
 
 static const char *fnm_base = "./test_TriangleFile_readWrite.tmp";
 
@@ -72,9 +72,9 @@ int main() {
   for (vno = 0; vno < nvertices; vno++) {
     // The STL format uses location to distinquish vertices
     VERTEX *v = &src->vertices[vno];
-    v->x = vno & 1;
-    v->y = vno & 2;
-    v->z = vno & ~3;
+    v->x      = vno & 1;
+    v->y      = vno & 2;
+    v->z      = vno & ~3;
   }
 
   mrisAddEdge(src, 0, 1);

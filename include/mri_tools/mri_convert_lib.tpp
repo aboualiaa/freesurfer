@@ -83,28 +83,22 @@ auto check_string_values(std::vector<std::string> allowed,
 } // namespace
 
 auto checkSize = [](auto opt, size_t min, size_t max = 0) {
-  return [opt, min, max](auto v) {
-    check_vector_range(v, opt, min, max);
-  };
+  return [opt, min, max](auto v) { check_vector_range(v, opt, min, max); };
 };
 
 auto checkValue = [](auto min, auto opt,
                      std::function<bool(decltype(min), decltype(min))> fn) {
-  return [min, opt, fn](auto value) {
-    check_value(value, min, opt, fn);
-  };
+  return [min, opt, fn](auto value) { check_value(value, min, opt, fn); };
 };
 
 auto checkRange = [](auto min, auto max, auto opt) {
-  return [min, opt, max](auto value) {
-    check_value_range(value, opt, min, max);
-  };
+  return
+      [min, opt, max](auto value) { check_value_range(value, opt, min, max); };
 };
 
 auto checkString = [](std::vector<std::string> allowed, std::string_view opt) {
-  return [allowed, opt](auto value) {
-    check_string_values(allowed, value, opt);
-  };
+  return
+      [allowed, opt](auto value) { check_string_values(allowed, value, opt); };
 };
 
 auto allocateExternalString = [](char **var) mutable {
@@ -146,7 +140,7 @@ auto constexpr checkOrientationString = [](std::string_view ostr) {
 
 auto checkNorm = [](std::string_view opt, bool &flag) {
   return [opt, &flag](auto value) {
-    auto norm = fs::math::frobenius_norm(&value);
+    auto norm       = fs::math::frobenius_norm(&value);
     auto directions = value;
     if (norm == 0.0) {
       fmt::fprintf(stderr,

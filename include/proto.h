@@ -1,16 +1,11 @@
 /**
- * @file  proto.h
  * @brief function prototypes of common system functions
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: zkaufman $
- *    $Date: 2012/12/05 18:31:09 $
- *    $Revision: 1.40 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -48,8 +43,8 @@ int stricmp(const char *str1, const char *str2);
 #endif
 
 /* needed for select */
-#include <sys/types.h>
 #include <sys/time.h>
+#include <sys/types.h>
 
 int _flsbuf(unsigned char c, FILE *p);
 int _filbuf(FILE *p);
@@ -65,26 +60,26 @@ int fgetc(FILE *stream);
 int pclose(FILE *stream);
 int ftime(struct timeb *tp);
 /* void ftime(struct timeb *tm) ;*/
-int fflush(FILE *fp);
-int scanf(const char *fmt, ...);
-int fscanf(FILE *fp, const char *fmt, ...);
-int fprintf(FILE *fp, const char *fmt, ...);
-int printf(const char *fmt, ...);
-int vsprintf(char *str, const char *fmt, va_list args);
-int vfprintf(FILE *fp, const char *fmt, va_list args);
-int vprintf(const char *fmt, va_list args);
-int sscanf(char *str, const char *fmt, ...);
-void system(char *command_string);
-void perror(char *s);
-int fgetc(FILE *fp);
+int    fflush(FILE *fp);
+int    scanf(const char *fmt, ...);
+int    fscanf(FILE *fp, const char *fmt, ...);
+int    fprintf(FILE *fp, const char *fmt, ...);
+int    printf(const char *fmt, ...);
+int    vsprintf(char *str, const char *fmt, va_list args);
+int    vfprintf(FILE *fp, const char *fmt, va_list args);
+int    vprintf(const char *fmt, va_list args);
+int    sscanf(char *str, const char *fmt, ...);
+void   system(char *command_string);
+void   perror(char *s);
+int    fgetc(FILE *fp);
 time_t time(time_t *tloc);
-void fclose(FILE *fp);
-void rewind(FILE *fp);
-char toupper(char c);
-char tolower(char c);
-int fseek(FILE *fp, long offset, int whence);
-int fread(void *ptr, int size, int nitems, FILE *fp);
-int fwrite(void *ptr, int size, int nitems, FILE *fp);
+void   fclose(FILE *fp);
+void   rewind(FILE *fp);
+char   toupper(char c);
+char   tolower(char c);
+int    fseek(FILE *fp, long offset, int whence);
+int    fread(void *ptr, int size, int nitems, FILE *fp);
+int    fwrite(void *ptr, int size, int nitems, FILE *fp);
 #endif /* SunOS */
 
 /*----------- Mac OS/X -----------------------*/
@@ -135,8 +130,8 @@ double rint(double x);
 //#define nint(f)  (f<0?((int)(f-0.5)):((int)(f+0.5)))
 /* ((int)((double)f+(f < 0 ? -0.5 : 0.5))) */
 #define isnan(f) 0
-#define unlink _unlink
-#define hypot _hypot
+#define unlink   _unlink
+#define hypot    _hypot
 #endif /* MSDOS */
 
 /*----------- Windows Cygwin -----------------------*/

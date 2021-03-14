@@ -1,20 +1,20 @@
 #ifndef __NormalizedCutsFilter_h
 #define __NormalizedCutsFilter_h
 
-#include "itkKdTree.h"
-#include "itkKdTreeGenerator.h"
-#include "itkKdTreeBasedKmeansEstimator.h"
-#include "itkListSample.h"
 #include "itkArray.h"
+#include "itkKdTree.h"
+#include "itkKdTreeBasedKmeansEstimator.h"
+#include "itkKdTreeGenerator.h"
+#include "itkListSample.h"
 #include "itkVector.h"
 //#include "itkImageKmeansModelEstimator.h"
 #include "itkImageRegionIteratorWithIndex.h"
 //#include "itkKMeansClassifierFilter.h"
-#include "itkVariableLengthVector.h"
-#include "itkPolylineCell.h"
-#include "itkWeightedCentroidKdTreeGenerator.h"
-#include "itkMeshToMeshFilter.h"
 #include "ThreadedMembershipFunction.h"
+#include "itkMeshToMeshFilter.h"
+#include "itkPolylineCell.h"
+#include "itkVariableLengthVector.h"
+#include "itkWeightedCentroidKdTreeGenerator.h"
 #if ITK_VERSION_MAJOR < 4
 #include "itkMaximumDecisionRule2.h"
 #else
@@ -27,73 +27,71 @@ class NormalizedCutsFilter : public ProcessObject
 //  public MeshToMeshFilter<TInputMesh, TOutputMesh>
 {
 public:
-  using Self = NormalizedCutsFilter<TMesh, TMembershipFunctionType>;
-  using Pointer = SmartPointer<Self>;
-  using ConstPointer = SmartPointer<const Self>;
+  typedef NormalizedCutsFilter     Self;
+  typedef SmartPointer<Self>       Pointer;
+  typedef SmartPointer<const Self> ConstPointer;
 
   itkNewMacro(Self);
   itkTypeMacro(NormalizedCutsFilter, ProcessObject);
 
-  using MeshType = TMesh;
-  using MeshTraits = typename MeshType::MeshTraits;
-  using PointType = typename MeshType::PointType;
-  using PixelType = typename MeshType::PixelType;
-  using CellType = typename MeshType::CellType;
-  using MeshPointerType = typename MeshType::Pointer;
+  typedef TMesh                         MeshType;
+  typedef typename MeshType::MeshTraits MeshTraits;
+  typedef typename MeshType::PointType  PointType;
+  typedef typename MeshType::PixelType  PixelType;
+  typedef typename MeshType::CellType   CellType;
+  typedef typename MeshType::Pointer    MeshPointerType;
 
-  using ListOfOutputMeshTypePointer = typename std::vector<MeshPointerType>;
+  typedef typename std::vector<MeshPointerType> ListOfOutputMeshTypePointer;
 
-  using MeshCellTraits = typename MeshType::CellTraits;
-  using MeshCellIdentifier = typename MeshType::CellIdentifier;
-  using MeshCellType = typename MeshType::CellType;
+  typedef typename MeshType::CellTraits     MeshCellTraits;
+  typedef typename MeshType::CellIdentifier MeshCellIdentifier;
+  typedef typename MeshType::CellType       MeshCellType;
 
-  using MeshCellAutoPointer = typename MeshType::CellAutoPointer;
-  using MeshPointIdentifier = typename MeshType::PointIdentifier;
-  using MeshPointIdIterator = typename MeshCellTraits::PointIdIterator;
+  typedef typename MeshType::CellAutoPointer       MeshCellAutoPointer;
+  typedef typename MeshType::PointIdentifier       MeshPointIdentifier;
+  typedef typename MeshCellTraits::PointIdIterator MeshPointIdIterator;
 
-  using PointsContainerPointer = typename MeshType::PointsContainerPointer;
+  typedef typename MeshType::PointsContainerPointer PointsContainerPointer;
 
-  using PointsContainer = typename MeshType::PointsContainer;
+  typedef typename MeshType::PointsContainer PointsContainer;
 
-  using CellsContainer = typename MeshType::CellsContainer;
+  typedef typename MeshType::CellsContainer CellsContainer;
 
-  using CellsContainerPointer = typename MeshType::CellsContainerPointer;
-  using PolylineCellType = PolylineCell<MeshCellType>;
+  typedef typename MeshType::CellsContainerPointer CellsContainerPointer;
+  typedef PolylineCell<MeshCellType>               PolylineCellType;
 
-  using MembershipFunctionType = TMembershipFunctionType;
-  using MembershipFunctionPointer = typename MembershipFunctionType::Pointer;
-  using MeasurementVectorType =
-      typename MembershipFunctionType::MeasurementVectorType;
+  typedef TMembershipFunctionType                  MembershipFunctionType;
+  typedef typename MembershipFunctionType::Pointer MembershipFunctionPointer;
+  typedef typename MembershipFunctionType::MeasurementVectorType
+      MeasurementVectorType;
 
-  using ThreadedMembershipFunctionType =
-      ThreadedMembershipFunction<MembershipFunctionType>;
+  typedef ThreadedMembershipFunction<MembershipFunctionType>
+      ThreadedMembershipFunctionType;
 
-  using SampleType = ListSample<MeasurementVectorType>;
-  using TreeGeneratorType = WeightedCentroidKdTreeGenerator<SampleType>;
-  using TreeType = typename TreeGeneratorType::KdTreeType;
-  using EstimatorType = KdTreeBasedKmeansEstimator<TreeType>;
+  typedef ListSample<MeasurementVectorType>           SampleType;
+  typedef WeightedCentroidKdTreeGenerator<SampleType> TreeGeneratorType;
+  typedef typename TreeGeneratorType::KdTreeType      TreeType;
+  typedef KdTreeBasedKmeansEstimator<TreeType>        EstimatorType;
 
 #if ITK_VERSION_MAJOR < 4
   typedef MaximumDecisionRule2 DecisionRuleType;
 #else
-  using DecisionRuleType = MaximumDecisionRule;
+  typedef MaximumDecisionRule DecisionRuleType;
 #endif
 
-  //	typedef KMeansClassifierFilter<SampleType,MembershipFunctionType>
-  //ClassifierType;
-  //		typedef typename ClassifierType::ClassLabelVectorType
-  //ClassLabelVectorType; 	typedef typename
-  //ClassifierType::MembershipFunctionVectorType MembershipFunctionVectorType;
-  using MembershipFunctionTypePointer =
-      typename MembershipFunctionType::Pointer;
-  using MembershipFunctionVectorType =
-      typename std::vector<MembershipFunctionTypePointer>;
+  //	typedef KMeansClassifierFilter<SampleType,MembershipFunctionType> ClassifierType;
+  //		typedef typename ClassifierType::ClassLabelVectorType                     ClassLabelVectorType;
+  //	typedef typename ClassifierType::MembershipFunctionVectorType             MembershipFunctionVectorType;
+  typedef
+      typename MembershipFunctionType::Pointer MembershipFunctionTypePointer;
+  typedef typename std::vector<MembershipFunctionTypePointer>
+      MembershipFunctionVectorType;
 
   ListOfOutputMeshTypePointer GetOutput() { return this->m_Output; }
 
   void SetNumberOfClusters(int n) { this->numberOfClusters = n; }
 
-  int GetNumberOfClusters() { return this->numberOfClusters; }
+  int  GetNumberOfClusters() { return this->numberOfClusters; }
   void SetNumberOfFibersForEigenDecomposition(int e) {
     this->m_numberOfFibersForEigenDecomposition = e;
   }
@@ -105,9 +103,9 @@ public:
   void SetLabels(std::vector<std::string> labels) { this->labels = labels; }
 
   MeshPointerType GetInput() { return this->input; }
-  void SetInput(MeshPointerType input) { this->input = input; }
-  // void Update();
-  virtual void Update();
+  void            SetInput(MeshPointerType input) { this->input = input; }
+  //void Update();
+  virtual void Update(void);
 
   itkGetMacro(SigmaCurrents, int);
   //  itkSetMacro( SigmaCurrents, int );
@@ -132,12 +130,12 @@ protected:
   SelectCentroids(typename SampleType::Pointer samples,
                   const typename MembershipFunctionType::Pointer);
   std::vector<std::pair<int, int>>
-  SelectCentroidsParallel(typename SampleType::Pointer samples,
-                          const typename MembershipFunctionType::Pointer);
+                  SelectCentroidsParallel(typename SampleType::Pointer samples,
+                                          const typename MembershipFunctionType::Pointer);
   MeshPointerType input;
-  std::vector<std::string> labels;
+  std::vector<std::string>    labels;
   ListOfOutputMeshTypePointer m_Output;
-  int numberOfClusters;
+  int                         numberOfClusters;
   NormalizedCutsFilter() {}
   ~NormalizedCutsFilter() {}
 
@@ -146,8 +144,8 @@ private:
   unsigned int m_NumberOfIterations;
   NormalizedCutsFilter(const Self &);
   std::vector<std::pair<std::string, std::string>> m_clusterIdHierarchy;
-  void operator=(const Self &);
-  int m_SigmaCurrents;
+  void                                             operator=(const Self &);
+  int                                              m_SigmaCurrents;
   int m_numberOfFibersForEigenDecomposition;
   //		void SaveClustersInMeshes(MembershipFunctionVectorType mfv);
   MembershipFunctionVectorType *m_membershipFunctions;

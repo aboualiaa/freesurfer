@@ -1,16 +1,11 @@
 /**
- * @file  LayerVolumeTrack.h
  * @brief Layer class for tracks saved in a multi-frame volume.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2013/02/06 18:35:43 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -45,7 +40,7 @@ public:
   void SetVisible(bool bVisible);
 
   virtual void Append3DProps(vtkRenderer *renderer,
-                             bool *bPlaneVisibility = NULL);
+                             bool *       bPlaneVisibility = NULL);
 
   virtual COLOR_TABLE *GetEmbeddedColorTable() { return m_ctabStripped; }
 
@@ -77,9 +72,9 @@ protected slots:
   void RebuildActors();
 
 protected:
-  QList< vtkSmartPointer<vtkActor> >  m_actors;
-  QList< bool > m_bVisiblities;
-  COLOR_TABLE* m_ctabStripped;
+  QList<vtkSmartPointer<vtkActor>> m_actors;
+  QList<bool>                      m_bVisiblities;
+  COLOR_TABLE *                    m_ctabStripped;
 };
 
 #endif // LAYERVOLUMETRACK_H

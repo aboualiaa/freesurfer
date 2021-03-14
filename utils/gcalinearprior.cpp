@@ -1,16 +1,11 @@
 /**
- * @file  gcalinearprior.cpp
  * @brief Class to hold a volume of GCA priors in linear memory
  *
  */
 /*
  * Original Authors: Richard Edgar
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:44 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,16 +22,15 @@
 #include <iostream>
 #include <limits>
 #include <numeric>
-using namespace std;
 
 #include "gcalinearprior.hpp"
 
 namespace Freesurfer {
 // ==========================================
-void GCAlinearPrior::PrintStats(ostream &os) const {
-  os << "Stats for GCAlinearPrior" << endl;
-  os << "  Exhumation time = " << exhumeTime << " ms" << endl;
-  os << "  Inhumation time = " << inhumeTime << " ms" << endl;
+void GCAlinearPrior::PrintStats(std::ostream &os) const {
+  os << "Stats for GCAlinearPrior" << std::endl;
+  os << "  Exhumation time = " << exhumeTime << " ms" << std::endl;
+  os << "  Inhumation time = " << inhumeTime << " ms" << std::endl;
 }
 
 // ==========================================
@@ -76,7 +70,7 @@ void GCAlinearPrior::Allocate() {
 
   //! Space for the offsets4D array
   this->offsets4D.clear();
-  this->offsets4D.resize(nVoxels + 1, numeric_limits<size_t>::max());
+  this->offsets4D.resize(nVoxels + 1, std::numeric_limits<size_t>::max());
   this->bytes += this->offsets4D.size() * sizeof(unsigned int);
 
   //! Space for maxLabels
@@ -86,17 +80,17 @@ void GCAlinearPrior::Allocate() {
 
   //! Space for the labels
   this->labels.clear();
-  this->labels.resize(this->n4D, numeric_limits<unsigned short>::max());
+  this->labels.resize(this->n4D, std::numeric_limits<unsigned short>::max());
   this->bytes += this->labels.size() * sizeof(unsigned short);
 
   //! Space for the priors
   this->priors.clear();
-  this->priors.resize(this->n4D, numeric_limits<float>::quiet_NaN());
+  this->priors.resize(this->n4D, std::numeric_limits<float>::quiet_NaN());
   this->bytes += this->priors.size() * sizeof(float);
 
   //! Space for totTraining
   this->totTraining.clear();
-  this->totTraining.resize(nVoxels, numeric_limits<int>::max());
+  this->totTraining.resize(nVoxels, std::numeric_limits<int>::max());
   this->bytes += this->totTraining.size() * sizeof(int);
 }
 
@@ -113,8 +107,8 @@ void GCAlinearPrior::Exhume(const GCA *const src) {
   this->ExtractDims(src);
   this->Allocate();
 
-  std::vector<unsigned int> labelCounts(this->totTraining.size(),
-                                        numeric_limits<unsigned int>::max());
+  std::vector<unsigned int> labelCounts(
+      this->totTraining.size(), std::numeric_limits<unsigned int>::max());
 
   // Handle the 3D data
   for (int ix = 0; ix < this->xDim; ix++) {
@@ -177,14 +171,14 @@ void GCAlinearPrior::Inhume(GCA *dst) const {
   this->ScorchPriors(dst);
 
   // Set dimensions
-  dst->prior_width = this->xDim;
+  dst->prior_width  = this->xDim;
   dst->prior_height = this->yDim;
-  dst->prior_depth = this->zDim;
+  dst->prior_depth  = this->zDim;
 
   // Start allocating
   dst->priors = (GCA_PRIOR ***)calloc(this->xDim, sizeof(GCA_PRIOR **));
   if (!(dst->priors)) {
-    cerr << __FUNCTION__ << ": dst->priors allocation failed" << endl;
+    std::cerr << __FUNCTION__ << ": dst->priors allocation failed" << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -193,7 +187,8 @@ void GCAlinearPrior::Inhume(GCA *dst) const {
     // Allocate pointer block
     dst->priors[ix] = (GCA_PRIOR **)calloc(this->yDim, sizeof(GCA_PRIOR *));
     if (!(dst->priors[ix])) {
-      cerr << __FUNCTION__ << ": dst->priors[ix] allocation failed" << endl;
+      std::cerr << __FUNCTION__ << ": dst->priors[ix] allocation failed"
+                << std::endl;
       exit(EXIT_FAILURE);
     }
 
@@ -201,8 +196,8 @@ void GCAlinearPrior::Inhume(GCA *dst) const {
       // Allocate pointer block
       dst->priors[ix][iy] = (GCA_PRIOR *)calloc(this->zDim, sizeof(GCA_PRIOR));
       if (!(dst->priors[ix][iy])) {
-        cerr << __FUNCTION__ << ": dst->priors[ix][iy] allocation failed"
-             << endl;
+        std::cerr << __FUNCTION__ << ": dst->priors[ix][iy] allocation failed"
+                  << std::endl;
         exit(EXIT_FAILURE);
       }
 
@@ -211,7 +206,7 @@ void GCAlinearPrior::Inhume(GCA *dst) const {
 
         const_GCAprior cGCAp = this->GetConstPrior(ix, iy, iz);
 
-        gcap->nlabels = cGCAp.labelCount();
+        gcap->nlabels    = cGCAp.labelCount();
         gcap->max_labels = cGCAp.maxLabel();
 
         gcap->total_training = cGCAp.totalTraining();

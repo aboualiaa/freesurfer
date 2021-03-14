@@ -1,16 +1,11 @@
 /**
- * @file  Interactor2DMeasure.cpp
  * @brief Interactor for measure tool in 2D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/08/24 19:16:46 $
- *    $Revision: 1.15 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,16 +19,16 @@
  */
 
 #include "Interactor2DMeasure.h"
-#include "RenderView2D.h"
 #include "Cursor2D.h"
-#include "MainWindow.h"
+#include "CursorFactory.h"
 #include "LayerCollection.h"
-#include "LayerVolumeBase.h"
 #include "LayerMRI.h"
+#include "LayerVolumeBase.h"
+#include "MainWindow.h"
 #include "Region2DLine.h"
 #include "Region2DPolyline.h"
 #include "Region2DRectangle.h"
-#include "CursorFactory.h"
+#include "RenderView2D.h"
 #include <vtkRenderer.h>
 
 Interactor2DMeasure::Interactor2DMeasure(QObject *parent)
@@ -43,7 +38,7 @@ Interactor2DMeasure::Interactor2DMeasure(QObject *parent)
 Interactor2DMeasure::~Interactor2DMeasure() {}
 
 bool Interactor2DMeasure::ProcessMouseDownEvent(QMouseEvent *event,
-                                                RenderView *renderview) {
+                                                RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
   // UpdateCursor( event, view );
 
@@ -98,7 +93,7 @@ bool Interactor2DMeasure::ProcessMouseDownEvent(QMouseEvent *event,
           m_bDrawing = true;
         } else // editing
         {
-          m_region = reg;
+          m_region   = reg;
           m_bEditing = true;
           m_region->Highlight();
           view->EmitRegionSelected(reg);
@@ -124,7 +119,7 @@ bool Interactor2DMeasure::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor2DMeasure::ProcessMouseUpEvent(QMouseEvent *event,
-                                              RenderView *renderview) {
+                                              RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
   UpdateCursor(event, renderview);
 
@@ -164,7 +159,7 @@ bool Interactor2DMeasure::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor2DMeasure::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                RenderView *renderview) {
+                                                RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   if (m_bDrawing) {
@@ -210,7 +205,7 @@ bool Interactor2DMeasure::ProcessMouseMoveEvent(QMouseEvent *event,
   }
 }
 
-bool Interactor2DMeasure::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor2DMeasure::ProcessKeyDownEvent(QKeyEvent * event,
                                               RenderView *renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
   UpdateCursor(event, renderview);
@@ -224,7 +219,7 @@ bool Interactor2DMeasure::ProcessKeyDownEvent(QKeyEvent *event,
   }
 }
 
-bool Interactor2DMeasure::ProcessKeyUpEvent(QKeyEvent *event,
+bool Interactor2DMeasure::ProcessKeyUpEvent(QKeyEvent * event,
                                             RenderView *renderview) {
   UpdateCursor(event, renderview);
 

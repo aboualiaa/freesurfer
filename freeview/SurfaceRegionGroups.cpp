@@ -1,16 +1,11 @@
 /**
- * @file  SurfaceRegionGroups.cpp
  * @brief Surface region from a surface selection in 3D view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:48 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -61,7 +56,7 @@ QColor SurfaceRegionGroups::GetGroupColor(int n) {
 
 int SurfaceRegionGroups::GetGroupIdRange(SurfaceRegion *reg) {
   QList<SurfaceRegion *> &regs = m_mri->m_surfaceRegions;
-  int nMax = 0;
+  int                     nMax = 0;
   for (int i = 0; i < regs.size(); i++) {
     if (regs[i] != reg && regs[i]->GetGroup() > nMax) {
       nMax = regs[i]->GetGroup();

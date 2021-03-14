@@ -1,5 +1,4 @@
 /**
- * @file  IconLoader.cxx
  * @brief Loads TIF and GIF icons and sets KW Menus and Pushbuttons
  *
  * Allows you to load icons from a text file list or at run time from
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,23 +20,21 @@
  *
  */
 
-#include <sstream>
-#include <string>
-#include <stdexcept>
-#include "tiffio.h"
 #include "IconLoader.h"
+#include "tiffio.h"
 #include "vtkKWApplication.h"
 #include "vtkKWCheckButton.h"
 #include "vtkKWMenu.h"
 #include "vtkKWPushButton.h"
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
-using namespace std;
-
-vtkKWApplication *IconLoader::mApp;
-map<string, bool> IconLoader::mabTkIconLoaded;
+vtkKWApplication *           IconLoader::mApp;
+map<string, bool>            IconLoader::mabTkIconLoaded;
 map<string, unsigned char *> IconLoader::maTIFFData;
-map<string, int> IconLoader::maWidth;
-map<string, int> IconLoader::maHeight;
+map<string, int>             IconLoader::maWidth;
+map<string, int>             IconLoader::maHeight;
 
 void IconLoader::Initialize(vtkKWApplication *iApp) {
 
@@ -61,53 +54,53 @@ void IconLoader::ShutDown() {
       _TIFFfree(tTIFFData->second);
 }
 
-void IconLoader::SetPushButtonIcon(const char *isKey,
+void IconLoader::SetPushButtonIcon(const char *     isKey,
                                    vtkKWPushButton *iButton) {
 
   map<string, unsigned char *>::iterator tTIFFData = maTIFFData.find(isKey);
   if (maTIFFData.end() == tTIFFData)
-    throw runtime_error(string("Icon key ") + string(isKey) +
-                        string(" not found in data map."));
+    throw std::runtime_error(string("Icon key ") + string(isKey) +
+                             string(" not found in data map."));
 
   map<string, int>::iterator tWidth = maWidth.find(isKey);
   if (maWidth.end() == tWidth)
-    throw runtime_error(string("Icon key ") + string(isKey) +
-                        string(" not found in width map."));
+    throw std::runtime_error(string("Icon key ") + string(isKey) +
+                             string(" not found in width map."));
 
   map<string, int>::iterator tHeight = maHeight.find(isKey);
   if (maWidth.end() == tHeight)
-    throw runtime_error(string("Icon key ") + string(isKey) +
-                        string(" not found in height map."));
+    throw std::runtime_error(string("Icon key ") + string(isKey) +
+                             string(" not found in height map."));
 
   if (NULL == tTIFFData->second)
-    throw runtime_error(string("Icon with key ") + string(isKey) +
-                        string(" had NULL data."));
+    throw std::runtime_error(string("Icon with key ") + string(isKey) +
+                             string(" had NULL data."));
 
   iButton->SetImageToPixels(tTIFFData->second, tWidth->second, tHeight->second,
                             4, 0);
 }
 
-void IconLoader::SetCheckButtonIcon(const char *isKey,
+void IconLoader::SetCheckButtonIcon(const char *      isKey,
                                     vtkKWCheckButton *iButton) {
 
   map<string, unsigned char *>::iterator tTIFFData = maTIFFData.find(isKey);
   if (maTIFFData.end() == tTIFFData)
-    throw runtime_error(string("Icon key ") + string(isKey) +
-                        string(" not found in data map."));
+    throw std::runtime_error(string("Icon key ") + string(isKey) +
+                             string(" not found in data map."));
 
   map<string, int>::iterator tWidth = maWidth.find(isKey);
   if (maWidth.end() == tWidth)
-    throw runtime_error(string("Icon key ") + string(isKey) +
-                        string(" not found in width map."));
+    throw std::runtime_error(string("Icon key ") + string(isKey) +
+                             string(" not found in width map."));
 
   map<string, int>::iterator tHeight = maHeight.find(isKey);
   if (maWidth.end() == tHeight)
-    throw runtime_error(string("Icon key ") + string(isKey) +
-                        string(" not found in height map."));
+    throw std::runtime_error(string("Icon key ") + string(isKey) +
+                             string(" not found in height map."));
 
   if (NULL == tTIFFData->second)
-    throw runtime_error(string("Icon with key ") + string(isKey) +
-                        string(" had NULL data."));
+    throw std::runtime_error(string("Icon with key ") + string(isKey) +
+                             string(" had NULL data."));
 
   iButton->SetImageToPixels(tTIFFData->second, tWidth->second, tHeight->second,
                             4, 0);
@@ -118,12 +111,12 @@ void IconLoader::SetMenuItemIcon(const char *isKey, vtkKWMenu *iMenu,
 
   map<string, bool>::iterator tbLoaded = mabTkIconLoaded.find(isKey);
   if (mabTkIconLoaded.end() == tbLoaded)
-    throw runtime_error(string("Icon key ") + string(isKey) +
-                        string(" not found in loaded map."));
+    throw std::runtime_error(string("Icon key ") + string(isKey) +
+                             string(" not found in loaded map."));
 
   if (!tbLoaded->second)
-    throw runtime_error(string("Icon with key ") + string(isKey) +
-                        string(" is not loaded."));
+    throw std::runtime_error(string("Icon with key ") + string(isKey) +
+                             string(" is not loaded."));
 
   iMenu->SetItemImage(inItem, isKey);
 }
@@ -133,14 +126,14 @@ int IconLoader::LoadIconsFromFile(const char *ifn) {
   int errs = 0;
 
   // Try to open the file.
-  ifstream fIcons(ifn, ios::in);
+  std::ifstream fIcons(ifn, std::ios::in);
   if (!fIcons || fIcons.bad()) {
-    throw runtime_error(string("Couldn't read icons file ") + ifn);
+    throw std::runtime_error(string("Couldn't read icons file ") + ifn);
   }
 
   // Go through the file.
-  int nLine = 1;
-  string sLine;
+  int         nLine = 1;
+  std::string sLine;
   while (!fIcons.eof()) {
 
     // Get a line.
@@ -151,26 +144,27 @@ int IconLoader::LoadIconsFromFile(const char *ifn) {
       break;
 
     // Try to get three strings out of this line.
-    stringstream ssLine(sLine);
-    string sKey, sfnTIFF, sfnGIF;
+    std::stringstream ssLine(sLine);
+    std::string       sKey, sfnTIFF, sfnGIF;
     if (ssLine >> sKey >> sfnTIFF >> sfnGIF) {
 
       // Try to load the icon with the strings that we got.
       try {
-        // cout << "LoadIcon: " << sKey.c_str() << ", "
+        // std::cout << "LoadIcon: " << sKey.c_str() << ", "
         //   << sfnTIFF.c_str() << ", "
-        //   << sfnGIF.c_str() << endl;
+        //   << sfnGIF.c_str() << std::endl;
         errs += LoadIcon(sKey.c_str(), sfnTIFF.c_str(), sfnGIF.c_str());
       } catch (exception &e) {
-        cerr << "Error reading " << ifn << ", line " << nLine << ": "
-             << e.what() << endl;
+        std::cerr << "Error reading " << ifn << ", line " << nLine << ": "
+                  << e.what() << std::endl;
         errs++;
       }
 
     } else {
 
-      cerr << "Error reading " << ifn << ", line " << nLine
-           << ": Malformed line, unexpected number of entries." << endl;
+      std::cerr << "Error reading " << ifn << ", line " << nLine
+                << ": Malformed line, unexpected number of entries."
+                << std::endl;
       errs++;
     }
 
@@ -189,30 +183,30 @@ int IconLoader::LoadIcon(const char *isKey, const char *ifnTIFF,
 
   // We'll substitute any IMAGEDIR in the file name with these
   // strings.
-  string fnImageDir;
-  char *FREESURFER_HOME = getenv("FREESURFER_HOME");
+  std::string fnImageDir;
+  char *      FREESURFER_HOME = getenv("FREESURFER_HOME");
   if (NULL == FREESURFER_HOME)
     fnImageDir = "../images";
   else
     fnImageDir = string(FREESURFER_HOME) + "/lib/images";
 
-  string fnTIFF = ifnTIFF;
-  string fnGIF = ifnGIF;
+  std::string fnTIFF = ifnTIFF;
+  std::string fnGIF  = ifnGIF;
 
   size_t nFound = fnTIFF.find("IMAGEDIR");
-  if (nFound != string::npos)
+  if (nFound != std::string::npos)
     fnTIFF.replace(nFound, strlen("IMAGEDIR"), fnImageDir);
 
   nFound = fnGIF.find("IMAGEDIR");
-  if (nFound != string::npos)
+  if (nFound != std::string::npos)
     fnGIF.replace(nFound, strlen("IMAGEDIR"), fnImageDir);
 
   // Load the data icon.
   TIFF *tiff = TIFFOpen(fnTIFF.c_str(), "r");
   if (tiff) {
 
-    uint32 zImageWidth, zImageHeight;
-    size_t cPixels;
+    uint32  zImageWidth, zImageHeight;
+    size_t  cPixels;
     uint32 *tempData;
     uint32 *data;
 
@@ -225,7 +219,7 @@ int IconLoader::LoadIcon(const char *isKey, const char *ifnTIFF,
     // doesn't have that function, so we have to use the older
     // TIFFReadRGBAImage and flip it manually.
     tempData = (uint32 *)_TIFFmalloc(cPixels * sizeof(uint32));
-    data = (uint32 *)_TIFFmalloc(cPixels * sizeof(uint32));
+    data     = (uint32 *)_TIFFmalloc(cPixels * sizeof(uint32));
     if (data) {
       //       if( TIFFReadRGBAImageOriented( tiff, zImageWidth, zImageHeight,
       //          data, ORIENTATION_TOPLEFT, 1 ) ) {
@@ -240,8 +234,8 @@ int IconLoader::LoadIcon(const char *isKey, const char *ifnTIFF,
         }
 
         maTIFFData[isKey] = (unsigned char *)data;
-        maWidth[isKey] = zImageWidth;
-        maHeight[isKey] = zImageHeight;
+        maWidth[isKey]    = zImageWidth;
+        maHeight[isKey]   = zImageHeight;
 
       } else {
         errs++;
@@ -256,9 +250,9 @@ int IconLoader::LoadIcon(const char *isKey, const char *ifnTIFF,
 
   } else {
     errs++;
-    string sError;
+    std::string sError;
     sError = string("Couldn't open ") + fnTIFF + ", missing?";
-    throw runtime_error(sError);
+    throw std::runtime_error(sError);
   }
 
   //  string sCmd = string("image create photo ") + sTkIconName + " -file [file

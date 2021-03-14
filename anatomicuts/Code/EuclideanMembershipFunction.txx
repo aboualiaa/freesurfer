@@ -4,11 +4,12 @@
 #include <iostream>
 
 #include "EuclideanMembershipFunction.h"
+#include <fstream>
 
 template <class TVector>
 EuclideanMembershipFunction<TVector>::EuclideanMembershipFunction()
     : Superclass() {
-  this->m_Variance = 0;
+  this->m_Variance   = 0;
   this->m_withCosine = false;
 }
 template <class TVector>
@@ -20,11 +21,11 @@ template <class TVector>
 double EuclideanMembershipFunction<TVector>::Evaluate(
     const MeasurementVectorType *m1, const MeasurementVectorType *m2) const {
   typedef typename MeasurementVectorType::CellType CellType;
-  const std::vector<CellType> *labels1 = m1->GetLabels();
-  const std::vector<CellType> *labels2 = m2->GetLabels();
-  double dist = 0.0, dist_inv = 0.0;
-  // double cos=1, cos_inv=1;
-  // std::cout << labels1->size() << std::endl;
+  const std::vector<CellType> *                    labels1 = m1->GetLabels();
+  const std::vector<CellType> *                    labels2 = m2->GetLabels();
+  double                                           dist = 0.0, dist_inv = 0.0;
+  //double cos=1, cos_inv=1;
+  //std::cout << labels1->size() << std::endl;
 
   for (int i = 0; i < labels1->size() - 1; i++) {
     double euclid = 0, euclid_inv = 0;
@@ -54,20 +55,20 @@ double EuclideanMembershipFunction<TVector>::Evaluate(
         cos += vec[k] * vec2[k];
         cos_inv += vec[k] * vec2_inv[k];
       }
-      norm2 = (sqrt(norm) * sqrt(norm2));
+      norm2     = (sqrt(norm) * sqrt(norm2));
       norm2_inv = (sqrt(norm) * sqrt(norm2_inv));
-      cos = abs(cos / norm2);
-      cos_inv = abs(cos_inv / norm2_inv);
+      cos       = abs(cos / norm2);
+      cos_inv   = abs(cos_inv / norm2_inv);
     }
-    // dist+= (1/sqrt(euclid+1.0))*cos;
-    // dist_inv+= (1/sqrt(euclid_inv+1.0))*cos_inv;
+    //dist+= (1/sqrt(euclid+1.0))*cos;
+    //dist_inv+= (1/sqrt(euclid_inv+1.0))*cos_inv;
     dist += sqrt(euclid);
     dist_inv += sqrt(euclid_inv);
   }
 
-  // dist =	   max( dist, dist_inv); ///(labels1->size()*7);
+  //dist =	   max( dist, dist_inv); ///(labels1->size()*7);
   dist = std::min(dist, dist_inv) / labels1->size();
-  // dist = 100000.0/(dist+1.0);
+  //dist = 100000.0/(dist+1.0);
   dist = 1.0 / (dist + 1);
   //	dist = exp(-dist/25);
   //	std::cout << dist << std::endl ;
@@ -83,8 +84,8 @@ void EuclideanMembershipFunction<TVector>::AddChild(
 }
 template <class TVector>
 void EuclideanMembershipFunction<TVector>::RecalculateCentroid() {
-  this->m_Variance = 0;
-  int numPoints = this->GetCentroid()->GetLabels()->size();
+  this->m_Variance                = 0;
+  int                   numPoints = this->GetCentroid()->GetLabels()->size();
   MeasurementVectorType averageMv(numPoints * 3);
 
   for (int i = 0; i < this->childs.size(); i++) {
@@ -138,37 +139,37 @@ void EuclideanMembershipFunction<TVector>::RecalculateCentroid() {
     }
   }
   /*double var = this->GetVariance();
-  std::cout << "childs size" << childs.size() << std::endl;
-  if(this->childs.size() > 0)
-  {
-          double minDist =  numeric_limits<double>::min();
-          int offset = this->childs.size()/min(50,(int)this->childs.size());
-          for(unsigned int i=0; i< this->childs.size(); i++)
-          {
-                  double min_i = 0;
-                  //			int offset2= this->childs.size();
-                  for(unsigned int j=0; j< this->childs.size() ; j++)
-                  {
-                          double D = this->Evaluate(childs[i], childs[j]);
-                          min_i += D*D;
+	std::cout << "childs size" << childs.size() << std::endl;
+	if(this->childs.size() > 0)
+	{
+		double minDist =  numeric_limits<double>::min();
+		int offset = this->childs.size()/min(50,(int)this->childs.size());
+		for(unsigned int i=0; i< this->childs.size(); i++)
+		{
+			double min_i = 0;
+			//			int offset2= this->childs.size();
+			for(unsigned int j=0; j< this->childs.size() ; j++)
+			{
+				double D = this->Evaluate(childs[i], childs[j]);
+				min_i += D*D;
 
-                  }
+			}
 
-                  min_i /= this->childs.size();
+			min_i /= this->childs.size();
 
-                  //	min_i =pow(var - min_i,2);
-                  if(  min_i > minDist )
-                  {
-                          minDist = min_i;
-                          this->SetCentroid(this->childs[i]);
-                  }
-                  i+=offset;
-          }
+			//	min_i =pow(var - min_i,2);		
+			if(  min_i > minDist )
+			{
+				minDist = min_i;
+				this->SetCentroid(this->childs[i]);
+			}
+			i+=offset;
+		}
 
-          this->m_Variance =  minDist/this->childs.size();
-
-  }
-  */
+		this->m_Variance =  minDist/this->childs.size();
+	
+	}
+	*/
 }
 
 template <class TVector>

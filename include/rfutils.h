@@ -1,16 +1,11 @@
 /**
- * @file  rfutils.h
  * @brief utilities for Random Forests
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2012/06/07 12:57:39 $
- *    $Revision: 1.1 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,12 +20,12 @@
 #ifndef RFUTILS_H
 #define RFUTILS_H
 
+#include "colortab.h"
 #include "mri.h"
 #include "transform.h"
-#include "colortab.h"
 
 #include "affine.h"
-#include "rforest.h"
 #include "cma.h"
+#include "rforest.h"
 
 #endif

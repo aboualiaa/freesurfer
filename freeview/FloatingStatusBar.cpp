@@ -1,16 +1,7 @@
-/**
- * @file  FloatingStatusBar.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/02 18:41:17 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -54,7 +45,7 @@ void FloatingStatusBar::ShowProgress() {
 
 void FloatingStatusBar::Reposition() {
   QWidget *p = parentWidget();
-  QSize s = p->size() - this->size();
+  QSize    s = p->size() - this->size();
 #ifdef Q_OS_MAC
   this->move(p->geometry().topLeft() + QPoint(0, s.height()) + QPoint(1, -1));
 #elif defined(Q_CYGWIN_WIN)

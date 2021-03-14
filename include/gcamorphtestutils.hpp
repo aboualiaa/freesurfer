@@ -1,5 +1,4 @@
 /**
- * @file  gcamorphtestutils.hpp
  * @brief Utilities to help with testing GCAmorph routines (C++ interface)
  *
  * Reference:
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Richard Edgar
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2012/12/12 21:18:23 $
- *    $Revision: 1.15 $
  *
- * Copyright © 2011-2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,10 +22,10 @@
 #ifndef GCAMORPH_TEST_UTILS_HPP
 #define GCAMORPH_TEST_UTILS_HPP
 
-#include <string>
-#include <map>
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
+#include <map>
+#include <string>
 
 #include "netcdf.h"
 

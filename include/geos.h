@@ -6,7 +6,7 @@
 
 typedef struct {
   double lambda;
-  int wsize;
+  int    wsize;
   double max_dist;
 } GEOS_PARMS, GP;
 

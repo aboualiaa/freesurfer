@@ -1,16 +1,7 @@
-/**
- * @file  PanelROI.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/12/11 16:04:03 $
- *    $Revision: 1.18 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -39,8 +30,8 @@ public:
   ~PanelROI();
 
 protected:
-  void DoUpdateWidgets();
-  void DoIdle();
+  void         DoUpdateWidgets();
+  void         DoIdle();
   virtual void ConnectLayer(Layer *layer);
 
 protected slots:
@@ -56,7 +47,7 @@ protected slots:
   void OnButtonResample();
 
 private:
-  Ui::PanelROI *ui;
+  Ui::PanelROI *   ui;
   QList<QWidget *> m_listWidgetsHeatscale;
 };
 

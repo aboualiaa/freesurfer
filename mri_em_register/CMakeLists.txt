@@ -2,11 +2,7 @@ project(mri_em_register)
 
 include_directories(${FS_INCLUDE_DIRS})
 
-set(SOURCES
-  mri_em_register.cpp
-  findtranslation.cpp
-  emregisterutils.cpp
-)
+set(SOURCES mri_em_register.cpp findtranslation.cpp emregisterutils.cpp)
 
 add_test_script(NAME mri_em_register_test SCRIPT test.sh DEPENDS mri_em_register)
 

@@ -16,7 +16,7 @@ namespace sbl {
 double evalImageTransform(const ImageTransform &transform,
                           const ImageGrayU &src, const ImageGrayU &dest,
                           int step, int border,
-                          const ImageGrayU *srcMask = NULL,
+                          const ImageGrayU *srcMask  = NULL,
                           const ImageGrayU *destMask = NULL,
                           bool interp = false, bool verbose = false);
 

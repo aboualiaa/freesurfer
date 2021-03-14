@@ -19,7 +19,6 @@
 ///
 //  Namespaces
 //
-using namespace std;
 
 ///
 //  Public Functions
@@ -202,8 +201,8 @@ void oclPrintDevInfo(cl_device_id device) {
   if (device_string != 0) {
     fprintf(stdout, "  CL_DEVICE_EXTENSIONS:\n");
     std::string stdDevString;
-    stdDevString = std::string(device_string);
-    size_t szOldPos = 0;
+    stdDevString      = std::string(device_string);
+    size_t szOldPos   = 0;
     size_t szSpacePos = stdDevString.find(
         ' ', szOldPos); // extensions string is space delimited
     while (szSpacePos != stdDevString.npos && (szSpacePos - szOldPos) > 0) {
@@ -216,7 +215,7 @@ void oclPrintDevInfo(cl_device_id device) {
       fprintf(stdout, "\t\t\t\t\t%s\n",
               stdDevString.substr(szOldPos, szSpacePos - szOldPos).c_str());
 
-      szOldPos = szSpacePos + 1;
+      szOldPos   = szSpacePos + 1;
       szSpacePos = stdDevString.find(' ', szOldPos);
     }
   } else {
@@ -264,7 +263,7 @@ void oclPrintDevInfo(cl_device_id device) {
 char *oclLoadProgSource(const char *cFilename, const char *cPreamble,
                         size_t *szFinalLength) {
   // locals
-  FILE *pFileStream = NULL;
+  FILE * pFileStream = NULL;
   size_t szSourceLength;
 
   // open the OpenCL source code file
@@ -309,7 +308,7 @@ char *oclLoadProgSource(const char *cFilename, const char *cPreamble,
 /// @param device_idx            index of the device of interest
 ///
 cl_device_id oclGetDev(cl_context cxGPUContext, unsigned int nr) {
-  size_t szParmDataBytes;
+  size_t        szParmDataBytes;
   cl_device_id *cdDevices;
 
   // get the list of GPU devices associated with context
@@ -337,7 +336,7 @@ cl_device_id oclGetDev(cl_context cxGPUContext, unsigned int nr) {
 /// @param cxGPUContext         OpenCL context
 ///
 cl_device_id oclGetFirstDev(cl_context cxGPUContext) {
-  size_t szParmDataBytes;
+  size_t        szParmDataBytes;
   cl_device_id *cdDevices;
 
   // get the list of GPU devices associated with context
@@ -360,19 +359,19 @@ cl_device_id oclGetFirstDev(cl_context cxGPUContext) {
 /// @param cxGPUContext         OpenCL context
 ///
 cl_device_id oclGetMaxFlopsDev(cl_context cxGPUContext) {
-  size_t szParmDataBytes;
+  size_t        szParmDataBytes;
   cl_device_id *cdDevices;
 
   // get the list of GPU devices associated with context
   clGetContextInfo(cxGPUContext, CL_CONTEXT_DEVICES, 0, NULL, &szParmDataBytes);
-  cdDevices = (cl_device_id *)malloc(szParmDataBytes);
+  cdDevices           = (cl_device_id *)malloc(szParmDataBytes);
   size_t device_count = szParmDataBytes / sizeof(cl_device_id);
 
   clGetContextInfo(cxGPUContext, CL_CONTEXT_DEVICES, szParmDataBytes, cdDevices,
                    NULL);
 
   cl_device_id max_flops_device = cdDevices[0];
-  int max_flops = 0;
+  int          max_flops        = 0;
 
   size_t current_device = 0;
 
@@ -402,7 +401,7 @@ cl_device_id oclGetMaxFlopsDev(cl_context cxGPUContext) {
 
     int flops = compute_units * clock_frequency;
     if (flops > max_flops) {
-      max_flops = flops;
+      max_flops        = flops;
       max_flops_device = cdDevices[current_device];
     }
     ++current_device;
@@ -425,7 +424,7 @@ cl_device_id oclGetMaxFlopsDev(cl_context cxGPUContext) {
 void oclCheckErrorFileLine(int errNum, int expected, const char *file,
                            const int lineNumber) {
   if (errNum != expected) {
-    cerr << "Line " << lineNumber << " in File " << file << endl;
+    std::cerr << "Line " << lineNumber << " in File " << file << std::endl;
     exit(1);
   }
 }

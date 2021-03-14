@@ -36,7 +36,7 @@ public:
 
   /// draw text
   virtual void drawText(const String &text, float x, float y, float r, float g,
-                        float b,
+                        float          b,
                         HorizAlignment alignment = HORIZ_ALIGN_LEFT) = 0;
 };
 

@@ -4,12 +4,8 @@
 # selxavg3-sess
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: greve $
-#    $Date: 2016/05/10 03:24:18 $
-#    $Revision: 1.68 $
 #
-# Copyright (C) 2002-2007,
+# Copyright © 2021
 # The General Hospital Corporation (Boston, MA). 
 # All rights reserved.
 #
@@ -23,7 +19,7 @@
 #
 
 
-set VERSION = '$Id: selxavg3-sess,v 1.68 2016/05/10 03:24:18 greve Exp $'
+set VERSION = 'selxavg3-sess @FS_VERSION@';
 
 set inputargs = ($argv);
 set DateStr = "`date '+%y%m%d%H%M%S'`"
@@ -63,7 +59,7 @@ set SynthSeed = -1;
 set ReduceToMask = 1;
 set threads = "-singleCompThread"; # one single thread
 if(! $?FS_SXA3_USE_BIN)  setenv FS_SXA3_USE_BIN 0
-if(! $?FS_MCRROOT) setenv FS_MCRROOT /usr/pubsw/common/matlab/9.5
+if(! $?FS_MCRROOT) setenv FS_MCRROOT $FREESURFER_HOME/MCRv84
 
 set UseOctave = 0;
 if($?FS_USE_OCTAVE) then
@@ -190,9 +186,20 @@ if($FS_SXA3_USE_BIN == 0) then
 else
   echo "FS_MCRROOT $FS_MCRROOT " |& tee -a $LF
   if($?LD_LIBRARY_PATH == 0) setenv LD_LIBRARY_PATH
-  setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH":"$FS_MCRROOT/runtime/glnxa64"
-  setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH":"$FS_MCRROOT/bin/glnxa64"
-  setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH":"$FS_MCRROOT/sys/os/glnxa64"
+  set ORIG_LD_LIBRARY_PATH = $LD_LIBRARY_PATH
+  set MCR_LD_LIBRARY_PATH = "$FS_MCRROOT/runtime/glnxa64":"$FS_MCRROOT/bin/glnxa64":"$FS_MCRROOT/sys/os/glnxa64"
+  set LIBSTD_PATH = `/sbin/ldconfig -p | grep libstdc++.so | sed -n 1p | awk '{ print $NF }'`
+  if ( "$LIBSTD_PATH" == "" ) then
+    echo "error: can't find libstdc++.so"
+    exit 1
+  endif
+  set LIBSTD_DIR = `dirname $LIBSTD_PATH`
+  setenv LD_LIBRARY_PATH "$ORIG_LD_LIBRARY_PATH":"$LIBSTD_DIR":"$MCR_LD_LIBRARY_PATH"
+  set selxbin = `which fast_selxavg3b.glnxa64`
+  if ( `ldd $selxbin |& grep -c 'not found'` ) then
+    echo "INFO: error loading libraries in default configuration, trying with MCR libraries only"
+    setenv LD_LIBRARY_PATH "$ORIG_LD_LIBRARY_PATH":"$MCR_LD_LIBRARY_PATH"
+  endif
   echo "LD_LIBRARY_PATH $LD_LIBRARY_PATH" |& tee -a $LF
 endif
 

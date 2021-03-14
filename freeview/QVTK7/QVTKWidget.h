@@ -36,10 +36,10 @@
 #ifndef Q_VTK_WIDGET_H
 #define Q_VTK_WIDGET_H
 
-#include "vtkGUISupportQtModule.h" // For export macro
 #include "QVTKInteractor.h"
-#include <QWidget>
+#include "vtkGUISupportQtModule.h" // For export macro
 #include <QTimer>
+#include <QWidget>
 
 class QVTKInteractorAdapter;
 
@@ -98,10 +98,10 @@ public:
   // These events can be picked up by command observers on the interactor
   enum vtkCustomEvents {
     ContextMenuEvent = QVTKInteractor::ContextMenuEvent,
-    DragEnterEvent = QVTKInteractor::DragEnterEvent,
-    DragMoveEvent = QVTKInteractor::DragMoveEvent,
-    DragLeaveEvent = QVTKInteractor::DragLeaveEvent,
-    DropEvent = QVTKInteractor::DropEvent
+    DragEnterEvent   = QVTKInteractor::DragEnterEvent,
+    DragMoveEvent    = QVTKInteractor::DragMoveEvent,
+    DragLeaveEvent   = QVTKInteractor::DragLeaveEvent,
+    DropEvent        = QVTKInteractor::DropEvent
   };
 
   // Description:
@@ -118,7 +118,7 @@ public:
   // interactions. (See vtkRenderWindow::DesiredUpdateRate,
   // vtkRenderWindowInteractor::DesiredUpdateRate and
   // vtkRenderWindowInteractor::StillUpdateRate for more details.)
-  virtual void setMaxRenderRateForImageCache(double rate);
+  virtual void   setMaxRenderRateForImageCache(double rate);
   virtual double maxRenderRateForImageCache() const;
 
   // Description:
@@ -253,7 +253,7 @@ protected:
 
   // the vtk render window
   vtkRenderWindow *mRenWin;
-  bool UseTDx;
+  bool             UseTDx;
 
   // the paint engine
   QPaintEngine *mPaintEngine;
@@ -272,12 +272,12 @@ protected:
 #endif
 
 protected:
-  vtkImageData *mCachedImage;
-  bool cachedImageCleanFlag;
-  bool automaticImageCache;
-  double maxImageCacheRenderRate;
+  vtkImageData *         mCachedImage;
+  bool                   cachedImageCleanFlag;
+  bool                   automaticImageCache;
+  double                 maxImageCacheRenderRate;
   QVTKInteractorAdapter *mIrenAdapter;
-  bool mDeferRenderInPaintEvent;
+  bool                   mDeferRenderInPaintEvent;
 
 private:
   //! unimplemented operator=
@@ -290,7 +290,7 @@ private:
   // Description:
   // Callback called on every vtkCommand::RenderEvent fired by the
   // vtkRenderWindow.
-  void renderEventCallback();
+  void   renderEventCallback();
   QTimer mDeferedRenderTimer;
 };
 

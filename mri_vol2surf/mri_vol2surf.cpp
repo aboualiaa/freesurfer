@@ -1,5 +1,4 @@
 /**
- * @file  mri_vol2surf.c
  * @brief utility for sampling volumes onto a surface.
  *
  * Purpose: Resamples a volume onto a surface. The surface
@@ -25,12 +24,8 @@
  */
 /*
  * Original Author: Doug Greve
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/05/30 20:58:47 $
- *    $Revision: 1.68 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -42,72 +37,79 @@
  *
  */
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 
-#include "icosahedron.h"
+#include "MRIio_old.h"
+#include "cmdargs.h"
 #include "diag.h"
-#include "mrisutils.h"
-#include "mri_identify.h"
-#include "mri2.h"
-#include "prime.h"
+#include "error.h"
+#include "fmriutils.h"
 #include "fsenv.h"
+#include "icosahedron.h"
+#include "mri.h"
+#include "mri2.h"
+#include "mri_identify.h"
+#include "mrisurf.h"
+#include "mrisutils.h"
+#include "prime.h"
+#include "proto.h" // nint
+#include "registerio.h"
 #include "resample.h"
 #include "selxavgio.h"
 #include "version.h"
-#include "fmriutils.h"
-#include "cmdargs.h"
 
 #ifndef FZERO
 #define FZERO(f) (fabs(f) < 0.0000001F)
 #endif
 
-static int parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static int  parse_commandline(int argc, char **argv);
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
-int main(int argc, char *argv[]);
+static int  singledash(char *flag);
+int         main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_vol2surf.c,v 1.68 2014/05/30 20:58:47 greve Exp $";
-
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 static char *defaulttypestring;
-static int defaulttype = MRI_VOLUME_TYPE_UNKNOWN;
+static int   defaulttype = MRI_VOLUME_TYPE_UNKNOWN;
 
-static char *srcvolid = nullptr;
-static char *srctypestring = nullptr;
-static int srctype = MRI_VOLUME_TYPE_UNKNOWN;
-static char *srcregfile = nullptr;
-static int regheader = 0;
-static char *srcwarp = nullptr;
-static int srcoldreg = 0;
-static char *srcsubject = nullptr;
-static char *srcsubjectuse = nullptr;
+static char *srcvolid      = NULL;
+static char *srctypestring = NULL;
+static int   srctype       = MRI_VOLUME_TYPE_UNKNOWN;
+static char *srcregfile    = NULL;
+static int   regheader     = 0;
+static char *srcwarp       = NULL;
+static int   srcoldreg     = 0;
+static char *srcsubject    = NULL;
+static char *srcsubjectuse = NULL;
 
-static char *ref_vol_name = "orig.mgz";
+static const char *ref_vol_name = "orig.mgz";
 
-static char *srchitvolid = nullptr;
-static char *srchittypestring = nullptr;
-static int srchittype = MRI_VOLUME_TYPE_UNKNOWN;
+static char *srchitvolid      = NULL;
+static char *srchittypestring = NULL;
+static int   srchittype       = MRI_VOLUME_TYPE_UNKNOWN;
 
-static char *hemi = nullptr;
-static char *surfname = "white";
-static char *trgsubject = nullptr;
-static int IcoOrder = -1;
-static float IcoRadius = 100;
-static char *surfreg = "sphere.reg";
-static char *thicknessname = "thickness";
-static float ProjFrac = 0;
-static int ProjOpt = 0;
-static char *volume_fraction_fname = nullptr;
-static int ProjDistFlag = 0;
-static float ProjFracMin = 0.0, ProjFracMax = 0.0, ProjFracDelta = 1.0;
+static char *      hemi                  = NULL;
+static char const *surfname              = "white";
+static char *      trgsubject            = NULL;
+static int         IcoOrder              = -1;
+static float       IcoRadius             = 100;
+static char const *surfreg               = "sphere.reg";
+static char const *thicknessname         = "thickness";
+static float       ProjFrac              = 0;
+static int         ProjOpt               = 0;
+static char *      volume_fraction_fname = NULL;
+static int         ProjDistFlag          = 0;
+static float       ProjFracMin = 0.0, ProjFracMax = 0.0, ProjFracDelta = 1.0;
 
 MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri, MATRIX *m, float din,
                         float dout, int nsamples, MRI *mri_wm, MRI *mri_gm,
@@ -117,77 +119,77 @@ MRI *estimate_gm_values(MRI *mri_wm, MRI *mri_gm, MRI *mri_csf, MRI *SrcVol,
                         MRI_SURFACE *TrgSurf, int InterpMethod, int float2int,
                         MRI *SrcHitVol);
 
-static MRI_SURFACE *Surf = nullptr;
-static MRI_SURFACE *SurfOut = nullptr;
-static MRI_SURFACE *SrcSurfReg = nullptr;
-static MRI_SURFACE *TrgSurfReg = nullptr;
-static int UseHash = 1;
+static MRI_SURFACE *Surf       = NULL;
+static MRI_SURFACE *SurfOut    = NULL;
+static MRI_SURFACE *SrcSurfReg = NULL;
+static MRI_SURFACE *TrgSurfReg = NULL;
+static int          UseHash    = 1;
 
-static char *outfile = nullptr;
-static char *outtypestring = nullptr;
-static int outtype = MRI_VOLUME_TYPE_UNKNOWN;
+static char *outfile       = NULL;
+static char *outtypestring = NULL;
+static int   outtype       = MRI_VOLUME_TYPE_UNKNOWN;
 
-static char *srchitfile = nullptr;
-static char *trghitfile = nullptr;
+static char *srchitfile = NULL;
+static char *trghitfile = NULL;
 
-static char *interpmethod_string = "nearest";
-static int interpmethod = -1;
-static char *mapmethod = "nnfr";
+static const char *interpmethod_string = "nearest";
+static int         interpmethod        = -1;
+static const char *mapmethod           = "nnfr";
 
-static int debug = 0;
-static int reshape = 0;
+static int debug         = 0;
+static int reshape       = 0;
 static int reshapefactor = 0;
 static int reshapetarget = 20;
-static int reshape3d = 0;
+static int reshape3d     = 0;
 
 static MATRIX *Dsrc, *Dsrctmp, *Wsrc, *Fsrc, *Qsrc, *vox2ras;
 
-static char *SUBJECTS_DIR = nullptr;
-static MRI *SrcVol, *SurfVals, *SurfVals2, *SurfValsP;
-static MRI *SrcHits, *SrcDist, *TrgHits, *TrgDist;
-static MRI *mritmp;
-static MRI *SrcHitVol;
-static MRI *TargVol;
+static char *SUBJECTS_DIR = NULL;
+static MRI * SrcVol, *SurfVals, *SurfVals2, *SurfValsP;
+static MRI * SrcHits, *SrcDist, *TrgHits, *TrgDist;
+static MRI * mritmp;
+static MRI * SrcHitVol;
+static MRI * TargVol;
 
 static FILE *fp;
 
-static char *nvoxfile = nullptr;
+static char *nvoxfile = NULL;
 
 static char tmpstr[2000];
 
-static int float2int_src;
-static char *float2int_string = "round";
-static int float2int = -1;
-static int fixtkreg = 0;
-static int ReverseMapFlag = 0;
+static int         float2int_src;
+static const char *float2int_string = "round";
+static int         float2int        = -1;
+static int         fixtkreg         = 0;
+static int         ReverseMapFlag   = 0;
 
 static int framesave = -1;
 
 static float fwhm = 0, gstd = 0;
 static float surf_fwhm = 0, surf_gstd = 0;
 
-static int srcsynth = 0;
-int srcsynthindex = 0;
-static long seed = -1; /* < 0 for auto */
-static char *seedfile = nullptr;
+static int   srcsynth      = 0;
+int          srcsynthindex = 0;
+static long  seed          = -1; /* < 0 for auto */
+static char *seedfile      = NULL;
 
-static double scale = 0;
-static int GetProjMax = 0;
-int UseCortexLabel = 0;
-static char *mask_label_name = nullptr;
-LABEL *area;
+static double scale           = 0;
+static int    GetProjMax      = 0;
+int           UseCortexLabel  = 0;
+static char * mask_label_name = NULL;
+LABEL *       area;
 
-double angles[3] = {0, 0, 0};
-MATRIX *Mrot = nullptr;
-double xyztrans[3] = {0, 0, 0};
-MATRIX *Mtrans = nullptr;
+double  angles[3]   = {0, 0, 0};
+MATRIX *Mrot        = NULL;
+double  xyztrans[3] = {0, 0, 0};
+MATRIX *Mtrans      = NULL;
 
-char *vsmfile = nullptr;
-MRI *vsm = nullptr;
-int UseOld = 1;
-MRI *MRIvol2surf(MRI *SrcVol, MATRIX *Rtk, MRI_SURFACE *TrgSurf, MRI *vsm,
-                 int InterpMethod, MRI *SrcHitVol, float ProjFrac, int ProjType,
-                 int nskip);
+char *vsmfile = NULL;
+MRI * vsm     = NULL;
+int   UseOld  = 1;
+MRI * MRIvol2surf(MRI *SrcVol, MATRIX *Rtk, MRI_SURFACE *TrgSurf, MRI *vsm,
+                  int InterpMethod, MRI *SrcHitVol, float ProjFrac, int ProjType,
+                  int nskip);
 
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
@@ -195,15 +197,15 @@ MRI *MRIvol2surf(MRI *SrcVol, MATRIX *Rtk, MRI_SURFACE *TrgSurf, MRI *vsm,
 int main(int argc, char **argv) {
   int n, err, f, vtx, svtx, tvtx, nproj, nSmoothSteps;
   int nrows_src, ncols_src, nslcs_src, nfrms;
-  // float ipr, bpr, intensity;
+  //float ipr, bpr, intensity;
   float colres_src = 0, rowres_src = 0, slcres_src = 0;
-  char fname[2000];
-  int nTrg121, nSrc121, nSrcLost;
-  int nTrgMulti, nSrcMulti;
+  char  fname[2000];
+  int   nTrg121, nSrc121, nSrcLost;
+  int   nTrgMulti, nSrcMulti;
   float MnTrgMultiHits, MnSrcMultiHits;
-  int nargs;
-  int r, c, s, nsrchits;
-  LTA *lta;
+  int   nargs;
+  int   r, c, s, nsrchits;
+  LTA * lta;
 
   nargs = handleVersionOption(argc, argv, "mri_vol2surf");
   if (nargs && argc - nargs == 1)
@@ -214,7 +216,7 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
   vg_isEqual_Threshold = 10e-4;
 
   if (argc == 0)
@@ -225,7 +227,7 @@ int main(int argc, char **argv) {
   dump_options(stdout);
 
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-  if (SUBJECTS_DIR == nullptr) {
+  if (SUBJECTS_DIR == NULL) {
     fprintf(stderr, "ERROR: SUBJECTS_DIR not defined in environment\n");
     exit(1);
   }
@@ -245,7 +247,7 @@ int main(int argc, char **argv) {
   if (srcsynth == 0 && srcsynthindex == 0) {
     /* Load the Source Volume */
     SrcVol = MRIreadType(srcvolid, srctype);
-    if (SrcVol == nullptr) {
+    if (SrcVol == NULL) {
       printf("ERROR: could not read %s as type %d\n", srcvolid, srctype);
       exit(1);
     }
@@ -259,14 +261,14 @@ int main(int argc, char **argv) {
     /* Synth the Source Volume */
     printf("Synthesizing, seed = %ld\n", seed);
     srand48(seed);
-    // srcfmtid = checkfmt(srctype);
+    //srcfmtid = checkfmt(srctype);
     mritmp = MRIreadType(srcvolid, srctype);
-    if (mritmp == nullptr) {
+    if (mritmp == NULL) {
       printf("ERROR: could not read %s as type %d\n", srcvolid, srctype);
       exit(1);
     }
     SrcVol = MRIrandn(mritmp->width, mritmp->height, mritmp->depth,
-                      mritmp->nframes, 0, 1, nullptr);
+                      mritmp->nframes, 0, 1, NULL);
     MRIcopyHeader(mritmp, SrcVol);
     SrcVol->type = MRI_FLOAT;
     MRIfree(&mritmp);
@@ -274,17 +276,17 @@ int main(int argc, char **argv) {
   if (srcsynthindex) {
     printf("Synthesizing with index\n");
     mritmp = MRIreadType(srcvolid, srctype);
-    if (mritmp == nullptr) {
+    if (mritmp == NULL) {
       printf("ERROR: could not read %s as type %d\n", srcvolid, srctype);
       exit(1);
     }
-    SrcVol = MRIindexNo(mritmp, nullptr);
+    SrcVol = MRIindexNo(mritmp, NULL);
   }
 
   if (!regheader) {
     /* Load the registration matrix */
     lta = LTAread(srcregfile);
-    if (lta == nullptr)
+    if (lta == NULL)
       exit(1);
     if (debug)
       LTAprint(stdout, lta);
@@ -336,9 +338,9 @@ int main(int argc, char **argv) {
     printf("Computing registration from header.\n");
     printf("  Using %s as target reference.\n", tmpstr);
     TargVol = MRIreadHeader(tmpstr, MRI_VOLUME_TYPE_UNKNOWN);
-    if (TargVol == nullptr)
+    if (TargVol == NULL)
       exit(1);
-    Dsrc = MRItkRegMtx(TargVol, SrcVol, nullptr);
+    Dsrc = MRItkRegMtx(TargVol, SrcVol, NULL);
     MRIfree(&TargVol);
   }
 
@@ -365,10 +367,10 @@ int main(int argc, char **argv) {
     Dsrc = MatrixMultiply(Mtrans, Dsrc, Dsrc);
   }
 
-  ncols_src = SrcVol->width;
-  nrows_src = SrcVol->height;
-  nslcs_src = SrcVol->depth;
-  nfrms = SrcVol->nframes;
+  ncols_src  = SrcVol->width;
+  nrows_src  = SrcVol->height;
+  nslcs_src  = SrcVol->depth;
+  nfrms      = SrcVol->nframes;
   colres_src = SrcVol->xsize; /* in-plane resolution */
   rowres_src = SrcVol->ysize; /* in-plane resolution */
   slcres_src = SrcVol->zsize; /* between-plane resolution */
@@ -388,7 +390,7 @@ int main(int argc, char **argv) {
     printf("-------- fixed matrix -----------\n");
     MatrixPrint(stdout, Dsrctmp);
     MatrixFree(&Dsrc);
-    Dsrc = Dsrctmp;
+    Dsrc      = Dsrctmp;
     float2int = FLT2INT_ROUND;
   }
 
@@ -399,7 +401,7 @@ int main(int argc, char **argv) {
   if (vsmfile) {
     printf("Reading vsm %s\n", vsmfile);
     vsm = MRIread(vsmfile);
-    if (vsm == nullptr) {
+    if (vsm == NULL) {
       printf("ERROR: could not read %s\n", vsmfile);
       exit(1);
     }
@@ -411,20 +413,20 @@ int main(int argc, char **argv) {
   }
 
   /* Wsrc: Get the source warping Transform */
-  Wsrc = nullptr;
+  Wsrc = NULL;
   /* Fsrc: Get the source FOV registration matrix */
-  Fsrc = nullptr;
+  Fsrc = NULL;
   // Compute vox2ras for source
   vox2ras = MRIxfmCRS2XYZtkreg(SrcVol);
   // Compute ras2vox (Qsrc: the quantization matrix)
-  Qsrc = MatrixInverse(vox2ras, nullptr);
+  Qsrc = MatrixInverse(vox2ras, NULL);
 
   if (fwhm > 0) {
     printf("INFO: smoothing volume at fwhm = %g mm (std = %g)\n", fwhm, gstd);
     MRIgaussianSmooth(SrcVol, gstd, 1, SrcVol); /* 1 = normalize */
   }
 
-  if (trgsubject == nullptr)
+  if (trgsubject == NULL)
     trgsubject = srcsubject;
   if (UseCortexLabel) {
     sprintf(tmpstr, "%s/%s/label/%s.cortex.label", SUBJECTS_DIR, trgsubject,
@@ -433,8 +435,8 @@ int main(int argc, char **argv) {
   }
   if (mask_label_name) {
     printf("Loading label %s\n", mask_label_name);
-    area = LabelRead(nullptr, mask_label_name);
-    if (area == nullptr)
+    area = LabelRead(NULL, mask_label_name);
+    if (area == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load label file %s", Progname,
                 mask_label_name);
   }
@@ -461,7 +463,7 @@ int main(int argc, char **argv) {
 
   SrcHitVol = MRIallocSequence(SrcVol->width, SrcVol->height, SrcVol->depth,
                                MRI_FLOAT, 1);
-  if (SrcHitVol == nullptr) {
+  if (SrcHitVol == NULL) {
     printf("ERROR: could not alloc SrcHitVol\n");
     exit(1);
   }
@@ -471,32 +473,32 @@ int main(int argc, char **argv) {
   printf("Mapping Source Volume onto Source Subject Surface\n");
   fflush(stdout);
   if (ProjOpt != 0) {
-    char fname[STRLEN];
-    MRI *mri_gm, *mri_wm, *mri_csf;
+    char    fname[STRLEN];
+    MRI *   mri_gm, *mri_wm, *mri_csf;
     MATRIX *Qsrc, *QFWDsrc;
 
     sprintf(fname, "%s.gm.mgz", volume_fraction_fname);
     printf("reading gm volume fraction from %s\n", fname);
     mri_gm = MRIread(fname);
-    if (mri_gm == nullptr)
+    if (mri_gm == NULL)
       ErrorExit(ERROR_NOFILE, "could not read gm volume fraction from %s",
                 fname);
 
     sprintf(fname, "%s.wm.mgz", volume_fraction_fname);
     printf("reading wm volume fraction from %s\n", fname);
     mri_wm = MRIread(fname);
-    if (mri_wm == nullptr)
+    if (mri_wm == NULL)
       ErrorExit(ERROR_NOFILE, "could not read wm volume fraction from %s",
                 fname);
     sprintf(fname, "%s.csf.mgz", volume_fraction_fname);
     printf("reading csf volume fraction from %s\n", fname);
     mri_csf = MRIread(fname);
-    if (mri_csf == nullptr)
+    if (mri_csf == NULL)
       ErrorExit(ERROR_NOFILE, "could not read csf volume fraction from %s",
                 fname);
-    Qsrc = MRIxfmCRS2XYZtkreg(SrcVol);
-    Qsrc = MatrixInverse(Qsrc, Qsrc);
-    QFWDsrc = ComputeQFWD(Qsrc, Fsrc, Wsrc, Dsrc, nullptr);
+    Qsrc     = MRIxfmCRS2XYZtkreg(SrcVol);
+    Qsrc     = MatrixInverse(Qsrc, Qsrc);
+    QFWDsrc  = ComputeQFWD(Qsrc, Fsrc, Wsrc, Dsrc, NULL);
     SurfVals = build_sample_array(Surf, SrcVol, QFWDsrc, 1.0, 0.1, 10, mri_wm,
                                   mri_gm, mri_csf);
     MatrixFree(&Qsrc);
@@ -513,17 +515,16 @@ int main(int argc, char **argv) {
                                     SrcHitVol, ProjDistFlag, 1);
       } else {
         printf("using new\n");
-        SurfValsP =
-            MRIvol2surfVSM(SrcVol, Dsrc, Surf, vsm, interpmethod, SrcHitVol,
-                           ProjFrac, ProjDistFlag, 1, nullptr);
+        SurfValsP = MRIvol2surfVSM(SrcVol, Dsrc, Surf, vsm, interpmethod,
+                                   SrcHitVol, ProjFrac, ProjDistFlag, 1, NULL);
       }
       fflush(stdout);
-      if (SurfValsP == nullptr) {
+      if (SurfValsP == NULL) {
         printf("ERROR: mapping volume to source\n");
         exit(1);
       }
       if (nproj == 0)
-        SurfVals = MRIcopy(SurfValsP, nullptr);
+        SurfVals = MRIcopy(SurfValsP, NULL);
       else {
         if (!GetProjMax)
           MRIadd(SurfVals, SurfValsP, SurfVals);
@@ -552,9 +553,9 @@ int main(int argc, char **argv) {
     }
   }
   printf("Number of source voxels hit = %d\n", nsrchits);
-  if (nvoxfile != nullptr) {
+  if (nvoxfile != NULL) {
     fp = fopen(nvoxfile, "w");
-    if (fp == nullptr)
+    if (fp == NULL)
       printf("ERROR: could not open nvox file %s\n", nvoxfile);
     else {
       fprintf(fp, "%d\n", nsrchits);
@@ -562,18 +563,18 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (srchitvolid != nullptr) {
+  if (srchitvolid != NULL) {
     printf("Saving src hit volume.\n");
     MRIwriteType(SrcHitVol, srchitvolid, srchittype);
   }
   MRIfree(&SrcHitVol);
 
-  if (trgsubject != nullptr && strcmp(trgsubject, srcsubject)) {
+  if (trgsubject != NULL && strcmp(trgsubject, srcsubject)) {
     /* load in the source subject registration */
     sprintf(fname, "%s/%s/surf/%s.%s", SUBJECTS_DIR, srcsubject, hemi, surfreg);
     printf("Reading source surface registration \n  %s\n", fname);
     SrcSurfReg = MRISread(fname);
-    if (SrcSurfReg == nullptr) {
+    if (SrcSurfReg == NULL) {
       printf("ERROR: reading %s\n", fname);
       exit(1);
     }
@@ -586,7 +587,7 @@ int main(int argc, char **argv) {
               surfreg);
       printf("Reading target registration \n   %s\n", fname);
       TrgSurfReg = MRISread(fname);
-      if (TrgSurfReg == nullptr) {
+      if (TrgSurfReg == NULL) {
         printf("ERROR: could not read %s\n", fname);
         exit(1);
       }
@@ -597,7 +598,7 @@ int main(int argc, char **argv) {
       printf("Reading icosahedron, order = %d, radius = %g\n", IcoOrder,
              IcoRadius);
       TrgSurfReg = ReadIcoByOrder(IcoOrder, IcoRadius);
-      if (TrgSurfReg == nullptr) {
+      if (TrgSurfReg == NULL) {
         printf("ERROR reading icosahedron\n");
         exit(1);
       }
@@ -615,17 +616,17 @@ int main(int argc, char **argv) {
     SurfVals2 =
         surf2surf_nnfr(SurfVals, SrcSurfReg, TrgSurfReg, &SrcHits, &SrcDist,
                        &TrgHits, &TrgDist, ReverseMapFlag, UseHash);
-    if (SurfVals2 == nullptr) {
+    if (SurfVals2 == NULL) {
       printf("ERROR: mapping surfaces\n");
       exit(1);
     }
     printf("Done mapping surfaces\n");
     fflush(stdout);
 
-    /*Compute some stats on mapping number
+    /*Compute some stats on mapping number 
       of trgvtxs mapped from a source vtx */
-    nSrc121 = 0;
-    nSrcLost = 0;
+    nSrc121        = 0;
+    nSrcLost       = 0;
     MnSrcMultiHits = 0.0;
     for (svtx = 0; svtx < SrcSurfReg->nvertices; svtx++) {
       n = MRIFseq_vox(SrcHits, svtx, 0, 0, 0);
@@ -646,7 +647,7 @@ int main(int argc, char **argv) {
            nSrc121, nSrcLost, nSrcMulti, MnSrcMultiHits);
     MRISfree(&SrcSurfReg);
 
-    nTrg121 = 0;
+    nTrg121        = 0;
     MnTrgMultiHits = 0.0;
     for (tvtx = 0; tvtx < TrgSurfReg->nvertices; tvtx++) {
       n = MRIFseq_vox(TrgHits, tvtx, 0, 0, 0);
@@ -664,14 +665,14 @@ int main(int argc, char **argv) {
            nTrgMulti, MnTrgMultiHits);
 
     /* save the Source Hits into a .w file */
-    if (srchitfile != nullptr) {
+    if (srchitfile != NULL) {
       for (vtx = 0; vtx < Surf->nvertices; vtx++)
         Surf->vertices[vtx].val = MRIFseq_vox(SrcHits, vtx, 0, 0, 0);
       MRISwriteValues(Surf, srchitfile);
       MRIfree(&SrcHits);
     }
     /* save the Target Hits into a .w file */
-    if (trghitfile != nullptr) {
+    if (trghitfile != NULL) {
       for (vtx = 0; vtx < SurfOut->nvertices; vtx++)
         SurfOut->vertices[vtx].val = MRIFseq_vox(TrgHits, vtx, 0, 0, 0);
       MRISwriteValues(SurfOut, trghitfile);
@@ -681,7 +682,7 @@ int main(int argc, char **argv) {
   } else {
     // Source and target subjects are the same
     SurfVals2 = SurfVals;
-    SurfOut = Surf;
+    SurfOut   = Surf;
   }
 
   if (surf_fwhm > 0) {
@@ -690,7 +691,7 @@ int main(int argc, char **argv) {
       exit(1);
     printf("Surface smoothing by fwhm = %g (n=%d)\n", surf_fwhm, nSmoothSteps);
     fflush(stdout);
-    MRISsmoothMRI(SurfOut, SurfVals2, nSmoothSteps, nullptr, SurfVals2);
+    MRISsmoothMRI(SurfOut, SurfVals2, nSmoothSteps, NULL, SurfVals2);
   }
 
   if (scale != 0) {
@@ -699,8 +700,8 @@ int main(int argc, char **argv) {
   }
 
   if (framesave > 0) {
-    mritmp = fMRIframe(SurfVals2, framesave, nullptr);
-    if (mritmp == nullptr)
+    mritmp = fMRIframe(SurfVals2, framesave, NULL);
+    if (mritmp == NULL)
       exit(1);
     MRIfree(&SurfVals2);
     SurfVals2 = mritmp;
@@ -718,8 +719,8 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (outtypestring != nullptr && (!strcasecmp(outtypestring, "w") ||
-                                   !strcasecmp(outtypestring, "paint"))) {
+  if (outtypestring != NULL && (!strcasecmp(outtypestring, "w") ||
+                                !strcasecmp(outtypestring, "paint"))) {
     /*-------------- paint or .w --------------*/
     for (vtx = 0; vtx < SurfVals2->width; vtx++)
       SurfOut->vertices[vtx].val = MRIFseq_vox(SurfVals2, vtx, 0, 0, 0);
@@ -741,7 +742,7 @@ int main(int argc, char **argv) {
                SurfVals2->width);
         mritmp = mri_reshape(SurfVals2, SurfVals2->width / reshapefactor, 1,
                              reshapefactor, SurfVals2->nframes);
-        if (mritmp == nullptr) {
+        if (mritmp == NULL) {
           printf("ERROR: mri_reshape could not alloc\n");
           return (1);
         }
@@ -759,7 +760,7 @@ int main(int argc, char **argv) {
       }
       printf("Reshape 3d\n");
       mritmp = mri_reshape(SurfVals2, 42, 47, 83, SurfVals2->nframes);
-      if (mritmp == nullptr) {
+      if (mritmp == NULL) {
         printf("ERROR: mri_reshape could not alloc\n");
         return (1);
       }
@@ -781,7 +782,7 @@ int main(int argc, char **argv) {
 }
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -819,7 +820,7 @@ static int parse_commandline(int argc, char **argv) {
       reshape = 1;
     else if (!strcasecmp(option, "--reshape3d")) {
       reshape3d = 1;
-      reshape = 0;
+      reshape   = 0;
     } else if (!strcasecmp(option, "--noreshape"))
       reshape = 0;
     else if (!strcasecmp(option, "--no-reshape"))
@@ -829,11 +830,11 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--nofixtkreg"))
       fixtkreg = 0;
     else if (!strcasecmp(option, "--v")) {
-      Gdiag_no = atoi(pargv[0]);
+      Gdiag_no  = atoi(pargv[0]);
       nargsused = 1;
     } else if (!strcasecmp(option, "--ref")) {
       ref_vol_name = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--inflated"))
       surfname = "inflated";
 
@@ -847,15 +848,15 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       defaulttypestring = pargv[0];
-      defaulttype = string_to_type(defaulttypestring);
-      nargsused = 1;
+      defaulttype       = string_to_type(defaulttypestring);
+      nargsused         = 1;
     }
     /* -------- source volume inputs ------ */
     else if (!strcmp(option, "--srcvol") || !strcmp(option, "--src") ||
              !strcmp(option, "--mov")) {
       if (nargc < 1)
         argnerr(option, 1);
-      srcvolid = pargv[0];
+      srcvolid  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--src_type") ||
                !strcmp(option, "--srcvol_type") ||
@@ -863,32 +864,32 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       srctypestring = pargv[0];
-      srctype = string_to_type(srctypestring);
-      nargsused = 1;
+      srctype       = string_to_type(srctypestring);
+      nargsused     = 1;
     } else if (!strcmp(option, "--srchitvol") || !strcmp(option, "--srchit")) {
       if (nargc < 1)
         argnerr(option, 1);
       srchitvolid = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--srchit_type") ||
                !strcmp(option, "--srchitvol_type") ||
                !strcmp(option, "--srchitfmt")) {
       if (nargc < 1)
         argnerr(option, 1);
       srchittypestring = pargv[0];
-      srchittype = string_to_type(srchittypestring);
-      nargsused = 1;
+      srchittype       = string_to_type(srchittypestring);
+      nargsused        = 1;
     } else if (!strcmp(option, "--reg") || !strcmp(option, "--srcreg")) {
       if (nargc < 1)
         argnerr(option, 1);
       srcregfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--regheader")) {
       if (nargc < 1)
         argnerr(option, 1);
-      regheader = 1;
+      regheader  = 1;
       srcsubject = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--vg-thresh")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -908,7 +909,7 @@ static int parse_commandline(int argc, char **argv) {
       angles[0] *= (M_PI / 180);
       angles[1] *= (M_PI / 180);
       angles[2] *= (M_PI / 180);
-      Mrot = MRIangles2RotMat(angles);
+      Mrot      = MRIangles2RotMat(angles);
       nargsused = 3;
     } else if (!strcmp(option, "--trans")) {
       if (nargc < 3)
@@ -917,17 +918,17 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%lf", &xyztrans[0]);
       sscanf(pargv[1], "%lf", &xyztrans[1]);
       sscanf(pargv[2], "%lf", &xyztrans[2]);
-      Mtrans = MatrixIdentity(4, nullptr);
+      Mtrans             = MatrixIdentity(4, NULL);
       Mtrans->rptr[1][4] = xyztrans[0];
       Mtrans->rptr[2][4] = xyztrans[1];
       Mtrans->rptr[3][4] = xyztrans[2];
-      nargsused = 3;
+      nargsused          = 3;
     } else if (!strcmp(option, "--srcoldreg")) {
       srcoldreg = 1;
     } else if (!strcmp(option, "--srcwarp")) {
       if (nargc < 1)
         argnerr(option, 1);
-      srcwarp = pargv[0];
+      srcwarp   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--frame")) {
       if (nargc < 1)
@@ -950,7 +951,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--hemi")) {
       if (nargc < 1)
         argnerr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--mapmethod")) {
       if (nargc < 1)
@@ -965,12 +966,12 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       trgsubject = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--srcsubject")) {
       if (nargc < 1)
         argnerr(option, 1);
       srcsubjectuse = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--icoorder")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -981,22 +982,22 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--surfreg")) {
       if (nargc < 1)
         argnerr(option, 1);
-      surfreg = pargv[0];
+      surfreg   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--projfrac")) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%f", &ProjFrac);
-      ProjFracMin = ProjFrac;
-      ProjFracMax = ProjFrac;
+      ProjFracMin   = ProjFrac;
+      ProjFracMax   = ProjFrac;
       ProjFracDelta = 1.0;
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--projopt")) {
       if (nargc < 1)
         argnerr(option, 1);
       volume_fraction_fname = pargv[0];
-      ProjOpt = 1;
-      nargsused = 1;
+      ProjOpt               = 1;
+      nargsused             = 1;
     } else if (!strcmp(option, "--projfrac-int") ||
                !strcmp(option, "--projfrac-avg")) {
       if (nargc < 3)
@@ -1004,7 +1005,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%f", &ProjFracMin);
       sscanf(pargv[1], "%f", &ProjFracMax);
       sscanf(pargv[2], "%f", &ProjFracDelta);
-      ProjFrac = 0.5; // just make it non-zero
+      ProjFrac  = 0.5; // just make it non-zero
       nargsused = 3;
     } else if (!strcmp(option, "--projfrac-max")) {
       if (nargc < 3)
@@ -1012,18 +1013,18 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%f", &ProjFracMin);
       sscanf(pargv[1], "%f", &ProjFracMax);
       sscanf(pargv[2], "%f", &ProjFracDelta);
-      ProjFrac = 0.5; // just make it non-zero
+      ProjFrac   = 0.5; // just make it non-zero
       GetProjMax = 1;
-      nargsused = 3;
+      nargsused  = 3;
     } else if (!strcmp(option, "--projdist")) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%f", &ProjFrac);
-      ProjFracMin = ProjFrac;
-      ProjFracMax = ProjFrac;
+      ProjFracMin   = ProjFrac;
+      ProjFracMax   = ProjFrac;
       ProjFracDelta = 1.0;
-      ProjDistFlag = 1;
-      nargsused = 1;
+      ProjDistFlag  = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--cortex"))
       UseCortexLabel = 1;
     else if (!strcmp(option, "--mask")) {
@@ -1039,19 +1040,19 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[0], "%f", &ProjFracMin);
       sscanf(pargv[1], "%f", &ProjFracMax);
       sscanf(pargv[2], "%f", &ProjFracDelta);
-      ProjFrac = 0.5; // just make it non-zero
+      ProjFrac     = 0.5; // just make it non-zero
       ProjDistFlag = 1;
-      nargsused = 3;
+      nargsused    = 3;
     } else if (!strcmp(option, "--projdist-max")) {
       if (nargc < 3)
         argnerr(option, 3);
       sscanf(pargv[0], "%f", &ProjFracMin);
       sscanf(pargv[1], "%f", &ProjFracMax);
       sscanf(pargv[2], "%f", &ProjFracDelta);
-      ProjFrac = 0.5; // just make it non-zero
+      ProjFrac     = 0.5; // just make it non-zero
       ProjDistFlag = 1;
-      GetProjMax = 1;
-      nargsused = 3;
+      GetProjMax   = 1;
+      nargsused    = 3;
     } else if (!strcmp(option, "--scale")) {
       if (nargc < 1)
         argnerr(option, 1);
@@ -1065,12 +1066,12 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       thicknessname = pargv[0];
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--interp")) {
       if (nargc < 1)
         argnerr(option, 1);
       interpmethod_string = pargv[0];
-      interpmethod = interpolation_code(interpmethod_string);
+      interpmethod        = interpolation_code(interpmethod_string);
       if (interpmethod == -1) {
         fprintf(stderr, "ERROR: interpmethod = %s\n", interpmethod_string);
         fprintf(stderr, "  must be either nearest or trilinear \n");
@@ -1081,7 +1082,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       float2int_string = pargv[0];
-      float2int = float2int_code(float2int_string);
+      float2int        = float2int_code(float2int_string);
       if (float2int == -1) {
         fprintf(stderr, "ERROR: float2int = %s\n", float2int_string);
         fprintf(stderr, "  must be either round, floor, or tkreg\n");
@@ -1091,52 +1092,54 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--o") || !strcmp(option, "--out")) {
       if (nargc < 1)
         argnerr(option, 1);
-      outfile = pargv[0];
+      outfile   = pargv[0];
       nargsused = 1;
+    } else if (!strcmp(option, "--use-new")) {
+      UseOld = 0;
     } else if (!strcmp(option, "--vsm")) {
       if (nargc < 1)
         argnerr(option, 1);
-      vsmfile = pargv[0];
-      UseOld = 0;
+      vsmfile   = pargv[0];
+      UseOld    = 0;
       nargsused = 1;
     } else if (!strcmp(option, "--out_type") || !strcmp(option, "--ofmt")) {
       if (nargc < 1)
         argnerr(option, 1);
       outtypestring = pargv[0];
-      outtype = string_to_type(outtypestring);
-      nargsused = 1;
+      outtype       = string_to_type(outtypestring);
+      nargsused     = 1;
     } else if (!strcmp(option, "--nvox")) {
       if (nargc < 1)
         argnerr(option, 1);
-      nvoxfile = pargv[0];
+      nvoxfile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--rf")) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%d", &reshapefactor);
-      reshape = 1;
+      reshape   = 1;
       nargsused = 1;
     } else if (!strcmp(option, "--rft")) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%d", &reshapetarget);
-      reshape = 1;
+      reshape   = 1;
       nargsused = 1;
     } else if (!strcmp(option, "--srchits")) {
       if (nargc < 1)
         argnerr(option, 1);
       srchitfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--trghits")) {
       if (nargc < 1)
         argnerr(option, 1);
       trghitfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--fwhm")) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%f", &fwhm);
-      gstd = fwhm / sqrt(log(256.0));
+      gstd      = fwhm / sqrt(log(256.0));
       nargsused = 1;
     } else if (!strcmp(option, "--surf-fwhm")) {
       if (nargc < 1)
@@ -1148,16 +1151,16 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%ld", &seed);
-      srcsynth = 1;
+      srcsynth  = 1;
       nargsused = 1;
     } else if (!strcmp(option, "--srcsynth-index")) {
-      srcsynthindex = 1;
+      srcsynthindex       = 1;
       interpmethod_string = "nearest";
-      interpmethod = interpolation_code(interpmethod_string);
+      interpmethod        = interpolation_code(interpmethod_string);
     } else if (!strcmp(option, "--seedfile")) {
       if (nargc < 1)
         argnerr(option, 1);
-      seedfile = pargv[0];
+      seedfile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--profile")) {
       if (nargc < 6) {
@@ -1166,10 +1169,10 @@ static int parse_commandline(int argc, char **argv) {
         exit(1);
       }
       MRIS *surf = MRISread(pargv[0]);
-      if (surf == nullptr)
+      if (surf == NULL)
         exit(1);
-      MRI *mri = MRIread(pargv[1]); // norm
-      if (mri == nullptr)
+      MRI *mri = MRIread(pargv[1]); //norm
+      if (mri == NULL)
         exit(1);
       double dist, delta, sigma;
       sscanf(pargv[2], "%lf", &dist);
@@ -1179,13 +1182,98 @@ static int parse_commandline(int argc, char **argv) {
         delta = mri->xsize / 2.0;
       printf("dist %g, delta=%g, sigma=%g\n", dist, delta, sigma);
       MRI *mri2 =
-          MRISsampleMRINorm(surf, mri, -dist, +dist, delta, sigma, nullptr);
-      if (mri2 == nullptr)
+          MRISsampleMRINorm(surf, mri, -dist, +dist, delta, sigma, NULL);
+      if (mri2 == NULL)
         exit(1);
       MRIwrite(mri2, pargv[5]);
       printf("freeview -f %s:overlay=%s\n", pargv[0], pargv[5]);
       printf("mri_vol2surf --profile done\n");
       exit(0);
+    } else if (!strcmp(option, "--vol2surf")) {
+      // This is an alternative way to run vol2surf that does not rely on
+      // the recon-all directory structure. It generates the same as the standard
+      // invocation when using --use-new. It does not have all the functionality,
+      // eg, avg or max or mapping xyz.
+      int err;
+      if (nargc < 9) {
+        printf("ERROR: --vol2surf requires 9 args\n");
+        printf("USAGE: --vol2surf vol surf projtype projdist projmap reg vsm "
+               "interp output\n");
+        printf(" projtype 0=absdist, 1=frac (if 0, projmap arg will be "
+               "ignored)\n");
+        printf(" projmap : map to get the values for projection (usually "
+               "thickness)\n");
+        printf(" reg : LTA registration file (or 'regheader', surf must have "
+               "vol geom) \n");
+        printf("   LTA files can go in either direction if surf has a valid "
+               "vol geom\n");
+        printf(" vsm : voxel shift map for B0 correction (or 'novsm')\n");
+        printf(" interp 0=nearest, 1=trilin, 5=cubicbspline\n");
+        exit(1);
+      }
+      MRI *mri = MRIread(pargv[0]);
+      if (mri == NULL)
+        exit(1);
+      MRIS *surf = MRISread(pargv[1]);
+      if (surf == NULL)
+        exit(1);
+      int projtype;
+      sscanf(pargv[2], "%d", &projtype);
+      double projdist;
+      sscanf(pargv[3], "%lf", &projdist);
+      if (projtype == 1) {
+        err = MRISreadCurvatureFile(surf, pargv[4]);
+        if (err)
+          exit(1);
+      }
+      LTA *   lta    = NULL;
+      MATRIX *RegMat = NULL;
+      if (strcmp(pargv[5], "regheader") != 0) { // not regheader
+        lta = LTAread(pargv[5]);
+        if (lta == NULL)
+          exit(1);
+        LTAchangeType(lta, REGISTER_DAT);
+        VOL_GEOM srcvg;
+        getVolGeom(mri, &srcvg);
+        vg_isEqual_Threshold = 10e-3;
+        if (!vg_isEqual(&srcvg, &(lta->xforms[0].src))) {
+          if (!vg_isEqual(&srcvg, &(lta->xforms[0].dst))) {
+            printf("ERRRO: input volume VG does not match LTA source or target "
+                   "VG\n");
+            exit(1);
+          }
+          printf("INFO: input volume VG matches LTA target VG, inverting \n");
+          LTA *lta2 = LTAinvert(lta, NULL);
+          lta       = lta2;
+        }
+        RegMat = lta->xforms[0].m_L;
+      } else {
+        if (!surf->vg.valid) {
+          printf("ERROR: volume geometry of input surface is not valid, cannot "
+                 "use regheader\n");
+          exit(1);
+        }
+        MRI *TargVol = NULL;
+        TargVol      = MRIallocFromVolGeom(&(surf->vg), MRI_UCHAR, 1, 1);
+        RegMat       = MRItkRegMtx(TargVol, mri, NULL);
+        MRIfree(&TargVol);
+      }
+      MRI *vsm = NULL;
+      if (strcmp(pargv[6], "novsm") != 0) {
+        vsm = MRIread(pargv[6]);
+        if (vsm == NULL)
+          exit(1);
+      }
+      int interpmethod = 0;
+      sscanf(pargv[7], "%d", &interpmethod);
+      printf("projtype %d, projdist %g, interp %d\n", projtype, projdist,
+             interpmethod);
+      MRI *sval = MRIvol2surfVSM(mri, RegMat, surf, vsm, interpmethod, NULL,
+                                 projdist, projtype, 1, NULL);
+      err       = MRIwrite(sval, pargv[8]);
+      printf("mri_vol2surf --volsurf done\n");
+      exit(err);
+      // done with --vol2surf
     } else if (!strcmp(option, "--norm-pointset")) {
       if (nargc < 5) {
         printf("ERROR: --norm-pointset requires 5 args\n");
@@ -1193,15 +1281,15 @@ static int parse_commandline(int argc, char **argv) {
         exit(1);
       }
       MRIS *surf = MRISread(pargv[0]);
-      if (surf == nullptr)
+      if (surf == NULL)
         exit(1);
-      int vtxno;
+      int    vtxno;
       double dist, delta;
       sscanf(pargv[1], "%d", &vtxno);
       sscanf(pargv[2], "%lf", &dist);
       sscanf(pargv[3], "%lf", &delta);
       FILE *fp = fopen(pargv[4], "w");
-      if (fp == nullptr) {
+      if (fp == NULL) {
         printf("ERROR: opening %s for writing\n", pargv[4]);
         exit(1);
       }
@@ -1222,12 +1310,12 @@ static int parse_commandline(int argc, char **argv) {
   return (0);
 }
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("USAGE: %s \n", Progname);
   printf("\n");
   printf("   --mov input volume path (or --src)\n");
@@ -1255,7 +1343,7 @@ static void print_usage() {
   printf(" Options for use with --trgsubject\n");
   printf("   --surfreg    surface registration (sphere.reg)  \n");
   printf("   --icoorder   order of icosahedron when trgsubject=ico\n");
-  // printf("   --nohash flag to keep the hash table from being used. \n");
+  //printf("   --nohash flag to keep the hash table from being used. \n");
   printf("\n");
   printf(" Options for projecting along the surface normal:\n");
   printf("   --projfrac frac : (0->1)fractional projection along normal \n");
@@ -1271,7 +1359,7 @@ static void print_usage() {
          "cortex)\n");
   printf("   --cortex : use hemi.cortex.label from trgsubject\n");
 
-  // printf("   --thickness thickness file (thickness)\n");
+  //printf("   --thickness thickness file (thickness)\n");
   printf("\n");
   printf(" Options for output\n");
   printf("   --o         output path\n");
@@ -1309,12 +1397,32 @@ static void print_usage() {
   printf("   --interp    interpolation method (<nearest> or trilinear)\n");
   printf("   --vg-thresh thrshold : threshold for  'ERROR: LTAconcat(): LTAs 0 "
          "and 1 do not match'\n");
-  printf("%s\n", vcid);
   printf("\n");
-  // printf("   --src_type  input volume format \n");
+  printf("   --vol2surf vol surf projtype projdist projmap reg vsm interp "
+         "output\n");
+  printf("    This is an alternative way to run vol2surf that does not rely on "
+         "the recon-all\n");
+  printf("    directory structure. Generates the same output as standard "
+         "invocation as long \n");
+  printf("    as --use-new is added. --vol2surf does not have all the "
+         "functionality. \n");
+  printf(
+      "      projtype 0=absdist, 1=frac (if 0, projmap arg will be ignored)\n");
+  printf("      projmap : map to get the values for projection (usually "
+         "thickness)\n");
+  printf("      reg : LTA registration file (or 'regheader', surf must have "
+         "vol geom) \n");
+  printf("        LTA files can go in either direction if surf has a valid vol "
+         "geom\n");
+  printf("      vsm : voxel shift map for B0 correction (or 'novsm')\n");
+  printf("      interp 0=nearest, 1=trilin, 5=cubicbspline\n");
+  printf("\n");
+  std::cout << getVersion() << std::endl;
+  printf("\n");
+  //printf("   --src_type  input volume format \n");
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
 
   printf(
@@ -1589,8 +1697,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */
@@ -1602,15 +1710,15 @@ static void argnerr(char *option, int n) {
   exit(-1);
 }
 /* --------------------------------------------- */
-static void check_options() {
+static void check_options(void) {
   struct timeval tv;
-  FILE *fp;
+  FILE *         fp;
 
-  if (srcvolid == nullptr) {
+  if (srcvolid == NULL) {
     fprintf(stderr, "A source volume path must be supplied\n");
     exit(1);
   }
-  if (interpmethod_string == nullptr)
+  if (interpmethod_string == NULL)
     interpmethod_string = "nearest";
   interpmethod = interpolation_code(interpmethod_string);
   if (interpmethod == -1) {
@@ -1619,7 +1727,7 @@ static void check_options() {
     exit(1);
   }
 
-  if (srcregfile == nullptr && !regheader) {
+  if (srcregfile == NULL && !regheader) {
     printf("ERROR: must specify a source registration file or --regheader\n");
     exit(1);
   }
@@ -1635,7 +1743,7 @@ static void check_options() {
     exit(1);
   }
 
-  if (srchitvolid != nullptr) {
+  if (srchitvolid != NULL) {
     if (srchittype == MRI_VOLUME_TYPE_UNKNOWN) {
       if (defaulttype == MRI_VOLUME_TYPE_UNKNOWN)
         srchittype = mri_identify(srchitvolid);
@@ -1648,13 +1756,13 @@ static void check_options() {
     }
   }
 
-  if (outfile == nullptr) {
+  if (outfile == NULL) {
     printf("ERROR: no output file specified\n");
     exit(1);
   }
 
-  if (outtypestring != nullptr && (!strcasecmp(outtypestring, "w") ||
-                                   !strcasecmp(outtypestring, "paint"))) {
+  if (outtypestring != NULL && (!strcasecmp(outtypestring, "w") ||
+                                !strcasecmp(outtypestring, "paint"))) {
     printf("INFO: output format is paint\n");
   } else {
     if (outtype == MRI_VOLUME_TYPE_UNKNOWN) {
@@ -1669,30 +1777,30 @@ static void check_options() {
     }
   }
 
-  if (hemi == nullptr) {
+  if (hemi == NULL) {
     fprintf(stderr, "ERROR: no hemifield specified\n");
     exit(1);
   }
 
-  if (trgsubject != nullptr && strcmp(trgsubject, "ico") && IcoOrder > -1) {
+  if (trgsubject != NULL && strcmp(trgsubject, "ico") && IcoOrder > -1) {
     fprintf(stderr, "ERROR: --icoorder can only be used with "
                     "--trgsubject ico\n");
     exit(1);
   }
 
-  if (trgsubject != nullptr && !strcmp(trgsubject, "ico") && IcoOrder < 0) {
+  if (trgsubject != NULL && !strcmp(trgsubject, "ico") && IcoOrder < 0) {
     fprintf(stderr, "ERROR: need to specify --icoorder with "
                     "--trgsubject ico\n");
     exit(1);
   }
 
   if (seed < 0) {
-    gettimeofday(&tv, nullptr);
+    gettimeofday(&tv, NULL);
     seed = tv.tv_sec + tv.tv_usec;
   }
-  if (seedfile != nullptr) {
+  if (seedfile != NULL) {
     fp = fopen(seedfile, "w");
-    if (fp == nullptr) {
+    if (fp == NULL) {
       printf("ERROR: cannot open seed file %s\n", seedfile);
       exit(1);
     }
@@ -1701,7 +1809,7 @@ static void check_options() {
   }
 
   // paint format but framesave has not been set
-  if (framesave < 0 && outtypestring != nullptr &&
+  if (framesave < 0 && outtypestring != NULL &&
       (!strcasecmp(outtypestring, "w") || !strcasecmp(outtypestring, "paint")))
     framesave = 0;
 
@@ -1711,27 +1819,27 @@ static void check_options() {
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "srcvol = %s\n", srcvolid);
-  if (srctypestring != nullptr)
+  if (srctypestring != NULL)
     fprintf(fp, "srctype = %s\n", srctypestring);
-  if (srcregfile != nullptr)
+  if (srcregfile != NULL)
     fprintf(fp, "srcreg = %s\n", srcregfile);
   else
     fprintf(fp, "srcreg unspecified\n");
   fprintf(fp, "srcregold = %d\n", srcoldreg);
-  if (srcwarp != nullptr)
+  if (srcwarp != NULL)
     fprintf(fp, "srcwarp = %s\n", srcwarp);
   else
     fprintf(fp, "srcwarp unspecified\n");
 
-  if (srchitvolid != nullptr) {
+  if (srchitvolid != NULL) {
     fprintf(fp, "srchitvol = %s\n", srchitvolid);
-    if (srchittypestring != nullptr)
+    if (srchittypestring != NULL)
       fprintf(fp, "srchittype = %s\n", srchittypestring);
   }
 
   fprintf(fp, "surf = %s\n", surfname);
   fprintf(fp, "hemi = %s\n", hemi);
-  if (trgsubject != nullptr) {
+  if (trgsubject != NULL) {
     fprintf(fp, "trgsubject = %s\n", trgsubject);
     fprintf(fp, "surfreg = %s\n", surfreg);
   }
@@ -1768,13 +1876,13 @@ MRI *MRIvol2surf(MRI *SrcVol, MATRIX *Rtk, MRI_SURFACE *TrgSurf, MRI *vsm,
                  int InterpMethod, MRI *SrcHitVol, float ProjFrac, int ProjType,
                  int nskip) {
   MATRIX *ras2vox, *Scrs, *Txyz;
-  MRI *TrgVol;
-  int irow, icol, islc;   /* integer row, col, slc in source */
-  float frow, fcol, fslc; /* float row, col, slc in source */
-  float srcval, *valvect, rshift;
-  int frm, vtx, nhits, err;
-  double rval;
-  float Tx, Ty, Tz;
+  MRI *   TrgVol;
+  int     irow, icol, islc; /* integer row, col, slc in source */
+  float   frow, fcol, fslc; /* float row, col, slc in source */
+  float   srcval, *valvect, rshift;
+  int     frm, vtx, nhits, err;
+  double  rval;
+  float   Tx, Ty, Tz;
 
   if (vsm) {
     err = MRIdimMismatch(vsm, SrcVol, 0);
@@ -1785,33 +1893,33 @@ MRI *MRIvol2surf(MRI *SrcVol, MATRIX *Rtk, MRI_SURFACE *TrgSurf, MRI *vsm,
   }
 
   vox2ras = MRIxfmCRS2XYZtkreg(SrcVol);
-  ras2vox = MatrixInverse(vox2ras, nullptr);
-  if (Rtk != nullptr)
+  ras2vox = MatrixInverse(vox2ras, NULL);
+  if (Rtk != NULL)
     ras2vox = MatrixMultiply(ras2vox, Rtk, NULL);
   MatrixFree(&vox2ras);
   // ras2vox now converts surfacs RAS to SrcVol vox
 
   /* preallocate the row-col-slc vectors */
-  Scrs = MatrixAlloc(4, 1, MATRIX_REAL);
-  Txyz = MatrixAlloc(4, 1, MATRIX_REAL);
+  Scrs                     = MatrixAlloc(4, 1, MATRIX_REAL);
+  Txyz                     = MatrixAlloc(4, 1, MATRIX_REAL);
   Txyz->rptr[3 + 1][0 + 1] = 1.0;
 
   /* allocate a "volume" to hold the output */
   TrgVol =
       MRIallocSequence(TrgSurf->nvertices, 1, 1, MRI_FLOAT, SrcVol->nframes);
-  if (TrgVol == nullptr)
-    return (nullptr);
+  if (TrgVol == NULL)
+    return (NULL);
   MRIcopyHeader(SrcVol, TrgVol);
 
   /* Zero the source hit volume */
-  if (SrcHitVol != nullptr) {
+  if (SrcHitVol != NULL) {
     MRIconst(SrcHitVol->width, SrcHitVol->height, SrcHitVol->depth, 1, 0,
              SrcHitVol);
   }
 
-  srcval = 0;
+  srcval  = 0;
   valvect = (float *)calloc(sizeof(float), SrcVol->nframes);
-  nhits = 0;
+  nhits   = 0;
   /*--- loop through each vertex ---*/
   for (vtx = 0; vtx < TrgSurf->nvertices; vtx += nskip) {
 
@@ -1884,13 +1992,13 @@ MRI *MRIvol2surf(MRI *SrcVol, MATRIX *Rtk, MRI_SURFACE *TrgSurf, MRI *vsm,
           MRIsincSampleVolume(SrcVol, fcol, frow, fslc, 5, &rval);
           srcval = rval;
           break;
-        } // switch
+        } //switch
         MRIFseq_vox(TrgVol, vtx, 0, 0, frm) = srcval;
         if (Gdiag_no == vtx)
           printf("val[%d] = %f\n", frm, srcval);
       } // for
     }   // else
-    if (SrcHitVol != nullptr)
+    if (SrcHitVol != NULL)
       MRIFseq_vox(SrcHitVol, icol, irow, islc, 0)++;
   }
 
@@ -1899,7 +2007,7 @@ MRI *MRIvol2surf(MRI *SrcVol, MATRIX *Rtk, MRI_SURFACE *TrgSurf, MRI *vsm,
   MatrixFree(&Txyz);
   free(valvect);
 
-  // printf("vol2surf_linear: nhits = %d/%d\n",nhits,TrgSurf->nvertices);
+  //printf("vol2surf_linear: nhits = %d/%d\n",nhits,TrgSurf->nvertices);
 
   return (TrgVol);
 }
@@ -2078,9 +2186,9 @@ estimate_gm_values(MRI *mri_wm, MRI *mri_gm, MRI *mri_csf,
 #endif
 
 #define MAX_SAMPLES 1000
-#define FOUND_WM 0x01
-#define FOUND_GM 0x02
-#define FOUND_CSF 0x04
+#define FOUND_WM    0x01
+#define FOUND_GM    0x02
+#define FOUND_CSF   0x04
 
 #define MAX_NBRS 10000
 MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri_src, MATRIX *m, float din,
@@ -2091,28 +2199,28 @@ MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri_src, MATRIX *m, float din,
       vnum, nsize, found, done, failed, vlist[MAX_NBRS],
       min_needed = 3 * 2; // 3 parameters estimated with 2x overdetermination
   MATRIX *Scrs, *Txyz, *m_A, *m_p, *m_S, *m_inv;
-  MRI *mri_samples, *mri_voxels_c, *mri_voxels_r, *mri_voxels_s, *mri_sampled;
+  MRI *  mri_samples, *mri_voxels_c, *mri_voxels_r, *mri_voxels_s, *mri_sampled;
   double rms_mean, rms_var;
 
-  mri_samples = MRIalloc(mris->nvertices, 1, 1, MRI_FLOAT);
-  Scrs = MatrixAlloc(4, 1, MATRIX_REAL);
-  Txyz = MatrixAlloc(4, 1, MATRIX_REAL);
+  mri_samples              = MRIalloc(mris->nvertices, 1, 1, MRI_FLOAT);
+  Scrs                     = MatrixAlloc(4, 1, MATRIX_REAL);
+  Txyz                     = MatrixAlloc(4, 1, MATRIX_REAL);
   Txyz->rptr[3 + 1][0 + 1] = 1.0;
 
-  mri_sampled = MRIcloneDifferentType(mri_src, MRI_UCHAR);
+  mri_sampled  = MRIcloneDifferentType(mri_src, MRI_UCHAR);
   mri_voxels_c = MRIallocSequence(mris->nvertices, 1, 1, MRI_INT, nsamples);
-  if (mri_voxels_c == nullptr)
+  if (mri_voxels_c == NULL)
     ErrorExit(ERROR_NOMEMORY,
               "build_sample_array: couldn't allocate %d x %d array", nsamples,
               mris->nvertices);
 
   mri_voxels_r = MRIallocSequence(mris->nvertices, 1, 1, MRI_INT, nsamples);
-  if (mri_voxels_r == nullptr)
+  if (mri_voxels_r == NULL)
     ErrorExit(ERROR_NOMEMORY,
               "build_sample_array: couldn't allocate %d x %d array", nsamples,
               mris->nvertices);
   mri_voxels_s = MRIallocSequence(mris->nvertices, 1, 1, MRI_INT, nsamples);
-  if (mri_voxels_s == nullptr)
+  if (mri_voxels_s == NULL)
     ErrorExit(ERROR_NOMEMORY,
               "build_sample_array: couldn't allocate %d x %d array", nsamples,
               mris->nvertices);
@@ -2129,8 +2237,8 @@ MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri_src, MATRIX *m, float din,
     if (vno == Gdiag_no)
       DiagBreak();
 
-    thick = v->curv;
-    dist = -din;
+    thick       = v->curv;
+    dist        = -din;
     sample_dist = (din + thick + dout) / (nsamples - 1);
     for (n = 0; n < nsamples; n++, dist += sample_dist) {
       /* Load the Target xyz vector */
@@ -2155,14 +2263,14 @@ MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri_src, MATRIX *m, float din,
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
     if (v->ripflag)
       continue;
     if (vno == Gdiag_no)
       DiagBreak();
     nfound = index = 0;
-    nsize = 1;
-    failed = 0;
+    nsize          = 1;
+    failed         = 0;
     found = 0; // bitask to make sure we find at least some of each tissue class
     // find enough samples to do optimal linear estimation
     do {
@@ -2195,9 +2303,9 @@ MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri_src, MATRIX *m, float din,
             continue; // already sampled this voxel
           MRIsetVoxVal(mri_sampled, icol_src, irow_src, islc_src, 0, vno + 1);
           srcval = MRIgetVoxVal(mri_src, icol_src, irow_src, islc_src, 0);
-          wm = MRIgetVoxVal(mri_wm, icol_src, irow_src, islc_src, 0);
-          gm = MRIgetVoxVal(mri_gm, icol_src, irow_src, islc_src, 0);
-          csf = MRIgetVoxVal(mri_csf, icol_src, irow_src, islc_src, 0);
+          wm     = MRIgetVoxVal(mri_wm, icol_src, irow_src, islc_src, 0);
+          gm     = MRIgetVoxVal(mri_gm, icol_src, irow_src, islc_src, 0);
+          csf    = MRIgetVoxVal(mri_csf, icol_src, irow_src, islc_src, 0);
           if ((csf < 0.3) && (wm > 0.5) && (srcval > 5000))
             DiagBreak();
           if (index >= MAX_SAMPLES)
@@ -2251,8 +2359,8 @@ MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri_src, MATRIX *m, float din,
     {
       m_A->cols = m_p->rows = 2;
     }
-    m_inv = MatrixSVDPseudoInverse(m_A, nullptr);
-    if (m_inv == nullptr)
+    m_inv = MatrixSVDPseudoInverse(m_A, NULL);
+    if (m_inv == NULL)
       DiagBreak();
     MatrixMultiply(m_inv, m_S, m_p);
     if (*MATRIX_RELT(m_p, 1, 1) < 0)
@@ -2262,11 +2370,11 @@ MRI *build_sample_array(MRI_SURFACE *mris, MRI *mri_src, MATRIX *m, float din,
 
     // compute quality of linear fit
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      double rms;
+      double  rms;
       MATRIX *m_fit = MatrixMultiply(m_A, m_p, NULL);
       MatrixSubtract(m_fit, m_S, m_fit);
       MatrixSquareElts(m_fit, m_fit);
-      rms = sqrt(MatrixSumElts(m_fit) / index);
+      rms     = sqrt(MatrixSumElts(m_fit) / index);
       v->curv = rms;
       rms_mean += rms;
       rms_var += rms * rms;

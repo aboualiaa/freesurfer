@@ -1,16 +1,11 @@
 /**
- * @file  SurfaceRegion.h
  * @brief Surface region from a surface selection in 3D view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:48 $
- *    $Revision: 1.18 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,8 +23,8 @@
 
 #include "RenderView.h"
 #include "vtkSmartPointer.h"
-#include <QObject>
 #include <QColor>
+#include <QObject>
 
 class vtkRenderer;
 class vtkActor;
@@ -58,7 +53,7 @@ public:
   void ResetOutline();
 
   QColor GetColor();
-  void SetColor(const QColor &color);
+  void   SetColor(const QColor &color);
 
   void Update();
 
@@ -98,21 +93,21 @@ signals:
 private:
   void RebuildOutline(bool bClose);
 
-  vtkSmartPointer<vtkActor> m_actorMesh;
-  vtkSmartPointer<vtkActor> m_actorOutline;
+  vtkSmartPointer<vtkActor>  m_actorMesh;
+  vtkSmartPointer<vtkActor>  m_actorOutline;
   vtkSmartPointer<vtkPoints> m_points;
 
-  vtkSmartPointer<vtkBox> m_clipbox;
-  vtkSmartPointer<vtkClipPolyData> m_clipperPre;
+  vtkSmartPointer<vtkBox>            m_clipbox;
+  vtkSmartPointer<vtkClipPolyData>   m_clipperPre;
   vtkSmartPointer<vtkSelectPolyData> m_selector;
-  vtkSmartPointer<vtkCleanPolyData> m_cleanerPost;
+  vtkSmartPointer<vtkCleanPolyData>  m_cleanerPost;
 
   vtkSmartPointer<vtkPolyData> m_polydataHolder;
 
   LayerMRI *m_mri;
-  QColor m_color;
-  int m_nId;
-  int m_nGroup;
+  QColor    m_color;
+  int       m_nId;
+  int       m_nGroup;
 };
 
 #endif

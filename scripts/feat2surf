@@ -6,12 +6,8 @@
 # Registers example func to freesurfer using fsl
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/12 21:43:15 $
-#    $Revision: 1.18 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,7 +20,7 @@
 #
 
 
-set VERSION = '$Id: feat2surf,v 1.18 2016/02/12 21:43:15 zkaufman Exp $'
+set VERSION = 'feat2surf @FS_VERSION@';
 set FeatDirList = ();
 set ProjFrac = ();
 set HemiList = (lh rh);

@@ -1,16 +1,11 @@
 /**
- * @file  RenderView2D.h
  * @brief 2D slice view
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/02 16:40:06 $
- *    $Revision: 1.39 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -66,15 +61,15 @@ public:
 
   void SetInteractionMode(int nMode);
 
-  void MousePositionToRAS(int posX, int posY, double *pos);
+  void      MousePositionToRAS(int posX, int posY, double *pos);
   LayerMRI *GetFirstNonLabelVolume();
 
   void StartSelection(int nX, int nY);
   void UpdateSelection(int nX, int nY);
 
   Region2D *GetRegion(int nX, int nY, int *index_out = NULL);
-  void AddRegion(Region2D *region);
-  void DeleteRegion(Region2D *region);
+  void      AddRegion(Region2D *region);
+  void      DeleteRegion(Region2D *region);
 
   void EmitZooming() { emit Zooming(this); }
 
@@ -115,33 +110,34 @@ signals:
 
 protected slots:
   virtual void OnSlicePositionChanged(bool bCenterView = false);
-  void SyncZoomTo(RenderView2D *view);
-  void OnDuplicateRegion();
-  void OnInteractorError(const QString &msg);
-  void OnCopyVoxelValue();
+  void         SyncZoomTo(RenderView2D *view);
+  void         OnDuplicateRegion();
+  void         OnInteractorError(const QString &msg);
+  void         OnCopyVoxelValue();
+  void         OnCopyLabelVolume();
 
 protected:
   virtual void resizeEvent(QResizeEvent *event);
-  bool EnsureCursor2DVisible();
+  bool         EnsureCursor2DVisible();
 
 private:
-  int m_nViewPlane;
-  double m_dPreSlicePosition;
-  Cursor2D *m_cursor2D;
-  Contour2D *m_contour2D;
-  Annotation2D *m_annotation2D;
+  int                m_nViewPlane;
+  double             m_dPreSlicePosition;
+  Cursor2D *         m_cursor2D;
+  Contour2D *        m_contour2D;
+  Annotation2D *     m_annotation2D;
   Region2DRectangle *m_selection2D;
-  QList<Region2D *> m_regions;
+  QList<Region2D *>  m_regions;
 
-  Interactor2DNavigate *m_interactorNavigate;
-  Interactor2DMeasure *m_interactorMeasure;
-  Interactor2DVoxelEdit *m_interactorVoxelEdit;
-  Interactor2DROIEdit *m_interactorROIEdit;
+  Interactor2DNavigate *    m_interactorNavigate;
+  Interactor2DMeasure *     m_interactorMeasure;
+  Interactor2DVoxelEdit *   m_interactorVoxelEdit;
+  Interactor2DROIEdit *     m_interactorROIEdit;
   Interactor2DPointSetEdit *m_interactorPointSetEdit;
-  Interactor2DVolumeCrop *m_interactorVolumeCrop;
+  Interactor2DVolumeCrop *  m_interactorVolumeCrop;
 
   bool m_bAutoScaleText;
-  int m_nTextSize;
+  int  m_nTextSize;
 };
 
 #endif // RENDERVIEW2D_H

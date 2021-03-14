@@ -1,17 +1,12 @@
 /**
- * @file  Transformation.h
  * @brief A base class for different transformation models used for registration
  *
  */
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2015/09/22 19:55:12 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -32,8 +27,8 @@
 #include <vector>
 #include <vnl/vnl_matrix_fixed.h>
 
-#include "Quaternion.h"
 #include "MyMatrix.h"
+#include "Quaternion.h"
 
 /** \class Transformation
  * \brief Base class for all 2d and 3d transformation models
@@ -56,7 +51,7 @@ public:
   virtual vnl_vector<double> getGradient(const unsigned int &x, const float &fx,
                                          const unsigned int &y, const float &fy,
                                          const unsigned int &z,
-                                         const float &fz) const = 0;
+                                         const float &       fz) const = 0;
 
   //! Set the parameters from double std vector
   void setParameters(const std::vector<double> &p) {
@@ -88,24 +83,21 @@ public:
 protected:
   //! vector to store the parameters
   vnl_vector<double> parameters;
-  // std::vector < double > parameters;
+  //std::vector < double > parameters;
 };
 
 /****************************************************************************************************
 
  2D transforms
-
- affine, isoscale (rigid+global scaling), rigid (translation+rotation),
- translation only
-
- Note the transforms ending with 2 are slightly different and are mainly used
- for the powell method.
-
+ 
+ affine, isoscale (rigid+global scaling), rigid (translation+rotation), translation only
+ 
+ Note the transforms ending with 2 are slightly different and are mainly used for the powell method.
+ 
  *****************************************************************************************************/
 
 /** \class Transform2dAffine
- * \brief Describes affine 2d transformation (6 DOF) as 2x3 matrix added to the
- * 4x4 identity matrix
+ * \brief Describes affine 2d transformation (6 DOF) as 2x3 matrix added to the 4x4 identity matrix
  */
 class Transform2dAffine : public Transformation {
 public:
@@ -167,9 +159,8 @@ public:
 };
 
 /** \class Transform2dAffine2
- * \brief Describes affine 2d transformation (6 DOF) as
- * t_x,t_y,alpha_z,scale_x,scale_y,shear
- *
+ * \brief Describes affine 2d transformation (6 DOF) as t_x,t_y,alpha_z,scale_x,scale_y,shear
+ * 
  * where alpha_z is negative euler angle around z axis (clockwise, same as spm)
  */
 class Transform2dAffine2 : public Transformation { // M = T*shear*Scale*Rot
@@ -218,16 +209,16 @@ public:
     vnl_matrix_fixed<double, 4, 4> ret;
     // Translation
     vnl_vector_fixed<double, 3> t(parameters[0], parameters[1], 0);
-    // Rotation
+    //Rotation
     Quaternion q;
     q.importZYXAngles(-parameters[2], 0, 0);
     vnl_matrix<double> rmat = MyMatrix::getVNLMatrix(q.getRotMatrix3d(), 3);
-    // Scale
+    //Scale
     vnl_matrix<double> smat(3, 3, 0.0);
     smat[0][0] = parameters[3];
     smat[1][1] = parameters[4];
     smat[2][2] = 1;
-    // Shear
+    //Shear
     vnl_matrix<double> zmat(3, 3);
     zmat.set_identity();
     zmat[0][1] = parameters[5];
@@ -244,7 +235,7 @@ public:
       // set 4th row to zero
       ret[3][rr] = 0.0;
     }
-    // except 4,4
+    //except 4,4
     ret[3][3] = 1.0;
 
     return ret;
@@ -268,9 +259,8 @@ public:
 };
 
 /** \class Transform2dIsoscale
- * \brief Describes rigid 2d transformation with isotropic scaling (4 DOF) [ p
- * -q ; q p ] + T
- *
+ * \brief Describes rigid 2d transformation with isotropic scaling (4 DOF) [ p -q ; q p ] + T
+ * 
  */
 class Transform2dIsoscale : public Transformation {
 public:
@@ -330,9 +320,8 @@ public:
 };
 
 /** \class Transform2dIsoscale2
- * \brief Describes rigid 2d transformation with isotropic scaling (4 DOF)
- * tx,ty,alpha,s
- *
+ * \brief Describes rigid 2d transformation with isotropic scaling (4 DOF) tx,ty,alpha,s
+ * 
  */
 class Transform2dIsoscale2
     : public Transformation { // rigid and isotropic scaling
@@ -377,7 +366,7 @@ public:
   virtual vnl_matrix_fixed<double, 4, 4> getMatrix() const {
     vnl_matrix_fixed<double, 4, 4> ret;
     // M = T*(Scale*Rot)
-    // Rot
+    //Rot
     Quaternion q;
     q.importZYXAngles(-parameters[2], 0, 0);
     vnl_matrix<double> rmat = MyMatrix::getVNLMatrix(q.getRotMatrix3d(), 3);
@@ -413,7 +402,7 @@ public:
 
 /** \class Transform2dRigid
  * \brief Describes rigid 2d transformation (3 DOF) tx,ty,alpha (pos around z)
- *
+ * 
  */
 class Transform2dRigid : public Transformation { // rigid  tx, ty, r
 public:
@@ -454,7 +443,7 @@ public:
     q.importRotVec(0, 0, parameters[2]);
     vnl_matrix<double> rmat = MyMatrix::getVNLMatrix(q.getRotMatrix3d(), 3);
     vnl_matrix_fixed<double, 4, 4> ret;
-    int rr, cc;
+    int                            rr, cc;
     for (rr = 0; rr < 3; rr++) {
       for (cc = 0; cc < 3; cc++) // copy rot-matrix
         ret[rr][cc] = rmat[rr][cc];
@@ -463,7 +452,7 @@ public:
       ret[3][rr] = 0.0;
       ret[rr][3] = 0.0;
     }
-    // except 4,4
+    //except 4,4
     ret[3][3] = 1.0;
     // translation
     ret[0][3] = parameters[0];
@@ -483,12 +472,10 @@ public:
 };
 
 /** \class Transform2dRigid2
- * \brief Describes rigid 2d transformation (3 DOF) tx,ty,alpha (clockwise
- * around z)
+ * \brief Describes rigid 2d transformation (3 DOF) tx,ty,alpha (clockwise around z)
  */
 class Transform2dRigid2
-    : public Transformation { // rigid  tx, ty, r  where r is rot around z axis
-                              // (clockwise?, same as SPM)
+    : public Transformation { // rigid  tx, ty, r  where r is rot around z axis (clockwise?, same as SPM)
 public:
   Transform2dRigid2() {
     parameters.set_size(getDOF());
@@ -525,22 +512,21 @@ public:
     // rigid: first 2 translation, next rotation (as a vector)
     // split translation and rotation:
     vnl_vector_fixed<double, 3> t(parameters[0], parameters[1], 0);
-    double r = parameters[2];
+    double                      r = parameters[2];
 
     // converts rot vector (3x1) and translation vector (3x1)
     // into an affine matrix (homogeneous coord) 4x4
-    // if global rtype ==2 then r1,r2,r3 are angles around x,y,z axis (order
-    // 1zrot,2yrot,3xrot)
+    // if global rtype ==2 then r1,r2,r3 are angles around x,y,z axis (order 1zrot,2yrot,3xrot)
     vnl_matrix<double> rmat;
-    Quaternion q;
+    Quaternion         q;
     // first convert rotation to quaternion (clockwise)
-    // q.importZYXAngles(-r[2], -r[1], -r[0]);
+    //q.importZYXAngles(-r[2], -r[1], -r[0]);
     q.importZYXAngles(-r, 0, 0); // same as spm now
     // then to rotation matrix
     rmat = MyMatrix::getVNLMatrix(q.getRotMatrix3d(), 3);
 
     vnl_matrix_fixed<double, 4, 4> ret;
-    int rr, cc;
+    int                            rr, cc;
     for (rr = 0; rr < 3; rr++) {
       for (cc = 0; cc < 3; cc++) // copy rot-matrix
         ret[rr][cc] = rmat[rr][cc];
@@ -550,7 +536,7 @@ public:
       // set 4th row to zero
       ret[3][rr] = 0.0;
     }
-    // except 4,4
+    //except 4,4
     ret[3][3] = 1.0;
 
     return ret;
@@ -626,7 +612,7 @@ public:
 /**************************************************************
 
  3D transforms
-
+ 
  ***************************************************************/
 
 /** \class Transform3dAffine
@@ -660,8 +646,8 @@ public:
 
   inline virtual vnl_vector<double> getSteps() const {
     vnl_vector<double> v(getDOF(), 0.001);
-    v[3] = 0.02;
-    v[7] = 0.02;
+    v[3]  = 0.02;
+    v[7]  = 0.02;
     v[11] = 0.02;
     return v;
   }
@@ -682,16 +668,16 @@ public:
   getGradient(const unsigned int &x, const float &fx, const unsigned int &y,
               const float &fy, const unsigned int &z, const float &fz) const {
     vnl_vector<double> ret(12);
-    ret[0] = fx * x;
-    ret[1] = fx * y;
-    ret[2] = fx * z;
-    ret[3] = fx;
-    ret[4] = fy * x;
-    ret[5] = fy * y;
-    ret[6] = fy * z;
-    ret[7] = fy;
-    ret[8] = fz * x;
-    ret[9] = fz * y;
+    ret[0]  = fx * x;
+    ret[1]  = fx * y;
+    ret[2]  = fx * z;
+    ret[3]  = fx;
+    ret[4]  = fy * x;
+    ret[5]  = fy * y;
+    ret[6]  = fy * z;
+    ret[7]  = fy;
+    ret[8]  = fz * x;
+    ret[9]  = fz * y;
     ret[10] = fz * z;
     ret[11] = fz;
     return ret;
@@ -748,17 +734,17 @@ public:
   virtual vnl_matrix_fixed<double, 4, 4> getMatrix() const {
     // M = T*shear*Scale*Rot
 
-    // Rot
+    //Rot
     Quaternion q;
     q.importZYXAngles(-parameters[5], parameters[4],
                       -parameters[3]); // same as spm now
     vnl_matrix<double> rmat = MyMatrix::getVNLMatrix(q.getRotMatrix3d(), 3);
-    // Scale
+    //Scale
     vnl_matrix<double> smat(3, 3, 0.0);
     smat[0][0] = parameters[6];
     smat[1][1] = parameters[7];
     smat[2][2] = parameters[8];
-    // Shear
+    //Shear
     vnl_matrix<double> zmat(3, 3);
     zmat.set_identity();
     zmat[0][1] = parameters[9];
@@ -768,7 +754,7 @@ public:
     vnl_matrix<double> M3 = zmat * smat * rmat;
     // consturct 4x4 with translation also:
     vnl_matrix_fixed<double, 4, 4> ret;
-    int rr, cc;
+    int                            rr, cc;
     for (rr = 0; rr < 3; rr++) {
       for (cc = 0; cc < 3; cc++) // copy M3
         ret[rr][cc] = M3[rr][cc];
@@ -778,7 +764,7 @@ public:
       // set 4th row to zero
       ret[3][rr] = 0.0;
     }
-    // except 4,4
+    //except 4,4
     ret[3][3] = 1.0;
 
     return ret;
@@ -791,16 +777,16 @@ public:
               << std::endl;
     exit(1);
     vnl_vector<double> ret(12);
-    ret[0] = fx * x;
-    ret[1] = fx * y;
-    ret[2] = fx * z;
-    ret[3] = fx;
-    ret[4] = fy * x;
-    ret[5] = fy * y;
-    ret[6] = fy * z;
-    ret[7] = fy;
-    ret[8] = fz * x;
-    ret[9] = fz * y;
+    ret[0]  = fx * x;
+    ret[1]  = fx * y;
+    ret[2]  = fx * z;
+    ret[3]  = fx;
+    ret[4]  = fy * x;
+    ret[5]  = fy * y;
+    ret[6]  = fy * z;
+    ret[7]  = fy;
+    ret[8]  = fz * x;
+    ret[9]  = fz * y;
     ret[10] = fz * z;
     ret[11] = fz;
     return ret;
@@ -808,8 +794,7 @@ public:
 };
 
 /** \class Transform3dIsoscale
- * \brief Describes rigid and isoscale transformation in 3d (7 DOF)  M =
- * T*(Scale*Rot)
+ * \brief Describes rigid and isoscale transformation in 3d (7 DOF)  M = T*(Scale*Rot)
  */
 class Transform3dIsoscale : public Transformation {
 public:
@@ -858,7 +843,7 @@ public:
     vnl_matrix_fixed<double, 4, 4> ret;
     // M = T*(Scale*Rot)
 
-    // Rotation
+    //Rotation
     Quaternion q;
     q.importRotVec(parameters[3], parameters[4], parameters[5]);
     vnl_matrix<double> rmat = MyMatrix::getVNLMatrix(q.getRotMatrix3d(), 3);
@@ -900,8 +885,7 @@ public:
 };
 
 /** \class Transform3dIsoscale2
- * \brief Describes rigid and isoscale transformation in 3d (7 DOF) M =
- * T*(Scale*Rot)
+ * \brief Describes rigid and isoscale transformation in 3d (7 DOF) M = T*(Scale*Rot)
  */
 class Transform3dIsoscale2 : public Transformation {
 public:
@@ -947,7 +931,7 @@ public:
     vnl_matrix_fixed<double, 4, 4> ret;
     // M = T*(Scale*Rot)
 
-    // Rotation
+    //Rotation
     Quaternion q;
     q.importZYXAngles(-parameters[5], parameters[4],
                       -parameters[3]); // same as spm now
@@ -990,7 +974,7 @@ public:
 };
 
 /** \class Transform3dRigid
- * \brief Describes rigid transformation in 3d (6 DOF)
+ * \brief Describes rigid transformation in 3d (6 DOF) 
  */
 class Transform3dRigid : public Transformation {
 public:
@@ -1030,7 +1014,7 @@ public:
     vnl_matrix_fixed<double, 4, 4> ret;
     // M = T*(Scale*Rot)
 
-    // Rotation
+    //Rotation
     Quaternion q;
     q.importRotVec(parameters[3], parameters[4], parameters[5]);
     vnl_matrix<double> rmat = MyMatrix::getVNLMatrix(q.getRotMatrix3d(), 3);
@@ -1065,7 +1049,7 @@ public:
 };
 
 /** \class Transform3dRigid2
- * \brief Describes rigid transformation in 3d (6 DOF)
+ * \brief Describes rigid transformation in 3d (6 DOF) 
  */
 class Transform3dRigid2 : public Transformation {
 public:
@@ -1105,7 +1089,7 @@ public:
     vnl_matrix_fixed<double, 4, 4> ret;
     // M = T*(Scale*Rot)
 
-    // Rotation
+    //Rotation
     Quaternion q;
     q.importZYXAngles(-parameters[5], parameters[4],
                       -parameters[3]); // same as spm now
@@ -1144,7 +1128,7 @@ public:
 };
 
 /** \class Transform3dTranslate
- * \brief Describes translation in 3d (3 DOF)
+ * \brief Describes translation in 3d (3 DOF) 
  */
 class Transform3dTranslate : public Transformation {
 public:
@@ -1199,7 +1183,7 @@ public:
 };
 
 /** \class TransformIdentity
- * \brief Describes Identity (no geometric transform) (0 DOF)
+ * \brief Describes Identity (no geometric transform) (0 DOF) 
  */
 class Transform3dIdentity : public Transformation {
 public:

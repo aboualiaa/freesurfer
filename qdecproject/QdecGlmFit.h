@@ -1,5 +1,4 @@
 /**
- * @file  QdecGlmFit.h
  * @brief Wrapper for mri_glmfit.
  *
  * Run mri_glmfit, given its input data, and puts the output in the specified
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Nick Schmansky
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:35 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -32,8 +27,6 @@
 
 #include "QdecGlmDesign.h"
 #include "QdecGlmFitResults.h"
-
-using namespace std;
 
 class QdecGlmFit {
 public:

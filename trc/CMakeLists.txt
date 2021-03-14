@@ -1,19 +1,15 @@
 project(trc)
 
-# TODO: remove APPLE condition after solving fem_elastic build issues on linux
-find_package(MPI REQUIRED)
+if(PETSC_FOUND)
 
-if(PETSC_FOUND AND APPLE)
-
-  include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${FS_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/fem_elastic
-    SYSTEM
-    ${CMAKE_SOURCE_DIR}/packages/tetgen
-    ${ITK_INCLUDE_DIRS}
-    ${PETSC_INCLUDE_DIR}
-  )
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+                      ${FS_INCLUDE_DIRS}
+                      ${CMAKE_SOURCE_DIR}/fem_elastic
+                      SYSTEM
+                      ${CMAKE_SOURCE_DIR}/packages/tetgen
+                      ${ITK_INCLUDE_DIRS}
+                      ${PETSC_INCLUDE_DIR}
+                      )
 
   # dmri_spline
   add_executable(dmri_spline dmri_spline.cxx spline.cxx)

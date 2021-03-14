@@ -1,7 +1,7 @@
 #ifndef _SBL_STRING_UTIL_H_
 #define _SBL_STRING_UTIL_H_
-#include <sbl/core/String.h>
 #include <sbl/core/Array.h>
+#include <sbl/core/String.h>
 namespace sbl {
 
 /*! \file StringUtil.h

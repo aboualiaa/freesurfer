@@ -1,5 +1,4 @@
 /**
- * @file  LayerPropertyROI.h
  * @brief The common properties available to MRI layers
  *
  * An interface implemented by a collection. Layers will get
@@ -9,12 +8,8 @@
 /*
  * Original Author: Kevin Teich
  * Reimplemented by: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/08 21:01:00 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,8 +25,8 @@
 #ifndef LayerPropertyROI_h
 #define LayerPropertyROI_h
 
-#include "vtkSmartPointer.h"
 #include "LayerProperty.h"
+#include "vtkSmartPointer.h"
 #include <QColor>
 
 #include "colortab.h"
@@ -47,7 +42,7 @@ public:
   double GetOpacity() const;
 
   double *GetColor() { return mRGB; }
-  void SetColor(double r, double g, double b);
+  void    SetColor(double r, double g, double b);
 
   double GetThreshold() const { return m_dThreshold; }
 
@@ -57,8 +52,7 @@ public:
 
   double GetHeatscaleMax() { return m_dHeatscaleMax; }
 
-  void GetValueRange(double* range)
-  {
+  void GetValueRange(double *range) {
     range[0] = m_dValueRange[0];
     range[1] = m_dValueRange[1];
   }
@@ -103,7 +97,7 @@ private:
   double mOpacity;
   double mRGB[3];
   double m_dThreshold;
-  int m_nColorCode;
+  int    m_nColorCode;
 
   double m_dHeatscaleMin;
   double m_dHeatscaleMax;

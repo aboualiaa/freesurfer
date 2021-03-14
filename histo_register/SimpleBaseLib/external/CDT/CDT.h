@@ -26,7 +26,7 @@
 ******************************************************************************/
 
 #define VERBOSE 0
-#define NIL(x) NULL
+#define NIL(x)  NULL
 #include <assert.h>
 #ifndef MAX
 #define MAX(a, b) (a) > (b) ? (a) : (b)
@@ -53,7 +53,7 @@ class LlistNode {
   friend class Llist;
 
 private:
-  Ldata data;
+  Ldata      data;
   LlistNode *next;
   LlistNode() {
     data = 0;
@@ -69,24 +69,24 @@ typedef LlistNode *LlistPos;
 
 class Llist {
 private:
-  int len;
+  int        len;
   LlistNode *node;
 
 public:
   Llist() {
     node = new LlistNode;
-    len = 0;
+    len  = 0;
   }
   ~Llist();
-  bool empty() const { return (node == node->next); }
-  void insert(LlistPos, Ldata);
-  void remove(LlistPos);
+  bool     empty() const { return (node == node->next); }
+  void     insert(LlistPos, Ldata);
+  void     remove(LlistPos);
   LlistPos first() const { return node; }
-  bool isEnd(LlistPos p) const { return (p->next == node); }
+  bool     isEnd(LlistPos p) const { return (p->next == node); }
   LlistPos next(LlistPos p) const { return p->next; }
-  Ldata retrieve(LlistPos p) const { return p->next->data; }
-  void store(LlistPos p, Ldata d) { p->next->data = d; }
-  int length() const { return len; }
+  Ldata    retrieve(LlistPos p) const { return p->next->data; }
+  void     store(LlistPos p, Ldata d) { p->next->data = d; }
+  int      length() const { return len; }
 };
 
 inline void Llist::insert(LlistPos p, Ldata d) {
@@ -96,7 +96,7 @@ inline void Llist::insert(LlistPos p, Ldata d) {
 
 inline void Llist::remove(LlistPos p) {
   LlistNode *t = p->next;
-  p->next = p->next->next;
+  p->next      = p->next->next;
   delete t;
   len--;
 }
@@ -114,45 +114,45 @@ inline Llist::~Llist() {
 #include <math.h>
 
 #define EPS 1e-6
-#define X 0
-#define Y 1
-#define Z 2
+#define X   0
+#define Y   1
+#define Z   2
 
 typedef double CDT_real;
-typedef bool Boolean;
+typedef bool   Boolean;
 
 class Vector2d {
 public:
   CDT_real x, y;
-  void *tag;
+  void *   tag;
   Vector2d() {
-    x = 0;
-    y = 0;
+    x   = 0;
+    y   = 0;
     tag = 0;
   }
   Vector2d(CDT_real a, CDT_real b) {
-    x = a;
-    y = b;
+    x   = a;
+    y   = b;
     tag = 0;
   }
   Vector2d(CDT_real a, CDT_real b, void *t) {
-    x = a;
-    y = b;
+    x   = a;
+    y   = b;
     tag = t;
   }
   Vector2d(const Vector2d &v) {
-    x = v.x;
-    y = v.y;
+    x   = v.x;
+    y   = v.y;
     tag = v.tag;
   }
-  CDT_real &operator[](int i) { return ((CDT_real *)this)[i]; }
+  CDT_real &      operator[](int i) { return ((CDT_real *)this)[i]; }
   const CDT_real &operator[](int i) const { return ((CDT_real *)this)[i]; }
-  CDT_real norm() const;
-  void normalize();
-  bool operator==(const Vector2d &) const;
-  Vector2d operator+(const Vector2d &) const;
-  Vector2d operator-(const Vector2d &) const;
-  CDT_real operator|(const Vector2d &) const;
+  CDT_real        norm() const;
+  void            normalize();
+  bool            operator==(const Vector2d &) const;
+  Vector2d        operator+(const Vector2d &) const;
+  Vector2d        operator-(const Vector2d &) const;
+  CDT_real        operator|(const Vector2d &) const;
   friend Vector2d operator*(CDT_real, const Vector2d &);
   friend Vector2d operator/(const Vector2d &, CDT_real);
   //	friend istream& operator>>(istream&, Vector2d&);
@@ -165,10 +165,10 @@ class Line {
 public:
   Line() {}
   Line(const Point2d &, const Point2d &);
-  void set(const Point2d &, const Point2d &);
+  void     set(const Point2d &, const Point2d &);
   CDT_real eval(const Point2d &) const;
-  int classify(const Point2d &) const;
-  Point2d intersect(const Point2d &, const Point2d &) const;
+  int      classify(const Point2d &) const;
+  Point2d  intersect(const Point2d &, const Point2d &) const;
 
 private:
   CDT_real a, b, c;
@@ -219,7 +219,7 @@ inline Line::Line(const Point2d &p, const Point2d &q)
 // Computes the normalized line equation through the
 // points p and q.
 {
-  Vector2d t = q - p;
+  Vector2d t   = q - p;
   CDT_real len = t.norm();
 
   a = t.y / len;
@@ -276,7 +276,7 @@ inline Boolean operator<(const Point2d &point, const Line &line)
 // FROM "quadedge.h>
 //-------------------------------------------
 
-#define TRUE true
+#define TRUE  true
 #define FALSE false
 
 class QuadEdge;
@@ -286,8 +286,8 @@ class Edge {
   friend void Splice(Edge *, Edge *);
 
 private:
-  int num;
-  Edge *next;
+  int      num;
+  Edge *   next;
   Point2d *data;
 #if MARKED
   short _lmark;
@@ -295,25 +295,25 @@ private:
 #endif
 public:
   Edge() { data = 0; }
-  Edge *Rot();
-  Edge *invRot();
-  Edge *Sym();
-  Edge *Onext();
-  Edge *Oprev();
-  Edge *Dnext();
-  Edge *Dprev();
-  Edge *Lnext();
-  Edge *Lprev();
-  Edge *Rnext();
-  Edge *Rprev();
-  Point2d *Org();
-  Point2d *Dest();
+  Edge *         Rot();
+  Edge *         invRot();
+  Edge *         Sym();
+  Edge *         Onext();
+  Edge *         Oprev();
+  Edge *         Dnext();
+  Edge *         Dprev();
+  Edge *         Lnext();
+  Edge *         Lprev();
+  Edge *         Rnext();
+  Edge *         Rprev();
+  Point2d *      Org();
+  Point2d *      Dest();
   const Point2d &Org2d() const;
   const Point2d &Dest2d() const;
-  void EndPoints(Point2d *, Point2d *);
-  Boolean isConstrained();
-  void Constrain();
-  QuadEdge *QEdge() const { return (QuadEdge *)(this - num); }
+  void           EndPoints(Point2d *, Point2d *);
+  Boolean        isConstrained();
+  void           Constrain();
+  QuadEdge *     QEdge() const { return (QuadEdge *)(this - num); }
 #if MARKED
   short &lmark(void) { return _lmark; }
   short &rmark(void) { return _rmark; }
@@ -322,7 +322,7 @@ public:
 
 class QuadEdge {
 private:
-  Edge e[4];
+  Edge    e[4];
   Boolean c;
 #if MARKED
   short _lmark;
@@ -331,10 +331,10 @@ private:
 
 public:
   QuadEdge(Boolean);
-  Edge *edges() { return e; }
+  Edge *  edges() { return e; }
   Boolean isConstrained() { return c; }
-  void Constrain() { c = TRUE; }
-  void Draw();
+  void    Constrain() { c = TRUE; }
+  void    Draw();
   ~QuadEdge();
 #if MARKED
   short &lmark(void) { return _lmark; }
@@ -346,12 +346,12 @@ class Mesh {
 private:
   Edge *startingEdge;
   //	Llist edges;
-  void DeleteEdge(Edge *);
+  void  DeleteEdge(Edge *);
   Edge *Connect(Edge *, Edge *);
   Edge *Locate(const Point2d &);
   Edge *BrutalLocate(const Point2d &);
-  void SplitEdge(Edge *, const Point2d &);
-  void Triangulate(Edge *);
+  void  SplitEdge(Edge *, const Point2d &);
+  void  Triangulate(Edge *);
 
 public:
   Llist edges;
@@ -360,10 +360,10 @@ public:
   Edge *MakeEdge(Boolean);
   Edge *MakeEdge(Point2d *, Point2d *, Boolean);
   Edge *InsertSite(const Point2d &, CDT_real dist = EPS);
-  void InsertEdge(const Point2d &, const Point2d &);
-  int numEdges() const { return edges.length(); }
-  void Draw() const;
-  void Apply(void (*f)(int isconstrained, double x1, double y1, double x2,
+  void  InsertEdge(const Point2d &, const Point2d &);
+  int   numEdges() const { return edges.length(); }
+  void  Draw() const;
+  void  Apply(void (*f)(int isconstrained, double x1, double y1, double x2,
                        double y2)) const;
 #if MARKED
   void ApplyTriangles(void (*f)(Point2d p1, Point2d p2, Point2d p3)) const;
@@ -388,7 +388,7 @@ inline QuadEdge::QuadEdge(Boolean constrained = FALSE) {
   e[1].next = &(e[3]);
   e[2].next = &(e[2]);
   e[3].next = &(e[1]);
-  c = constrained;
+  c         = constrained;
 }
 
 /************************* Edge Algebra *************************************/
@@ -472,7 +472,7 @@ inline const Point2d &Edge::Dest2d() const {
 }
 
 inline void Edge::EndPoints(Point2d *orig, Point2d *de) {
-  data = orig;
+  data        = orig;
   Sym()->data = de;
 }
 

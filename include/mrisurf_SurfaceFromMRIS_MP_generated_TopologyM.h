@@ -1,7 +1,7 @@
 namespace TopologyM {
 struct Face : public Repr_Elt {
   using Surface = TopologyM::Surface;
-  using Vertex = TopologyM::Vertex;
+  using Vertex  = TopologyM::Vertex;
   inline Face();
   inline Face(Face const &src);
   inline Face(Representation *representation, size_t idx);
@@ -9,7 +9,7 @@ struct Face : public Repr_Elt {
   int fno() const { return idx; }
 
   inline Vertex v(size_t i) const;
-  inline char ripflag() const;
+  inline char   ripflag() const;
 
   inline void set_v(size_t i, Vertex to);
   inline void set_ripflag(char to);
@@ -17,7 +17,7 @@ struct Face : public Repr_Elt {
 
 struct Vertex : public Repr_Elt {
   using Surface = TopologyM::Surface;
-  using Face = TopologyM::Face;
+  using Face    = TopologyM::Face;
   inline Vertex();
   inline Vertex(Vertex const &src);
   inline Vertex(Representation *representation, size_t idx);
@@ -34,8 +34,8 @@ struct Vertex : public Repr_Elt {
 
 struct MRIS_MP : public Repr_Elt {
   using Surface = TopologyM::Surface;
-  using Face = TopologyM::Face;
-  using Vertex = TopologyM::Vertex;
+  using Face    = TopologyM::Face;
+  using Vertex  = TopologyM::Vertex;
   inline MRIS_MP();
   inline MRIS_MP(MRIS_MP const &src);
   inline MRIS_MP(Representation *representation, size_t idx);
@@ -44,7 +44,7 @@ struct MRIS_MP : public Repr_Elt {
 }; // MRIS_MP
 
 struct Surface : public Repr_Elt {
-  using Face = TopologyM::Face;
+  using Face   = TopologyM::Face;
   using Vertex = TopologyM::Vertex;
   inline Surface();
   inline Surface(Surface const &src);
@@ -55,11 +55,11 @@ struct Surface : public Repr_Elt {
                                 //  MRISreallocVerticesAndFaces et al
   inline int nfaces() const;    //  # of faces on surface, change by calling
                                 //  MRISreallocVerticesAndFaces et al
-  inline Vertex vertices(size_t i) const;
-  inline Face faces(size_t i) const;
-  inline FaceNormCacheEntry faceNormCacheEntries(size_t i) const;
+  inline Vertex                vertices(size_t i) const;
+  inline Face                  faces(size_t i) const;
+  inline FaceNormCacheEntry    faceNormCacheEntries(size_t i) const;
   inline FaceNormDeferredEntry faceNormDeferredEntries(size_t i) const;
-  inline double radius() const;      //  radius (if status==MRIS_SPHERE)
+  inline double      radius() const; //  radius (if status==MRIS_SPHERE)
   inline MRIS_Status status() const; //  type of surface (e.g. sphere, plane)
   inline MRIS_Status
   origxyz_status() const;     //  type of surface (e.g. sphere, plane) that this

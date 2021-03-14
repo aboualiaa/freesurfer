@@ -1,16 +1,11 @@
 /**
- * @file  SurfaceROI.h
  * @brief Surface region from a surface selection in 3D view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/05/20 17:35:30 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,8 +22,8 @@
 #define SurfaceROI_h
 
 #include "vtkSmartPointer.h"
-#include <QObject>
 #include <QColor>
+#include <QObject>
 
 class vtkRenderer;
 class vtkActor;
@@ -57,7 +52,7 @@ public:
   void InitializeOutline(double *pos);
 
   QColor GetColor();
-  void SetColor(const QColor &color);
+  void   SetColor(const QColor &color);
 
   void Update();
 
@@ -79,12 +74,12 @@ signals:
 private:
   void RebuildOutline(bool bClose);
 
-  vtkSmartPointer<vtkActor> m_actorOutline;
+  vtkSmartPointer<vtkActor>  m_actorOutline;
   vtkSmartPointer<vtkPoints> m_points;
 
   LayerSurface *m_mris;
-  QColor m_color;
-  int m_nId;
+  QColor        m_color;
+  int           m_nId;
 };
 
 #endif

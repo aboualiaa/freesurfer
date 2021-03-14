@@ -1,17 +1,12 @@
 /**
- * @file  dmri_forrest.cxx
  * @brief Random-forrest classifier for white-matter segmentation
  *
  * Random-forrest classifier for white-matter segmentation
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
- *    $Author: ayendiki $
- *    $Date: 2014/05/27 14:49:34 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2031 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,52 +20,64 @@
 
 #include "forrest.h"
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <float.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <math.h>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
+#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
 using namespace std;
 
-static int parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static int  parse_commandline(int argc, char **argv);
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options();
 
 int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
 const char *Progname = "dmri_forrest";
 
-char *testDir = nullptr, *trainListFile = nullptr, *maskFile = nullptr,
-     *asegFile = nullptr, *orientFile = nullptr;
+std::string    testDir, trainListFile, maskFile, asegFile, orientFile;
 vector<char *> tractFileList;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
-  int nx;
-  int ny;
-  int nz;
-  int ntrain;
+  int nargs, cputime, nx, ny, nz, ntrain;
 
   nargs = handleVersionOption(argc, argv, "dmri_forrest");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -80,17 +87,15 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  if (argc == 0) {
+  if (argc == 0)
     usage_exit();
-  }
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly != 0) {
+  if (checkoptsonly)
     return (0);
-  }
 
   dump_options();
 
@@ -99,7 +104,8 @@ int main(int argc, char **argv) {
   cputimer.reset();
 
   cout << "Reading test subject data..." << endl;
-  myforrest.ReadTestSubject(testDir, maskFile, asegFile, orientFile);
+  myforrest.ReadTestSubject(testDir.c_str(), maskFile.c_str(), asegFile.c_str(),
+                            orientFile.c_str());
 
   // Get volume dimensions from test subject
   nx = myforrest.GetNx();
@@ -107,26 +113,25 @@ int main(int argc, char **argv) {
   nz = myforrest.GetNz();
 
   cout << "Reading training subject data..." << endl;
-  myforrest.ReadTrainingSubjects(trainListFile, maskFile, asegFile, orientFile,
+  myforrest.ReadTrainingSubjects(trainListFile.c_str(), maskFile.c_str(),
+                                 asegFile.c_str(), orientFile.c_str(),
                                  tractFileList);
 
   // Get total number of training samples
   ntrain = myforrest.GetNumTrain();
 
   for (int k = 0; k < 100; k++) {
-    const int ix = (int)round(drand48() * (nx - 1));
-    const int iy = (int)round(drand48() * (ny - 1));
-    const int iz = (int)round(drand48() * (nz - 1));
-    const int isamp = (int)round(drand48() * (ntrain - 1));
-    vector<int> xyz;
-    vector<unsigned int> aseg;
-    vector<unsigned int> tracts;
-    vector<float> orient;
+    const int ix    = (int)round(drand48() * (nx - 1)),
+              iy    = (int)round(drand48() * (ny - 1)),
+              iz    = (int)round(drand48() * (nz - 1)),
+              isamp = (int)round(drand48() * (ntrain - 1));
+    vector<int>          xyz;
+    vector<unsigned int> aseg, tracts;
+    vector<float>        orient;
 
     // Check if this voxel is inside the brain mask of the test subject
-    if (!myforrest.IsInMask(ix, iy, iz)) {
+    if (!myforrest.IsInMask(ix, iy, iz))
       continue;
-    }
 
     // Get anatomical segmentation neighbors for a voxel in the test subject
     aseg = myforrest.GetTestAseg(ix, iy, iz);
@@ -134,9 +139,8 @@ int main(int argc, char **argv) {
       cout << "Anatomical segmentation neighbors of voxel (" << ix << ", " << iy
            << ", " << iz << ")"
            << " in test subject:";
-      for (unsigned int iseg = 0; iseg < aseg.size(); iseg++) {
+      for (unsigned int iseg = 0; iseg < aseg.size(); iseg++)
         cout << " " << aseg[iseg];
-      }
       cout << endl;
     }
 
@@ -159,9 +163,8 @@ int main(int argc, char **argv) {
     if (!aseg.empty()) { // If anatomical segmentations were provided
       cout << "Anatomical segmentation neighbors of training sample " << isamp
            << ":";
-      for (unsigned int iseg = 0; iseg < aseg.size(); iseg++) {
+      for (unsigned int iseg = 0; iseg < aseg.size(); iseg++)
         cout << " " << aseg[iseg];
-      }
       cout << endl;
     }
 
@@ -175,12 +178,11 @@ int main(int argc, char **argv) {
     // Sample tract membership from the training data
     tracts = myforrest.GetTrainTractIds(isamp);
     cout << "Tract membership of training sample " << isamp << ":";
-    if (tracts.empty()) { // If voxel doesn't belong to any tracts
+    if (tracts.empty()) // If voxel doesn't belong to any tracts
       cout << " " << 0 << endl;
-    } else {
-      for (unsigned int itract = 0; itract < tracts.size(); itract++) {
+    else {
+      for (unsigned int itract = 0; itract < tracts.size(); itract++)
         cout << " " << tracts[itract];
-      }
       cout << endl;
     }
   }
@@ -195,80 +197,69 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
-  char **pargv;
-  char *option;
+  int    nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) {
+  if (argc < 1)
     usage_exit();
-  }
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug != 0) {
+    if (debug)
       printf("%d %s\n", nargc, option);
-    }
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (strcasecmp(option, "--help") == 0) {
+    if (!strcasecmp(option, "--help"))
       print_help();
-    } else if (strcasecmp(option, "--version") == 0) {
+    else if (!strcasecmp(option, "--version"))
       print_version();
-    } else if (strcasecmp(option, "--debug") == 0) {
+    else if (!strcasecmp(option, "--debug"))
       debug = 1;
-    } else if (strcasecmp(option, "--checkopts") == 0) {
+    else if (!strcasecmp(option, "--checkopts"))
       checkoptsonly = 1;
-    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+    else if (!strcasecmp(option, "--nocheckopts"))
       checkoptsonly = 0;
-    } else if (strcmp(option, "--test") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--test")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      testDir = fio_fullpath(pargv[0]);
+      testDir   = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--train") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--train")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       trainListFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
-    } else if (strcmp(option, "--mask") == 0) {
-      if (nargc < 1) {
+      nargsused     = 1;
+    } else if (!strcmp(option, "--mask")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      maskFile = pargv[0];
+      maskFile  = pargv[0];
       nargsused = 1;
-    } else if (strcmp(option, "--seg") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--seg")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      asegFile = pargv[0];
+      asegFile  = pargv[0];
       nargsused = 1;
-    } else if (strcmp(option, "--diff") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--diff")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       orientFile = pargv[0];
-      nargsused = 1;
-    } else if (strcmp(option, "--tract") == 0) {
-      if (nargc < 1) {
+      nargsused  = 1;
+    } else if (!strcmp(option, "--tract")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
         tractFileList.push_back(pargv[nargsused]);
         nargsused++;
       }
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
-      if (CMDsingleDash(option) != 0) {
+      if (CMDsingleDash(option))
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -278,7 +269,7 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   cout << endl
        << "USAGE: " << Progname << endl
        << endl
@@ -311,7 +302,7 @@ static void print_usage() {
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
 
   cout << endl << "..." << endl << endl;
@@ -320,28 +311,28 @@ static void print_help() {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  cout << vcid << endl;
+static void print_version(void) {
+  cout << getVersion() << endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void check_options() {
-  if (testDir == nullptr) {
+static void check_options(void) {
+  if (testDir.empty()) {
     cout << "ERROR: Must specify test subject directory" << endl;
     exit(1);
   }
-  if (trainListFile == nullptr) {
+  if (trainListFile.empty()) {
     cout << "ERROR: Must specify training subject list file" << endl;
     exit(1);
   }
-  if (maskFile == nullptr) {
+  if (maskFile.empty()) {
     cout << "ERROR: Must specify brain mask volume" << endl;
     exit(1);
   }
@@ -349,12 +340,13 @@ static void check_options() {
     cout << "ERROR: Must specify at least one tract label volume" << endl;
     exit(1);
   }
+  return;
 }
 
 /* --------------------------------------------- */
 static void dump_options() {
   cout << endl
-       << vcid << endl
+       << getVersion() << endl
        << "cwd " << cwd << endl
        << "cmdline " << cmdline << endl
        << "sysname  " << uts.sysname << endl
@@ -371,18 +363,20 @@ static void dump_options() {
 
   cout << "Location of streamline files relative to subject directory:";
 
-  for (auto istr = tractFileList.begin(); istr < tractFileList.end(); istr++) {
+  for (vector<char *>::const_iterator istr = tractFileList.begin();
+       istr < tractFileList.end(); istr++)
     cout << " " << *istr;
-  }
   cout << endl;
 
-  if (asegFile != nullptr) {
+  if (!asegFile.empty()) {
     cout << "Location of aparc+aseg's relative to subject directory: "
          << asegFile << endl;
   }
 
-  if (orientFile != nullptr) {
+  if (!orientFile.empty()) {
     cout << "Location of diffusion orientations relative to subject directory: "
          << orientFile << endl;
   }
+
+  return;
 }

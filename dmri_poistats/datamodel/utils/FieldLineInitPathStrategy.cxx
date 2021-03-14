@@ -112,7 +112,7 @@ void FieldLineInitPathStrategy::CalculateInitialPath() {
   }
 }
 
-void FieldLineInitPathStrategy::GetLookAtVector(double *lookAtVector,
+void FieldLineInitPathStrategy::GetLookAtVector(double *   lookAtVector,
                                                 const int *startPoint,
                                                 const int *endPoint) {
 
@@ -176,7 +176,7 @@ void FieldLineInitPathStrategy::GetUpVector(double *up, const double *lookAt,
   }
 }
 
-void FieldLineInitPathStrategy::GetCrossProduct(double *product,
+void FieldLineInitPathStrategy::GetCrossProduct(double *      product,
                                                 const double *v1,
                                                 const double *v2) {
 
@@ -234,7 +234,7 @@ FieldLineInitPathStrategy::GetInitialPoints(const int *startPoint,
 
   // set the start and end points
   for (unsigned int cCol = 0; cCol < initialPoints.cols(); cCol++) {
-    initialPoints(0, cCol) = startPoint[cCol];
+    initialPoints(0, cCol)                        = startPoint[cCol];
     initialPoints(initialPoints.rows() - 1, cCol) = endPoint[cCol];
   }
 
@@ -243,7 +243,7 @@ FieldLineInitPathStrategy::GetInitialPoints(const int *startPoint,
 
     // get the intermediate point
     const int intermediateLabel = (*seedValues)[cRow];
-    int point[3];
+    int       point[3];
     this->GetRandomSeedPoint(point, intermediateLabel);
 
     // set the point

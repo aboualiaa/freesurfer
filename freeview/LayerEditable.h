@@ -1,16 +1,11 @@
 /**
- * @file  LayerEditable.h
  * @brief Base Layer class for editable volume.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:47 $
- *    $Revision: 1.17 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -60,7 +55,7 @@ public slots:
   virtual void SetModified();
 
 protected:
-  int m_nMaxUndoSteps;
+  int  m_nMaxUndoSteps;
   bool m_bModified;
 
   bool m_bEditable;

@@ -12,9 +12,9 @@ private:
   float (*mFunction)(float[]);
   void (*mFunctionGradient)(float[], float[]);
 
-  void copyFromVNLToFloat(float *floatVector,
+  void copyFromVNLToFloat(float *                  floatVector,
                           const vnl_vector<double> vnlVector,
-                          int numberOfParameters);
+                          int                      numberOfParameters);
 
 public:
   fs_cost_function(float (*function)(float[]));

@@ -1,17 +1,6 @@
-/**
- * @file  mris_spherical_wavelets.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:34 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,55 +19,41 @@
 // date: 11/10/04
 //
 // Warning: Do not edit the following four lines.  CVS maintains them.
-// Revision Author: $Author: nicks $
-// Revision Date  : $Date: 2011/03/02 00:04:34 $
-// Revision       : $Revision: 1.5 $
 ////////////////////////////////////////////
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <ctype.h>
-#include "mri.h"
-#include "mrisurf.h"
-#include "icosahedron.h"
+#include "cma.h"
 #include "const.h"
 #include "diag.h"
 #include "error.h"
+#include "icosahedron.h"
 #include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mrinorm.h"
+#include "mrisurf.h"
 #include "proto.h"
 #include "timer.h"
-#include "mrinorm.h"
-#include "cma.h"
 #include "version.h"
-#include "error.h"
-#include "matrix.h"
 
-// static char vcid[] = "$Id: mris_spherical_wavelets.c,v 1.5 2011/03/02
-// 00:04:34 nicks Exp $";
-
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-const char *Progname;
+int                 main(int argc, char *argv[]);
+static int          get_option(int argc, char *argv[]);
+const char *        Progname;
 static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst);
 
-static int ANALYSIS = 0;
-static int SYNTHESIS = 0;
-static int COMPARE = 0;
-static int CURV = 0;
+static int   ANALYSIS  = 0;
+static int   SYNTHESIS = 0;
+static int   COMPARE   = 0;
+static int   CURV      = 0;
 static char *fname;
 
 int main(int argc, char *argv[]) {
   int nargs, msec, order, i, number, vno, nnum, m, k, b1, b2, cno, flag = 0,
                                                                    fno;
-  Timer then;
-  MRIS *mris_in, *mris_out, *mris_high;
+  Timer   then;
+  MRIS *  mris_in, *mris_out, *mris_high;
   MRI_SP *mrisp;
   VERTEX *vm_out, *vm_high, *v;
-  float s_jkm, area;
+  float   s_jkm, area;
 
   Progname = argv[0];
   DiagInit(NULL, NULL, NULL);
@@ -148,7 +123,7 @@ int main(int argc, char *argv[]) {
 
     /* Initialize Ij,k*/
     for (vno = 0; vno < mris_out->nvertices; vno++) {
-      vm_out = &mris_out->vertices[vno];
+      vm_out      = &mris_out->vertices[vno];
       vm_out->val = 1;
     }
 
@@ -160,9 +135,9 @@ int main(int argc, char *argv[]) {
       MRISsetNeighborhoodSizeAndDist(mris_high, 3);
       number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
       for (m = number; m < mris_high->nvertices; m++) {
-        vm_out = &mris_out->vertices[m];
+        vm_out  = &mris_out->vertices[m];
         vm_high = &mris_high->vertices[m];
-        flag = 0;
+        flag    = 0;
         for (nnum = 0; nnum < vm_high->vnum; nnum++)
           if (vm_high->v[nnum] < number) // A(j,m)
           {
@@ -185,7 +160,7 @@ int main(int argc, char *argv[]) {
         for (; nnum < vm_high->v3num; nnum++)
           if (vm_high->v[nnum] < number) // C(j,m)
           {
-            k = vm_high->v[nnum];
+            k    = vm_high->v[nnum];
             flag = 0; // C has to be a second-order neighbor of B
             for (cno = mris_high->vertices[b1].vnum;
                  cno < mris_high->vertices[b1].v2num; cno++)
@@ -213,9 +188,9 @@ int main(int argc, char *argv[]) {
       number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
       /* compute Yj,m for each m vertices */
       for (m = number; m < mris_high->nvertices; m++) {
-        vm_out = &mris_out->vertices[m];
+        vm_out  = &mris_out->vertices[m];
         vm_high = &mris_high->vertices[m];
-        flag = 0;
+        flag    = 0;
         for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
           if (vm_high->v[nnum] < number)             // neighbor A(j,m)
           {
@@ -242,7 +217,7 @@ int main(int argc, char *argv[]) {
         for (; nnum < vm_high->v3num; nnum++)
           if (vm_high->v[nnum] < number) // neighbor C(j,m)
           {
-            k = vm_high->v[nnum];
+            k    = vm_high->v[nnum];
             flag = 0; // C has to be a second-order neighbor of B
             for (cno = mris_high->vertices[b1].vnum;
                  cno < mris_high->vertices[b1].v2num; cno++)
@@ -264,13 +239,13 @@ int main(int argc, char *argv[]) {
       /*Analysis Stage II: */
       /*Compute Lamda(j,k) using the Yita(j,m)*/
       for (m = number; m < mris_high->nvertices; m++) {
-        vm_out = &mris_out->vertices[m];
+        vm_out  = &mris_out->vertices[m];
         vm_high = &mris_high->vertices[m];
         for (nnum = 0; nnum < vm_high->vnum; nnum++)
           if (vm_high->v[nnum] < number) // A(j,m)
           {
-            k = vm_high->v[nnum];
-            v = &mris_out->vertices[k];
+            k     = vm_high->v[nnum];
+            v     = &mris_out->vertices[k];
             s_jkm = vm_out->val / 2 / v->val;
             v->origx += s_jkm * vm_out->origx;
             v->origy += s_jkm * vm_out->origy;
@@ -320,7 +295,7 @@ int main(int argc, char *argv[]) {
     // MRISwriteCurvature(mris_out,"/space/xrt/1/users/btquinn/buckner_paper/010223_61223/surf/lh.thickness.sampled");
     /* Initialize Ij,k*/
     for (vno = 0; vno < mris_out->nvertices; vno++) {
-      vm_out = &mris_out->vertices[vno];
+      vm_out      = &mris_out->vertices[vno];
       vm_out->val = 1;
     }
 
@@ -332,9 +307,9 @@ int main(int argc, char *argv[]) {
       MRISsetNeighborhoodSizeAndDist(mris_high, 3);
       number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
       for (m = number; m < mris_high->nvertices; m++) {
-        vm_out = &mris_out->vertices[m];
+        vm_out  = &mris_out->vertices[m];
         vm_high = &mris_high->vertices[m];
-        flag = 0;
+        flag    = 0;
         for (nnum = 0; nnum < vm_high->vnum; nnum++)
           if (vm_high->v[nnum] < number) // A(j,m)
           {
@@ -357,7 +332,7 @@ int main(int argc, char *argv[]) {
         for (; nnum < vm_high->v3num; nnum++)
           if (vm_high->v[nnum] < number) // C(j,m)
           {
-            k = vm_high->v[nnum];
+            k    = vm_high->v[nnum];
             flag = 0; // C has to be a second-order neighbor of B
             for (cno = mris_high->vertices[b1].vnum;
                  cno < mris_high->vertices[b1].v2num; cno++)
@@ -385,9 +360,9 @@ int main(int argc, char *argv[]) {
       number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
       /* compute Yj,m for each m vertices */
       for (m = number; m < mris_high->nvertices; m++) {
-        vm_out = &mris_out->vertices[m];
+        vm_out  = &mris_out->vertices[m];
         vm_high = &mris_high->vertices[m];
-        flag = 0;
+        flag    = 0;
         for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
           if (vm_high->v[nnum] < number)             // neighbor A(j,m)
           {
@@ -410,7 +385,7 @@ int main(int argc, char *argv[]) {
         for (; nnum < vm_high->v3num; nnum++)
           if (vm_high->v[nnum] < number) // neighbor C(j,m)
           {
-            k = vm_high->v[nnum];
+            k    = vm_high->v[nnum];
             flag = 0; // C has to be a second-order neighbor of B
             for (cno = mris_high->vertices[b1].vnum;
                  cno < mris_high->vertices[b1].v2num; cno++)
@@ -430,13 +405,13 @@ int main(int argc, char *argv[]) {
       /*Analysis Stage II: */
       /*Compute Lamda(j,k) using the Yita(j,m)*/
       for (m = number; m < mris_high->nvertices; m++) {
-        vm_out = &mris_out->vertices[m];
+        vm_out  = &mris_out->vertices[m];
         vm_high = &mris_high->vertices[m];
         for (nnum = 0; nnum < vm_high->vnum; nnum++)
           if (vm_high->v[nnum] < number) // A(j,m)
           {
-            k = vm_high->v[nnum];
-            v = &mris_out->vertices[k];
+            k     = vm_high->v[nnum];
+            v     = &mris_out->vertices[k];
             s_jkm = vm_out->val / 2 / v->val;
             v->curv += s_jkm * vm_out->curv;
           }
@@ -504,7 +479,7 @@ int main(int argc, char *argv[]) {
 
     /*Initialize Ij,k*/
     for (vno = 0; vno < mris_out->nvertices; vno++) {
-      vm_out = &mris_out->vertices[vno];
+      vm_out      = &mris_out->vertices[vno];
       vm_out->val = 1;
     }
 
@@ -516,9 +491,9 @@ int main(int argc, char *argv[]) {
       MRISsetNeighborhoodSizeAndDist(mris_high, 3);
       number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
       for (m = number; m < mris_high->nvertices; m++) {
-        vm_out = &mris_out->vertices[m];
+        vm_out  = &mris_out->vertices[m];
         vm_high = &mris_high->vertices[m];
-        flag = 0;
+        flag    = 0;
         for (nnum = 0; nnum < vm_high->vnum; nnum++)
           if (vm_high->v[nnum] < number) // A(j,m)
           {
@@ -541,7 +516,7 @@ int main(int argc, char *argv[]) {
         for (; nnum < vm_high->v3num; nnum++)
           if (vm_high->v[nnum] < number) // C(j,m)
           {
-            k = vm_high->v[nnum];
+            k    = vm_high->v[nnum];
             flag = 0; // C has to be a second-order neighbor of B
             for (cno = mris_high->vertices[b1].vnum;
                  cno < mris_high->vertices[b1].v2num; cno++)
@@ -569,13 +544,13 @@ int main(int argc, char *argv[]) {
       /* Synthesis Stage I */
       /* Compute Lamda(j+1,k) using the Yita(j,m) */
       for (m = number; m < mris_high->nvertices; m++) {
-        vm_out = &mris_out->vertices[m];
+        vm_out  = &mris_out->vertices[m];
         vm_high = &mris_high->vertices[m];
         for (nnum = 0; nnum < vm_high->vnum; nnum++)
           if (vm_high->v[nnum] < number) // A(j,m)
           {
-            k = vm_high->v[nnum];
-            v = &mris_out->vertices[k];
+            k     = vm_high->v[nnum];
+            v     = &mris_out->vertices[k];
             s_jkm = vm_out->val / 2 / v->val;
             v->origx -= s_jkm * vm_out->origx;
             v->origy -= s_jkm * vm_out->origy;
@@ -585,9 +560,9 @@ int main(int argc, char *argv[]) {
 
       /* compute Lamda(j+1,m) for each m vertices */
       for (m = number; m < mris_high->nvertices; m++) {
-        vm_out = &mris_out->vertices[m];
+        vm_out  = &mris_out->vertices[m];
         vm_high = &mris_high->vertices[m];
-        flag = 0;
+        flag    = 0;
         for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
           if (vm_high->v[nnum] < number)             // neighbor A(j,m)
           {
@@ -614,7 +589,7 @@ int main(int argc, char *argv[]) {
         for (; nnum < vm_high->v3num; nnum++) // third order neighborhood
           if (vm_high->v[nnum] < number)      // neighbor C(j,m)
           {
-            k = vm_high->v[nnum];
+            k    = vm_high->v[nnum];
             flag = 0; // C has to be a second-order neighbor of B
             for (cno = mris_high->vertices[b1].vnum;
                  cno < mris_high->vertices[b1].v2num; cno++)
@@ -667,10 +642,10 @@ int main(int argc, char *argv[]) {
  Description:
  ----------------------------------------------------------------------*/
 MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) {
-  int fno, vno;
-  FACE *face;
+  int     fno, vno;
+  FACE *  face;
   VERTEX *vdst;
-  float x, y, z, x0, y0, z0;
+  float   x, y, z, x0, y0, z0;
 
   if (!mris_dst)
     mris_dst = MRISclone(mris_src);
@@ -715,7 +690,7 @@ MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -728,7 +703,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stdout, "Spherical wavelt synthesis\n");
   } else if (!stricmp(option, "C")) {
     COMPARE = 1;
-    fname = argv[2];
+    fname   = argv[2];
     fprintf(stdout, "Reconstruct the surface using only differences\n");
     nargs = 1;
   } else if (!stricmp(option, "CURV")) {

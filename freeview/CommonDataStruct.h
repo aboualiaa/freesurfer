@@ -1,5 +1,4 @@
 /**
- * @file  CommonDataStruct.h
  * @brief A few common structures to hold settings
  *
  * Simple mix-in class for use with the Broadcaster class so text
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:46 $
- *    $Revision: 1.16 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,14 +23,14 @@
 #ifndef CommonDataStruct_h
 #define CommonDataStruct_h
 
-#include <QString>
 #include <QColor>
+#include <QString>
 
 struct SettingsGeneral {
   QColor BackgroundColor;
   QColor CursorColor;
-  int CursorStyle;
-  bool SaveCopy;
+  int    CursorStyle;
+  bool   SaveCopy;
 };
 
 struct Settings2D {
@@ -47,22 +42,22 @@ struct SettingsScreenshot {
   bool HideCoords;
   bool HideScaleBar;
   bool AntiAliasing;
-  int Magnification;
+  int  Magnification;
   bool AutoTrim;
 };
 
 struct SettingsMovieFrames {
   QString OutputLocation;
   QString OutputExtension;
-  double AngleStep;
-  int StepCount;
+  double  AngleStep;
+  int     StepCount;
 };
 
 struct RotationElement {
-  int Plane;
+  int    Plane;
   double Angle;
   double Point[3];
-  int SampleMethod;
+  int    SampleMethod;
 };
 
 #endif

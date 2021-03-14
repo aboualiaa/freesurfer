@@ -20,12 +20,8 @@ function [kmeans, kmap, dmin, niters, yhat] = fast_kmeans(y,nc,kmeans0,nitersmax
 % fast_kmeans.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: greve $
-%    $Date: 2012/06/07 21:23:34 $
-%    $Revision: 1.10 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

@@ -1,7 +1,8 @@
 #include "kvlConditionalGaussianEntropyCostAndGradientCalculator.h"
 
-#include <itkMath.h>
 #include "kvlTetrahedronInteriorConstIterator.h"
+#include <itkMath.h>
+// #include "itkTimeProbe.h"
 
 #define SUBTRACT_MARGINAL_ENTROPY 0
 
@@ -13,7 +14,7 @@ namespace kvl {
 ConditionalGaussianEntropyCostAndGradientCalculator ::
     ConditionalGaussianEntropyCostAndGradientCalculator() {
 
-  m_Image = nullptr;
+  m_Image = 0;
 }
 
 //
@@ -37,8 +38,8 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::SetImage(
 void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
     const AtlasMesh *mesh) {
   //
-  // itk::TimeProbe clock;
-  // clock.Start();
+  //itk::TimeProbe clock;
+  //clock.Start();
 
   // Clean up any previous mess
   m_Abort = false;
@@ -51,29 +52,31 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
   // m_ThreadSpecificPriorCosts.clear();
   // m_ThreadSpecificPriorGradients.clear();
 
-  // Make sure thread-specific, class-specific quantities we're going to collect
-  // are defined and initialized to zero
+  // Make sure thread-specific, class-specific quantities we're going to collect are defined and
+  // initialized to zero
   const int numberOfClasses =
       mesh->GetPointData()->Begin().Value().m_Alphas.Size();
-  AtlasPositionGradientType zeroEntry(0.0f);
+  AtlasPositionGradientThreadAccumType zeroEntry(0.0f);
 
-  // std::cout << "Preparing..." << std::flush;
+  //std::cout << "Preparing..." << std::flush;
   const bool memoryAlreadyAllocated = (m_ThreadSpecificNs.size() > 0);
-  // std::cout << "memoryAlreadyAllocated: " << memoryAlreadyAllocated <<
-  // std::endl;
+  //std::cout << "memoryAlreadyAllocated: " << memoryAlreadyAllocated << std::endl;
 
   for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
        threadNumber++) {
     if (!m_OnlyDeformationPrior) {
       if (!memoryAlreadyAllocated) {
-        // std::cout << "Allocating memory" << std::endl;
-        std::vector<double> Ns;
-        std::vector<double> Ls;
-        std::vector<double> Qs;
+        //std::cout << "Allocating memory" << std::endl;
+        std::vector<ThreadAccumDataType> Ns;
+        std::vector<ThreadAccumDataType> Ls;
+        std::vector<ThreadAccumDataType> Qs;
 
-        std::vector<AtlasPositionGradientContainerType::Pointer> NGradients;
-        std::vector<AtlasPositionGradientContainerType::Pointer> LGradients;
-        std::vector<AtlasPositionGradientContainerType::Pointer> QGradients;
+        std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>
+            NGradients;
+        std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>
+            LGradients;
+        std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>
+            QGradients;
 
         // For each class, initialize N, L, Q, and their gradients
         for (int classNumber = 0; classNumber < numberOfClasses;
@@ -84,12 +87,12 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
           Qs.push_back(0.0);
 
           // Gradients
-          AtlasPositionGradientContainerType::Pointer NGradient =
-              AtlasPositionGradientContainerType::New();
-          AtlasPositionGradientContainerType::Pointer LGradient =
-              AtlasPositionGradientContainerType::New();
-          AtlasPositionGradientContainerType::Pointer QGradient =
-              AtlasPositionGradientContainerType::New();
+          AtlasPositionGradientThreadAccumContainerType::Pointer NGradient =
+              AtlasPositionGradientThreadAccumContainerType::New();
+          AtlasPositionGradientThreadAccumContainerType::Pointer LGradient =
+              AtlasPositionGradientThreadAccumContainerType::New();
+          AtlasPositionGradientThreadAccumContainerType::Pointer QGradient =
+              AtlasPositionGradientThreadAccumContainerType::New();
           for (AtlasMesh::PointsContainer::ConstIterator pointIt =
                    mesh->GetPoints()->Begin();
                pointIt != mesh->GetPoints()->End(); ++pointIt) {
@@ -113,7 +116,7 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
         m_ThreadSpecificQGradients.push_back(QGradients);
 
       } else {
-        // std::cout << "zeroing existing memory" << std::endl;
+        //std::cout << "zeroing existing memory" << std::endl;
 
         // Memory already allocated; just zero out the values
         m_ThreadSpecificNs[threadNumber].assign(numberOfClasses, 0.0);
@@ -122,11 +125,11 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
         for (int classNumber = 0; classNumber < numberOfClasses;
              classNumber++) {
-          AtlasPositionGradientContainerType::Iterator NGradientIt =
+          AtlasPositionGradientThreadAccumContainerType::Iterator NGradientIt =
               (m_ThreadSpecificNGradients[threadNumber])[classNumber]->Begin();
-          AtlasPositionGradientContainerType::Iterator LGradientIt =
+          AtlasPositionGradientThreadAccumContainerType::Iterator LGradientIt =
               (m_ThreadSpecificLGradients[threadNumber])[classNumber]->Begin();
-          AtlasPositionGradientContainerType::Iterator QGradientIt =
+          AtlasPositionGradientThreadAccumContainerType::Iterator QGradientIt =
               (m_ThreadSpecificQGradients[threadNumber])[classNumber]->Begin();
           for (; NGradientIt !=
                  (m_ThreadSpecificNGradients[threadNumber])[classNumber]->End();
@@ -142,12 +145,12 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
     if (!m_IgnoreDeformationPrior) {
       if (!memoryAlreadyAllocated) {
-        // std::cout << "Allocating memory" << std::endl;
+        //std::cout << "Allocating memory" << std::endl;
 
         //
         m_ThreadSpecificPriorCosts.push_back(0.0);
-        AtlasPositionGradientContainerType::Pointer priorGradient =
-            AtlasPositionGradientContainerType::New();
+        AtlasPositionGradientThreadAccumContainerType::Pointer priorGradient =
+            AtlasPositionGradientThreadAccumContainerType::New();
         for (AtlasMesh::PointsContainer::ConstIterator pointIt =
                  mesh->GetPoints()->Begin();
              pointIt != mesh->GetPoints()->End(); ++pointIt) {
@@ -155,11 +158,12 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
         }
         m_ThreadSpecificPriorGradients.push_back(priorGradient);
       } else {
-        // std::cout << "Zeroing out memory" << std::endl;
+        //std::cout << "Zeroing out memory" << std::endl;
 
         m_ThreadSpecificPriorCosts[threadNumber] = 0.0;
-        for (AtlasPositionGradientContainerType::Iterator priorGradientIt =
-                 m_ThreadSpecificPriorGradients[threadNumber]->Begin();
+        for (AtlasPositionGradientThreadAccumContainerType::Iterator
+                 priorGradientIt =
+                     m_ThreadSpecificPriorGradients[threadNumber]->Begin();
              priorGradientIt !=
              m_ThreadSpecificPriorGradients[threadNumber]->End();
              ++priorGradientIt) {
@@ -170,20 +174,18 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
   } // End loop over threads
 
-  // clock.Stop();
-  // std::cout << "Time taken by initialization: " << clock.GetMean() <<
-  // std::endl;
+  //clock.Stop();
+  //std::cout << "Time taken by initialization: " << clock.GetMean() << std::endl;
 
   // Now rasterize
-  // clock.Reset();
-  // clock.Start();
+  //clock.Reset();
+  //clock.Start();
   AtlasMeshRasterizor::Rasterize(mesh);
-  // clock.Stop();
-  // std::cout << "Time taken by rasterization: " << clock.GetMean() <<
-  // std::endl;
+  //clock.Stop();
+  //std::cout << "Time taken by rasterization: " << clock.GetMean() << std::endl;
 
-  // clock.Reset();
-  // clock.Start();
+  //clock.Reset();
+  //clock.Start();
 
   // Initialize gradient-to-return to zero
   m_PositionGradient = AtlasPositionGradientContainerType::New();
@@ -201,35 +203,53 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
   }
 
   // Add contributions of prior
-  double priorCost = 0.0;
+  ThreadAccumDataType totalThreadPriorCost = 0.0;
   if (!m_IgnoreDeformationPrior) {
+
+    // Accumulate prior cost over threads
     for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
          threadNumber++) {
       // Cost
-      if (std::isnan(m_ThreadSpecificPriorCosts[threadNumber]) ||
-          std::isinf(m_ThreadSpecificPriorCosts[threadNumber])) {
+      const double typedPriorCost =
+          double(m_ThreadSpecificPriorCosts[threadNumber]);
+      if (std::isnan(typedPriorCost) || std::isinf(typedPriorCost)) {
         // Something has gone wrong
         m_MinLogLikelihoodTimesPrior = itk::NumericTraits<double>::max();
         return;
       }
-      priorCost += m_ThreadSpecificPriorCosts[threadNumber];
-
-      // Gradient
-      AtlasPositionGradientContainerType::ConstIterator priorGradientIt =
-          m_ThreadSpecificPriorGradients[threadNumber]->Begin();
-      AtlasPositionGradientContainerType::Iterator gradientIt =
-          m_PositionGradient->Begin();
-      for (; gradientIt != m_PositionGradient->End();
-           ++gradientIt, ++priorGradientIt) {
-        gradientIt.Value() += priorGradientIt.Value();
-      }
-
+      totalThreadPriorCost += m_ThreadSpecificPriorCosts[threadNumber];
     } // End loop over threads
-  }
-  // std::cout << "priorCost: " << priorCost << std::endl;
 
-  // Stitch together the results based on thread-specific, class-specific
-  // quantities
+    // Accumulate prior gradients over threads
+    for (int threadNumber = 1; threadNumber < this->GetNumberOfThreads();
+         threadNumber++) {
+      // Gradient
+      AtlasPositionGradientThreadAccumContainerType::ConstIterator threadIt =
+          m_ThreadSpecificPriorGradients[threadNumber]->Begin();
+      AtlasPositionGradientThreadAccumContainerType::Iterator firstThreadIt =
+          m_ThreadSpecificPriorGradients[0]->Begin();
+      for (; firstThreadIt != m_ThreadSpecificPriorGradients[0]->End();
+           ++firstThreadIt, ++threadIt) {
+        firstThreadIt.Value() += threadIt.Value();
+      }
+    }
+
+    // Copy accumulated thread gradient to final prior gradient value
+    AtlasPositionGradientThreadAccumContainerType::ConstIterator
+        firstThreadGradientIt = m_ThreadSpecificPriorGradients[0]->Begin();
+    AtlasPositionGradientContainerType::Iterator finalGradientIt =
+        m_PositionGradient->Begin();
+    for (; finalGradientIt != m_PositionGradient->End();
+         ++finalGradientIt, ++firstThreadGradientIt) {
+      finalGradientIt.Value() = firstThreadGradientIt.Value();
+    }
+  }
+
+  // Copy accumulated thread cost to final prior cost value
+  double priorCost = totalThreadPriorCost;
+  //std::cout << "priorCost: " << priorCost << std::endl;
+
+  // Stitch together the results based on thread-specific, class-specific quantities
   double dataCost = 0.0;
 
   if (!m_OnlyDeformationPrior) {
@@ -241,20 +261,25 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 
     // Add the various contributions to the cost function
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
-      double N = 1e-15;
-      double L = 0.0;
-      double Q = 0.0;
+      ThreadAccumDataType tN = 1e-15;
+      ThreadAccumDataType tL = 0.0;
+      ThreadAccumDataType tQ = 0.0;
       for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
            threadNumber++) {
         //
-        N += (m_ThreadSpecificNs[threadNumber])[classNumber];
-        L += (m_ThreadSpecificLs[threadNumber])[classNumber];
-        Q += (m_ThreadSpecificQs[threadNumber])[classNumber];
+        tN += (m_ThreadSpecificNs[threadNumber])[classNumber];
+        tL += (m_ThreadSpecificLs[threadNumber])[classNumber];
+        tQ += (m_ThreadSpecificQs[threadNumber])[classNumber];
       } // end loop over threads
+
+      // Convert from accumulator precision to double
+      const double N = tN;
+      const double L = tL;
+      const double Q = tQ;
 
       //
       const double variance = (Q * N - pow(L, 2)) / pow(N, 2) + 1e-15;
-      const double entropy = log(variance) + 1;
+      const double entropy  = log(variance) + 1;
 
       //
       dataCost += N * entropy;
@@ -264,10 +289,9 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
       marginalQ += Q;
 #endif
       // //
-      // std::cout << "variance[ " << classNumber << " ]: " << variance <<
-      // std::endl; std::cout << "N[ " << classNumber << " ]: " << N <<
-      // std::endl; std::cout << "entropy[ " << classNumber << " ]: " << entropy
-      // << std::endl;
+      // std::cout << "variance[ " << classNumber << " ]: " << variance << std::endl;
+      // std::cout << "N[ " << classNumber << " ]: " << N << std::endl;
+      // std::cout << "entropy[ " << classNumber << " ]: " << entropy << std::endl;
 
     } // End loop over classes
     dataCost /= marginalN;
@@ -282,84 +306,127 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
 #endif
 
     //
-    // std::cout << "marginalN: " << marginalN << std::endl;
-    // std::cout << "dataCost: " << dataCost << std::endl;
+    //std::cout << "marginalN: " << marginalN << std::endl;
+    //std::cout << "dataCost: " << dataCost << std::endl;
 
     // Add the various contributions to the gradient
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
-      double N = 1e-15;
-      double L = 0.0;
-      double Q = 0.0;
+      ThreadAccumDataType tN = 1e-15;
+      ThreadAccumDataType tL = 0.0;
+      ThreadAccumDataType tQ = 0.0;
       for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
            threadNumber++) {
         //
-        N += (m_ThreadSpecificNs[threadNumber])[classNumber];
-        L += (m_ThreadSpecificLs[threadNumber])[classNumber];
-        Q += (m_ThreadSpecificQs[threadNumber])[classNumber];
+        tN += (m_ThreadSpecificNs[threadNumber])[classNumber];
+        tL += (m_ThreadSpecificLs[threadNumber])[classNumber];
+        tQ += (m_ThreadSpecificQs[threadNumber])[classNumber];
       } // end loop over threads
+
+      // Convert from accumulator precision to double
+      const double N = tN;
+      const double L = tL;
+      const double Q = tQ;
 
       //
       const double variance = (Q * N - pow(L, 2)) / pow(N, 2) + 1e-15;
-      const double entropy = log(variance) + 1;
+      const double entropy  = log(variance) + 1;
 
 #if SUBTRACT_MARGINAL_ENTROPY
-      const double Nweight = (entropy - dataCost + Q / (variance * N) -
-                              marginalQ / (marginalVariance * marginalN)) /
-                             marginalN;
-      const double Lweight = (-2 * L / (variance * N) +
-                              2 * marginalL / (marginalVariance * marginalN)) /
-                             marginalN;
-      const double Qweight = (1 / variance - 1 / marginalVariance) / marginalN;
+      const ThreadAccumDataType Nweight =
+          (entropy - dataCost + Q / (variance * N) -
+           marginalQ / (marginalVariance * marginalN)) /
+          marginalN;
+      const ThreadAccumDataType Lweight =
+          (-2 * L / (variance * N) +
+           2 * marginalL / (marginalVariance * marginalN)) /
+          marginalN;
+      const ThreadAccumDataType Qweight =
+          (1 / variance - 1 / marginalVariance) / marginalN;
 #else
-      const double Nweight =
+      const ThreadAccumDataType Nweight =
           (entropy - dataCost + Q / (variance * N) - 2) / marginalN;
-      const double Lweight = (-2 * L / (variance * N)) / marginalN;
-      const double Qweight = (1 / variance) / marginalN;
+      const ThreadAccumDataType Lweight = (-2 * L / (variance * N)) / marginalN;
+      const ThreadAccumDataType Qweight = (1 / variance) / marginalN;
 #endif
 
-      // std::cout << "N[ " << classNumber << " ]: " << N << std::endl;
-      // std::cout << "L[ " << classNumber << " ]: " << L << std::endl;
-      // std::cout << "Q[ " << classNumber << " ]: " << Q << std::endl;
-      // std::cout << "Nweight[ " << classNumber << " ]: " << Nweight <<
-      // std::endl; std::cout << "Lweight[ " << classNumber << " ]: " << Lweight
-      // << std::endl; std::cout << "Qweight[ " << classNumber << " ]: " <<
-      // Qweight << std::endl; std::cout << std::endl;
+      //std::cout << "N[ " << classNumber << " ]: " << N << std::endl;
+      //std::cout << "L[ " << classNumber << " ]: " << L << std::endl;
+      //std::cout << "Q[ " << classNumber << " ]: " << Q << std::endl;
+      //std::cout << "Nweight[ " << classNumber << " ]: " << Nweight << std::endl;
+      //std::cout << "Lweight[ " << classNumber << " ]: " << Lweight << std::endl;
+      //std::cout << "Qweight[ " << classNumber << " ]: " << Qweight << std::endl;
+      //std::cout << std::endl;
 
-      for (int threadNumber = 0; threadNumber < this->GetNumberOfThreads();
+      // Accumulate the gradients over all threads
+      // TODO: Make a template function that does thread accumulation
+      // to avoid this ugliness.
+      for (int threadNumber = 1; threadNumber < this->GetNumberOfThreads();
            threadNumber++) {
-        AtlasPositionGradientContainerType::ConstIterator NGradientIt =
-            (m_ThreadSpecificNGradients[threadNumber])[classNumber]->Begin();
-        AtlasPositionGradientContainerType::ConstIterator LGradientIt =
-            (m_ThreadSpecificLGradients[threadNumber])[classNumber]->Begin();
-        AtlasPositionGradientContainerType::ConstIterator QGradientIt =
-            (m_ThreadSpecificQGradients[threadNumber])[classNumber]->Begin();
+        AtlasPositionGradientThreadAccumContainerType::ConstIterator
+            NGradientIt =
+                (m_ThreadSpecificNGradients[threadNumber])[classNumber]
+                    ->Begin();
+        AtlasPositionGradientThreadAccumContainerType::ConstIterator
+            LGradientIt =
+                (m_ThreadSpecificLGradients[threadNumber])[classNumber]
+                    ->Begin();
+        AtlasPositionGradientThreadAccumContainerType::ConstIterator
+            QGradientIt =
+                (m_ThreadSpecificQGradients[threadNumber])[classNumber]
+                    ->Begin();
+        AtlasPositionGradientThreadAccumContainerType::Iterator
+            NGradientTargetIt =
+                (m_ThreadSpecificNGradients[0])[classNumber]->Begin();
+        AtlasPositionGradientThreadAccumContainerType::Iterator
+            LGradientTargetIt =
+                (m_ThreadSpecificLGradients[0])[classNumber]->Begin();
+        AtlasPositionGradientThreadAccumContainerType::Iterator
+            QGradientTargetIt =
+                (m_ThreadSpecificQGradients[0])[classNumber]->Begin();
         for (AtlasPositionGradientContainerType::Iterator gradientIt =
                  m_PositionGradient->Begin();
              gradientIt != m_PositionGradient->End();
-             ++gradientIt, ++NGradientIt, ++LGradientIt, ++QGradientIt) {
-          gradientIt.Value() += Nweight * NGradientIt.Value() +
-                                Lweight * LGradientIt.Value() +
-                                Qweight * QGradientIt.Value();
+             ++gradientIt, ++NGradientIt, ++LGradientIt, ++QGradientIt,
+                                                          ++NGradientTargetIt,
+                                                          ++LGradientTargetIt,
+                                                          ++QGradientTargetIt) {
+          NGradientTargetIt.Value() += NGradientIt.Value();
+          LGradientTargetIt.Value() += LGradientIt.Value();
+          QGradientTargetIt.Value() += QGradientIt.Value();
         }
 
       } // End loop over threads
 
+      // Copy accumulated values to final gradient
+      AtlasPositionGradientThreadAccumContainerType::ConstIterator NGradientIt =
+          (m_ThreadSpecificNGradients[0])[classNumber]->Begin();
+      AtlasPositionGradientThreadAccumContainerType::ConstIterator LGradientIt =
+          (m_ThreadSpecificLGradients[0])[classNumber]->Begin();
+      AtlasPositionGradientThreadAccumContainerType::ConstIterator QGradientIt =
+          (m_ThreadSpecificQGradients[0])[classNumber]->Begin();
+      for (AtlasPositionGradientContainerType::Iterator gradientIt =
+               m_PositionGradient->Begin();
+           gradientIt != m_PositionGradient->End();
+           ++gradientIt, ++NGradientIt, ++LGradientIt, ++QGradientIt) {
+        gradientIt.Value() += Nweight * NGradientIt.Value() +
+                              Lweight * LGradientIt.Value() +
+                              Qweight * QGradientIt.Value();
+      }
+
     } // End loop over classes
 
-    // std::cout << "- and done" << std::endl;
+    //std::cout << "- and done" << std::endl;
 #if SUBTRACT_MARGINAL_ENTROPY
-    // std::cout << "dataCost - marginalEntropy: " << dataCost << " - " <<
-    // marginalEntropy << std::endl;
+    // std::cout << "dataCost - marginalEntropy: " << dataCost << " - " << marginalEntropy << std::endl;
 
     dataCost -= marginalEntropy;
 #endif
   }
 
-  // std::cout << "dataCost: " << dataCost << std::endl;
+  //std::cout << "dataCost: " << dataCost << std::endl;
 
-  // clock.Stop();
-  // std::cout << "Time taken by results gathering: " << clock.GetMean() <<
-  // std::endl;
+  //clock.Stop();
+  //std::cout << "Time taken by results gathering: " << clock.GetMean() << std::endl;
 
   //
   m_MinLogLikelihoodTimesPrior = dataCost + priorCost;
@@ -367,22 +434,22 @@ void ConditionalGaussianEntropyCostAndGradientCalculator ::Rasterize(
   // Take care of the desired boundary conditions
   switch (m_BoundaryCondition) {
   case SLIDING: {
-    // std::cout << "SLIDING" << std::endl;
+    //std::cout << "SLIDING" << std::endl;
     this->ImposeSlidingBoundaryConditions(mesh);
     break;
   }
   case AFFINE: {
-    // std::cout << "AFFINE" << std::endl;
+    //std::cout << "AFFINE" << std::endl;
     this->ImposeAffineBoundaryConditions(mesh);
     break;
   }
   case TRANSLATION: {
-    // std::cout << "TRANSLATION" << std::endl;
+    //std::cout << "TRANSLATION" << std::endl;
     this->ImposeTranslationBoundaryConditions(mesh);
     break;
   }
   default: {
-    // std::cout << "NONE" << std::endl;
+    //std::cout << "NONE" << std::endl;
     break;
   }
   }
@@ -403,7 +470,7 @@ bool ConditionalGaussianEntropyCostAndGradientCalculator ::RasterizeTetrahedron(
   mesh->GetCell(tetrahedronId, cell);
 
   AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-  const AtlasMesh::PointIdentifier id0 = *pit;
+  const AtlasMesh::PointIdentifier     id0 = *pit;
   ++pit;
   const AtlasMesh::PointIdentifier id1 = *pit;
   ++pit;
@@ -451,15 +518,15 @@ bool ConditionalGaussianEntropyCostAndGradientCalculator ::RasterizeTetrahedron(
     }
 
     //
-    std::vector<double> &Ns = m_ThreadSpecificNs[threadNumber];
-    std::vector<double> &Ls = m_ThreadSpecificLs[threadNumber];
-    std::vector<double> &Qs = m_ThreadSpecificQs[threadNumber];
-    std::vector<AtlasPositionGradientContainerType::Pointer> &NGradients =
-        m_ThreadSpecificNGradients[threadNumber];
-    std::vector<AtlasPositionGradientContainerType::Pointer> &LGradients =
-        m_ThreadSpecificLGradients[threadNumber];
-    std::vector<AtlasPositionGradientContainerType::Pointer> &QGradients =
-        m_ThreadSpecificQGradients[threadNumber];
+    std::vector<ThreadAccumDataType> &Ns = m_ThreadSpecificNs[threadNumber];
+    std::vector<ThreadAccumDataType> &Ls = m_ThreadSpecificLs[threadNumber];
+    std::vector<ThreadAccumDataType> &Qs = m_ThreadSpecificQs[threadNumber];
+    std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>
+        &NGradients = m_ThreadSpecificNGradients[threadNumber];
+    std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>
+        &LGradients = m_ThreadSpecificLGradients[threadNumber];
+    std::vector<AtlasPositionGradientThreadAccumContainerType::Pointer>
+        &QGradients = m_ThreadSpecificQGradients[threadNumber];
 
     // Loop over all voxels within the tetrahedron and do The Right Thing
     const int numberOfClasses = alphasInVertex0.Size();
@@ -475,33 +542,33 @@ bool ConditionalGaussianEntropyCostAndGradientCalculator ::RasterizeTetrahedron(
     for (; !it.IsAtEnd(); ++it) {
       // Skip voxels with zero intensity
       if (it.Value() == 0) {
-        // std::cout << "Skipping: " << it.Value() << std::endl;
+        //std::cout << "Skipping: " << it.Value() << std::endl;
         continue;
       }
 
       // Retrieve intensity
-      const double y = it.Value();
+      const double y        = it.Value();
       const double ySquared = pow(y, 2);
 
       for (unsigned int classNumber = 0; classNumber < numberOfClasses;
            classNumber++) {
 
         // Add contribution to N, L, and Q
-        double &N = Ns[classNumber];
-        double &L = Ls[classNumber];
-        double &Q = Qs[classNumber];
+        ThreadAccumDataType &N = Ns[classNumber];
+        ThreadAccumDataType &L = Ls[classNumber];
+        ThreadAccumDataType &Q = Qs[classNumber];
         N += it.GetExtraLoadingInterpolatedValue(classNumber);
         L += y * it.GetExtraLoadingInterpolatedValue(classNumber);
         Q += ySquared * it.GetExtraLoadingInterpolatedValue(classNumber);
 
         // Add contribution to NGradient
-        AtlasPositionGradientType &NGradientInVertex0 =
+        AtlasPositionGradientThreadAccumType &NGradientInVertex0 =
             NGradients[classNumber]->ElementAt(id0);
-        AtlasPositionGradientType &NGradientInVertex1 =
+        AtlasPositionGradientThreadAccumType &NGradientInVertex1 =
             NGradients[classNumber]->ElementAt(id1);
-        AtlasPositionGradientType &NGradientInVertex2 =
+        AtlasPositionGradientThreadAccumType &NGradientInVertex2 =
             NGradients[classNumber]->ElementAt(id2);
-        AtlasPositionGradientType &NGradientInVertex3 =
+        AtlasPositionGradientThreadAccumType &NGradientInVertex3 =
             NGradients[classNumber]->ElementAt(id3);
 
         const double xGradientBasisN =
@@ -532,13 +599,13 @@ bool ConditionalGaussianEntropyCostAndGradientCalculator ::RasterizeTetrahedron(
         NGradientInVertex3[2] += zGradientBasisN * it.GetPi3();
 
         // Add contribution to LGradient
-        AtlasPositionGradientType &LGradientInVertex0 =
+        AtlasPositionGradientThreadAccumType &LGradientInVertex0 =
             LGradients[classNumber]->ElementAt(id0);
-        AtlasPositionGradientType &LGradientInVertex1 =
+        AtlasPositionGradientThreadAccumType &LGradientInVertex1 =
             LGradients[classNumber]->ElementAt(id1);
-        AtlasPositionGradientType &LGradientInVertex2 =
+        AtlasPositionGradientThreadAccumType &LGradientInVertex2 =
             LGradients[classNumber]->ElementAt(id2);
-        AtlasPositionGradientType &LGradientInVertex3 =
+        AtlasPositionGradientThreadAccumType &LGradientInVertex3 =
             LGradients[classNumber]->ElementAt(id3);
 
         const double xGradientBasisL = y * xGradientBasisN;
@@ -566,13 +633,13 @@ bool ConditionalGaussianEntropyCostAndGradientCalculator ::RasterizeTetrahedron(
         LGradientInVertex3[2] += zGradientBasisL * it.GetPi3();
 
         // Add contribution to QGradient
-        AtlasPositionGradientType &QGradientInVertex0 =
+        AtlasPositionGradientThreadAccumType &QGradientInVertex0 =
             QGradients[classNumber]->ElementAt(id0);
-        AtlasPositionGradientType &QGradientInVertex1 =
+        AtlasPositionGradientThreadAccumType &QGradientInVertex1 =
             QGradients[classNumber]->ElementAt(id1);
-        AtlasPositionGradientType &QGradientInVertex2 =
+        AtlasPositionGradientThreadAccumType &QGradientInVertex2 =
             QGradients[classNumber]->ElementAt(id2);
-        AtlasPositionGradientType &QGradientInVertex3 =
+        AtlasPositionGradientThreadAccumType &QGradientInVertex3 =
             QGradients[classNumber]->ElementAt(id3);
 
         const double xGradientBasisQ = ySquared * xGradientBasisN;

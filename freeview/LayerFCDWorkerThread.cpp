@@ -1,7 +1,7 @@
 #include "LayerFCDWorkerThread.h"
 #include "LayerFCD.h"
-#include <QMutexLocker>
 #include <QApplication>
+#include <QMutexLocker>
 
 LayerFCDWorkerThread::LayerFCDWorkerThread(LayerFCD *fcd)
     : QThread(fcd), m_bAbort(false) {}

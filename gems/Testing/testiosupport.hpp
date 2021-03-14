@@ -1,14 +1,14 @@
 #pragma once
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 #include "dimensioncuda.hpp"
 #include "stopwatch.hpp"
 
 namespace std {
 template <unsigned char nDims, typename IndexType>
-ostream &operator<<(ostream &os,
+ostream &operator<<(ostream &                                    os,
                     const kvl::cuda::Dimension<nDims, IndexType> d) {
   os << "( ";
 

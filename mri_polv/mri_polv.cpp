@@ -1,17 +1,6 @@
-/**
- * @file  mri_polv.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:24 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,29 +17,29 @@
 #include "mri.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 static void print_help();
-static int get_option(char *argv[]);
+static int  get_option(char *argv[]);
 
 const char *Progname;
 
 #define WINDOW_SIZE 5
 
-static int verbose = 1;
+static int verbose     = 1;
 static int window_size = WINDOW_SIZE;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac;
-  int nargs;
-  MRI *mri_src;
-  MRI *mri_dst = nullptr;
-  char *in_fname;
-  char *out_fname;
+  int    ac;
+  int    nargs;
+  MRI *  mri_src;
+  MRI *  mri_dst = nullptr;
+  char * in_fname;
+  char * out_fname;
 
   nargs = handleVersionOption(argc, argv, "mri_polv");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
   Progname = argv[0];
@@ -113,7 +102,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

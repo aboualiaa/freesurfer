@@ -64,7 +64,7 @@ public:
                    PolygonDrawMode mode) override;
 
 protected:
-  QVTKWidget *Widget;
+  QVTKWidget *             Widget;
   QVTKPaintEngineInternal *Internal;
 };
 

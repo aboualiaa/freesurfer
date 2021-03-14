@@ -1,19 +1,12 @@
 /**
- * @file  mri_compute_volume_intensities.c
- * @brief compute the unpartial-volumed intensities given an input volume and
- * volume fracion maps
+ * @brief compute the unpartial-volumed intensities given an input volume and volume fracion maps
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2016/04/19 13:32:50 $
- *    $Revision: 1.3 $
  *
- * Copyright (C) 2002-2007,
- * The General Hospital Corporation (Boston, MA).
+ * Copyright © 2021
+ * The General Hospital Corporation (Boston, MA). 
  * All rights reserved.
  *
  * Distribution, usage and copying of this software is covered under the
@@ -26,22 +19,36 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
-#include "diag.h"
-#include "timer.h"
-#include "version.h"
-#include "mrinorm.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int main(int argc, char *argv[]);
+#include "cma.h"
+#include "const.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_conform.h"
+#include "mrimorph.h"
+#include "mrinorm.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "registerio.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
+
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static int whalf = 4;
-static double sigma = 1;
-static int separate_frames = 0;
+static int    whalf           = 4;
+static double sigma           = 1;
+static int    separate_frames = 0;
 
 static MRI *compute_unpartial_volumed_intensities(
     MRI *mri_src, MRI *mri_vfrac_wm, MRI *mri_vfrac_cortex,
@@ -50,7 +57,7 @@ static MRI *compute_unpartial_volumed_intensities(
 
 static void patch_csf_vol(MRI *mri_vfrac_wm, MRI *mri_vfrac_cortex,
                           MRI *mri_vfrac_subcort, MRI *mri_vfrac_csf) {
-  int x, y, z;
+  int    x, y, z;
   double v;
 
   for (x = 0; x < mri_vfrac_wm->width; x++)
@@ -66,11 +73,11 @@ static void patch_csf_vol(MRI *mri_vfrac_wm, MRI *mri_vfrac_cortex,
 }
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
-  char fname[STRLEN], *stem;
-  MRI *mri_src, *mri_vfrac_wm, *mri_vfrac_cortex, *mri_vfrac_subcort,
+  int    ac, nargs;
+  int    msec, minutes, seconds;
+  Timer  start;
+  char   fname[STRLEN], *stem;
+  MRI *  mri_src, *mri_vfrac_wm, *mri_vfrac_cortex, *mri_vfrac_subcort,
       *mri_vfrac_csf, *mri_unpv_intensities;
 
   nargs = handleVersionOption(argc, argv, "mri_compute_volume_intensities");
@@ -79,8 +86,8 @@ int main(int argc, char *argv[]) {
   argc -= nargs;
 
   Progname = argv[0];
-  ac = argc;
-  av = argv;
+  ac       = argc;
+  av       = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -91,34 +98,34 @@ int main(int argc, char *argv[]) {
     usage_exit(1);
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
   mri_src = MRIread(argv[1]);
-  if (mri_src == nullptr)
+  if (mri_src == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not load intensity volume from %s",
               Progname, argv[1]);
 
   stem = argv[2];
   sprintf(fname, "%s.cortex.mgz", stem);
   mri_vfrac_cortex = MRIread(fname);
-  if (mri_vfrac_cortex == nullptr)
+  if (mri_vfrac_cortex == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read vfrac volume from %s", Progname,
               fname);
   sprintf(fname, "%s.subcort_gm.mgz", stem);
   mri_vfrac_subcort = MRIread(fname);
-  if (mri_vfrac_subcort == nullptr)
+  if (mri_vfrac_subcort == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read vfrac volume from %s", Progname,
               fname);
   sprintf(fname, "%s.csf.mgz", stem);
   mri_vfrac_csf = MRIread(fname);
-  if (mri_vfrac_csf == nullptr)
+  if (mri_vfrac_csf == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read vfrac volume from %s", Progname,
               fname);
   sprintf(fname, "%s.wm.mgz", stem);
   mri_vfrac_wm = MRIread(fname);
-  if (mri_vfrac_wm == nullptr)
+  if (mri_vfrac_wm == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read vfrac volume from %s", Progname,
               fname);
   patch_csf_vol(mri_vfrac_wm, mri_vfrac_cortex, mri_vfrac_subcort,
@@ -126,11 +133,11 @@ int main(int argc, char *argv[]) {
 
   mri_unpv_intensities = compute_unpartial_volumed_intensities(
       mri_src, mri_vfrac_wm, mri_vfrac_cortex, mri_vfrac_subcort, mri_vfrac_csf,
-      whalf, sigma, nullptr, separate_frames);
+      whalf, sigma, NULL, separate_frames);
   printf("writing unpartial-volumed intensities to %s\n", argv[3]);
   MRIwrite(mri_unpv_intensities, argv[3]);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -146,7 +153,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -208,21 +215,21 @@ static MRI *compute_unpartial_volumed_intensities(
       vcsf;
   MATRIX *m_A_pinv, *m_A3, *m_A2, *m_A1, *m_A;
   VECTOR *v_I, *v_s3, *v_s2, *v_s1, *v_s;
-  float wm, gm, csf;
+  float   wm, gm, csf;
 
   whalfx = (int)ceil(whalf0 / mri_src->xsize);
   whalfy = (int)ceil(whalf0 / mri_src->ysize);
   whalfz = (int)ceil(whalf0 / mri_src->zsize);
-  nvox = (2 * whalfx + 1) * (2 * whalfy + 1) * (2 * whalfz + 1);
-  m_A3 = MatrixAlloc(nvox, 3, MATRIX_REAL);
-  m_A2 = MatrixAlloc(nvox, 2, MATRIX_REAL);
-  m_A1 = MatrixAlloc(nvox, 1, MATRIX_REAL);
-  v_s3 = VectorAlloc(3, MATRIX_REAL);
-  v_s2 = VectorAlloc(2, MATRIX_REAL);
-  v_s1 = VectorAlloc(1, MATRIX_REAL);
-  v_I = VectorAlloc(nvox, MATRIX_REAL);
+  nvox   = (2 * whalfx + 1) * (2 * whalfy + 1) * (2 * whalfz + 1);
+  m_A3   = MatrixAlloc(nvox, 3, MATRIX_REAL);
+  m_A2   = MatrixAlloc(nvox, 2, MATRIX_REAL);
+  m_A1   = MatrixAlloc(nvox, 1, MATRIX_REAL);
+  v_s3   = VectorAlloc(3, MATRIX_REAL);
+  v_s2   = VectorAlloc(2, MATRIX_REAL);
+  v_s1   = VectorAlloc(1, MATRIX_REAL);
+  v_I    = VectorAlloc(nvox, MATRIX_REAL);
 
-  if (mri_dst == nullptr) {
+  if (mri_dst == NULL) {
     if (separate_frames) {
       mri_dst = MRIallocSequence(mri_src->width, mri_src->height,
                                  mri_src->depth, MRI_FLOAT, 3);
@@ -247,10 +254,10 @@ static MRI *compute_unpartial_volumed_intensities(
             dy = yk * mri_src->ysize;
             yi = mri_src->yi[y + yk];
             for (zk = -whalfz; zk <= whalfz; zk++) {
-              dz = zk * mri_src->zsize;
-              zi = mri_src->zi[z + zk];
+              dz     = zk * mri_src->zsize;
+              zi     = mri_src->zi[z + zk];
               distsq = dx * dx + dy * dy + dz * dz;
-              w = exp(-.5 * distsq / (sigma * sigma));
+              w      = exp(-.5 * distsq / (sigma * sigma));
               norm += w;
               VECTOR_ELT(v_I, num + 1) =
                   w * MRIgetVoxVal(mri_src, xi, yi, zi, 0);
@@ -339,14 +346,14 @@ static MRI *compute_unpartial_volumed_intensities(
           m_A = m_A1;
         }
 
-        m_A_pinv = MatrixPseudoInverse(m_A, nullptr);
-        if (m_A_pinv == nullptr)
+        m_A_pinv = MatrixPseudoInverse(m_A, NULL);
+        if (m_A_pinv == NULL)
           continue;
 
         MatrixMultiply(m_A_pinv, v_I, v_s);
-        vwm = MRIgetVoxVal(mri_vfrac_wm, x, y, z, 0);
+        vwm  = MRIgetVoxVal(mri_vfrac_wm, x, y, z, 0);
         vcsf = MRIgetVoxVal(mri_vfrac_csf, x, y, z, 0);
-        vgm = MRIgetVoxVal(mri_vfrac_cortex, x, y, z, 0) +
+        vgm  = MRIgetVoxVal(mri_vfrac_cortex, x, y, z, 0) +
               MRIgetVoxVal(mri_vfrac_subcort, x, y, z, 0);
         wm = gm = csf = 0.0;
         if (!FZERO(total_wm)) // wm in 1st col

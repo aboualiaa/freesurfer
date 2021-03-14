@@ -3,15 +3,15 @@
 #############################################################
 ##
 ## This script is used to download the Freesurfer tutorial
-## data onto the users machine. 
-## 
-## At the time of writing this script, the tutorial data 
+## data onto the users machine.
+##
+## At the time of writing this script, the tutorial data
 ## is about 5Gigs. And that represents only a subset
-## of the entire tutorial data set required to run all 
+## of the entire tutorial data set required to run all
 ## commands in the tutorial.
-## 
+##
 ## The tutorial data will be downloaded into the directory
-## specified by the TUTORIAL_DATA environment variable, or 
+## specified by the TUTORIAL_DATA environment variable, or
 ## if undefined than it is installed to $FREESURFER_HOME/subjects/tutorial_data.
 #############################################################
 
@@ -39,13 +39,13 @@ RSYNC_COMMAND="rsync -ztrlv --progress"
 while [[ $# > 0 ]]; do
   key="$1"
   case $key in
-    -h|-help|--h|--help)
-        echo "${HELP}"
-        exit 1
-        ;;
-    *) 
-        RSYNC_COMMAND="${RSYNC_COMMAND} ${key}"
-        ;;
+    -h | -help | --h | --help)
+      echo "${HELP}"
+      exit 1
+      ;;
+    *)
+      RSYNC_COMMAND="${RSYNC_COMMAND} ${key}"
+      ;;
   esac
   shift
 done
@@ -59,15 +59,15 @@ if [[ ! -d "$TUTORIAL_DATA" ]]; then
 fi
 
 ## Begin download
-echo    " Tutorial data will be downloaded and installed into:" 
+echo " Tutorial data will be downloaded and installed into:"
 echo
-echo    "   $TUTORIAL_DATA"
+echo "   $TUTORIAL_DATA"
 echo
 read -p " Shall I proceed? [y/n/Abort]: "
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    ${RSYNC_COMMAND} rsync://surfer.nmr.mgh.harvard.edu/pub/data/tutorial_data/ $TUTORIAL_DATA
-    exit 0
+  ${RSYNC_COMMAND} rsync://surfer.nmr.mgh.harvard.edu/pub/data/tutorial_data/ $TUTORIAL_DATA
+  exit 0
 else
-    exit 1
+  exit 1
 fi

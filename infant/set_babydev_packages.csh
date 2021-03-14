@@ -5,7 +5,7 @@ setenv FSSCRIPTSDIR $FREESURFER_HOME/bin
 
 ##### IN ORDER TO ENABLE SSCNN TO RUN
 
-##### 
+#####
 
 ##### IN ORDER TO ENABLE NIFTYREG TO RUN
 
@@ -17,6 +17,6 @@ set NiftyPath = ${NIFTYREG_INSTALL}/bin
 setenv PATH ${PATH}:${NiftyPath}:${FSSCRIPTSDIR}
 echo $PATH
 
-bash;
+bash
 export PATH=/space/freesurfer/python/linux/bin:$PATH
 exit

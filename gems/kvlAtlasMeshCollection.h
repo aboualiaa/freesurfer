@@ -1,19 +1,19 @@
 #ifndef __kvlAtlasMeshCollection_h
 #define __kvlAtlasMeshCollection_h
 
-#include "kvlAtlasMesh.h"
 #include "itkAffineTransform.h"
 #include "itkAutomaticTopologyMeshSource.h"
+#include "kvlAtlasMesh.h"
 
 namespace kvl {
 
 class AtlasMeshCollection : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshCollection;
-  using Superclass = itk::Object;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshCollection           Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -22,10 +22,10 @@ public:
   itkTypeMacro(AtlasMeshCollection, itk::Object);
 
   // Some typedefs
-  using PointsContainerType = AtlasMesh::PointsContainer;
-  using PointDataContainerType = AtlasMesh::PointDataContainer;
-  using CellsContainerType = AtlasMesh::CellsContainer;
-  using CellDataContainerType = AtlasMesh::CellDataContainer;
+  typedef AtlasMesh::PointsContainer    PointsContainerType;
+  typedef AtlasMesh::PointDataContainer PointDataContainerType;
+  typedef AtlasMesh::CellsContainer     CellsContainerType;
+  typedef AtlasMesh::CellDataContainer  CellDataContainerType;
 
   //
   void SetPointParameters(PointDataContainerType *pointParameters) {
@@ -41,15 +41,15 @@ public:
   void SetCells(CellsContainerType *cells) {
     m_Cells = cells;
     m_Meshes.clear();
-    m_CellLinks = nullptr;
+    m_CellLinks = 0;
   }
   const CellsContainerType *GetCells() const { return m_Cells; }
-  CellsContainerType *GetCells() { return m_Cells; }
+  CellsContainerType *      GetCells() { return m_Cells; }
 
   //
   void SetReferencePosition(PointsContainerType *referencePosition) {
-    m_ReferencePosition = referencePosition;
-    m_ReferenceTetrahedronInfos = nullptr;
+    m_ReferencePosition         = referencePosition;
+    m_ReferenceTetrahedronInfos = 0;
     m_Meshes.clear();
   }
   const PointsContainerType *GetReferencePosition() const {
@@ -59,8 +59,8 @@ public:
 
   //
   void SetK(double K) {
-    m_K = K;
-    m_ReferenceTetrahedronInfos = nullptr;
+    m_K                         = K;
+    m_ReferenceTetrahedronInfos = 0;
     m_Meshes.clear();
   }
   float GetK() const { return m_K; }
@@ -122,13 +122,13 @@ public:
   void Construct(const unsigned int *meshSize, const unsigned int *domainSize,
                  double K, unsigned int numberOfClasses,
                  unsigned int numberOfMeshes,
-                 bool forceBorderVerticesToBackground = true);
+                 bool         forceBorderVerticesToBackground = true);
 
   //
-  bool GetCollapsed(AtlasMesh::CellIdentifier edgeId,
-                    AtlasMeshCollection::Pointer &collapsed,
+  bool GetCollapsed(AtlasMesh::CellIdentifier            edgeId,
+                    AtlasMeshCollection::Pointer &       collapsed,
                     std::set<AtlasMesh::CellIdentifier> &disappearingCells,
-                    AtlasMesh::CellIdentifier &unifiedVertexId,
+                    AtlasMesh::CellIdentifier &          unifiedVertexId,
                     bool initializeAlphasToFlat = true) const;
 
   //
@@ -141,8 +141,8 @@ public:
 
   //
   AtlasMeshCollection::Pointer
-  GetEdgeSplitted(AtlasMesh::CellIdentifier edgeId,
-                  AtlasMesh::CellIdentifier newVertexId,
+  GetEdgeSplitted(AtlasMesh::CellIdentifier  edgeId,
+                  AtlasMesh::CellIdentifier  newVertexId,
                   AtlasMesh::PointIdentifier newPointId) const;
 
   //
@@ -151,8 +151,8 @@ public:
 
   //
   AtlasMeshCollection::Pointer
-  GetEdgeSwapped(AtlasMesh::CellIdentifier edgeId,
-                 AtlasMesh::CellIdentifier newVertexId,
+  GetEdgeSwapped(AtlasMesh::CellIdentifier  edgeId,
+                 AtlasMesh::CellIdentifier  newVertexId,
                  AtlasMesh::PointIdentifier newPointId,
                  AtlasMesh::CellIdentifier &newEdgeId) const;
 
@@ -160,7 +160,7 @@ public:
   void FlattenAlphas();
 
   //
-  using TransformType = itk::AffineTransform<double, 3>;
+  typedef itk::AffineTransform<double, 3> TransformType;
   void Transform(int meshNumber, const TransformType *transform);
 
   //
@@ -178,14 +178,14 @@ protected:
 
   //
   AtlasMeshCollection::Pointer
-  GetEdgeSplitted(AtlasMesh::CellIdentifier edgeId,
-                  AtlasMesh::CellIdentifier newVertexId,
+  GetEdgeSplitted(AtlasMesh::CellIdentifier  edgeId,
+                  AtlasMesh::CellIdentifier  newVertexId,
                   AtlasMesh::PointIdentifier newPointId,
                   AtlasMesh::CellIdentifier &transverseEdge0Id,
                   AtlasMesh::CellIdentifier &transverseEdge1Id) const;
 
   //
-  using MeshSourceType = itk::AutomaticTopologyMeshSource<kvl::AtlasMesh>;
+  typedef itk::AutomaticTopologyMeshSource<kvl::AtlasMesh> MeshSourceType;
   void FillCubeWithTetrahedra(
       MeshSourceType *meshSource, bool flippedConfiguration,
       const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
@@ -194,8 +194,8 @@ protected:
       const AtlasMesh::PointType &p6, const AtlasMesh::PointType &p7) const;
 
 private:
-  AtlasMeshCollection(const Self &); // purposely not implemented
-  void operator=(const Self &);      // purposely not implemented
+  AtlasMeshCollection(const Self &); //purposely not implemented
+  void operator=(const Self &);      //purposely not implemented
 
   // Data members
   // PointParameters have Alpha vector and flags to indicate whether
@@ -207,8 +207,8 @@ private:
 
   CellsContainerType::Pointer m_Cells; // m_Cells = mesh->GetCells();
   PointsContainerType::Pointer
-      m_ReferencePosition; // m_ReferencePosition = mesh->GetPoints();
-  double m_K;              // stiffness, applies to all meshes
+         m_ReferencePosition; //m_ReferencePosition = mesh->GetPoints();
+  double m_K;                 // stiffness, applies to all meshes
 
   // This struct has info about the volume of a given tetrahron as well
   // as matrix info. See kvlAtlasMesh.h

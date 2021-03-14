@@ -6,10 +6,10 @@ static void ErrorValidation(const char *string) {
 }
 
 const char *Progname = "Validation";
-MRI *mri_ref, *mri_tst;
-int width, height, depth, i, j, k, consistent = 1;
-int nb_union, falsep, falsen;
-float probap, proban, Ec, c, vox_ref, vox_tst;
+MRI *       mri_ref, *mri_tst;
+int         width, height, depth, i, j, k, consistent = 1;
+int         nb_union, falsep, falsen;
+float       probap, proban, Ec, c, vox_ref, vox_tst;
 
 int main(int argc, char **argv) {
   if (argc != 4) {
@@ -27,15 +27,15 @@ int main(int argc, char **argv) {
 
   if (mri_ref->width == mri_tst->width && mri_ref->height == mri_tst->height &&
       mri_ref->depth == mri_tst->depth) {
-    depth = mri_ref->width;
+    depth  = mri_ref->width;
     height = mri_ref->height;
-    width = mri_ref->depth;
+    width  = mri_ref->depth;
   } else
     ErrorValidation("\n Problem in dimensions \n");
 
   nb_union = 0;
-  falsep = 0;
-  falsen = 0;
+  falsep   = 0;
+  falsen   = 0;
 
   for (k = 0; k < depth; k++)
     for (j = 0; j < height; j++)
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 
   probap = (float)falsep / nb_union;
   proban = (float)falsen / nb_union;
-  Ec = (probap + c * proban) / (1 + c);
+  Ec     = (probap + c * proban) / (1 + c);
 
   // if (!consistent)
   //   printf(" The two images don't have the same intensity at some positive

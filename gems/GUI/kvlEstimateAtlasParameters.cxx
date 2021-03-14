@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
   // Collect input file names
   std::vector<std::string> fileNames;
   for (int i = 1; i < argc; i++) {
-    fileNames.emplace_back(argv[i]);
+    fileNames.push_back(std::string(argv[i]));
   }
 
   //

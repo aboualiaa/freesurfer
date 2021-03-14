@@ -1,16 +1,11 @@
 /**
- * @file  nmovie.c
  * @brief image display utility
  *
  */
 /*
  * Original Author: RJ Wood
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2012/03/17 20:33:11 $
- *    $Revision: 1.31 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,50 +17,48 @@
  *
  */
 
-char *NMOVIE_VERSION = "$Revision: 1.31 $";
-#include <stdio.h>
+#include "error.h"
+#include "macros.h"
+#include "proto.h"
+#include "utils.h"
+#include "version.h"
 #include <image.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "error.h"
-#include "proto.h"
-#include "macros.h"
-#include "utils.h"
-#include "diag.h"
-#include "version.h"
 
-#include <X11/Xlib.h>
 #include <X11/Intrinsic.h>
-#include <X11/StringDefs.h>
 #include <X11/Shell.h>
+#include <X11/StringDefs.h>
+#include <X11/Xlib.h>
 
 // this is to fix a problem on KDE where this application's window will never
 // get the focus
 #ifdef HAVE_XAWPLUS
 
-#include <X11/XawPlus/Form.h>
 #include <X11/XawPlus/Command.h>
+#include <X11/XawPlus/Form.h>
 #include <X11/XawPlus/Simple.h>
 
 #else
 
-#include <X11/Xaw/Form.h>
 #include <X11/Xaw/Command.h>
+#include <X11/Xaw/Form.h>
 #include <X11/Xaw/Simple.h>
 
 #endif
 
+#include <X11/extensions/XShm.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <X11/extensions/XShm.h>
 
 // Centos 6 doesnt seem to have Xpm
 void XpmReadFileToPixmap(){};
 
 static int nocolor = 0;
 
-#define NONE 0
-#define LOOP 1
+#define NONE  0
+#define LOOP  1
 #define SWING 2
 
 #define FORWARD 0
@@ -94,43 +87,43 @@ void forward_proc(Widget w, XEvent *event, String *pars, Cardinal *npars);
 void back_proc(Widget w, XEvent *event, String *pars, Cardinal *npars);
 void start_timer(void);
 static void XInit(int *argc, char ***argv);
-static int highbit(unsigned long ul);
+static int  highbit(unsigned long ul);
 static void XSetupDisplay(int nframes);
-void rgb2xcol(IMAGE *I, char *ximgdata, int fnum);
-void ConvertImages(int nframes, char **argv);
-void MakeDispNames(int argc, char **argv);
+void        rgb2xcol(IMAGE *I, char *ximgdata, int fnum);
+void        ConvertImages(int nframes, char **argv);
+void        MakeDispNames(int argc, char **argv);
 /* -------- End Prototypes -------- */
 
 /* -------- Typedefs -------- */
 typedef struct {
-  XtAppContext context;
-  Display *disp;
-  GC theGC;
-  XVisualInfo vi;
-  Visual *vis;
-  Window root;
-  Window canvas;
-  Colormap colormap;
-  int screenno;
-  int depth;
+  XtAppContext  context;
+  Display *     disp;
+  GC            theGC;
+  XVisualInfo   vi;
+  Visual *      vis;
+  Window        root;
+  Window        canvas;
+  Colormap      colormap;
+  int           screenno;
+  int           depth;
   unsigned long rmask, gmask, bmask;
-  int rshift, gshift, bshift;
+  int           rshift, gshift, bshift;
 } XCRUFT;
 /* -------- End Typedefs -------- */
 
 /* -------- Global Variables ------- */
-Widget frame, toplevel, quit_bt, canvas, buttons, stop_bt, loop_bt, swing_bt;
-Widget fast_bt, slow_bt, back_bt, forward_bt;
-int shmext, nframes;
+Widget  frame, toplevel, quit_bt, canvas, buttons, stop_bt, loop_bt, swing_bt;
+Widget  fast_bt, slow_bt, back_bt, forward_bt;
+int     shmext, nframes;
 XImage *ximg;
-char *imgdata;
-XCRUFT xi;
-int nm_pfmt = 0, rows = 0, cols = 0;
-int running = 0;
-int direction = FORWARD;
-int curframe = 0;
+char *  imgdata;
+XCRUFT  xi;
+int     nm_pfmt = 0, rows = 0, cols = 0;
+int     running        = 0;
+int     direction      = FORWARD;
+int     curframe       = 0;
 unsigned long interval = 33; /* 1s */
-char **fnames;
+char **       fnames;
 /* -------- End Global Variables ------- */
 
 /* -------- Static Variables -------- */
@@ -188,8 +181,8 @@ void useage(void) {
 void mark_proc(Widget w, XEvent *event, String *pars, Cardinal *npars) {}
 
 void update_proc(Widget w, XEvent *event, String *pars, Cardinal *npars) {
-  Window root, child;
-  int rx, ry, wx, wy;
+  Window       root, child;
+  int          rx, ry, wx, wy;
   unsigned int mask;
 
   XQueryPointer(xi.disp, xi.canvas, &root, &child, &rx, &ry, &wx, &wy, &mask);
@@ -248,14 +241,14 @@ void timer_proc(XtPointer ptr, XtIntervalId *id) {
     case FORWARD:
       curframe++;
       if (curframe == nframes) {
-        curframe = nframes - 1;
+        curframe  = nframes - 1;
         direction = REVERSE;
       }
       break;
     case REVERSE:
       curframe--;
       if (curframe < 0) {
-        curframe = 0;
+        curframe  = 0;
         direction = FORWARD;
       }
       break;
@@ -306,7 +299,7 @@ static int highbit(unsigned long ul) {
   /* returns position of highest set bit in 'ul' as an integer (0-31),
      or -1 if none */
 
-  int i;
+  int           i;
   unsigned long hb;
 
   hb = 0x80;
@@ -325,12 +318,12 @@ static void XInit(int *argc, char ***argv) {
   if (!xi.disp)
     ErrorExit(ERROR_BAD_PARM, "Unable to open display");
 
-  shmext = XShmQueryExtension(xi.disp);
+  shmext      = XShmQueryExtension(xi.disp);
   xi.screenno = DefaultScreen(xi.disp);
 }
 
 static void XSetupDisplay(int nframes) {
-  XGCValues xgcv;
+  XGCValues      xgcv;
   XtAccelerators keys;
 
   /* Had to do it this way since embedding the keystrokes in the fallback
@@ -344,7 +337,7 @@ static void XSetupDisplay(int nframes) {
   if (!XMatchVisualInfo(xi.disp, xi.screenno, xi.depth, TrueColor, &(xi.vi)))
     ErrorExit(ERROR_BADPARM, "Could not find a TrueColor visual");
 
-  xi.vis = xi.vi.visual;
+  xi.vis  = xi.vi.visual;
   xi.root = RootWindow(xi.disp, xi.screenno);
 
   // AllocNone -- clients can allocate the colormap entries
@@ -405,10 +398,10 @@ static void XSetupDisplay(int nframes) {
 }
 
 void rgb2xcol(IMAGE *I, char *ximgdata, int fnum) {
-  int i, j;
+  int           i, j;
   unsigned long r, g, b, xcol;
-  byte *bptr;
-  char *xptr, *ip;
+  byte *        bptr;
+  char *        xptr, *ip;
 
   bptr = I->image;
   xptr = ximgdata + (fnum + 1) * rows * ximg->bytes_per_line -
@@ -419,7 +412,7 @@ void rgb2xcol(IMAGE *I, char *ximgdata, int fnum) {
       // quick hack to show short data, assuming that the data is unsigned short
       {
         short *ptr = (short *)bptr;
-        short val = *ptr;
+        short  val = *ptr;
         val /= 256; // only look at high byte
         r = (byte)val;
         g = (byte)val;
@@ -510,7 +503,7 @@ void rgb2xcol(IMAGE *I, char *ximgdata, int fnum) {
 
 void ConvertImages(int nframes, char **argv) {
   IMAGE *I;
-  int i, rows = 0, cols = 0;
+  int    i, rows = 0, cols = 0;
 
   for (i = 0; i < nframes; i++) {
 
@@ -547,7 +540,7 @@ void ConvertImages(int nframes, char **argv) {
 }
 
 void MakeDispNames(int argc, char **argv) {
-  int i;
+  int   i;
   char *s;
 
   fnames = (char **)malloc(sizeof(char *) * nframes);
@@ -577,7 +570,7 @@ static int get_option(int argc, char *argv[]);
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -600,8 +593,8 @@ static int get_option(int argc, char *argv[]) {
 }
 int main(int argc, char **argv) {
   IMAGE *I;
-  int i;
-  int nargs;
+  int    i;
+  int    nargs;
 
   ErrorInit(NULL, NULL, NULL);
   DiagInit(NULL, NULL, NULL);
@@ -649,8 +642,8 @@ int main(int argc, char **argv) {
       continue;
     }
     nm_pfmt = MAX(nm_pfmt, I->pixel_format);
-    rows = MAX(rows, I->orows);
-    cols = MAX(cols, I->ocols);
+    rows    = MAX(rows, I->orows);
+    cols    = MAX(cols, I->ocols);
     ImageFree(&I);
   }
 

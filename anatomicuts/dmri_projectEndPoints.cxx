@@ -4,69 +4,67 @@
  * Name: dmri_projectEndPoints.cxx
  *
  * Description:
- * Changes the endpoints of a streamline to a different value and save it to a
- * new overlay file
+ * Changes the endpoints of a streamline to a different value and save it to a new overlay file
  *
  */
 
 const int ENDPOINT_VALUE = 1;
 
 // Libraries
-#include <iostream>
-#include <fstream>
-#include <string>
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 // Input Splicing
 #include "GetPot.h"
 
 // TRK Loading
+#include "ClusterTools.h"
+#include "EuclideanMembershipFunction.h"
+#include "LabelPerPointVariableLengthVector.h"
+#include "PolylineMeshToVTKPolyDataFilter.h"
+#include "TrkVTKPolyDataFilter.txx"
+#include "itkArray.h"
+#include "itkDefaultStaticMeshTraits.h"
+#include "itkImage.h"
+#include "itkPolylineCell.h"
+#include <cmath>
+#include <vtkCellArray.h>
+#include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataReader.h>
 #include <vtkPolyDataWriter.h>
-#include "itkPolylineCell.h"
-#include <vtkCellArray.h>
-#include <vtkPoints.h>
-#include <cmath>
-#include "itkArray.h"
-#include "itkPolylineCell.h"
-#include "TrkVTKPolyDataFilter.txx"
-#include "itkImage.h"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "LabelPerPointVariableLengthVector.h"
-#include "EuclideanMembershipFunction.h"
-#include "ClusterTools.h"
-#include "itkDefaultStaticMeshTraits.h"
 
 // Surface Loading
-#include "itkImage.h"
-#include <map>
-#include "itkDefaultStaticMeshTraits.h"
-#include "fsSurface.h"
-#include "itkTriangleCell.h"
-#include <set>
 #include "colortab.h"
+#include "fsSurface.h"
 #include "fsenv.h"
-#include "itkVTKPolyDataWriter.h"
+#include "itkDefaultStaticMeshTraits.h"
+#include "itkImage.h"
 #include "itkSmoothingQuadEdgeMeshFilter.h"
+#include "itkTriangleCell.h"
+#include "itkVTKPolyDataWriter.h"
 #include "vtkCellData.h"
 #include "vtkPointData.h"
+#include <map>
+#include <set>
 
+#include "vtkCellArray.h"
+#include "vtkCleanPolyData.h"
+#include "vtkDecimatePro.h"
 #include "vtkFillHolesFilter.h"
 #include "vtkPolyDataNormals.h"
-#include "vtkCellArray.h"
-#include "vtkTriangle.h"
-#include "vtkDecimatePro.h"
-#include "vtkCleanPolyData.h"
 #include "vtkSmoothPolyDataFilter.h"
+#include "vtkTriangle.h"
 #include "vtkTriangleFilter.h"
 
-#include "vtkDelaunay3D.h"
 #include "macros.h"
-#include "mrisurf.h"
 #include "mri.h"
-#include "vtkKdTreePointLocator.h"
+#include "mrisurf.h"
 #include "vtkCurvatures.h"
+#include "vtkDelaunay3D.h"
+#include "vtkKdTreePointLocator.h"
 
 using namespace std;
 
@@ -94,31 +92,31 @@ int main(int narg, char *arg[]) {
   // Declaration of Variables for Program to Function
   // TRK file Definition
   enum { Dimension = 3 };
-  using PixelType = int;
-  const unsigned int PointDimension = 3;
-  using PointDataType = vector<int>;
-  const unsigned int MaxTopologicalDimension = 3;
-  using CoordinateType = double;
-  using InterpolationWeightType = double;
-  using MeshTraits =
-      itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
-                                   MaxTopologicalDimension, CoordinateType,
-                                   InterpolationWeightType, PointDataType>;
-  using HistogramMeshType = itk::Mesh<PixelType, PointDimension, MeshTraits>;
+  typedef int         PixelType;
+  const unsigned int  PointDimension = 3;
+  typedef vector<int> PointDataType;
+  const unsigned int  MaxTopologicalDimension = 3;
+  typedef double      CoordinateType;
+  typedef double      InterpolationWeightType;
+  typedef itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
+                                       MaxTopologicalDimension, CoordinateType,
+                                       InterpolationWeightType, PointDataType>
+                                                           MeshTraits;
+  typedef itk::Mesh<PixelType, PointDimension, MeshTraits> HistogramMeshType;
 
-  using ImageType = itk::Image<float, 3>;
+  typedef itk::Image<float, 3> ImageType;
 
-  using ColorMeshType = itk::Mesh<PixelType, PointDimension>;
-  using PointType = ColorMeshType::PointType;
-  using CellType = ColorMeshType::CellType;
-  using PolylineCellType = itk::PolylineCell<CellType>;
-  using CellAutoPointer = ColorMeshType::CellAutoPointer;
-  using ClusterToolsType =
-      ClusterTools<ColorMeshType, ImageType, HistogramMeshType>;
+  typedef itk::Mesh<PixelType, PointDimension> ColorMeshType;
+  typedef ColorMeshType::PointType             PointType;
+  typedef ColorMeshType::CellType              CellType;
+  typedef itk::PolylineCell<CellType>          PolylineCellType;
+  typedef ColorMeshType::CellAutoPointer       CellAutoPointer;
+  typedef ClusterTools<ColorMeshType, ImageType, HistogramMeshType>
+      ClusterToolsType;
 
   // Surface file Definition
-  using CoordType = float;
-  using SurfType = fs::Surface<CoordType, Dimension>;
+  typedef float                             CoordType;
+  typedef fs::Surface<CoordType, Dimension> SurfType;
 
   // Input Parsing
   vector<string> TRKFile;
@@ -127,12 +125,12 @@ int main(int narg, char *arg[]) {
   const char *surfaceFileR = gp.follow("Could not find Surface File", "-sr");
   const char *overlayFileL = gp.follow("Could not find Overlay File", "-ol");
   const char *overlayFileR = gp.follow("Could not find Overlay File", "-or");
-  const char *refImage = gp.follow("Could not find Reference Image", "-ri");
+  const char *refImage     = gp.follow("Could not find Reference Image", "-ri");
 
   // Reading in the Image
   // ITK Version
-  using ImageReaderType = itk::ImageFileReader<ImageType>;
-  ImageReaderType::Pointer readerS = ImageReaderType::New();
+  typedef itk::ImageFileReader<ImageType> ImageReaderType;
+  ImageReaderType::Pointer                readerS = ImageReaderType::New();
   readerS->SetFileName(refImage);
   readerS->Update();
   ImageType::Pointer volume = readerS->GetOutput();
@@ -140,7 +138,7 @@ int main(int narg, char *arg[]) {
   // FS Version
   MRI *image = MRIread(refImage);
 
-  // Outputting the Files to Ensure the correct files were input
+  //Outputting the Files to Ensure the correct files were input
   cerr << endl
        << "TRK File:           " << TRKFile.at(0) << endl
        << "Left Surface File:  " << surfaceFileL << endl
@@ -150,7 +148,7 @@ int main(int narg, char *arg[]) {
        << "Reference Image:    " << refImage << endl;
 
   // Loading the TRK files into a mesh
-  vector<ColorMeshType::Pointer> *meshes;
+  vector<ColorMeshType::Pointer> *     meshes;
   vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
   ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
@@ -186,7 +184,7 @@ int main(int narg, char *arg[]) {
   double point_array[3];
 
   // Initialization of a streamline
-  ColorMeshType::Pointer input = (*meshes)[0];
+  ColorMeshType::Pointer                  input = (*meshes)[0];
   ColorMeshType::CellsContainer::Iterator inputCellIt =
       input->GetCells()->Begin();
 
@@ -202,11 +200,11 @@ int main(int narg, char *arg[]) {
                          &point_array[1], &point_array[2]);
 
     // Finds closest point and sets value equal to ENDPOINT_VALUE
-    double distL, distR;
+    double    distL, distR;
     vtkIdType Left_ID =
-        surfTreeL->FindClosestPointWithinRadius(1000, point_array, distL);
+        surfTreeL->FindClosestPointWithinRadius(100000, point_array, distL);
     vtkIdType Right_ID =
-        surfTreeR->FindClosestPointWithinRadius(1000, point_array, distR);
+        surfTreeR->FindClosestPointWithinRadius(100000, point_array, distR);
     vtkIdType ID = which_ID(distL, distR, Left_ID, Right_ID);
 
     if (ID == Left_ID)
@@ -223,9 +221,10 @@ int main(int narg, char *arg[]) {
     MRIvoxelToSurfaceRAS(image, index[0], index[1], index[2], &point_array[0],
                          &point_array[1], &point_array[2]);
 
-    Left_ID = surfTreeL->FindClosestPointWithinRadius(1000, point_array, distL);
+    Left_ID =
+        surfTreeL->FindClosestPointWithinRadius(100000, point_array, distL);
     Right_ID =
-        surfTreeR->FindClosestPointWithinRadius(1000, point_array, distR);
+        surfTreeR->FindClosestPointWithinRadius(100000, point_array, distR);
     ID = which_ID(distL, distR, Left_ID, Right_ID);
 
     if (ID == Left_ID)
@@ -244,7 +243,7 @@ int main(int narg, char *arg[]) {
 // Converts a surface to a VTK
 //
 vtkSmartPointer<vtkPolyData> FSToVTK(MRIS *surf) {
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkCellArray> triangles =
       vtkSmartPointer<vtkCellArray>::New();
 
@@ -271,8 +270,7 @@ vtkSmartPointer<vtkPolyData> FSToVTK(MRIS *surf) {
 /* Function: which_ID
  * Input: the two distances and the two vertice IDs
  * Return: whichever vertice is closer to the point
- * Does: Compares the two distances and returns the vertice of the shorter
- * distance
+ * Does: Compares the two distances and returns the vertice of the shorter distance
  */
 vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2) {
   if (n1 < n2)

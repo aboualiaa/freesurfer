@@ -6,7 +6,7 @@
 #define MRI_TOOLS_MRIIO_HPP
 namespace fs::mri::io {
 
-auto getVolumeName(std::string const string) -> std::string;
+auto getVolumeName(std::string string) -> std::string;
 
 } // namespace fs::mri::io
 #endif // MRI_TOOLS_MRIIO_HPP

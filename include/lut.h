@@ -1,14 +1,14 @@
 #ifndef LUT_H
 #define LUT_H
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 class LookupTable {
 
   struct LabelInfo {
-    bool valid;
+    bool        valid;
     std::string name;
   };
 
@@ -27,7 +27,7 @@ public:
 
   // extensions of std::map
   LabelInfo &operator[](int index) { return labelmap[index]; }
-  using iterator = std::map<int, LabelInfo>::iterator;
+  using iterator       = std::map<int, LabelInfo>::iterator;
   using const_iterator = std::map<int, LabelInfo>::const_iterator;
   iterator begin() { return labelmap.begin(); }
   iterator end() { return labelmap.end(); }

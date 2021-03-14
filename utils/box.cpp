@@ -1,17 +1,6 @@
-/**
- * @file  box.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:42 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -38,14 +27,14 @@ int BoxPrint(BOX *box, FILE *fp) {
   return (NO_ERROR);
 }
 int BoxExpand(BOX *box_src, BOX *box_dst, int dx, int dy, int dz) {
-  box_dst->x0 = MAX(box_src->x0 - dx, 0);
-  box_dst->y0 = MAX(box_src->y0 - dy, 0);
-  box_dst->z0 = MAX(box_src->z0 - dz, 0);
-  box_dst->x1 = MIN(box_src->x1 + dx, box_src->width - 1);
-  box_dst->y1 = MIN(box_src->y1 + dy, box_src->height - 1);
-  box_dst->z1 = MIN(box_src->z1 + dz, box_src->depth - 1);
-  box_dst->width = box_src->width;
+  box_dst->x0     = MAX(box_src->x0 - dx, 0);
+  box_dst->y0     = MAX(box_src->y0 - dy, 0);
+  box_dst->z0     = MAX(box_src->z0 - dz, 0);
+  box_dst->x1     = MIN(box_src->x1 + dx, box_src->width - 1);
+  box_dst->y1     = MIN(box_src->y1 + dy, box_src->height - 1);
+  box_dst->z1     = MIN(box_src->z1 + dz, box_src->depth - 1);
+  box_dst->width  = box_src->width;
   box_dst->height = box_src->height;
-  box_dst->depth = box_src->depth;
+  box_dst->depth  = box_src->depth;
   return (NO_ERROR);
 }

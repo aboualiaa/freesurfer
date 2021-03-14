@@ -1,16 +1,11 @@
 /**
- * @file  Cursor3D.h
  * @brief Cursor for 3D view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/12/13 16:43:39 $
- *    $Revision: 1.15 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -44,7 +39,7 @@ public:
   void SetPosition(double *pos);
 
   double *GetPosition();
-  void GetPosition(double *pos);
+  void    GetPosition(double *pos);
 
   void GetColor(double *rgb);
   void SetColor(double r, double g, double b);
@@ -80,8 +75,8 @@ private:
   RenderView3D *m_view;
 
   double m_dPosition[3];
-  int m_nSize;
-  int m_nThickness;
+  int    m_nSize;
+  int    m_nThickness;
   double m_dScale;
 };
 

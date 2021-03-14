@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_jacobian</name>
-	<synopsis>mris_jacobian [options] &lt;original surface&gt; &lt;mapped surface&gt; &lt;jacobian file name&gt;</synopsis>
-	<description>This program computes the Jacobian of a surface mapping.</description>
+  <name>mris_jacobian</name>
+  <synopsis>mris_jacobian [options] &lt;original surface&gt; &lt;mapped surface&gt; &lt;jacobian file name&gt;</synopsis>
+  <description>This program computes the Jacobian of a surface mapping.</description>
   <arguments>
     <positional>
       <intro>*****************************************************</intro>
@@ -44,4 +43,3 @@
   </arguments>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

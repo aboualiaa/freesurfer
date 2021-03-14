@@ -142,7 +142,7 @@ Face::Face(Analysis::Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char   Face::ripflag() const { return repr->f_ripflag[idx]; }
 
 void Face::set_ripflag(char to) { repr->f_ripflag[idx] = to; }
 
@@ -226,8 +226,8 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -268,7 +268,7 @@ Face::Face(Analysis::Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char   Face::ripflag() const { return repr->f_ripflag[idx]; }
 
 void Face::set_ripflag(char to) { repr->f_ripflag[idx] = to; }
 
@@ -389,8 +389,8 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -429,12 +429,12 @@ Face::Face(Analysis::Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char     Face::ripflag() const { return repr->f_ripflag[idx]; }
 FloatXYZ Face::norm() const { return repr->f_norm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -563,33 +563,33 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-float Surface::xctr() const { return repr->xctr; }
-float Surface::yctr() const { return repr->yctr; }
-float Surface::zctr() const { return repr->zctr; }
-float Surface::xlo() const { return repr->xlo; }
-float Surface::ylo() const { return repr->ylo; }
-float Surface::zlo() const { return repr->zlo; }
-float Surface::xhi() const { return repr->xhi; }
-float Surface::yhi() const { return repr->yhi; }
-float Surface::zhi() const { return repr->zhi; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::xctr() const { return repr->xctr; }
+float  Surface::yctr() const { return repr->yctr; }
+float  Surface::zctr() const { return repr->zctr; }
+float  Surface::xlo() const { return repr->xlo; }
+float  Surface::ylo() const { return repr->ylo; }
+float  Surface::zlo() const { return repr->zlo; }
+float  Surface::xhi() const { return repr->xhi; }
+float  Surface::yhi() const { return repr->yhi; }
+float  Surface::zhi() const { return repr->zhi; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
@@ -634,12 +634,12 @@ Face::Face(Analysis::Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char     Face::ripflag() const { return repr->f_ripflag[idx]; }
 FloatXYZ Face::norm() const { return repr->f_norm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -720,7 +720,7 @@ float Vertex::whitez() const { //  white surface coordinates
 }
 float Vertex::area() const { return repr->v_area[idx]; }
 float Vertex::origarea() const { return repr->v_origarea[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
 char Vertex::neg() const { //  1 if the normal vector is inverted
@@ -831,33 +831,33 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-float Surface::xctr() const { return repr->xctr; }
-float Surface::yctr() const { return repr->yctr; }
-float Surface::zctr() const { return repr->zctr; }
-float Surface::xlo() const { return repr->xlo; }
-float Surface::ylo() const { return repr->ylo; }
-float Surface::zlo() const { return repr->zlo; }
-float Surface::xhi() const { return repr->xhi; }
-float Surface::yhi() const { return repr->yhi; }
-float Surface::zhi() const { return repr->zhi; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::xctr() const { return repr->xctr; }
+float  Surface::yctr() const { return repr->yctr; }
+float  Surface::zctr() const { return repr->zctr; }
+float  Surface::xlo() const { return repr->xlo; }
+float  Surface::ylo() const { return repr->ylo; }
+float  Surface::zlo() const { return repr->zlo; }
+float  Surface::xhi() const { return repr->xhi; }
+float  Surface::yhi() const { return repr->yhi; }
+float  Surface::zhi() const { return repr->zhi; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
@@ -900,12 +900,12 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char     Face::ripflag() const { return repr->f_ripflag[idx]; }
 FloatXYZ Face::norm() const { return repr->f_norm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -984,7 +984,7 @@ float Vertex::whitez() const { //  white surface coordinates
 }
 float Vertex::area() const { return repr->v_area[idx]; }
 float Vertex::origarea() const { return repr->v_origarea[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
 char Vertex::neg() const { //  1 if the normal vector is inverted
@@ -1091,33 +1091,33 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-float Surface::xctr() const { return repr->xctr; }
-float Surface::yctr() const { return repr->yctr; }
-float Surface::zctr() const { return repr->zctr; }
-float Surface::xlo() const { return repr->xlo; }
-float Surface::ylo() const { return repr->ylo; }
-float Surface::zlo() const { return repr->zlo; }
-float Surface::xhi() const { return repr->xhi; }
-float Surface::yhi() const { return repr->yhi; }
-float Surface::zhi() const { return repr->zhi; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::xctr() const { return repr->xctr; }
+float  Surface::yctr() const { return repr->yctr; }
+float  Surface::zctr() const { return repr->zctr; }
+float  Surface::xlo() const { return repr->xlo; }
+float  Surface::ylo() const { return repr->ylo; }
+float  Surface::zlo() const { return repr->zlo; }
+float  Surface::xhi() const { return repr->xhi; }
+float  Surface::yhi() const { return repr->yhi; }
+float  Surface::zhi() const { return repr->zhi; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
@@ -1250,7 +1250,7 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char   Face::ripflag() const { return repr->f_ripflag[idx]; }
 
 void Face::set_v(size_t i, Vertex to) {
   cheapAssert(repr == to.repr);
@@ -1312,8 +1312,8 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -1348,7 +1348,7 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char   Face::ripflag() const { return repr->f_ripflag[idx]; }
 
 void Face::set_ripflag(char to) { repr->f_ripflag[idx] = to; }
 
@@ -1456,8 +1456,8 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
@@ -1492,12 +1492,12 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char     Face::ripflag() const { return repr->f_ripflag[idx]; }
 FloatXYZ Face::norm() const { return repr->f_norm[idx]; }
 
 void Face::set_area(float to) { repr->f_area[idx] = to; }
@@ -1618,33 +1618,33 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-float Surface::xctr() const { return repr->xctr; }
-float Surface::yctr() const { return repr->yctr; }
-float Surface::zctr() const { return repr->zctr; }
-float Surface::xlo() const { return repr->xlo; }
-float Surface::ylo() const { return repr->ylo; }
-float Surface::zlo() const { return repr->zlo; }
-float Surface::xhi() const { return repr->xhi; }
-float Surface::yhi() const { return repr->yhi; }
-float Surface::zhi() const { return repr->zhi; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::xctr() const { return repr->xctr; }
+float  Surface::yctr() const { return repr->yctr; }
+float  Surface::zctr() const { return repr->zctr; }
+float  Surface::xlo() const { return repr->xlo; }
+float  Surface::ylo() const { return repr->ylo; }
+float  Surface::zlo() const { return repr->zlo; }
+float  Surface::xhi() const { return repr->xhi; }
+float  Surface::yhi() const { return repr->yhi; }
+float  Surface::zhi() const { return repr->zhi; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
@@ -1698,12 +1698,12 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char     Face::ripflag() const { return repr->f_ripflag[idx]; }
 FloatXYZ Face::norm() const { return repr->f_norm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -1782,7 +1782,7 @@ float Vertex::whitez() const { //  white surface coordinates
 }
 float Vertex::area() const { return repr->v_area[idx]; }
 float Vertex::origarea() const { return repr->v_origarea[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
 char Vertex::neg() const { //  1 if the normal vector is inverted
@@ -1889,33 +1889,33 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-float Surface::xctr() const { return repr->xctr; }
-float Surface::yctr() const { return repr->yctr; }
-float Surface::zctr() const { return repr->zctr; }
-float Surface::xlo() const { return repr->xlo; }
-float Surface::ylo() const { return repr->ylo; }
-float Surface::zlo() const { return repr->zlo; }
-float Surface::xhi() const { return repr->xhi; }
-float Surface::yhi() const { return repr->yhi; }
-float Surface::zhi() const { return repr->zhi; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::xctr() const { return repr->xctr; }
+float  Surface::yctr() const { return repr->yctr; }
+float  Surface::zctr() const { return repr->zctr; }
+float  Surface::xlo() const { return repr->xlo; }
+float  Surface::ylo() const { return repr->ylo; }
+float  Surface::zlo() const { return repr->zlo; }
+float  Surface::xhi() const { return repr->xhi; }
+float  Surface::yhi() const { return repr->yhi; }
+float  Surface::zhi() const { return repr->zhi; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
@@ -1958,12 +1958,12 @@ Face::Face(Face const &src) : Repr_Elt(src) {}
 Face::Face(AllM::Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char     Face::ripflag() const { return repr->f_ripflag[idx]; }
 FloatXYZ Face::norm() const { return repr->f_norm[idx]; }
 
 void Face::set_orig_angle(angles_per_triangle_t to) {
@@ -2042,7 +2042,7 @@ float Vertex::whitez() const { //  white surface coordinates
 }
 float Vertex::area() const { return repr->v_area[idx]; }
 float Vertex::origarea() const { return repr->v_origarea[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
 char Vertex::neg() const { //  1 if the normal vector is inverted
@@ -2149,33 +2149,33 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-float Surface::xctr() const { return repr->xctr; }
-float Surface::yctr() const { return repr->yctr; }
-float Surface::zctr() const { return repr->zctr; }
-float Surface::xlo() const { return repr->xlo; }
-float Surface::ylo() const { return repr->ylo; }
-float Surface::zlo() const { return repr->zlo; }
-float Surface::xhi() const { return repr->xhi; }
-float Surface::yhi() const { return repr->yhi; }
-float Surface::zhi() const { return repr->zhi; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::xctr() const { return repr->xctr; }
+float  Surface::yctr() const { return repr->yctr; }
+float  Surface::zctr() const { return repr->zctr; }
+float  Surface::xlo() const { return repr->xlo; }
+float  Surface::ylo() const { return repr->ylo; }
+float  Surface::zlo() const { return repr->zlo; }
+float  Surface::xhi() const { return repr->xhi; }
+float  Surface::yhi() const { return repr->yhi; }
+float  Surface::zhi() const { return repr->zhi; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 double Surface::radius() const { //  radius (if status==MRIS_SPHERE)
@@ -2217,12 +2217,12 @@ Face::Face(Representation *representation, size_t idx)
 Face::Face(Face const &src) : Repr_Elt(src) {}
 
 Vertex Face::v(size_t i) const { return Vertex(repr, repr->f_v[idx][i]); }
-float Face::area() const { return repr->f_area[idx]; }
+float  Face::area() const { return repr->f_area[idx]; }
 angles_per_triangle_t Face::angle() const { return repr->f_angle[idx]; }
 angles_per_triangle_t Face::orig_angle() const {
   return repr->f_orig_angle[idx];
 }
-char Face::ripflag() const { return repr->f_ripflag[idx]; }
+char     Face::ripflag() const { return repr->f_ripflag[idx]; }
 FloatXYZ Face::norm() const { return repr->f_norm[idx]; }
 
 void Face::set_v(size_t i, Vertex to) {
@@ -2307,7 +2307,7 @@ float Vertex::whitez() const { //  white surface coordinates
 }
 float Vertex::area() const { return repr->v_area[idx]; }
 float Vertex::origarea() const { return repr->v_origarea[idx]; }
-int Vertex::fno() const { //  face that this vertex is in
+int   Vertex::fno() const { //  face that this vertex is in
   return repr->v_fno[idx];
 }
 char Vertex::neg() const { //  1 if the normal vector is inverted
@@ -2420,33 +2420,33 @@ int Surface::nfaces() const { //  # of faces on surface, change by calling
                               //  MRISreallocVerticesAndFaces et al
   return repr->nfaces;
 }
-Vertex Surface::vertices(size_t i) const { return Vertex(repr, i); }
-Face Surface::faces(size_t i) const { return Face(repr, i); }
+Vertex             Surface::vertices(size_t i) const { return Vertex(repr, i); }
+Face               Surface::faces(size_t i) const { return Face(repr, i); }
 FaceNormCacheEntry Surface::faceNormCacheEntries(size_t i) const {
   return repr->faceNormCacheEntries[i];
 }
 FaceNormDeferredEntry Surface::faceNormDeferredEntries(size_t i) const {
   return repr->faceNormDeferredEntries[i];
 }
-float Surface::xctr() const { return repr->xctr; }
-float Surface::yctr() const { return repr->yctr; }
-float Surface::zctr() const { return repr->zctr; }
-float Surface::xlo() const { return repr->xlo; }
-float Surface::ylo() const { return repr->ylo; }
-float Surface::zlo() const { return repr->zlo; }
-float Surface::xhi() const { return repr->xhi; }
-float Surface::yhi() const { return repr->yhi; }
-float Surface::zhi() const { return repr->zhi; }
-float Surface::total_area() const { return repr->total_area; }
+float  Surface::xctr() const { return repr->xctr; }
+float  Surface::yctr() const { return repr->yctr; }
+float  Surface::zctr() const { return repr->zctr; }
+float  Surface::xlo() const { return repr->xlo; }
+float  Surface::ylo() const { return repr->ylo; }
+float  Surface::zlo() const { return repr->zlo; }
+float  Surface::xhi() const { return repr->xhi; }
+float  Surface::yhi() const { return repr->yhi; }
+float  Surface::zhi() const { return repr->zhi; }
+float  Surface::total_area() const { return repr->total_area; }
 double Surface::avg_vertex_area() const { return repr->avg_vertex_area; }
 double
 Surface::avg_vertex_dist() const { //  set by MRIScomputeAvgInterVertexDist
   return repr->avg_vertex_dist;
 }
 double Surface::std_vertex_dist() const { return repr->std_vertex_dist; }
-float Surface::orig_area() const { return repr->orig_area; }
-float Surface::neg_area() const { return repr->neg_area; }
-float Surface::neg_orig_area() const { //  amount of original surface in folds
+float  Surface::orig_area() const { return repr->orig_area; }
+float  Surface::neg_area() const { return repr->neg_area; }
+float  Surface::neg_orig_area() const { //  amount of original surface in folds
   return repr->neg_orig_area;
 }
 double Surface::radius() const { //  radius (if status==MRIS_SPHERE)

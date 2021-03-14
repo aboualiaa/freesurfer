@@ -48,10 +48,10 @@ bool fh_isempty(const struct fibheap *fh) { return fh->fh_n == 0; }
  */
 static void fh_deleteel(struct fibheap *h, struct fibheap_el *x) {
   void *data;
-  int key;
+  int   key;
 
   data = x->fhe_data;
-  key = x->fhe_key;
+  key  = x->fhe_key;
 
   if (!h->fh_keys)
     fh_replacedata(h, x, h->fh_neginf);
@@ -66,28 +66,28 @@ static void fh_deleteel(struct fibheap *h, struct fibheap_el *x) {
   }
 
   x->fhe_data = data;
-  x->fhe_key = key;
+  x->fhe_key  = key;
 }
 
 static void fh_initheap(struct fibheap *n) {
   n->fh_cmp_fnct = NULL;
-  n->fh_neginf = NULL;
-  n->fh_n = 0;
-  n->fh_Dl = -1;
-  n->fh_cons = NULL;
-  n->fh_min = NULL;
-  n->fh_root = NULL;
-  n->fh_keys = 0;
+  n->fh_neginf   = NULL;
+  n->fh_n        = 0;
+  n->fh_Dl       = -1;
+  n->fh_cons     = NULL;
+  n->fh_min      = NULL;
+  n->fh_root     = NULL;
+  n->fh_keys     = 0;
 #ifdef FH_STATS
-  n->fh_maxn = 0;
-  n->fh_ninserts = 0;
+  n->fh_maxn      = 0;
+  n->fh_ninserts  = 0;
   n->fh_nextracts = 0;
 #endif
 }
 
 static void fh_destroyheap(struct fibheap *h) {
   h->fh_cmp_fnct = NULL;
-  h->fh_neginf = NULL;
+  h->fh_neginf   = NULL;
   if (h->fh_cons != NULL)
     free(h->fh_cons);
   h->fh_cons = NULL;
@@ -123,7 +123,7 @@ struct fibheap *fh_makeheap() {
 voidcmp fh_setcmp(struct fibheap *h, voidcmp fnct) {
   voidcmp oldfnct;
 
-  oldfnct = h->fh_cmp_fnct;
+  oldfnct        = h->fh_cmp_fnct;
   h->fh_cmp_fnct = fnct;
 
   return oldfnct;
@@ -132,7 +132,7 @@ voidcmp fh_setcmp(struct fibheap *h, voidcmp fnct) {
 void *fh_setneginf(struct fibheap *h, void *data) {
   void *old;
 
-  old = h->fh_neginf;
+  old          = h->fh_neginf;
   h->fh_neginf = data;
 
   return old;
@@ -153,9 +153,9 @@ struct fibheap *fh_union(struct fibheap *ha, struct fibheap *hb) {
   }
   ha->fh_root->fhe_left->fhe_right = hb->fh_root;
   hb->fh_root->fhe_left->fhe_right = ha->fh_root;
-  x = ha->fh_root->fhe_left;
-  ha->fh_root->fhe_left = hb->fh_root->fhe_left;
-  hb->fh_root->fhe_left = x;
+  x                                = ha->fh_root->fhe_left;
+  ha->fh_root->fhe_left            = hb->fh_root->fhe_left;
+  hb->fh_root->fhe_left            = x;
   ha->fh_n += hb->fh_n;
   /*
    * we probably should also keep stats on number of unions
@@ -191,7 +191,7 @@ struct fibheap_el *fh_insertkey(struct fibheap *h, int key, void *data) {
 
   /* just insert on root list, and make sure it's not the new min */
   x->fhe_data = data;
-  x->fhe_key = key;
+  x->fhe_key  = key;
 
   fh_insertel(h, x);
 
@@ -215,13 +215,13 @@ int fh_replacekey(struct fibheap *h, struct fibheap_el *x, int key) {
 
 void *fh_replacekeydata(struct fibheap *h, struct fibheap_el *x, int key,
                         void *data) {
-  void *odata;
-  int okey;
+  void *             odata;
+  int                okey;
   struct fibheap_el *y;
-  int r;
+  int                r;
 
   odata = x->fhe_data;
-  okey = x->fhe_key;
+  okey  = x->fhe_key;
 
   /*
    * we can increase a key by deleting and reinserting, that
@@ -233,7 +233,7 @@ void *fh_replacekeydata(struct fibheap *h, struct fibheap_el *x, int key,
     fh_deleteel(h, x);
 
     x->fhe_data = data;
-    x->fhe_key = key;
+    x->fhe_key  = key;
 
     fh_insertel(h, x);
 
@@ -241,7 +241,7 @@ void *fh_replacekeydata(struct fibheap *h, struct fibheap_el *x, int key,
   }
 
   x->fhe_data = data;
-  x->fhe_key = key;
+  x->fhe_key  = key;
 
   /* because they are equal, we don't have to do anything */
   if (r == 0)
@@ -297,12 +297,12 @@ void *fh_min(struct fibheap *h) {
 
 void *fh_extractmin(struct fibheap *h) {
   struct fibheap_el *z;
-  void *ret;
+  void *             ret;
 
   ret = NULL;
 
   if (h->fh_min != NULL) {
-    z = fh_extractminel(h);
+    z   = fh_extractminel(h);
     ret = z->fhe_data;
 #ifndef NO_FREE
     fhe_destroy(z);
@@ -355,7 +355,7 @@ static struct fibheap_el *fh_extractminel(struct fibheap *h) {
   for (x = ret->fhe_child; x != orig && x != NULL;) {
     if (orig == NULL)
       orig = x;
-    y = x->fhe_right;
+    y        = x->fhe_right;
     x->fhe_p = NULL;
     fh_insertrootlist(h, x);
     x = y;
@@ -381,8 +381,8 @@ static struct fibheap_el *fh_extractminel(struct fibheap *h) {
 
 static void fh_insertrootlist(struct fibheap *h, struct fibheap_el *x) {
   if (h->fh_root == NULL) {
-    h->fh_root = x;
-    x->fhe_left = x;
+    h->fh_root   = x;
+    x->fhe_left  = x;
     x->fhe_right = x;
     return;
   }
@@ -399,12 +399,12 @@ static void fh_removerootlist(struct fibheap *h, struct fibheap_el *x) {
 
 static void fh_consolidate(struct fibheap *h) {
   struct fibheap_el **a;
-  struct fibheap_el *w;
-  struct fibheap_el *y;
-  struct fibheap_el *x;
-  int i;
-  int d;
-  int D;
+  struct fibheap_el * w;
+  struct fibheap_el * y;
+  struct fibheap_el * x;
+  int                 i;
+  int                 d;
+  int                 D;
 
   fh_checkcons(h);
 
@@ -456,7 +456,7 @@ static void fh_cut(struct fibheap *h, struct fibheap_el *x,
   fhe_remove(x);
   y->fhe_degree--;
   fh_insertrootlist(h, x);
-  x->fhe_p = NULL;
+  x->fhe_p    = NULL;
   x->fhe_mark = 0;
 }
 
@@ -490,25 +490,25 @@ static struct fibheap_el *fhe_newelem() {
 
 static void fhe_initelem(struct fibheap_el *e) {
   e->fhe_degree = 0;
-  e->fhe_mark = 0;
-  e->fhe_p = NULL;
-  e->fhe_child = NULL;
-  e->fhe_left = e;
-  e->fhe_right = e;
-  e->fhe_data = NULL;
+  e->fhe_mark   = 0;
+  e->fhe_p      = NULL;
+  e->fhe_child  = NULL;
+  e->fhe_left   = e;
+  e->fhe_right  = e;
+  e->fhe_data   = NULL;
 }
 
 static void fhe_insertafter(struct fibheap_el *a, struct fibheap_el *b) {
   if (a == a->fhe_right) {
     a->fhe_right = b;
-    a->fhe_left = b;
+    a->fhe_left  = b;
     b->fhe_right = a;
-    b->fhe_left = a;
+    b->fhe_left  = a;
   } else {
-    b->fhe_right = a->fhe_right;
+    b->fhe_right           = a->fhe_right;
     a->fhe_right->fhe_left = b;
-    a->fhe_right = b;
-    b->fhe_left = a;
+    a->fhe_right           = b;
+    b->fhe_left            = a;
   }
 }
 
@@ -533,8 +533,8 @@ static struct fibheap_el *fhe_remove(struct fibheap_el *x) {
   x->fhe_left->fhe_right = x->fhe_right;
 
   /* clear out hanging pointers */
-  x->fhe_p = NULL;
-  x->fhe_left = x;
+  x->fhe_p     = NULL;
+  x->fhe_left  = x;
   x->fhe_right = x;
 
   return ret;
@@ -572,7 +572,7 @@ static int fh_comparedata(struct fibheap *h, int key, void *data,
                           struct fibheap_el *b) {
   struct fibheap_el a;
 
-  a.fhe_key = key;
+  a.fhe_key  = key;
   a.fhe_data = data;
 
   return fh_compare(h, &a, b);

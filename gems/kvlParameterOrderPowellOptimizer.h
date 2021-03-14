@@ -1,9 +1,9 @@
 #ifndef __kvlParameterOrderPowellOptimizer_h
 #define __kvlParameterOrderPowellOptimizer_h
 
+#include "itkCommand.h"
 #include "itkPowellOptimizer.h"
 #include "itkSingleValuedCostFunction.h"
-#include "itkCommand.h"
 
 namespace kvl {
 
@@ -12,9 +12,9 @@ class WrappedSingleValuedCostFunction : public itk::SingleValuedCostFunction {
 public:
   /** Standard class typedefs. */
   typedef WrappedSingleValuedCostFunction Self;
-  typedef itk::SingleValuedCostFunction Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
-  typedef itk::SmartPointer<const Self> ConstPointer;
+  typedef itk::SingleValuedCostFunction   Superclass;
+  typedef itk::SmartPointer<Self>         Pointer;
+  typedef itk::SmartPointer<const Self>   ConstPointer;
 
   /** Run-time type information (and related methods). */
   itkTypeMacro(WrappedSingleValuedCostFunction, itk::SingleValuedCostFunction);
@@ -24,14 +24,13 @@ public:
 
   // Some typedefs
   typedef Superclass::ParametersType ParametersType;
-  typedef Superclass::MeasureType MeasureType;
+  typedef Superclass::MeasureType    MeasureType;
   typedef Superclass::DerivativeType DerivativeType;
-  typedef itk::Array<unsigned int> ParameterOrderType;
+  typedef itk::Array<unsigned int>   ParameterOrderType;
 
   //
   virtual MeasureType GetValue(const ParametersType &parameters) const {
-    // Translate the (short) parameters into (long) parameters the cost function
-    // understands
+    // Translate the (short) parameters into (long) parameters the cost function understands
     ParametersType costFunctionParameters = m_DefaultCostFunctionParameters;
     for (unsigned int i = 0; i < m_ParameterOrder.Size(); i++) {
       if (m_ParameterOrder[i]) {
@@ -44,7 +43,7 @@ public:
 
   //
   virtual void GetDerivative(const ParametersType &parameters,
-                             DerivativeType &derivative) const {}
+                             DerivativeType &      derivative) const {}
 
   virtual unsigned int GetNumberOfParameters() const {
     unsigned int numberOfParameters = 0;
@@ -59,11 +58,11 @@ public:
 
   //
   void SetUp(itk::SingleValuedCostFunction *costFunction,
-             const ParametersType &defaultCostFunctionParameters,
-             const ParameterOrderType &parameterOrder) {
-    m_CostFunction = costFunction;
+             const ParametersType &         defaultCostFunctionParameters,
+             const ParameterOrderType &     parameterOrder) {
+    m_CostFunction                  = costFunction;
     m_DefaultCostFunctionParameters = defaultCostFunctionParameters;
-    m_ParameterOrder = parameterOrder;
+    m_ParameterOrder                = parameterOrder;
   }
 
 protected:
@@ -72,22 +71,22 @@ protected:
   virtual ~WrappedSingleValuedCostFunction() {}
 
 private:
-  WrappedSingleValuedCostFunction(const Self &); // purposely not implemented
-  void operator=(const Self &);                  // purposely not implemented
+  WrappedSingleValuedCostFunction(const Self &); //purposely not implemented
+  void operator=(const Self &);                  //purposely not implemented
 
   itk::SingleValuedCostFunction::Pointer m_CostFunction;
-  ParametersType m_DefaultCostFunctionParameters;
-  ParameterOrderType m_ParameterOrder;
+  ParametersType                         m_DefaultCostFunctionParameters;
+  ParameterOrderType                     m_ParameterOrder;
 };
 
 class ParameterOrderPowellOptimizer
     : public itk::SingleValuedNonLinearOptimizer {
 public:
   /** Standard class typedefs. */
-  typedef ParameterOrderPowellOptimizer Self;
+  typedef ParameterOrderPowellOptimizer       Self;
   typedef itk::SingleValuedNonLinearOptimizer Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
-  typedef itk::SmartPointer<const Self> ConstPointer;
+  typedef itk::SmartPointer<Self>             Pointer;
+  typedef itk::SmartPointer<const Self>       ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -99,9 +98,9 @@ public:
   // Some typedefs
   typedef Superclass::MeasureType MeasureType;
   typedef WrappedSingleValuedCostFunction::ParameterOrderType
-      ParameterOrderType;
+                                     ParameterOrderType;
   typedef Superclass::ParametersType ParametersType;
-  typedef Superclass::ScalesType ScalesType;
+  typedef Superclass::ScalesType     ScalesType;
 
   //
   const ParametersType &GetCurrentPosition() const {
@@ -112,8 +111,7 @@ public:
       return Superclass::GetCurrentPosition();
     }
 
-    // Translate the (short) parameters into (long) parameters the cost function
-    // understands
+    // Translate the (short) parameters into (long) parameters the cost function understands
     ParametersType currentPosition = this->GetInitialPosition();
     for (unsigned int i = 0; i < m_ParameterOrder.Size(); i++) {
       if (m_ParameterOrder[i]) {
@@ -140,7 +138,7 @@ public:
 
     // Set up initial position and scales
     ParametersType initialPosition(metric->GetNumberOfParameters());
-    ScalesType scales(metric->GetNumberOfParameters());
+    ScalesType     scales(metric->GetNumberOfParameters());
     for (unsigned int i = 0; i < m_ParameterOrder.Size(); i++) {
       if (m_ParameterOrder[i]) {
         scales[m_ParameterOrder[i] - 1] = this->GetScales()[i];
@@ -176,8 +174,8 @@ public:
   virtual void SetMaximize(bool maximize) {
     m_WrappedOptimizer->SetMaximize(maximize);
   }
-  virtual void MaximizeOn() { m_WrappedOptimizer->SetMaximize(true); }
-  virtual void MaximizeOff() { m_WrappedOptimizer->SetMaximize(false); }
+  virtual void        MaximizeOn() { m_WrappedOptimizer->SetMaximize(true); }
+  virtual void        MaximizeOff() { m_WrappedOptimizer->SetMaximize(false); }
   virtual const bool &GetMaximize() const {
     return m_WrappedOptimizer->GetMaximize();
   }
@@ -216,7 +214,7 @@ public:
   }
 
   // Forward events from wrapped optimizer to self
-  void HandleWrappedOptimizerEvent(itk::Object *object,
+  void HandleWrappedOptimizerEvent(itk::Object *           object,
                                    const itk::EventObject &event) {
     this->InvokeEvent(event);
   }
@@ -228,7 +226,7 @@ protected:
 
     // Add observers to the wrapped optimizer
     typedef itk::MemberCommand<Self> MemberCommandType;
-    MemberCommandType::Pointer command = MemberCommandType::New();
+    MemberCommandType::Pointer       command = MemberCommandType::New();
     command->SetCallbackFunction(this, &Self::HandleWrappedOptimizerEvent);
     m_WrappedOptimizer->AddObserver(itk::StartEvent(), command);
     m_WrappedOptimizer->AddObserver(itk::IterationEvent(), command);
@@ -243,10 +241,10 @@ protected:
   virtual ~ParameterOrderPowellOptimizer(){};
 
 private:
-  ParameterOrderPowellOptimizer(const Self &); // purposely not implemented
-  void operator=(const Self &);                // purposely not implemented
+  ParameterOrderPowellOptimizer(const Self &); //purposely not implemented
+  void operator=(const Self &);                //purposely not implemented
 
-  ParameterOrderType m_ParameterOrder;
+  ParameterOrderType            m_ParameterOrder;
   itk::PowellOptimizer::Pointer m_WrappedOptimizer;
 };
 

@@ -1,7 +1,7 @@
-#include "mri2.h"
 #include "DICOMRead.h"
+#include "mri2.h"
 
-extern int errno;
+extern int  errno;
 const char *Progname;
 
 void get_string(int argc, char *argv[], int *pos, char *val);
@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 
   char in_name[STRLEN];
   in_name[0] = '\0';
-  int i;
+  int   i;
   FILE *fp;
 
   if (argc <= 1)

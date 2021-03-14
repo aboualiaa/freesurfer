@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_extract_main_component</name>
-	<synopsis>mris_extract_main_component input_surface output_surface</synopsis>
-	<description>************************************************************</description>
+  <name>mris_extract_main_component</name>
+  <synopsis>mris_extract_main_component input_surface output_surface</synopsis>
+  <description>************************************************************</description>
   <arguments>
     <positional>
       <argument>input_surface</argument>

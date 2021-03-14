@@ -32,7 +32,7 @@ public:
 
   virtual void Append2DProps(vtkRenderer *renderer, int nPlane);
   virtual void Append3DProps(vtkRenderer *renderer,
-                             bool *bSliceVisibility = NULL);
+                             bool *       bSliceVisibility = NULL);
 
   bool HasProp(vtkProp *prop);
 
@@ -51,7 +51,7 @@ public:
 
   void SetLabelVisible(int n, bool visible);
 
-  QList<LayerMRI *> GetMRILayers();
+  QList<LayerMRI *>     GetMRILayers();
   QList<LayerSurface *> GetSurfaceLayers();
 
   void SetMRILayerCTAB(COLOR_TABLE *ctab);
@@ -85,17 +85,17 @@ protected:
 
   virtual void OnSlicePositionChanged(int nPlane);
 
-  FCD_DATA *m_fcd;
-  vtkSmartPointer<vtkImageReslice> mReslice[3];
+  FCD_DATA *                           m_fcd;
+  vtkSmartPointer<vtkImageReslice>     mReslice[3];
   vtkSmartPointer<vtkImageMapToColors> mColorMap[3];
-  QList<bool> m_labelVisibility;
+  QList<bool>                          m_labelVisibility;
 
-  LayerMRI *m_layerSource;
-  LayerMRI *m_mri_norm;
-  LayerMRI *m_mri_flair;
-  LayerMRI *m_mri_t2;
-  LayerMRI *m_mri_aseg;
-  LayerMRI *m_mri_difference;
+  LayerMRI *    m_layerSource;
+  LayerMRI *    m_mri_norm;
+  LayerMRI *    m_mri_flair;
+  LayerMRI *    m_mri_t2;
+  LayerMRI *    m_mri_aseg;
+  LayerMRI *    m_mri_difference;
   LayerSurface *m_surf_lh;
   LayerSurface *m_surf_rh;
   LayerSurface *m_surf_lh_pial;

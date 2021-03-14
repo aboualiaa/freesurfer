@@ -33,8 +33,8 @@ protected:
 
 private:
   Ui::MainWindow *ui;
-  QProcess *m_process; // process/thread that runs mri_convert
-  QString m_strLastDir;
+  QProcess *      m_process; // process/thread that runs mri_convert
+  QString         m_strLastDir;
 };
 
 #endif // MAINWINDOW_H

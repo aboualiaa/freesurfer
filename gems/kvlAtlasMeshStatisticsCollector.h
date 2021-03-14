@@ -5,16 +5,13 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshStatisticsCollector : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshStatisticsCollector;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshStatisticsCollector  Self;
+  typedef AtlasMeshRasterizor           Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -23,8 +20,8 @@ public:
   itkTypeMacro(AtlasMeshStatisticsCollector, itk::Object);
 
   /** Some typedefs */
-  using StatisticsContainerType =
-      itk::MapContainer<AtlasMesh::PointIdentifier, AtlasAlphasType>;
+  typedef itk::MapContainer<AtlasMesh::PointIdentifier, AtlasAlphasType>
+      StatisticsContainerType;
 
   /** */
   const StatisticsContainerType *GetLabelStatistics() const {
@@ -42,9 +39,9 @@ protected:
   virtual ~AtlasMeshStatisticsCollector();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
   virtual void GetContributionOfTetrahedron(
       const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
@@ -59,12 +56,12 @@ protected:
       AtlasAlphasType &statisticsInVertex3) {}
 
 private:
-  AtlasMeshStatisticsCollector(const Self &); // purposely not implemented
-  void operator=(const Self &);               // purposely not implemented
+  AtlasMeshStatisticsCollector(const Self &); //purposely not implemented
+  void operator=(const Self &);               //purposely not implemented
 
   //
   StatisticsContainerType::Pointer m_LabelStatistics;
-  double m_MinLogLikelihood;
+  double                           m_MinLogLikelihood;
 
   //
   std::vector<StatisticsContainerType::Pointer> m_ThreadSpecificLabelStatistics;

@@ -1,5 +1,4 @@
 /**
- * @file  mrispline.h
  * @brief Compute B-Spline Coefficients and Interpolate MRI
  *
  * This Code is based on:
@@ -13,12 +12,8 @@
  */
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2012/11/01 19:03:46 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -39,10 +34,10 @@
 /** BSpline structure has degree, coefficient image (float), source type and
     if the source had negative values */
 typedef struct {
-  int degree;
+  int  degree;
   MRI *coeff;
-  int srctype;
-  int srcneg;
+  int  srctype;
+  int  srcneg;
 } MRI_BSPLINE;
 
 /**

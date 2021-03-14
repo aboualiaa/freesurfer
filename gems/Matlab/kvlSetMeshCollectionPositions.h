@@ -7,9 +7,9 @@ namespace kvl {
 class SetMeshCollectionPositions : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef SetMeshCollectionPositions Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef SetMeshCollectionPositions    Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -18,13 +18,11 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SetMeshCollectionPositions, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs,
-           const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // kvlSetMeshCollectionPositions( meshCollection, referencePosition,
-    // position0, position1, ... )
+    // kvlSetMeshCollectionPositions( meshCollection, referencePosition, position0, position1, ... )
 
     // Make sure input arguments are correct
     if ((nrhs < 3) || !mxIsInt64(prhs[0]) || !mxIsDouble(prhs[1]) ||
@@ -49,17 +47,17 @@ public:
         const_cast<kvl::AtlasMeshCollection *>(
             constMeshCollection.GetPointer());
 
-#if 0    
+#if 0
     // Make sure we're not trying to write positions of non-existing meshes in the collection
     if ( meshCollection->GetNumberOfMeshes() < ( nrhs-2 ) )
       {
       mexErrMsgTxt( "More positions than there are meshes in the mesh collection" );
       }
-    
+
     // Loop over all positions
     for ( int meshNumber = -1; meshNumber < ( nrhs-2 ); ++meshNumber )
       {
-        
+
       // Get pointer to the correct ITK position container
       AtlasMeshCollection::PointsContainerType::Pointer  position = 0;
       if ( meshNumber < 0 )
@@ -69,8 +67,8 @@ public:
       else
         {
         position = meshCollection->GetPositions()[ meshNumber ];
-        }  
-        
+        }
+
 
       // Get pointer to the Matlab data
       const int  numberOfNodes = mxGetDimensions( prhs[ meshNumber+2 ] )[ 0 ];
@@ -78,29 +76,29 @@ public:
         {
         mexErrMsgTxt( "Number of nodes don't match" );
         }
-      const double*  data = static_cast< double* >( mxGetData( prhs[ meshNumber+2 ] ) ); 
+      const double*  data = static_cast< double* >( mxGetData( prhs[ meshNumber+2 ] ) );
 
-      
+
       // Copy the alphas from the Matlab matrix into the mesh nodes
-      for ( AtlasMesh::PointsContainer::Iterator  it = position->Begin(); 
+      for ( AtlasMesh::PointsContainer::Iterator  it = position->Begin();
             it != position->End(); ++it, ++data )
         {
         AtlasMesh::PointType  point;
         for ( int i = 0; i < 3; i++ )
           {
-          point[ i ] = *( data + i * numberOfNodes );  
+          point[ i ] = *( data + i * numberOfNodes );
           } // End loop over x,y,z directions
 
         it.Value() = point;
 
         } // End loop over all points
-        
+
       } // End loop over all positions
 
 #else
 
-    // Loop over all input position matrices, copy their content into the
-    // correct format, and save
+    // Loop over all input position matrices, copy their content into the correct format,
+    // and save
     AtlasMeshCollection::PointsContainerType::Pointer referencePosition =
         nullptr;
     std::vector<AtlasMeshCollection::PointsContainerType::Pointer> positions;
@@ -113,8 +111,7 @@ public:
       const double *data =
           static_cast<double *>(mxGetData(prhs[meshNumber + 2]));
 
-      // Copy the coordinates from the Matlab matrix into a mesh node position
-      // container
+      // Copy the coordinates from the Matlab matrix into a mesh node position container
       AtlasMeshCollection::PointsContainerType::Pointer position =
           AtlasMeshCollection::PointsContainerType::New();
 
@@ -146,13 +143,11 @@ public:
   }
 
 protected:
-  SetMeshCollectionPositions() = default;
-  ;
-  ~SetMeshCollectionPositions() override = default;
-  ;
+  SetMeshCollectionPositions(){};
+  virtual ~SetMeshCollectionPositions(){};
 
-  SetMeshCollectionPositions(const Self &); // purposely not implemented
-  void operator=(const Self &);             // purposely not implemented
+  SetMeshCollectionPositions(const Self &); //purposely not implemented
+  void operator=(const Self &);             //purposely not implemented
 
 private:
 };

@@ -31,8 +31,8 @@ protected slots:
   void OnLineEditSplineRadius(const QString &strg);
 
 protected:
-  void DoIdle();
-  void DoUpdateWidgets();
+  void         DoIdle();
+  void         DoUpdateWidgets();
   virtual void ConnectLayer(Layer *layer);
 
 private:
@@ -40,7 +40,7 @@ private:
                          QTreeWidget *treeWidget);
 
   Ui::PanelConnectomeMatrix *ui;
-  bool m_bColorTableDirty;
+  bool                       m_bColorTableDirty;
 };
 
 #endif // PANELCONNECTOMEMATRIX_H

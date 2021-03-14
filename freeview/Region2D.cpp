@@ -1,16 +1,11 @@
 /**
- * @file  Region2D.cpp
  * @brief Region2D.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/03/17 16:25:26 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,10 +20,10 @@
 
 #include "Region2D.h"
 #include "RenderView2D.h"
+#include <QApplication>
+#include <QClipboard>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
-#include <QClipboard>
-#include <QApplication>
 
 Region2D::Region2D(RenderView2D *view) : QObject(view), m_view(view) {
   m_actorText = vtkSmartPointer<vtkTextActor>::New();

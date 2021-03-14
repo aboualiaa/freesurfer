@@ -1,16 +1,11 @@
 /**
- * @file  mri_copy_params.cpp
  * @brief copy volume parameters from template and write out the volume
  *
  */
 /*
  * Original Author: Yasunari Tosa
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:23 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,32 +21,33 @@
 #include "mri.h"
 #include "version.h"
 
-const char *Progname = "mri_copy_params";
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_version(void);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_version();
 static char vcid[] =
     "$Id: mri_copy_params.cpp,v 1.5 2011/03/02 00:04:23 nicks Exp $";
 
 static int copy_pulse_params_only = 0;
-static int copy_ras_only = 0;
-static int copy_voxel_size = 0;
-
-using namespace std;
+static int copy_ras_only          = 0;
+static int copy_voxel_size        = 0;
 
 void print_usage() {
-  cout << "Usage: mri_copy_params <in_vol> <template_vol> <out_vol>" << endl;
-  cout << "     : where all volume parameters of in_vol are replaced with "
-          "those of template_vol."
-       << endl;
-  cout << "use --size to force copying of voxel sizes when resolutions var"
-       << endl;
+  std::cout << "Usage: mri_copy_params <in_vol> <template_vol> <out_vol>"
+            << std::endl;
+  std::cout << "     : where all volume parameters of in_vol are replaced with "
+               "those of template_vol."
+            << std::endl;
+  std::cout << "use --size to force copying of voxel sizes when resolutions var"
+            << std::endl;
 }
 
 int main(int argc, char *argv[]) {
   bool bVolumeDifferent = false;
-  bool bSizeDifferent = false;
+  bool bSizeDifferent   = false;
   int  nargs;
   nargs = handleVersionOption(argc, argv, "mri_copy_params");
   if (nargs && argc - nargs == 1)
@@ -71,12 +67,12 @@ int main(int argc, char *argv[]) {
 
   MRI *in = MRIread(argv[1]);
   if (!in) {
-    cerr << "could not open " << argv[1] << endl;
+    std::cerr << "could not open " << argv[1] << std::endl;
     return -1;
   }
   MRI *temp = MRIreadHeader(argv[2], MRI_UNDEFINED);
   if (!temp) {
-    cerr << "could not open " << argv[2] << endl;
+    std::cerr << "could not open " << argv[2] << std::endl;
     return -1;
   }
   MRI *dst = MRIcopy(in, nullptr);
@@ -84,20 +80,20 @@ int main(int argc, char *argv[]) {
   // check few things
   if ((temp->width != in->width) || (temp->height != in->height) ||
       (temp->depth != in->depth)) {
-    cerr << "WARNING: volume sizes are different" << endl;
-    cerr << "    in_vol : " << in->width << ", " << in->height << ", "
-         << in->depth << endl;
-    cerr << "  temp_vol : " << temp->width << ", " << temp->height << ", "
-         << temp->depth << endl;
+    std::cerr << "WARNING: volume sizes are different" << std::endl;
+    std::cerr << "    in_vol : " << in->width << ", " << in->height << ", "
+              << in->depth << std::endl;
+    std::cerr << "  temp_vol : " << temp->width << ", " << temp->height << ", "
+              << temp->depth << std::endl;
     bVolumeDifferent = true;
   }
   if ((temp->xsize != in->xsize) || (temp->ysize != in->ysize) ||
       (temp->zsize != in->zsize)) {
-    cerr << "WARNING: voxel sizes are different" << endl;
-    cerr << "    in_vol : " << in->xsize << ", " << in->ysize << ", "
-         << in->zsize << endl;
-    cerr << "  temp_vol : " << temp->xsize << ", " << temp->ysize << ", "
-         << temp->zsize << endl;
+    std::cerr << "WARNING: voxel sizes are different" << std::endl;
+    std::cerr << "    in_vol : " << in->xsize << ", " << in->ysize << ", "
+              << in->zsize << std::endl;
+    std::cerr << "  temp_vol : " << temp->xsize << ", " << temp->ysize << ", "
+              << temp->zsize << std::endl;
     bSizeDifferent = true;
   }
   // copy everything in the header from template
@@ -105,20 +101,20 @@ int main(int argc, char *argv[]) {
     MRIcopyPulseParameters(temp, dst);
   else {
     if (copy_ras_only) {
-      dst->x_r = temp->x_r;
-      dst->x_a = temp->x_a;
-      dst->x_s = temp->x_s;
-      dst->y_r = temp->y_r;
-      dst->y_a = temp->y_a;
-      dst->y_s = temp->y_s;
-      dst->z_r = temp->z_r;
-      dst->z_a = temp->z_a;
-      dst->z_s = temp->z_s;
-      dst->c_r = temp->c_r;
-      dst->c_a = temp->c_a;
-      dst->c_s = temp->c_s;
+      dst->x_r           = temp->x_r;
+      dst->x_a           = temp->x_a;
+      dst->x_s           = temp->x_s;
+      dst->y_r           = temp->y_r;
+      dst->y_a           = temp->y_a;
+      dst->y_s           = temp->y_s;
+      dst->z_r           = temp->z_r;
+      dst->z_a           = temp->z_a;
+      dst->z_s           = temp->z_s;
+      dst->c_r           = temp->c_r;
+      dst->c_a           = temp->c_a;
+      dst->c_s           = temp->c_s;
       dst->ras_good_flag = temp->ras_good_flag;
-      dst->i_to_r__ = AffineMatrixCopy(temp->i_to_r__, dst->i_to_r__);
+      dst->i_to_r__      = AffineMatrixCopy(temp->i_to_r__, dst->i_to_r__);
 
       dst->r_to_i__ = MatrixCopy(temp->r_to_i__, dst->r_to_i__);
     } else
@@ -126,9 +122,9 @@ int main(int argc, char *argv[]) {
   }
   // just few things restored
   if (bVolumeDifferent) {
-    dst->width = in->width;
+    dst->width  = in->width;
     dst->height = in->height;
-    dst->depth = in->depth;
+    dst->depth  = in->depth;
   }
   if (bSizeDifferent) {
     if (copy_voxel_size) {
@@ -160,7 +156,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -183,8 +179,8 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 static void usage_exit() {

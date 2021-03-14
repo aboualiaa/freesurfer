@@ -1,17 +1,12 @@
 /**
- * @file  dmri_motion.cxx
  * @brief Compute measures of head motion in DWIs
  *
  * Compute measures of head motion in DWIs
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
- *    $Author: ayendiki $
- *    $Date: 2014/05/27 14:49:34 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2013 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,60 +20,76 @@
 
 #include "vial.h" // Needs to be included first because of CVS libs
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <float.h>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits.h>
+#include <limits>
+#include <math.h>
+#include <set>
+#include <sstream>
+#include <stdlib.h>
+#include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <time.h>
+#include <unistd.h>
+#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
 using namespace std;
 
-static int parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static int  parse_commandline(int argc, char **argv);
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options();
 
 int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
 const char *Progname = "dmri_motion";
 
 float T = 100, D = .001;
 
-char *inMatFile = nullptr, *inDwiFile = nullptr, *inBvalFile = nullptr,
-     *outFile = nullptr, *outFrameFile = nullptr;
+vector<std::string> inDwiList, inBvalList;
+std::string         inMatFile, outFile, outFrameFile;
 
 MRI *dwi;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
-  float travg = 0;
-  float roavg = 0;
-  float score = 0;
-  float pbad = 0;
-  vector<int> nbadframe;
-  vector<float> trframe;
-  vector<float> roframe;
-  vector<float> scoreframe;
-  string matline;
-  ofstream outfile;
+  int           nargs, cputime;
+  float         travg = 0, roavg = 0, score = 0, pbad = 0;
+  vector<int>   runstart(1, 0), nbadframe;
+  vector<float> trframe, roframe, scoreframe;
+  string        matline;
+  ofstream      outfile;
 
   nargs = handleVersionOption(argc, argv, "dmri_motion");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -88,29 +99,160 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  if (argc == 0) {
+  if (argc == 0)
     usage_exit();
-  }
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly != 0) {
+  if (checkoptsonly)
     return (0);
-  }
 
   dump_options();
 
   cputimer.reset();
 
-  if (inMatFile != nullptr) { // Estimate between-volume motion
-    int nframe = 0;
-    vector<float> xform;
-    vector<float> tr0(3, 0);
-    vector<float> ro0(3, 0);
-    vector<float> trtot(3, 0);
-    vector<float> rotot(3, 0);
+  if (!inDwiList.empty()) { // Estimate within-volume motion
+    int                nslice = 0, nbad = 0;
+    const unsigned int nrun = inDwiList.size();
+
+    for (unsigned int irun = 0; irun < nrun; irun++) {
+      int                           nx, ny, nz, nd, nxy;
+      float                         minvox, b;
+      vector<int>                   r, r1;
+      vector<int>::const_iterator   ir1;
+      vector<float>                 bvals;
+      vector<float>::const_iterator ibval;
+      ifstream                      infile;
+
+      // Read DWI volume series
+      cout << "Loading DWI volume series from " << inDwiList[irun] << endl;
+      dwi = MRIread(inDwiList[irun].c_str());
+      if (!dwi) {
+        cout << "ERROR: Could not read " << inDwiList[irun] << endl;
+        exit(1);
+      }
+
+      nx = dwi->width;
+      ny = dwi->height;
+      nz = dwi->depth;
+      nd = dwi->nframes;
+
+      runstart.push_back(*(runstart.end() - 1) + nd);
+
+      nxy    = nx * ny;
+      minvox = 0.05 * nxy;
+
+      nbadframe.insert(nbadframe.end(), nd, 0);
+      scoreframe.insert(scoreframe.end(), nd, 0.0);
+
+      // Read b-value table
+      cout << "Loading b-value table from " << inBvalList[irun] << endl;
+      infile.open(inBvalList[irun], ios::in);
+      if (!infile) {
+        cout << "ERROR: Could not open " << inBvalList[irun] << " for reading"
+             << endl;
+        exit(1);
+      }
+
+      while (infile >> b)
+        bvals.push_back(b);
+
+      infile.close();
+
+      if (bvals.size() != (unsigned int)nd) {
+        cout << "ERROR: Number of b-values (" << bvals.size() << ") in "
+             << inBvalList[irun] << " and number of volumes (" << nd << ") in "
+             << inDwiList[irun] << " do not match" << endl;
+        exit(1);
+      }
+
+      cout << "Computing within-volume head motion measures" << endl;
+
+      // Find unique b-values
+      set<float> blist(bvals.begin(), bvals.end());
+
+      // Compare frames acquired with each b-value separately
+      for (set<float>::const_iterator ib = blist.begin(); ib != blist.end();
+           ib++) {
+        const float             thresh = T * exp(-(*ib) * D);
+        vector<int>::iterator   inbad  = nbadframe.end() - nd;
+        vector<float>::iterator iscore = scoreframe.end() - nd;
+
+        r1.clear();
+        ibval = bvals.begin();
+
+        for (int id = 0; id < nd; id++) {
+          if (*ibval == *ib) {
+            r.clear();
+
+            // Find number of voxels above threshold in each slice of this frame
+            for (int iz = 0; iz < nz; iz++) {
+              int count = 0;
+
+              for (int iy = 0; iy < ny; iy++)
+                for (int ix = 0; ix < nx; ix++)
+                  if (MRIgetVoxVal(dwi, ix, iy, iz, id) > thresh)
+                    count++;
+
+              r.push_back(count);
+            }
+
+            if (r1.empty()) // First frame with this b-value
+              r1.insert(r1.begin(), r.begin(), r.end());
+
+            // Motion score (from Benner et al MRM 2011)
+            ir1 = r1.begin();
+            for (vector<int>::const_iterator ir = r.begin(); ir < r.end();
+                 ir++) {
+              if (*ir >= minvox) { // Do not count empty slices
+                const float S = 2 - *ir / (0.7 * (*ir1));
+
+                nslice++;
+
+                if (S > 1) {
+                  (*inbad)++;
+                  (*iscore) += S;
+                }
+              }
+
+              ir1++;
+            }
+
+            nbad += *inbad;
+            score += *iscore;
+
+            // Average motion score of bad slices in this frame
+            if (*inbad > 0)
+              *iscore /= *inbad;
+            else
+              *iscore = 1;
+          }
+
+          ibval++;
+          inbad++;
+          iscore++;
+        }
+      }
+    }
+
+    // Percentage of bad slices among all non-empty slices
+    if (nslice > 0)
+      pbad = nbad / (float)nslice * 100;
+
+    // Average motion score of bad slices
+    if (nbad > 0)
+      score /= nbad;
+    else
+      score = 1;
+  }
+
+  if (!inMatFile.empty()) { // Estimate between-volume motion
+    bool          isMat;
+    int           nframe = 0;
+    vector<float> xform, tr(3, 0), ro(3, 0), tr0(3, 0), ro0(3, 0), dtr(3, 0),
+        dro(3, 0), trtot(3, 0), rotot(3, 0);
     ifstream infile;
 
     cout << "Loading volume-to-baseline affine transformations" << endl;
@@ -120,62 +262,104 @@ int main(int argc, char **argv) {
       exit(1);
     }
 
-    cout << "Computing between-volume head motion measures" << endl;
-
-    while (getline(infile, matline)) {
-      if (((~static_cast<int>(matline.empty()) != 0)) &&
-          ((~isalpha(matline[0])) != 0)) {
-        float xval;
+    // Determine if file contains transformation matrices or parameters
+    while (getline(infile, matline))
+      if (!matline.empty() && !isalpha(matline[0])) {
+        float         xval;
         istringstream matstr(matline);
 
-        while (matstr >> xval) {
+        while (matstr >> xval)
           xform.push_back(xval);
-        }
 
-        if (xform.size() == 16) {
-          vector<float> tr;
-          vector<float> ro;
-          AffineReg reg(xform);
+        break;
+      }
 
-          // Decompose affine registration matrix into its parameters
-          reg.DecomposeXfm();
+    if (xform.size() == 4)
+      isMat = true;
+    else if (xform.size() == 16)
+      isMat = false;
+    else {
+      cout << "ERROR: Unexpected number of entries per line (" << xform.size()
+           << ") in  " << inMatFile << endl;
+      exit(1);
+    }
 
+    xform.clear();
+    infile.clear();
+    infile.seekg(0, ios::beg);
+
+    cout << "Computing between-volume head motion measures" << endl;
+
+    while (getline(infile, matline))
+      if (!matline.empty() && !isalpha(matline[0])) {
+        float         xval;
+        istringstream matstr(matline);
+
+        if (isMat) { // Read matrix from file and compute parameters
+          while (matstr >> xval)
+            xform.push_back(xval);
+
+          if (xform.size() == 16) {
+            AffineReg reg(xform);
+
+            // Decompose affine registration matrix into its parameters
+            reg.DecomposeXfm();
+
+            // Translations with respect to first frame
+            copy(reg.GetTranslate(), reg.GetTranslate() + 3, tr.begin());
+
+            // Rotations with respect to first frame
+            copy(reg.GetRotate(), reg.GetRotate() + 3, ro.begin());
+          } else
+            continue;
+        } else { // Read parameters from file
           // Translations with respect to first frame
-          tr = reg.GetTranslate();
-
-          // Frame-to-frame translations
           for (int k = 0; k < 3; k++) {
-            trframe.push_back(tr[k] - tr0[k]);
+            matstr >> xval;
+            tr[k] = xval;
           }
-
-          // Cumulative frame-to-frame translations
-          for (int k = 0; k < 3; k++) {
-            trtot[k] += fabs(*(trframe.end() - 3 + k));
-          }
-
-          copy(tr.begin(), tr.end(), tr0.begin());
 
           // Rotations with respect to first frame
-          ro = reg.GetRotate();
-
-          // Frame-to-frame rotations
           for (int k = 0; k < 3; k++) {
-            roframe.push_back(ro[k] - ro0[k]);
+            matstr >> xval;
+            ro[k] = xval;
           }
-
-          // Cumulative frame-to-frame rotations
-          for (int k = 0; k < 3; k++) {
-            rotot[k] += fabs(*(roframe.end() - 3 + k));
-          }
-
-          copy(ro.begin(), ro.end(), ro0.begin());
-
-          xform.clear();
-
-          nframe++;
         }
+
+        // Find translation/rotation with respect to previous frame,
+        // unless this is the first frame of a new DWI run
+        if (find(runstart.begin(), runstart.end(), nframe) == runstart.end())
+          for (int k = 0; k < 3; k++) {
+            dtr[k] = tr[k] - tr0[k];
+            dro[k] = ro[k] - ro0[k];
+          }
+        else {
+          fill(dtr.begin(), dtr.end(), 0);
+          fill(dro.begin(), dro.end(), 0);
+        }
+
+        // Frame-to-frame translations
+        trframe.insert(trframe.end(), dtr.begin(), dtr.end());
+
+        // Cumulative frame-to-frame translations
+        for (int k = 0; k < 3; k++)
+          trtot[k] += fabs(*(trframe.end() - 3 + k));
+
+        copy(tr.begin(), tr.end(), tr0.begin());
+
+        // Frame-to-frame rotations
+        roframe.insert(roframe.end(), dro.begin(), dro.end());
+
+        // Cumulative frame-to-frame rotations
+        for (int k = 0; k < 3; k++)
+          rotot[k] += fabs(*(roframe.end() - 3 + k));
+
+        copy(ro.begin(), ro.end(), ro0.begin());
+
+        xform.clear();
+
+        nframe++;
       }
-    }
 
     infile.close();
 
@@ -187,143 +371,6 @@ int main(int argc, char **argv) {
     roavg = (rotot[0] + rotot[1] + rotot[2]) / nframe;
   }
 
-  if (inBvalFile != nullptr) { // Estimate within-volume motion
-    int nx;
-    int ny;
-    int nz;
-    int nd;
-    int nxy;
-    int nslice = 0;
-    int nbad = 0;
-    float minvox;
-    float b;
-    vector<int> r;
-    vector<int> r1;
-    vector<int>::const_iterator ir1;
-    vector<float> bvals;
-    vector<float>::const_iterator ibval;
-    ifstream infile;
-
-    // Read DWI volume series
-    cout << "Loading DWI volume series from " << inDwiFile << endl;
-    dwi = MRIread(inDwiFile);
-    if (dwi == nullptr) {
-      cout << "ERROR: Could not read " << inDwiFile << endl;
-      exit(1);
-    }
-
-    nx = dwi->width;
-    ny = dwi->height;
-    nz = dwi->depth;
-    nd = dwi->nframes;
-
-    nxy = nx * ny;
-    minvox = 0.05 * nxy;
-
-    nbadframe.resize(nd);
-    fill(nbadframe.begin(), nbadframe.end(), 0);
-    scoreframe.resize(nd);
-    fill(scoreframe.begin(), scoreframe.end(), 0.0);
-
-    // Read b-value table
-    cout << "Loading b-value table from " << inBvalFile << endl;
-    infile.open(inBvalFile, ios::in);
-    if (!infile) {
-      cout << "ERROR: Could not open " << inBvalFile << " for reading" << endl;
-      exit(1);
-    }
-
-    while (infile >> b) {
-      bvals.push_back(b);
-    }
-
-    infile.close();
-
-    cout << "Computing within-volume head motion measures" << endl;
-
-    // Find unique b-values
-    set<float> blist(bvals.begin(), bvals.end());
-
-    // Compare frames acquired with each b-value separately
-    for (set<float>::const_iterator ib = blist.begin(); ib != blist.end();
-         ib++) {
-      const float thresh = T * exp(-(*ib) * D);
-      auto inbad = nbadframe.begin();
-      auto iscore = scoreframe.begin();
-
-      r1.clear();
-      ibval = bvals.begin();
-
-      for (int id = 0; id < nd; id++) {
-        if (*ibval == *ib) {
-          r.clear();
-
-          // Find number of voxels above threshold for each slice in this frame
-          for (int iz = 0; iz < nz; iz++) {
-            int count = 0;
-
-            for (int iy = 0; iy < ny; iy++) {
-              for (int ix = 0; ix < nx; ix++) {
-                if (MRIgetVoxVal(dwi, ix, iy, iz, id) > thresh) {
-                  count++;
-                }
-              }
-            }
-
-            r.push_back(count);
-          }
-
-          if (r1.empty()) { // First frame with this b-value
-            r1.insert(r1.begin(), r.begin(), r.end());
-          }
-
-          // Motion score (from Benner et al MRM 2011)
-          ir1 = r1.begin();
-          for (auto ir = r.begin(); ir < r.end(); ir++) {
-            if (*ir >= minvox) { // Do not count empty slices
-              const float S = 2 - *ir / (0.7 * (*ir1));
-
-              nslice++;
-
-              if (S > 1) {
-                (*inbad)++;
-                (*iscore) += S;
-              }
-            }
-
-            ir1++;
-          }
-
-          nbad += *inbad;
-          score += *iscore;
-
-          // Average motion score of bad slices in this frame
-          if (*inbad > 0) {
-            *iscore /= *inbad;
-          } else {
-            *iscore = 1;
-          }
-        }
-
-        ibval++;
-        inbad++;
-        iscore++;
-      }
-    }
-
-    // Percentage of bad slices among all non-empty slices
-    if (nslice > 0) {
-      pbad = nbad / static_cast<float>(nslice) * 100;
-    }
-
-    // Average motion score of bad slices
-    if (nbad > 0) {
-      score /= nbad;
-    } else {
-      score = 1;
-    }
-  }
-
   // Write overall measures to file
   outfile.open(outFile, ios::out);
   outfile << "AvgTranslation AvgRotation PercentBadSlices AvgDropoutScore"
@@ -332,45 +379,39 @@ int main(int argc, char **argv) {
   outfile.close();
 
   // Write frame-by-frame measures to file
-  if (outFrameFile != nullptr) {
-    vector<float>::const_iterator itr = trframe.begin();
-    vector<float>::const_iterator iro = roframe.begin();
-    vector<float>::const_iterator iscore = scoreframe.begin();
+  if (!outFrameFile.empty()) {
+    vector<float>::const_iterator itr, iro, iscore;
 
-    if (trframe.empty()) {
-      trframe.resize(nbadframe.size() * 3);
-      fill(trframe.begin(), trframe.end(), 0.0);
-    } else if (trframe.size() != nbadframe.size() * 3) {
+    if (trframe.empty())
+      trframe.insert(trframe.begin(), nbadframe.size() * 3, 0.0);
+    else if (trframe.size() != nbadframe.size() * 3) {
       cout << "ERROR: inconsistent number of frames for "
            << "between-volume (" << trframe.size() / 3 << ") and "
            << "within-volume (" << nbadframe.size() << ") measures" << endl;
       exit(1);
     }
 
-    if (roframe.empty()) {
-      roframe.resize(nbadframe.size() * 3);
-      fill(roframe.begin(), roframe.end(), 0.0);
-    } else if (roframe.size() != nbadframe.size() * 3) {
+    if (roframe.empty())
+      roframe.insert(roframe.begin(), nbadframe.size() * 3, 0.0);
+    else if (roframe.size() != nbadframe.size() * 3) {
       cout << "ERROR: inconsistent number of frames for "
            << "between-volume (" << roframe.size() / 3 << ") and "
            << "within-volume (" << nbadframe.size() << ") measures" << endl;
       exit(1);
     }
 
-    if (nbadframe.empty()) {
-      nbadframe.resize(trframe.size() / 3);
-      fill(nbadframe.begin(), nbadframe.end(), 0);
-    } else if (nbadframe.size() != trframe.size() / 3) {
+    if (nbadframe.empty())
+      nbadframe.insert(nbadframe.begin(), trframe.size() / 3, 0);
+    else if (nbadframe.size() != trframe.size() / 3) {
       cout << "ERROR: inconsistent number of frames for "
            << "between-volume (" << trframe.size() / 3 << ") and "
            << "within-volume (" << nbadframe.size() << ") measures" << endl;
       exit(1);
     }
 
-    if (scoreframe.empty()) {
-      scoreframe.resize(trframe.size() / 3);
-      fill(scoreframe.begin(), scoreframe.end(), 0.0);
-    } else if (scoreframe.size() != trframe.size() / 3) {
+    if (scoreframe.empty())
+      scoreframe.insert(scoreframe.begin(), trframe.size() / 3, 0.0);
+    else if (scoreframe.size() != trframe.size() / 3) {
       cout << "ERROR: inconsistent number of frames for "
            << "between-volume (" << trframe.size() / 3 << ") and "
            << "within-volume (" << scoreframe.size() << ") measures" << endl;
@@ -382,7 +423,12 @@ int main(int argc, char **argv) {
             << "RotationX RotationY RotationZ "
             << "PercentBadSlices AvgDropoutScore" << endl;
 
-    for (auto inbad = nbadframe.begin(); inbad < nbadframe.end(); inbad++) {
+    itr    = trframe.begin();
+    iro    = roframe.begin();
+    iscore = scoreframe.begin();
+
+    for (vector<int>::const_iterator inbad = nbadframe.begin();
+         inbad < nbadframe.end(); inbad++) {
 
       outfile << itr[0] << " " << itr[1] << " " << itr[2] << " " << iro[0]
               << " " << iro[1] << " " << iro[2] << " " << *inbad << " "
@@ -406,84 +452,76 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
-  char **pargv;
-  char *option;
+  int    nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) {
+  if (argc < 1)
     usage_exit();
-  }
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug != 0) {
+    if (debug)
       printf("%d %s\n", nargc, option);
-    }
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (strcasecmp(option, "--help") == 0) {
+    if (!strcasecmp(option, "--help"))
       print_help();
-    } else if (strcasecmp(option, "--version") == 0) {
+    else if (!strcasecmp(option, "--version"))
       print_version();
-    } else if (strcasecmp(option, "--debug") == 0) {
+    else if (!strcasecmp(option, "--debug"))
       debug = 1;
-    } else if (strcasecmp(option, "--checkopts") == 0) {
+    else if (!strcasecmp(option, "--checkopts"))
       checkoptsonly = 1;
-    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+    else if (!strcasecmp(option, "--nocheckopts"))
       checkoptsonly = 0;
-    } else if (strcmp(option, "--dwi") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--dwi")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
+        inDwiList.push_back(fio_fullpath(pargv[nargsused]));
+        nargsused++;
       }
-      inDwiFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
-    } else if (strcmp(option, "--bval") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--bval")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
+        inBvalList.push_back(fio_fullpath(pargv[nargsused]));
+        nargsused++;
       }
-      inBvalFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
-    } else if (strcmp(option, "--mat") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--mat")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       inMatFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--T") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--T")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%f", &T);
       nargsused = 1;
-    } else if (strcmp(option, "--D") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--D")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%f", &D);
       nargsused = 1;
-    } else if (strcmp(option, "--out") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--out")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      outFile = fio_fullpath(pargv[0]);
+      outFile   = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--outf") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--outf")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       outFrameFile = fio_fullpath(pargv[0]);
-      nargsused = 1;
+      nargsused    = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
-      if (CMDsingleDash(option) != 0) {
+      if (CMDsingleDash(option))
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -493,7 +531,7 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   cout << endl
        << "USAGE: " << Progname << endl
        << endl
@@ -509,13 +547,16 @@ static void print_usage() {
        << "   --mat <file>:" << endl
        << "     Input text file of volume-to-baseline affine transformations"
        << endl
+       << "     Can be transformation matrices (e.g., from eddy_correct) or"
+       << endl
+       << "     transformation parameters (e.g., from eddy)" << endl
        << endl
        << "Arguments needed for within-volume motion measures" << endl
        << "(see Benner et al MRM 2011):" << endl
-       << "   --dwi <file>:" << endl
-       << "     Input DWI volume series, unprocessed" << endl
-       << "   --bval <file>:" << endl
-       << "     Input b-value table" << endl
+       << "   --dwi <file> [...]:" << endl
+       << "     Input DWI scan(s), unprocessed" << endl
+       << "   --bval <file> [...]:" << endl
+       << "     Input b-value table(s), one per scan" << endl
        << "   --T <num>:" << endl
        << "     Low-b image intensity threshold (default: 100)" << endl
        << "   --D <num>:" << endl
@@ -532,7 +573,7 @@ static void print_usage() {
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
 
   cout << endl << "..." << endl << endl;
@@ -541,29 +582,29 @@ static void print_help() {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  cout << vcid << endl;
+static void print_version(void) {
+  cout << getVersion() << endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void check_options() {
-  if (outFile == nullptr) {
+static void check_options(void) {
+  if (outFile.empty()) {
     cout << "ERROR: must specify output file" << endl;
     exit(1);
   }
-  if (((inDwiFile != nullptr) && (inBvalFile == nullptr)) ||
-      ((inDwiFile == nullptr) && (inBvalFile != nullptr))) {
-    cout << "ERROR: must specify both DWI and b-value files" << endl;
+  if (inDwiList.size() != inBvalList.size()) {
+    cout << "ERROR: must specify equal numbers of DWI and b-value files"
+         << endl;
     exit(1);
   }
-  if ((inBvalFile == nullptr) && (inMatFile == nullptr)) {
+  if (inBvalList.empty() && inMatFile.empty()) {
     cout << "ERROR: must specify inputs for between-volume and/or "
          << "within-volume motion measures" << endl;
     exit(1);
@@ -572,11 +613,12 @@ static void check_options() {
     cout << "ERROR: diffusivity must be positive" << endl;
     exit(1);
   }
+  return;
 }
 
 static void dump_options() {
   cout << endl
-       << vcid << endl
+       << getVersion() << endl
        << "cwd " << cwd << endl
        << "cmdline " << cmdline << endl
        << "sysname  " << uts.sysname << endl
@@ -586,19 +628,31 @@ static void dump_options() {
 
   cout << "Output motion measure file: " << outFile << endl;
 
-  if (outFrameFile != nullptr) {
+  if (!outFrameFile.empty()) {
     cout << "Output frame-by-frame motion measure file: " << outFrameFile
          << endl;
   }
 
-  if (inMatFile != nullptr) {
+  if (!inMatFile.empty()) {
     cout << "Input transform file: " << inMatFile << endl;
   }
 
-  if (inBvalFile != nullptr) {
-    cout << "Input DWI file: " << inDwiFile << endl;
-    cout << "Input b-value table: " << inBvalFile << endl;
+  if (!inDwiList.empty()) {
+    cout << "Input DWI file(s):";
+    for (auto ifile = inDwiList.begin(); ifile < inDwiList.end(); ifile++) {
+      cout << " " << *ifile;
+    }
+    cout << endl;
+
+    cout << "Input b-value table(s):";
+    for (auto ifile = inBvalList.begin(); ifile < inBvalList.end(); ifile++) {
+      cout << " " << *ifile;
+    }
+    cout << endl;
+
     cout << "Low-b image intensity threshold: " << T << endl;
     cout << "Nominal diffusivity: " << D << endl;
   }
+
+  return;
 }

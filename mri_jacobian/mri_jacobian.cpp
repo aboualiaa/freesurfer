@@ -1,16 +1,10 @@
 /**
- * @file  mri_jacobian.c
- * @brief Computes the (determinant of the) jacobian of the input non-linear
- * morph.
+ * @brief Computes the (determinant of the) jacobian of the input non-linear morph.
  */
 /*
  * Original Author: Fischl, B.
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2011/12/10 22:47:57 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,39 +16,39 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
+#include "gcamorph.h"
 #include "timer.h"
 #include "version.h"
-#include "gcamorph.h"
-#include "cma.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 
-static int use_log = 0;
-static float sigma = 0;
-static int write_areas = 0;
-static int init = 0;
-static int atlas = 0;
-static int zero_mean = 0;
-static LTA *lta = nullptr;
+static int   use_log     = 0;
+static float sigma       = 0;
+static int   write_areas = 0;
+static int   init        = 0;
+static int   atlas       = 0;
+static int   zero_mean   = 0;
+static LTA * lta         = nullptr;
 
 static void usage_exit(int code);
-static int find_debug_node(GCA_MORPH *gcam, int origx, int origy, int origz);
-static int init_gcam_areas(GCA_MORPH *gcam);
-static int mask_invalid(GCA_MORPH *gcam, MRI *mri);
+static int  find_debug_node(GCA_MORPH *gcam, int origx, int origy, int origz);
+static int  init_gcam_areas(GCA_MORPH *gcam);
+static int  mask_invalid(GCA_MORPH *gcam, MRI *mri);
 
 int tm3dfile = 0;
 
 int main(int argc, char *argv[]) {
-  char **av, *out_fname;
-  int ac, nargs;
+  char **    av, *out_fname;
+  int        ac, nargs;
   GCA_MORPH *gcam;
-  int msec, minutes, seconds;
-  Timer start;
-  MRI *mri, *mri_jacobian, *mri_area, *mri_orig_area;
+  int        msec, minutes, seconds;
+  Timer      start;
+  MRI *      mri, *mri_jacobian, *mri_area, *mri_orig_area;
 
   nargs = handleVersionOption(argc, argv, "mri_jacobian");
   if (nargs && argc - nargs == 1)
@@ -79,7 +73,7 @@ int main(int argc, char *argv[]) {
     usage_exit(1);
 
   out_fname = argv[argc - 1];
-  gcam = GCAMread(argv[1]);
+  gcam      = GCAMread(argv[1]);
 
   if (gcam == nullptr)
     ErrorExit(ERROR_BADPARM, "%s: could not read input morph %s\n", Progname,
@@ -96,10 +90,10 @@ int main(int argc, char *argv[]) {
   if (init || tm3dfile)
     init_gcam_areas(gcam);
   if (atlas) {
-    mri_area = GCAMwriteMRI(gcam, nullptr, GCAM_AREA);
+    mri_area      = GCAMwriteMRI(gcam, nullptr, GCAM_AREA);
     mri_orig_area = GCAMwriteMRI(gcam, nullptr, GCAM_ORIG_AREA);
   } else {
-    mri_area = GCAMmorphFieldFromAtlas(gcam, mri, GCAM_AREA, 0, 0);
+    mri_area      = GCAMmorphFieldFromAtlas(gcam, mri, GCAM_AREA, 0, 0);
     mri_orig_area = GCAMmorphFieldFromAtlas(gcam, mri, GCAM_ORIG_AREA, 0, 0);
   }
 
@@ -125,7 +119,7 @@ int main(int argc, char *argv[]) {
     mri_kernel = MRIgaussian1d(sigma, 100);
     mri_smooth = MRIconvolveGaussian(mri_area, nullptr, mri_kernel);
     MRIfree(&mri_area);
-    mri_area = mri_smooth;
+    mri_area   = mri_smooth;
     mri_smooth = MRIconvolveGaussian(mri_orig_area, nullptr, mri_kernel);
     MRIfree(&mri_orig_area);
     mri_orig_area = mri_smooth;
@@ -173,7 +167,7 @@ int main(int argc, char *argv[]) {
     printf("writing labels to %s\n", fname);
     MRIwrite(mri_area, fname);
   }
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -188,15 +182,15 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "dt")) {
   } else if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "remove")) {
@@ -230,7 +224,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'Z':
       zero_mean = 1;
-      use_log = 1;
+      use_log   = 1;
       printf("making log jacobian zero mean\n");
       break;
     case '?':
@@ -272,8 +266,8 @@ static void usage_exit(int code) {
 }
 
 static int find_debug_node(GCA_MORPH *gcam, int origx, int origy, int origz) {
-  int x, y, z, xmin, ymin, zmin;
-  double d, dmin;
+  int             x, y, z, xmin, ymin, zmin;
+  double          d, dmin;
   GCA_MORPH_NODE *gcamn;
 
   dmin = 1e10;
@@ -282,7 +276,7 @@ static int find_debug_node(GCA_MORPH *gcam, int origx, int origy, int origz) {
     for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
         gcamn = &gcam->nodes[x][y][z];
-        d = sqrt(SQR(gcamn->origx - origx) + SQR(gcamn->origy - origy) +
+        d     = sqrt(SQR(gcamn->origx - origx) + SQR(gcamn->origy - origy) +
                  SQR(gcamn->origz - origz));
         if (d < dmin) {
           dmin = d;
@@ -303,15 +297,15 @@ static int find_debug_node(GCA_MORPH *gcam, int origx, int origy, int origz) {
 }
 
 static int init_gcam_areas(GCA_MORPH *gcam) {
-  int x, y, z;
-  double orig_area;
+  int             x, y, z;
+  double          orig_area;
   GCA_MORPH_NODE *gcamn;
 
   orig_area = gcam->spacing * gcam->spacing * gcam->spacing;
   for (x = 0; x < gcam->width; x++) {
     for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
-        gcamn = &gcam->nodes[x][y][z];
+        gcamn            = &gcam->nodes[x][y][z];
         gcamn->orig_area = gcamn->orig_area1 = gcamn->orig_area2 = orig_area;
       }
     }
@@ -320,7 +314,7 @@ static int init_gcam_areas(GCA_MORPH *gcam) {
 }
 
 static int mask_invalid(GCA_MORPH *gcam, MRI *mri) {
-  int x, y, z;
+  int             x, y, z;
   GCA_MORPH_NODE *gcamn;
 
   for (x = 0; x < gcam->width; x++) {

@@ -1,19 +1,14 @@
 /**
- * @file  mris_deform.c
- * @brief program for deforming a surface to lie at the gray/white or pial
- * boundary from ultra-high res data
+ * @brief program for deforming a surface to lie at the gray/white or pial boundary from 
+ *  ultra-high res data
  *
  * Fit a generative piecewise constant model to the data to determine
  * target locations and deform the surface to match them.
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2012/08/08 13:10:32 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,27 +21,26 @@
  */
 
 #include "diag.h"
-#include "version.h"
 #include "mrisurf.h"
+#include "version.h"
 
 const char *Progname = nullptr;
 
 static void usage_exit(int code);
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 
 #define MAX_VERTICES 10000
-static int nvertices = 0;
-static int target_vnos[MAX_VERTICES] ;
-static float target_vals[MAX_VERTICES] ;
-static double sigma = 2.0 ;
+static int    nvertices = 0;
+static int    target_vnos[MAX_VERTICES];
+static float  target_vals[MAX_VERTICES];
+static double sigma = 2.0;
 
-int
-main(int argc, char *argv[]) {
-  char         **av ;
-  int          ac, nargs, nsize ;
-  MRI_SURFACE  *mris ;
-  MRI          *mri ;
+int main(int argc, char *argv[]) {
+  char **      av;
+  int          ac, nargs, nsize;
+  MRI_SURFACE *mris;
+  MRI *        mri;
 
   nargs = handleVersionOption(argc, argv, "mris_nudge");
   if (nargs && argc - nargs == 1)
@@ -54,7 +48,7 @@ main(int argc, char *argv[]) {
   argc -= nargs;
 
   Gx = Gy = Gz = -1;
-  Progname = argv[0];
+  Progname     = argv[0];
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
 
@@ -83,7 +77,7 @@ main(int argc, char *argv[]) {
 
   target_vnos[nvertices] = atoi(argv[3]);
   target_vals[nvertices] = atof(argv[4]);
-  nsize = atoi(argv[5]);
+  nsize                  = atoi(argv[5]);
 
   printf("nudging %d vertex region around vertex %d to target val %2.1f\n",
          nsize, target_vnos[nvertices], target_vals[nvertices]);
@@ -104,7 +98,7 @@ main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

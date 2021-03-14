@@ -1,17 +1,6 @@
-/**
- * @file  ic163842.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:45 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,25 +12,25 @@
  *
  */
 
-#include <cstdio>
 #include "error.h"
 #include "icosahedron.h"
 #include "mrisurf.h"
 #include "utils.h" // fgetl
+#include <cstdio>
 
 #define ICO_NVERTICES 163842
-#define ICO_NFACES 327680
+#define ICO_NFACES    327680
 
 static int static_read_icosahedron();
 IC_VERTEX *ic163842_vertices = nullptr;
-IC_FACE *ic163842_faces = nullptr;
+IC_FACE *  ic163842_faces    = nullptr;
 
 MRI_SURFACE *ic163842_make_surface(int max_vertices, int max_faces) {
   static_read_icosahedron();
 
   int fno;
   for (fno = 0; fno < ICO_NFACES; fno++) {
-    int vno = ic163842_faces[fno].vno[1];
+    int vno                    = ic163842_faces[fno].vno[1];
     ic163842_faces[fno].vno[1] = ic163842_faces[fno].vno[2];
     ic163842_faces[fno].vno[2] = vno;
   }
@@ -66,12 +55,12 @@ MRI_SURFACE *ic163842_make_surface(int max_vertices, int max_faces) {
 }
 
 static int static_read_icosahedron() {
-  FILE *fp;
-  char line[200], *cp;
-  int vno, fno, vno1, vno2, vno3, n;
-  float x, y, z;
+  FILE *     fp;
+  char       line[200], *cp;
+  int        vno, fno, vno1, vno2, vno3, n;
+  float      x, y, z;
   IC_VERTEX *ic_vertices;
-  IC_FACE *ic_faces;
+  IC_FACE *  ic_faces;
 
   fp = fopen("ic163842.tri", "r");
   if (!fp)

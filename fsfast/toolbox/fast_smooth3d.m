@@ -14,12 +14,8 @@ function volsm = fast_smooth3d(vol,cfwhm,rfwhm,sfwhm,UseBB)
 % fast_smooth3d.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: greve $
-%    $Date: 2012/12/11 21:45:03 $
-%    $Revision: 1.9 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

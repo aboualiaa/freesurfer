@@ -1,16 +1,11 @@
 /**
- * @file  mri_brain_volume.cpp
  * @brief modified mri_watershed.c
  *
  */
 /*
  * Original Author: Florent Segonne & Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:25 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,22 +20,20 @@
 #include "TVector.h"
 #include "mrisurf.h"
 
-using namespace std;
-
 #define WM_CONST 110 /* not used anymore */
-#define MAX_INT 100  /*100% is a good value for the watershed algo */
+#define MAX_INT  100 /*100% is a good value for the watershed algo */
 
 #define ITER_SMOOTH 10
-#define NBR_AVGS 20
-#define NBR_NGBS 2
+#define NBR_AVGS    20
+#define NBR_NGBS    2
 
 #define DEFAULT_MODE 0
-#define DIST_MODE 1
-#define CURV_MODE 2
+#define DIST_MODE    1
+#define CURV_MODE    2
 
-#define DEBUG_CURVE 0
-#define OUTPUT 0
-#define OUTPUT_CURVES 0
+#define DEBUG_CURVE     0
+#define OUTPUT          0
+#define OUTPUT_CURVES   0
 #define OUTPUT_SURFACES 0
 
 #define VERBOSE_MODE 0
@@ -49,7 +42,7 @@ using namespace std;
 
 typedef struct Cell {
   unsigned char type;
-  void *next;
+  void *        next;
 } Cell;
 
 typedef struct Basincell {
@@ -86,13 +79,13 @@ typedef struct STRIP_PARMS {
   int cx, cy, cz, rb;
 
   char *surfname;
-  int h_shk;
-  int skull_type;
-  int watershed_analyze;
-  int threshold_analyze;
+  int   h_shk;
+  int   skull_type;
+  int   watershed_analyze;
+  int   threshold_analyze;
 
-  int seed_coord[30][4];
-  int nb_seed_points /*=0*/;
+  int           seed_coord[30][4];
+  int           nb_seed_points /*=0*/;
   unsigned char hpf;
 
   int manual_params;
@@ -106,15 +99,15 @@ typedef struct {
   MRIS *mrisphere, *mris, *mris_curv, *mris_var_curv, *mris_dCOG,
       *mris_var_dCOG;
 
-  double xCOG, yCOG, zCOG, rad_Brain;
-  double xsCOG, ysCOG, zsCOG;
-  int i_global_min /*=0*/, j_global_min, k_global_min, int_global_min;
+  double        xCOG, yCOG, zCOG, rad_Brain;
+  double        xsCOG, ysCOG, zsCOG;
+  int           i_global_min /*=0*/, j_global_min, k_global_min, int_global_min;
   unsigned long estimated_size /*=0*/, main_basin_size /*=0*/;
   unsigned long brain_size /*=0*/;
   unsigned long basinnumber, basinsize;
 
   MRI *mri_src, *mri_dst, *mri_orig;
-  int width, height, depth;
+  int  width, height, depth;
 
   unsigned char Imax;
   int WM_INTENSITY, WM_VARIANCE, WM_HALF_MAX, WM_HALF_MIN, WM_MAX, WM_MIN;
@@ -143,9 +136,9 @@ typedef struct {
   unsigned long count[256];
 
   Coord *T1Table;
-  long T1nbr;
+  long   T1nbr;
 
-  int decision;
+  int   decision;
   float scale;
 
   int atlas;
@@ -159,32 +152,32 @@ const char *Progname;
 static int type_changed = 0;
 static int old_type;
 
-static void Error(const char *string);
-static int get_option(int argc, char *argv[], STRIP_PARMS *parms);
-static STRIP_PARMS *init_parms();
+static void           Error(const char *string);
+static int            get_option(int argc, char *argv[], STRIP_PARMS *parms);
+static STRIP_PARMS *  init_parms();
 static MRI_variables *init_variables(MRI *mri_with_skull);
-MRI *MRIstripSkull(MRI *mri_with_skull, MRI *mri_without_skull,
-                   STRIP_PARMS *parms);
-static void MRIVfree(MRI_variables *MRI_var);
+MRI *                 MRIstripSkull(MRI *mri_with_skull, MRI *mri_without_skull,
+                                    STRIP_PARMS *parms);
+static void           MRIVfree(MRI_variables *MRI_var);
 /*WATERSHED FUNCTIONS*/
-static int Watershed(STRIP_PARMS *parms, MRI_variables *MRI_var);
-static void Allocation(MRI_variables *MRI_var);
-static int calCSFIntensity(MRI_variables *MRI_var);
-static int calCOGMAX(MRI_variables *MRI_var, int *x, int *y, int *z);
-static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var);
-static void analyseWM(double *tab, MRI_variables *MRI_var);
+static int        Watershed(STRIP_PARMS *parms, MRI_variables *MRI_var);
+static void       Allocation(MRI_variables *MRI_var);
+static int        calCSFIntensity(MRI_variables *MRI_var);
+static int        calCOGMAX(MRI_variables *MRI_var, int *x, int *y, int *z);
+static int        Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var);
+static void       analyseWM(double *tab, MRI_variables *MRI_var);
 static BasinCell *CreateBasinCell(int val, unsigned long size,
                                   unsigned long ambiguous);
-static int Decision(STRIP_PARMS *parms, MRI_variables *MRI_var);
-static int CharSorting(MRI_variables *MRI_var);
-static int sqroot(int r);
-static int Analyze(STRIP_PARMS *parms, MRI_variables *MRI_var);
-static Cell *FindBasin(Cell *cell);
-static int Lookat(int, int, int, unsigned char, int *, Cell **, int *,
-                  Cell *adtab[27], STRIP_PARMS *parms, MRI_variables *MRI_var);
-static int Test(Coord crd, STRIP_PARMS *parms, MRI_variables *MRI_var);
-static Cell *TypeVoxel(Cell *cell);
-static int PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var);
+static int        Decision(STRIP_PARMS *parms, MRI_variables *MRI_var);
+static int        CharSorting(MRI_variables *MRI_var);
+static int        sqroot(int r);
+static int        Analyze(STRIP_PARMS *parms, MRI_variables *MRI_var);
+static Cell *     FindBasin(Cell *cell);
+static int        Lookat(int, int, int, unsigned char, int *, Cell **, int *,
+                         Cell *adtab[27], STRIP_PARMS *parms, MRI_variables *MRI_var);
+static int        Test(Coord crd, STRIP_PARMS *parms, MRI_variables *MRI_var);
+static Cell *     TypeVoxel(Cell *cell);
+static int        PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var);
 static int Merge(unsigned char i, unsigned char j, unsigned char k, int val,
                  int *n, MRI_variables *MRI_var);
 static int AddVoxel(MRI_variables *MRI_var);
@@ -228,9 +221,9 @@ static void find_normal(float nx, float ny, float nz, float *n1, float *n2,
                         float direction[26][3]);
 static unsigned long MRISpeelBrain(float h, MRI *mri_dst, MRIS *mris,
                                    unsigned char val);
-static void mean(float tab[4][9], float *moy);
-static void MRISsmooth_surface(MRI_SURFACE *mris, int niter);
-static void MRISshrink_surface(MRIS *mris, int h);
+static void          mean(float tab[4][9], float *moy);
+static void          MRISsmooth_surface(MRI_SURFACE *mris, int niter);
+static void          MRISshrink_surface(MRIS *mris, int h);
 static void MRISshrink_Outer_Skin(MRI_variables *MRI_var, MRI *mri_src);
 static void label_voxels(STRIP_PARMS *parms, MRI_variables *MRI_var,
                          MRI *mri_with_skull);
@@ -254,8 +247,8 @@ void getTimeString(char *buf) {
 
 int main(int argc, char *argv[]) {
   char *in_fname, *out_fname;
-  int nargs;
-  MRI *mri_with_skull, *mri_without_skull = nullptr, *mri_mask;
+  int   nargs;
+  MRI * mri_with_skull, *mri_without_skull = nullptr, *mri_mask;
 
   STRIP_PARMS *parms;
 
@@ -284,7 +277,7 @@ int main(int argc, char *argv[]) {
   };
 
   if (argc == 3) {
-    in_fname = argv[argc - 2];
+    in_fname  = argv[argc - 2];
     out_fname = argv[argc - 1];
 
     fprintf(stderr,
@@ -293,7 +286,7 @@ int main(int argc, char *argv[]) {
             "\nOutput:\t%s\n",
             in_fname, out_fname);
   } else {
-    in_fname = argv[argc - 1];
+    in_fname  = argv[argc - 1];
     out_fname = nullptr;
 
     fprintf(stderr,
@@ -315,7 +308,7 @@ int main(int argc, char *argv[]) {
     MRI *mri_tmp;
 
     type_changed = 1;
-    old_type = mri_with_skull->type;
+    old_type     = mri_with_skull->type;
     printf("changing type of input volume to 8 bits/voxel...\n");
     mri_tmp = MRIchangeType(mri_with_skull, MRI_UCHAR, 0.0, 0.999, FALSE);
     MRIfree(&mri_with_skull);
@@ -331,7 +324,11 @@ int main(int argc, char *argv[]) {
     char timeString[256];
     getTimeString(timeString);
     char filename[256];
-    sprintf(filename, "%s-%s.mgh", "binarized", timeString);
+    int  req = snprintf(filename, 256, "%s-%s.mgh", "binarized", timeString);
+    if (req >= 256) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRIwrite(mri_with_skull, filename);
   }
   /* Main routine *********************/
@@ -346,7 +343,7 @@ int main(int argc, char *argv[]) {
     mri_with_skull = MRIread(in_fname);
     if (!mri_with_skull)
       Error("read failed\n");
-    mri_mask = mri_without_skull;
+    mri_mask          = mri_without_skull;
     mri_without_skull = MRImask(mri_with_skull, mri_mask, nullptr, 0, 0);
   } else
     mri_mask = mri_without_skull;
@@ -388,7 +385,7 @@ static void Error(const char *string) {
 ------------------------------------------------------*/
 
 static int get_option(int argc, char *argv[], STRIP_PARMS *parms) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -482,26 +479,26 @@ static STRIP_PARMS *init_parms() {
 static MRI_variables *init_variables(MRI *mri_with_skull) {
   MRI_variables *v = (MRI_variables *)calloc(1, sizeof(MRI_variables));
 
-  v->mris = nullptr;
-  v->mris_curv = nullptr;
+  v->mris          = nullptr;
+  v->mris_curv     = nullptr;
   v->mris_var_curv = nullptr;
-  v->mris_dCOG = nullptr;
+  v->mris_dCOG     = nullptr;
   v->mris_var_dCOG = nullptr;
-  v->mrisphere = nullptr;
+  v->mrisphere     = nullptr;
 
-  v->i_global_min = 0;
-  v->estimated_size = 0;
+  v->i_global_min    = 0;
+  v->estimated_size  = 0;
   v->main_basin_size = 0;
-  v->brain_size = 0;
+  v->brain_size      = 0;
 
-  v->width = mri_with_skull->width;
+  v->width  = mri_with_skull->width;
   v->height = mri_with_skull->height;
-  v->depth = mri_with_skull->depth;
+  v->depth  = mri_with_skull->depth;
 
   v->mri_orig = mri_with_skull;
 
   v->T1Table = nullptr;
-  v->T1nbr = 0;
+  v->T1nbr   = 0;
 
   return v;
 }
@@ -522,10 +519,10 @@ static MRI_variables *init_variables(MRI *mri_with_skull) {
 
 MRI *MRIstripSkull(MRI *mri_with_skull, MRI *mri_without_skull,
                    STRIP_PARMS *parms) {
-  char fname[512];
+  char           fname[512];
   MRI_variables *MRI_var;
-  MRI *mri_tp;
-  double vol_elt;
+  MRI *          mri_tp;
+  double         vol_elt;
 
 #if OUTPUT_SURFACES
   char filename[512];
@@ -570,8 +567,8 @@ MRI *MRIstripSkull(MRI *mri_with_skull, MRI *mri_without_skull,
 
     /*in case the src volume was modified (scaling of the intensity)*/
     free(mri_tp);
-    mri_tp = MRIclone(mri_with_skull, nullptr);
-    mri_tp = MRIcopy(mri_with_skull, nullptr);
+    mri_tp           = MRIclone(mri_with_skull, nullptr);
+    mri_tp           = MRIcopy(mri_with_skull, nullptr);
     MRI_var->mri_src = mri_tp;
 
     // mri_src is modified
@@ -732,9 +729,9 @@ static void Allocation(MRI_variables *MRI_var) {
   }
 
   for (k = 0; k < 256; k++) {
-    MRI_var->tabdim[k] = 0;
-    MRI_var->sqrdim[k] = 0;
-    MRI_var->count[k] = 0;
+    MRI_var->tabdim[k]   = 0;
+    MRI_var->sqrdim[k]   = 0;
+    MRI_var->count[k]    = 0;
     MRI_var->intbasin[k] = k;
     MRI_var->gmnumber[k] = 0;
   }
@@ -744,9 +741,9 @@ static void Allocation(MRI_variables *MRI_var) {
 // calculate CSF_intensity
 //
 static int calCSFIntensity(MRI_variables *MRI_var) {
-  int i, j, k;
-  int n;
-  double intensity_percent[256];
+  int      i, j, k;
+  int      n;
+  double   intensity_percent[256];
   BUFTYPE *pb;
 
   /*First estimation of the CSF */
@@ -782,9 +779,9 @@ static int calCSFIntensity(MRI_variables *MRI_var) {
 }
 
 static int calCOGMAX(MRI_variables *MRI_var, int *x, int *y, int *z) {
-  int i, j, k;
-  int n;
-  double intensity_percent[256];
+  int      i, j, k;
+  int      n;
+  double   intensity_percent[256];
   BUFTYPE *pb;
 
   /*Ignore everything which is bellow CSF_intensity
@@ -794,7 +791,7 @@ static int calCOGMAX(MRI_variables *MRI_var, int *x, int *y, int *z) {
     intensity_percent[k] = 0;
   }
 
-  n = 0;
+  n             = 0;
   MRI_var->xCOG = MRI_var->yCOG = MRI_var->zCOG = 0;
   for (k = 2; k < MRI_var->depth - 2; k++)
     for (j = 2; j < MRI_var->height - 2; j++) {
@@ -833,11 +830,11 @@ static int calCOGMAX(MRI_variables *MRI_var, int *x, int *y, int *z) {
 }
 
 static int calBrainRadius(MRI_variables *MRI_var) {
-  int m = 0;
-  int i, j, k;
+  int      m = 0;
+  int      i, j, k;
   BUFTYPE *pb;
 
-  m = 0;
+  m                  = 0;
   MRI_var->rad_Brain = 0;
   for (k = 2; k < MRI_var->depth - 2; k++)
     for (j = 2; j < MRI_var->height - 2; j++) {
@@ -876,20 +873,20 @@ static int calBrainRadius(MRI_variables *MRI_var) {
                Create a global minimum in the WM
 ------------------------------------------------------*/
 static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
-  int retVal;
-  int i, j, k, n, m, u, v;
-  int ig, jg, kg;
-  BUFTYPE *pb, *pbc[3][3];
+  int           retVal;
+  int           i, j, k, n, m, u, v;
+  int           ig, jg, kg;
+  BUFTYPE *     pb, *pbc[3][3];
   unsigned long wmint = 0, wmnb = 0;
   unsigned long number[256];
-  double intensity_percent[256];
-  float ***mean_val, mean, min, max;
-  float ***var_val, var;
-  float ***mean_var;
-  int x, y, z, r;
-  int xmin, xmax, ymin, ymax, zmin, zmax, mint;
-  float tmp;
-  MRI *mri_tmp;
+  double        intensity_percent[256];
+  float ***     mean_val, mean, min, max;
+  float ***     var_val, var;
+  float ***     mean_var;
+  int           x, y, z, r;
+  int           xmin, xmax, ymin, ymax, zmin, zmax, mint;
+  float         tmp;
+  MRI *         mri_tmp;
 
   // calculate CSF_intensity from voxel values (CSF_intensity)
   calCSFIntensity(MRI_var);
@@ -922,7 +919,7 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
   }
   if (parms->rb != -1) {
     MRI_var->rad_Brain = parms->rb;
-    r = (int)(MRI_var->rad_Brain / 2);
+    r                  = (int)(MRI_var->rad_Brain / 2);
     fprintf(stderr, "\n      modification of the brain radius to %.2f",
             MRI_var->rad_Brain);
   }
@@ -942,15 +939,15 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
 
   r *= 2;
   mean_val = (float ***)malloc(r * sizeof(float **));
-  var_val = (float ***)malloc(r * sizeof(float **));
+  var_val  = (float ***)malloc(r * sizeof(float **));
   mean_var = (float ***)malloc(r * sizeof(float **));
   for (k = 0; k < r; k++) {
     mean_val[k] = (float **)malloc(r * sizeof(float *));
-    var_val[k] = (float **)malloc(r * sizeof(float *));
+    var_val[k]  = (float **)malloc(r * sizeof(float *));
     mean_var[k] = (float **)malloc(r * sizeof(float *));
     for (j = 0; j < r; j++) {
       mean_val[k][j] = (float *)malloc(r * sizeof(float));
-      var_val[k][j] = (float *)malloc(r * sizeof(float));
+      var_val[k][j]  = (float *)malloc(r * sizeof(float));
       mean_var[k][j] = (float *)malloc(r * sizeof(float));
     }
   }
@@ -969,7 +966,7 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
   /*Calculate the mean intensity and the variance (mean = 27 voxels) */
 
   for (k = 0; k < 256; k++) {
-    number[k] = 0;
+    number[k]            = 0;
     intensity_percent[k] = 0;
   }
 
@@ -1019,7 +1016,7 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
   for (k = 0; k < r; k++)
     for (j = 0; j < r; j++)
       for (i = 0; i < r; i++) {
-        if (!(i * j * k * (i - r + 1) * (j - r + 1) * (k - r + 1))) {
+        if ((i * j * k * (i - r + 1) * (j - r + 1) * (k - r + 1)) == 0) {
           mean = 1000;
         } else {
           mean = 0;
@@ -1090,7 +1087,7 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
   }
 #endif
 
-  m = 0;
+  m                    = 0;
   MRI_var->WM_VARIANCE = 0;
   for (n = MRI_var->WM_HALF_MIN; n <= MRI_var->WM_HALF_MAX; n++) {
     m++;
@@ -1110,18 +1107,18 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
   if (parms->T1) {
     MRI_var->WM_INTENSITY = WM_CONST;
     MRI_var->WM_HALF_MAX = MRI_var->WM_HALF_MIN = WM_CONST;
-    MRI_var->WM_VARIANCE = 5;
-    MRI_var->WM_MAX = WM_CONST;
-    MRI_var->WM_MIN = WM_CONST;
+    MRI_var->WM_VARIANCE                        = 5;
+    MRI_var->WM_MAX                             = WM_CONST;
+    MRI_var->WM_MIN                             = WM_CONST;
   }
   if ((fabs(double(MRI_var->WM_INTENSITY - WM_CONST)) <= 2) &&
       (MRI_var->WM_VARIANCE < 3)) {
     if (fabs(double(MRI_var->WM_HALF_MAX - WM_CONST)) <= 2) {
-      MRI_var->WM_MIN = MIN(MRI_var->WM_MIN, WM_CONST);
-      MRI_var->WM_HALF_MIN = MIN(MRI_var->WM_HALF_MIN, WM_CONST);
+      MRI_var->WM_MIN       = MIN(MRI_var->WM_MIN, WM_CONST);
+      MRI_var->WM_HALF_MIN  = MIN(MRI_var->WM_HALF_MIN, WM_CONST);
       MRI_var->WM_INTENSITY = WM_CONST;
-      MRI_var->WM_HALF_MAX = WM_CONST;
-      MRI_var->WM_MAX = MAX(MRI_var->WM_MIN, WM_CONST);
+      MRI_var->WM_HALF_MAX  = WM_CONST;
+      MRI_var->WM_MAX       = MAX(MRI_var->WM_MIN, WM_CONST);
     }
   }
 
@@ -1136,9 +1133,9 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
           if (mean_val[k][j][i] == MRI_var->WM_HALF_MAX)
             if (mean_var[k][j][i] < tmp) {
               tmp = mean_var[k][j][i];
-              x = i;
-              y = j;
-              z = k;
+              x   = i;
+              y   = j;
+              z   = k;
             }
 
     i = xmin + 1 + x;
@@ -1152,11 +1149,11 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
       k = MRI_var->k_global_min;
     }
     MRI_var->tabdim[MRIvox(MRI_var->mri_src, i, j, k)]--;
-    MRI_var->int_global_min = MRIvox(MRI_var->mri_src, i, j, k);
+    MRI_var->int_global_min           = MRIvox(MRI_var->mri_src, i, j, k);
     MRIvox(MRI_var->mri_src, i, j, k) = MRI_var->Imax;
-    MRI_var->i_global_min = i;
-    MRI_var->j_global_min = j;
-    MRI_var->k_global_min = k;
+    MRI_var->i_global_min             = i;
+    MRI_var->j_global_min             = j;
+    MRI_var->k_global_min             = k;
     MRI_var->tabdim[MRI_var->Imax]++;
     MRI_var->Basin[k][j][i].type = 3;
     MRI_var->Basin[k][j][i].next =
@@ -1168,9 +1165,9 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
 
     n = parms->nb_seed_points;
     while (n) {
-      i = parms->seed_coord[n - 1][0];
-      j = parms->seed_coord[n - 1][1];
-      k = parms->seed_coord[n - 1][2];
+      i                           = parms->seed_coord[n - 1][0];
+      j                           = parms->seed_coord[n - 1][1];
+      k                           = parms->seed_coord[n - 1][2];
       parms->seed_coord[n - 1][3] = MRIvox(MRI_var->mri_src, i, j, k);
       MRI_var->tabdim[parms->seed_coord[n - 1][3]]--;
       MRIvox(MRI_var->mri_src, i, j, k) = MRI_var->Imax;
@@ -1195,14 +1192,14 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
         }
       /*set Voxel=WM to 1*/
       for (n = 0; n < MRI_var->T1nbr; n++) {
-        i = MRI_var->T1Table[n][0];
-        j = MRI_var->T1Table[n][1];
-        k = MRI_var->T1Table[n][2];
+        i                        = MRI_var->T1Table[n][0];
+        j                        = MRI_var->T1Table[n][1];
+        k                        = MRI_var->T1Table[n][2];
         MRIvox(mri_tmp, i, j, k) = 1;
       }
       free(MRI_var->T1Table);
       MRI_var->T1Table = nullptr;
-      MRI_var->T1nbr = 0;
+      MRI_var->T1nbr   = 0;
 
       /*go through the whole temp struct and keep the WM inside voxels*/
       for (k = 3; k < MRI_var->depth - 3; k++)
@@ -1233,8 +1230,8 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
 
     if (!min && wmint == 110 && MRI_var->WM_MAX == 110) {
       MRI_var->WM_INTENSITY = 110;
-      MRI_var->WM_VARIANCE = 5;
-      MRI_var->WM_MAX = 110;
+      MRI_var->WM_VARIANCE  = 5;
+      MRI_var->WM_MAX       = 110;
     }
 
     fprintf(stderr, "\n      global maximum in x=%d, y=%d, z=%d, Imax=%d",
@@ -1294,7 +1291,7 @@ static int Pre_CharSorting(STRIP_PARMS *parms, MRI_variables *MRI_var) {
         Description: Analyze the white matter curve
 ------------------------------------------------------*/
 static void analyseWM(double *tab, MRI_variables *MRI_var) {
-  int k, n;
+  int    k, n;
   double tmp, buff;
   double mean;
   double a, b, Sxy, Sxx, Sx, Sy;
@@ -1320,12 +1317,12 @@ static void analyseWM(double *tab, MRI_variables *MRI_var) {
    }*/
 
   MRI_var->WM_INTENSITY = 0;
-  tmp = 0;
+  tmp                   = 0;
   for (k = 0; k < 256; k++) {
 
     buff = tab[k];
     if (buff > tmp) {
-      tmp = buff;
+      tmp                   = buff;
       MRI_var->WM_INTENSITY = k;
     }
   }
@@ -1375,7 +1372,7 @@ static void analyseWM(double *tab, MRI_variables *MRI_var) {
   if (MRI_var->WM_INTENSITY < MRI_var->WM_MAX) {
     MRI_var->WM_MAX += 1;
 
-    n = MRI_var->WM_MAX - MRI_var->WM_INTENSITY + 1;
+    n   = MRI_var->WM_MAX - MRI_var->WM_INTENSITY + 1;
     Sxy = Sx = Sy = Sxx = 0;
     for (k = MRI_var->WM_INTENSITY; k <= MRI_var->WM_MAX; k++) {
       Sxy += (float)k * tab[k];
@@ -1417,7 +1414,7 @@ static void analyseWM(double *tab, MRI_variables *MRI_var) {
   if (MRI_var->WM_INTENSITY > MRI_var->WM_MIN) {
     MRI_var->WM_MIN = 3 * MRI_var->WM_MIN / 2 - MRI_var->WM_INTENSITY / 2;
 
-    n = MRI_var->WM_INTENSITY - MRI_var->WM_MIN + 1;
+    n   = MRI_var->WM_INTENSITY - MRI_var->WM_MIN + 1;
     Sxy = Sx = Sy = Sxx = 0;
     for (k = MRI_var->WM_MIN; k <= MRI_var->WM_INTENSITY; k++) {
       Sxy += (float)k * tab[k];
@@ -1448,9 +1445,9 @@ static BasinCell *CreateBasinCell(int val, unsigned long size,
                                   unsigned long ambiguous) {
   BasinCell *bcell;
 
-  bcell = (BasinCell *)malloc(sizeof(BasinCell));
-  bcell->depth = (unsigned char)val;
-  bcell->size = size;
+  bcell            = (BasinCell *)malloc(sizeof(BasinCell));
+  bcell->depth     = (unsigned char)val;
+  bcell->size      = size;
   bcell->ambiguous = ambiguous;
 
   return bcell;
@@ -1465,7 +1462,7 @@ static BasinCell *CreateBasinCell(int val, unsigned long size,
          such that wm=160
 ------------------------------------------------------*/
 static int Decision(STRIP_PARMS *parms, MRI_variables *MRI_var) {
-  int i, j, k;
+  int    i, j, k;
   double scale;
   if (MRI_var->WM_INTENSITY + MRI_var->WM_VARIANCE >= 80)
     return 1;
@@ -1476,7 +1473,7 @@ static int Decision(STRIP_PARMS *parms, MRI_variables *MRI_var) {
       return -1;
 
     MRI_var->decision = 1;
-    MRI_var->scale = (float)scale;
+    MRI_var->scale    = (float)scale;
 
     for (k = 0; k < MRI_var->depth; k++)
       for (j = 0; j < MRI_var->height; j++)
@@ -1486,9 +1483,9 @@ static int Decision(STRIP_PARMS *parms, MRI_variables *MRI_var) {
     fprintf(stderr, "\nmean intensity too low !");
     fprintf(stderr, "\nModification of the image: intensity*%2.2f", scale);
     for (k = 0; k < 256; k++) {
-      MRI_var->tabdim[k] = 0;
-      MRI_var->sqrdim[k] = 0;
-      MRI_var->count[k] = 0;
+      MRI_var->tabdim[k]   = 0;
+      MRI_var->sqrdim[k]   = 0;
+      MRI_var->count[k]    = 0;
       MRI_var->intbasin[k] = k;
       MRI_var->gmnumber[k] = 0;
     }
@@ -1504,18 +1501,18 @@ static int Decision(STRIP_PARMS *parms, MRI_variables *MRI_var) {
         Description: Sorting of the voxel in an ascending order
 ------------------------------------------------------*/
 static int CharSorting(MRI_variables *MRI_var) {
-  size_t i, j, k, u, v;
-  size_t l;
-  ldiv_t ld;
-  BUFTYPE *pb;
+  size_t        i, j, k, u, v;
+  size_t        l;
+  ldiv_t        ld;
+  BUFTYPE *     pb;
   unsigned char val;
 
   /*allocating an 256 table of Coord** in order to process the Sorting*/
 
   for (k = 1; k < (size_t)MRI_var->Imax + 1; k++) {
-    l = sqroot(MRI_var->tabdim[k]);
+    l                  = sqroot(MRI_var->tabdim[k]);
     MRI_var->sqrdim[k] = l;
-    MRI_var->Table[k] = (Coord **)malloc(l * sizeof(Coord *));
+    MRI_var->Table[k]  = (Coord **)malloc(l * sizeof(Coord *));
     if (!MRI_var->Table[k])
       Error("Allocation first Table Echec");
     for (u = 0; u < l; u++) {
@@ -1534,10 +1531,10 @@ static int CharSorting(MRI_variables *MRI_var) {
       for (i = 2; i < (size_t)MRI_var->width - 2; i++) {
         val = *pb++;
         if (val) {
-          l = MRI_var->count[val]++;
-          ld = ldiv(l, MRI_var->sqrdim[val]);
-          u = ld.quot;
-          v = ld.rem;
+          l                            = MRI_var->count[val]++;
+          ld                           = ldiv(l, MRI_var->sqrdim[val]);
+          u                            = ld.quot;
+          v                            = ld.rem;
           MRI_var->Table[val][u][v][0] = i;
           MRI_var->Table[val][u][v][1] = j;
           MRI_var->Table[val][u][v][2] = k;
@@ -1561,14 +1558,14 @@ static int sqroot(int r) {
 
 /*routine that analyzes all the voxels sorted in an descending order*/
 static int Analyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
-  int pos;
-  int u, v, n, d;
+  int           pos;
+  int           u, v, n, d;
   unsigned long l;
-  ldiv_t ld;
-  double vol_elt;
+  ldiv_t        ld;
+  double        vol_elt;
 
   MRI_var->basinnumber = 0;
-  MRI_var->basinsize = 0;
+  MRI_var->basinsize   = 0;
 
   n = MRI_var->sqrdim[MRI_var->Imax];
   for (u = 0; u < n; u++)
@@ -1581,8 +1578,8 @@ static int Analyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
     n = MRI_var->sqrdim[pos];
     while (l < (unsigned long)d) {
       ld = ldiv(l, n);
-      u = ld.quot;
-      v = ld.rem;
+      u  = ld.quot;
+      v  = ld.rem;
       Test(MRI_var->Table[pos][u][v], parms, MRI_var);
       l++;
     }
@@ -1638,9 +1635,9 @@ static Cell *FindBasin(Cell *cell) {
 static int Lookat(int i, int j, int k, unsigned char val, int *dpt,
                   Cell **admax, int *nb, Cell *adtab[27], STRIP_PARMS *parms,
                   MRI_variables *MRI_var) {
-  int t, n;
+  int           t, n;
   unsigned char d, hp = parms->hpf;
-  Cell *add = &MRI_var->Basin[k][j][i];
+  Cell *        add = &MRI_var->Basin[k][j][i];
 
   /*looks if the basin has already been processing*/
 
@@ -1652,7 +1649,7 @@ static int Lookat(int i, int j, int k, unsigned char val, int *dpt,
 
       if (d > *dpt) {
         *admax = add;
-        *dpt = d;
+        *dpt   = d;
       }
       if (100 * (d - val) < hp * MRI_var->Imax) {
         t = 0;
@@ -1669,7 +1666,7 @@ static int Lookat(int i, int j, int k, unsigned char val, int *dpt,
 
       if (d > *dpt) {
         *admax = add;
-        *dpt = d;
+        *dpt   = d;
       }
       if (100 * (d - val) < hp * MRI_var->Imax) {
         t = 0;
@@ -1692,10 +1689,10 @@ static int Lookat(int i, int j, int k, unsigned char val, int *dpt,
 
 /*tests a voxel, merges it or creates a new basin*/
 static int Test(Coord crd, STRIP_PARMS *parms, MRI_variables *MRI_var) {
-  int n, nb = 0, dpt = -1;
+  int           n, nb = 0, dpt = -1;
   unsigned char val;
-  int mean, var, tp = 0;
-  int a, b, c;
+  int           mean, var, tp = 0;
+  int           a, b, c;
 
   int i = crd[0], j = crd[1], k = crd[2];
 
@@ -1714,7 +1711,7 @@ static int Test(Coord crd, STRIP_PARMS *parms, MRI_variables *MRI_var) {
 
   if (parms->watershed_analyze) {
     mean = 0;
-    var = 0;
+    var  = 0;
     for (a = -1; a < 2; a++)
       for (b = -1; b < 2; b++)
         for (c = -1; c < 2; c++) {
@@ -1833,9 +1830,9 @@ static int AroundCell(unsigned char i, unsigned char j, unsigned char k,
 /*Merge voxels which intensity is near the intensity of border voxels*/
 static int MergeRoutine(unsigned char i, unsigned char j, unsigned char k,
                         int val, int *n, MRI_variables *MRI_var) {
-  int cond = 15 * val;
+  int    cond = 15 * val;
   Bound *buff;
-  Cell cell = MRI_var->Basin[k][j][i];
+  Cell   cell = MRI_var->Basin[k][j][i];
 
   if (cell.type < 2)
     if (abs(MRIvox(MRI_var->mri_src, i, j, k) - val) * 100 < cond) {
@@ -1844,14 +1841,14 @@ static int MergeRoutine(unsigned char i, unsigned char j, unsigned char k,
         ((Bound *)cell.next)->val /= 2;
       } else {
         cell.type = 1;
-        buff = (Bound *)malloc(sizeof(Bound));
-        buff->x = i;
-        buff->y = j;
-        buff->z = k;
+        buff      = (Bound *)malloc(sizeof(Bound));
+        buff->x   = i;
+        buff->y   = j;
+        buff->z   = k;
         buff->val = val;
         cell.next = (Bound *)buff;
         (*n)++;
-        buff->next = MRI_var->Bound2;
+        buff->next      = MRI_var->Bound2;
         MRI_var->Bound2 = buff;
       }
     }
@@ -1895,8 +1892,8 @@ static int Merge(unsigned char i, unsigned char j, unsigned char k, int val,
 }
 
 static int AddVoxel(MRI_variables *MRI_var) {
-  int n = 0, p = 0;
-  Bound *bound = MRI_var->Bound1;
+  int    n = 0, p = 0;
+  Bound *bound    = MRI_var->Bound1;
   MRI_var->Bound2 = nullptr;
   while (bound) {
     p++;
@@ -1904,9 +1901,9 @@ static int AddVoxel(MRI_variables *MRI_var) {
     bound = bound->next;
   }
   while (MRI_var->Bound1) {
-    bound = MRI_var->Bound1;
+    bound                                             = MRI_var->Bound1;
     MRI_var->Basin[bound->z][bound->y][bound->x].type = 4;
-    MRI_var->Bound1 = MRI_var->Bound1->next;
+    MRI_var->Bound1                                   = MRI_var->Bound1->next;
     free(bound);
   }
   MRI_var->Bound1 = MRI_var->Bound2;
@@ -1952,7 +1949,7 @@ static int Ambiguous(Cell* cell) {
 
 static int TRY(int i, int j, int k, MRI_variables *MRI_var) {
   unsigned char val;
-  int a, b, c, n;
+  int           a, b, c, n;
 
   n = 0;
   for (a = -1; a <= 1; a++)
@@ -1996,12 +1993,12 @@ static int TRYMERGE(int i, int j, int k, MRI_variables *MRI_var) {
 }
 
 static int PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
-  int i, j, k, p, q;
-  BUFTYPE *pb;
-  Cell *cell, *cell1 = nullptr, *celltp = nullptr;
-  Bound *buff;
-  BasinCell *bcell;
-  int val;
+  int           i, j, k, p, q;
+  BUFTYPE *     pb;
+  Cell *        cell, *cell1 = nullptr, *celltp = nullptr;
+  Bound *       buff;
+  BasinCell *   bcell;
+  int           val;
   unsigned long n = 0, added_size = 0;
 
   /*if main_basin_size<estimated_size/5
@@ -2024,7 +2021,7 @@ static int PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
             if (cell1->type == 2 && ((BasinCell *)cell1->next)->size > n &&
                 ((BasinCell *)cell1->next)->size <
                     MRI_var->estimated_size * 2) {
-              n = ((BasinCell *)cell1->next)->size;
+              n      = ((BasinCell *)cell1->next)->size;
               celltp = cell1;
             }
           }
@@ -2061,7 +2058,7 @@ static int PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
         switch (cell1->type) {
           /*cases brain basin*/
         case 3:
-          cell->type = 4;
+          cell->type  = 4;
           cell1->type = 4;
           free((BasinCell *)cell1->next);
           cell->next = (unsigned char *)MRI_var->intbasin + *pb;
@@ -2086,17 +2083,17 @@ static int PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
                 cell->type = 5;
                 cell->next = (Cell *)cell1;
               };
-              cell1->type = 6;
+              cell1->type                           = 6;
               ((BasinCell *)cell1->next)->ambiguous = 0;
             } else {
-              cell->type = 0;
+              cell->type  = 0;
               cell1->type = 0;
               free((BasinCell *)cell1->next);
               cell->next = (unsigned char *)MRI_var->intbasin + *pb;
             }
           } else /*case non watershed_analyze*/
           {
-            cell->type = 0;
+            cell->type  = 0;
             cell1->type = 0;
             free((BasinCell *)cell1->next);
             cell->next = (unsigned char *)MRI_var->intbasin + *pb;
@@ -2169,7 +2166,7 @@ static int PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
                             bcell->ambiguous, bcell->size);
                     p++;
                     n++;
-                    cell->type = 9;
+                    cell->type  = 9;
                     cell1->type = 9;
                     added_size += bcell->size;
                     free(bcell);
@@ -2243,6 +2240,9 @@ static int PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
                   ((BasinCell *)MRI_var->Basin[k][j][i].next)->ambiguous,
                   ((BasinCell *)MRI_var->Basin[k][j][i].next)->size);
           free((BasinCell *)MRI_var->Basin[k][j][i].next);
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case 9:
           MRI_var->Basin[k][j][i].type = 3;
           break;
@@ -2254,7 +2254,7 @@ static int PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
 
   if (!parms->template_deformation) {
     MRI_var->Bound1 = nullptr;
-    n = 0;
+    n               = 0;
     for (k = 2; k < MRI_var->depth - 2; k++)
       for (j = 2; j < MRI_var->height - 2; j++)
         for (i = 2; i < MRI_var->width - 2; i++) {
@@ -2266,12 +2266,12 @@ static int PostAnalyze(STRIP_PARMS *parms, MRI_variables *MRI_var) {
               cell->type = 4;
               cell->next = (unsigned char *)MRI_var->intbasin + val;
               if (val > MRI_var->CSF_intensity) {
-                buff = (Bound *)malloc(sizeof(Bound));
-                buff->x = i;
-                buff->y = j;
-                buff->z = k;
-                buff->val = val;
-                buff->next = MRI_var->Bound1;
+                buff            = (Bound *)malloc(sizeof(Bound));
+                buff->x         = i;
+                buff->y         = j;
+                buff->z         = k;
+                buff->val       = val;
+                buff->next      = MRI_var->Bound1;
                 MRI_var->Bound1 = buff;
               }
             }
@@ -2333,13 +2333,13 @@ static void Template_Deformation(STRIP_PARMS *parms, MRI_variables *MRI_var) {
   }
   char *realRAS = getenv("REAL_RAS");
   if (realRAS) {
-    MyworldToVoxel = &MRIworldToVoxel;
-    MyvoxelToWorld = &MRIvoxelToWorld;
+    MyworldToVoxel            = &MRIworldToVoxel;
+    MyvoxelToWorld            = &MRIvoxelToWorld;
     MRI_var->mris->useRealRAS = 1;
     printf("\nINFO: surface is saved with real RAS values\n");
   } else {
-    MyworldToVoxel = &MRIsurfaceRASToVoxel;
-    MyvoxelToWorld = &MRIvoxelToSurfaceRAS;
+    MyworldToVoxel            = &MRIsurfaceRASToVoxel;
+    MyvoxelToWorld            = &MRIvoxelToSurfaceRAS;
     MRI_var->mris->useRealRAS = 0;
     printf("\nINFO: surface is saved with conformed RAS with c_(r,a,s) = 0\n");
   }
@@ -2356,14 +2356,24 @@ static void Template_Deformation(STRIP_PARMS *parms, MRI_variables *MRI_var) {
   getTimeString(timeString);
   char filename[256];
   if (parms->surf_dbg) {
-    sprintf(filename, "surface1-%s-%.2f", timeString, parms->forceParam);
+    int req = snprintf(filename, 256, "surface1-%s-%.2f", timeString,
+                       parms->forceParam);
+    if (req >= 256) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRISwrite(MRI_var->mris, filename);
   }
   fprintf(stderr, "\n      calcForceGM... ");
   init_direction(MRI_var);
   MRISfit(MRI_var, calcForceGM, parms->forceParam);
   if (parms->surf_dbg) {
-    sprintf(filename, "surfaceFinal-%s-%.2f", timeString, parms->forceParam);
+    int req = snprintf(filename, 256, "surfaceFinal-%s-%.2f", timeString,
+                       parms->forceParam);
+    if (req >= 256) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     MRISwrite(MRI_var->mris, filename);
   }
   //
@@ -2395,13 +2405,13 @@ static void read_geometry(int type, MRI_variables *MRI_var, char *surf_fname) {
 }
 
 static void brain_params(MRI_variables *MRI_var) {
-  int i, j, k, xmin, xmax, ymin, zmin, zmax;
+  int           i, j, k, xmin, xmax, ymin, zmin, zmax;
   unsigned long n;
   // BUFTYPE *pb;
   double x, y, z;
 
   x = y = z = 0;
-  n = 0;
+  n         = 0;
   for (k = 0; k < MRI_var->depth; k++)
     for (j = 0; j < MRI_var->height; j++) {
       // pb=&MRIvox(MRI_var->mri_src,0,j,k);
@@ -2421,7 +2431,7 @@ static void brain_params(MRI_variables *MRI_var) {
   MRI_var->yCOG = y / n;
   MRI_var->zCOG = z / n;
 
-  n = 0;
+  n    = 0;
   xmin = MRI_var->width;
   xmax = 0;
   ymin = MRI_var->height;
@@ -2481,27 +2491,27 @@ static void init_surf_to_image(float rx, float ry, float rz,
 }
 
 static void write_image(MRI_variables *MRI_var, int val) {
-  int i, j, imnr, k, u, v;
-  float x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax;
-  float px0, py0, pz0, px1, py1, pz1, px, py, pz;
-  int numu, numv;
+  int    i, j, imnr, k, u, v;
+  float  x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax;
+  float  px0, py0, pz0, px1, py1, pz1, px, py, pz;
+  int    numu, numv;
   double tx, ty, tz;
 
   MRIS *mris = MRI_var->mris;
 
   for (k = 0; k < mris->nfaces; k++) {
-    x0 = mris->vertices[mris->faces[k].v[0]].x;
-    y0 = mris->vertices[mris->faces[k].v[0]].y;
-    z0 = mris->vertices[mris->faces[k].v[0]].z;
-    x1 = mris->vertices[mris->faces[k].v[1]].x;
-    y1 = mris->vertices[mris->faces[k].v[1]].y;
-    z1 = mris->vertices[mris->faces[k].v[1]].z;
-    x2 = mris->vertices[mris->faces[k].v[2]].x;
-    y2 = mris->vertices[mris->faces[k].v[2]].y;
-    z2 = mris->vertices[mris->faces[k].v[2]].z;
-    d0 = sqrt(SQR(x1 - x0) + SQR(y1 - y0) + SQR(z1 - z0));
-    d1 = sqrt(SQR(x2 - x1) + SQR(y2 - y1) + SQR(z2 - z1));
-    d2 = sqrt(SQR(x0 - x2) + SQR(y0 - y2) + SQR(z0 - z2));
+    x0   = mris->vertices[mris->faces[k].v[0]].x;
+    y0   = mris->vertices[mris->faces[k].v[0]].y;
+    z0   = mris->vertices[mris->faces[k].v[0]].z;
+    x1   = mris->vertices[mris->faces[k].v[1]].x;
+    y1   = mris->vertices[mris->faces[k].v[1]].y;
+    z1   = mris->vertices[mris->faces[k].v[1]].z;
+    x2   = mris->vertices[mris->faces[k].v[2]].x;
+    y2   = mris->vertices[mris->faces[k].v[2]].y;
+    z2   = mris->vertices[mris->faces[k].v[2]].z;
+    d0   = sqrt(SQR(x1 - x0) + SQR(y1 - y0) + SQR(z1 - z0));
+    d1   = sqrt(SQR(x2 - x1) + SQR(y2 - y1) + SQR(z2 - z1));
+    d2   = sqrt(SQR(x0 - x2) + SQR(y0 - y2) + SQR(z0 - z2));
     dmax = (d0 >= d1 && d0 >= d2) ? d0 : (d1 >= d0 && d1 >= d2) ? d1 : d2;
     numu = int(ceil(2 * d0));
     numv = int(ceil(2 * dmax));
@@ -2521,8 +2531,8 @@ static void write_image(MRI_variables *MRI_var, int val) {
         MyworldToVoxel(MRI_var->mri_orig, px, py, pz, &tx, &ty, &tz);
 
         imnr = (int)(tz + 0.5);
-        j = (int)(ty + 0.5);
-        i = (int)(tx + 0.5);
+        j    = (int)(ty + 0.5);
+        i    = (int)(tx + 0.5);
 
         if (i >= 0 && i < MRI_var->width && j >= 0 && j < MRI_var->height &&
             imnr >= 0 && imnr < MRI_var->depth)
@@ -2539,8 +2549,8 @@ static void write_image(MRI_variables *MRI_var, int val) {
     MyworldToVoxel(MRI_var->mri_orig, px, py, pz, &tx, &ty, &tz);
 
     imnr = (int)(tz + 0.5);
-    j = (int)(ty + 0.5);
-    i = (int)(tx + 0.5);
+    j    = (int)(ty + 0.5);
+    i    = (int)(tx + 0.5);
 
     if (i >= 0 && i < MRI_var->width && j >= 0 && j < MRI_var->height &&
         imnr >= 0 && imnr < MRI_var->depth)
@@ -2549,16 +2559,16 @@ static void write_image(MRI_variables *MRI_var, int val) {
 }
 
 static void init_direction(MRI_variables *MRI_var) {
-  int i, j, k, p = 0;
+  int   i, j, k, p = 0;
   float norm;
 
   for (i = -1; i < 2; i++)
     for (j = -1; j < 2; j++)
       for (k = -1; k < 2; k++)
         if (i || j || k) {
-          norm = sqrt(double(SQR(i) + SQR(j) + SQR(k)));
-          MRI_var->direction[p][0] = i / norm;
-          MRI_var->direction[p][1] = j / norm;
+          norm                       = sqrt(double(SQR(i) + SQR(j) + SQR(k)));
+          MRI_var->direction[p][0]   = i / norm;
+          MRI_var->direction[p][1]   = j / norm;
           MRI_var->direction[p++][2] = k / norm;
         }
 }
@@ -2567,9 +2577,9 @@ static void init_direction(MRI_variables *MRI_var) {
 static void find_normal(float nx, float ny, float nz, float *n1, float *n2,
                         float direction[26][3]) {
   float ps, ps_buff;
-  int p, k;
+  int   p, k;
 
-  k = 0;
+  k  = 0;
   ps = 10;
   for (p = 0; p < 26; p++) {
     ps_buff =
@@ -2578,7 +2588,7 @@ static void find_normal(float nx, float ny, float nz, float *n1, float *n2,
       ps_buff = -ps_buff;
     if (ps_buff < ps) {
       ps = ps_buff;
-      k = p;
+      k  = p;
     }
   }
   n1[0] = direction[k][0];
@@ -2602,17 +2612,17 @@ static void find_normal(float nx, float ny, float nz, float *n1, float *n2,
 // balloon by h
 static unsigned long MRISpeelBrain(float h, MRI *mri_dst, MRIS *mris,
                                    unsigned char val) {
-  int i, j, k, imnr;
-  float x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax, u, v;
-  float px, py, pz, px0, py0, pz0, px1, py1, pz1;
-  int numu, numv, totalfilled, newfilled;
+  int    i, j, k, imnr;
+  float  x0, y0, z0, x1, y1, z1, x2, y2, z2, d0, d1, d2, dmax, u, v;
+  float  px, py, pz, px0, py0, pz0, px1, py1, pz1;
+  int    numu, numv, totalfilled, newfilled;
   double tx, ty, tz;
-  int brainsize;
+  int    brainsize;
 
   // allocate volume (initialized to be all zeros)
-  int const width = mri_dst->width;
+  int const width  = mri_dst->width;
   int const height = mri_dst->height;
-  int const depth = mri_dst->depth;
+  int const depth  = mri_dst->depth;
 
   MRI *const mri_buff = MRIalloc(width, height, depth, MRI_UCHAR);
 
@@ -2668,8 +2678,8 @@ static unsigned long MRISpeelBrain(float h, MRI *mri_dst, MRIS *mris,
         MyworldToVoxel(mri_dst, px, py, pz, &tx, &ty, &tz);
 
         imnr = (int)(tz + 0.5);
-        j = (int)(ty + 0.5);
-        i = (int)(tx + 0.5);
+        j    = (int)(ty + 0.5);
+        i    = (int)(tx + 0.5);
         // if inside the volume, mark 255
         // i.e. that particular voxel is touching the triangle.
         if (i >= 0 && i < width && j >= 0 && j < height && imnr >= 0 &&
@@ -2747,7 +2757,7 @@ static unsigned long MRISpeelBrain(float h, MRI *mri_dst, MRIS *mris,
 
   free(mri_buff);
 
-  int tot = brainsize + totalfilled;
+  int tot    = brainsize + totalfilled;
   int volume = width * height * depth;
 
   if (tot != volume)
@@ -2784,7 +2794,7 @@ static void MRISsmooth_surface(MRI_SURFACE *mris, int niter) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[k];
 
       float x = 0, y = 0, z = 0;
-      int m;
+      int   m;
       for (m = 0; m < vt->vnum; m++) {
         x += p0x[vt->v[m]];
         y += p0y[vt->v[m]];
@@ -2803,13 +2813,13 @@ static void MRISsmooth_surface(MRI_SURFACE *mris, int niter) {
 
     // make the old values the new values
     float *t;
-    t = p1x;
+    t   = p1x;
     p1x = p0x;
     p0x = t;
-    t = p1y;
+    t   = p1y;
     p1y = p0y;
     p0y = t;
-    t = p1z;
+    t   = p1z;
     p1z = p0z;
     p0z = t;
   }
@@ -2858,26 +2868,26 @@ static void MRISshrink_Outer_Skin(MRI_variables *MRI_var, MRI *mri_src) {
   float force, force1;
 
   float d, dx, dy, dz, nx, ny, nz;
-  int iter, k, m, n;
+  int   iter, k, m, n;
   float samp_mean[4];
   float test_samp[4][9];
-  int a, b;
-  int it, jt, kt, h, niter;
+  int   a, b;
+  int   it, jt, kt, h, niter;
 
   float decay = 0.8, update = 0.9;
   float fzero;
 
-  MRIS *mris;
+  MRIS * mris;
   double tx, ty, tz;
 
   float val;
-  int int_smooth = 1;
+  int   int_smooth = 1;
 
-  double lm, d10m[3], d10, f1m, f2m, dm, dbuff;
+  double   lm, d10m[3], d10, f1m, f2m, dm, dbuff;
   float ***dist;
-  int nb_GM, nb_TR, nb_GTM;
-  float cout, pcout = 0, coutbuff, varbuff, mean_sd[10], mean_dist[10];
-  float n1[3], n2[3];
+  int      nb_GM, nb_TR, nb_GTM;
+  float    cout, pcout = 0, coutbuff, varbuff, mean_sd[10], mean_dist[10];
+  float    n1[3], n2[3];
 
   mris = MRI_var->mris;
 
@@ -2901,7 +2911,7 @@ static void MRISshrink_Outer_Skin(MRI_variables *MRI_var, MRI *mri_src) {
         dist[k][m][n] = 0;
 
   for (n = 0; n < 10; n++) {
-    mean_sd[n] = 0;
+    mean_sd[n]   = 0;
     mean_dist[n] = 0;
   }
 
@@ -2911,9 +2921,9 @@ static void MRISshrink_Outer_Skin(MRI_variables *MRI_var, MRI *mri_src) {
 
   for (k = 0; k < mris->nvertices; k++) {
     VERTEX *const v = &mris->vertices[k];
-    v->odx = 0;
-    v->ody = 0;
-    v->odz = 0;
+    v->odx          = 0;
+    v->ody          = 0;
+    v->odz          = 0;
   }
 
   /////////////////////////////////////////////////////////////////
@@ -2922,22 +2932,22 @@ static void MRISshrink_Outer_Skin(MRI_variables *MRI_var, MRI *mri_src) {
     cout = lm = d10 = f1m = f2m = dm = 0;
     for (k = 0; k < mris->nvertices; k++) {
       VERTEX *const v = &mris->vertices[k];
-      v->tx = v->x;
-      v->ty = v->y;
-      v->tz = v->z;
+      v->tx           = v->x;
+      v->ty           = v->y;
+      v->tz           = v->z;
     }
 
     for (k = 0; k < mris->nvertices; k++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[k];
-      VERTEX *const v = &mris->vertices[k];
-      x = v->tx;
-      y = v->ty;
-      z = v->tz;
-      nx = v->nx;
-      ny = v->ny;
-      nz = v->nz;
+      VERTEX *const                v  = &mris->vertices[k];
+      x                               = v->tx;
+      y                               = v->ty;
+      z                               = v->tz;
+      nx                              = v->nx;
+      ny                              = v->ny;
+      nz                              = v->nz;
       sx = sy = sz = sd = 0;
-      n = 0;
+      n                 = 0;
       for (m = 0; m < vt->vnum; m++) {
         sx += dx = mris->vertices[vt->v[m]].tx - x;
         sy += dy = mris->vertices[vt->v[m]].ty - y;
@@ -3010,8 +3020,8 @@ static void MRISshrink_Outer_Skin(MRI_variables *MRI_var, MRI *mri_src) {
           force = -0.2;
         else {
           // ??????????????
-          nb_GM = 0;
-          nb_TR = 0;
+          nb_GM  = 0;
+          nb_TR  = 0;
           nb_GTM = 0;
           for (h = 0; h < 4; h++) {
             if (samp_mean[h] >= MRI_var->TRANSITION_INTENSITY)
@@ -3121,7 +3131,7 @@ static void MRISshrink_Outer_Skin(MRI_variables *MRI_var, MRI *mri_src) {
     dm /= mris->nvertices;
     d10 /= mris->nvertices;
 
-    mean_sd[iter % 10] = lm;
+    mean_sd[iter % 10]   = lm;
     mean_dist[iter % 10] = d10;
 
     coutbuff = 0;
@@ -3177,11 +3187,11 @@ static void MRISshrink_Outer_Skin(MRI_variables *MRI_var, MRI *mri_src) {
 
 static void label_voxels(STRIP_PARMS *parms, MRI_variables *MRI_var,
                          MRI *mri_with_skull) {
-  char fname[512];
-  int i, j, k;
-  int A, B;
+  char          fname[512];
+  int           i, j, k;
+  int           A, B;
   unsigned long volume_skull;
-  double vol_elt;
+  double        vol_elt;
 
   A = (2 * MRI_var->CSF_MAX + MRI_var->TRANSITION_INTENSITY) / 3;
   B = (MRI_var->GM_INTENSITY + MRI_var->WM_MIN) / 2;
@@ -3258,9 +3268,9 @@ static void calcForce1(double &force0, double &force1, double &force, double sd,
 
   int ninside = 15, noutside = 10;
 
-  double x = Pos.x;
-  double y = Pos.y;
-  double z = Pos.z;
+  double x  = Pos.x;
+  double y  = Pos.y;
+  double z  = Pos.z;
   double nx = N.x;
   double ny = N.y;
   double nz = N.z;
@@ -3322,14 +3332,14 @@ static void calcForceGM(double &force0, double &force1, double &force,
                         double sd, const TVector &Pos, const TVector &S,
                         const TVector &N, MRI_variables *MRI_var,
                         double forceParam) {
-  float samp_mean[4];
-  float test_samp[4][9];
-  float n1[3], n2[3];
+  float  samp_mean[4];
+  float  test_samp[4][9];
+  float  n1[3], n2[3];
   double val;
 
-  double x = Pos.x;
-  double y = Pos.y;
-  double z = Pos.z;
+  double x  = Pos.x;
+  double y  = Pos.y;
+  double z  = Pos.z;
   double nx = N.x;
   double ny = N.y;
   double nz = N.z;
@@ -3385,8 +3395,8 @@ static void calcForceGM(double &force0, double &force1, double &force,
       force = -0.2;
     else {
       // count various matters
-      nb_GM = 0;
-      nb_TR = 0;
+      nb_GM  = 0;
+      nb_TR  = 0;
       nb_GTM = 0;
       for (h = 0; h < 4; h++) {
         if (samp_mean[h] >= MRI_var->TRANSITION_INTENSITY)
@@ -3443,14 +3453,14 @@ static void calcForceMine(double &force0, double &force1, double &force,
                           double forceParam) {
   int ninside = 10, noutside = 10;
 
-  double x = Pos.x;
-  double y = Pos.y;
-  double z = Pos.z;
+  double x  = Pos.x;
+  double y  = Pos.y;
+  double z  = Pos.z;
   double nx = N.x;
   double ny = N.y;
   double nz = N.z;
 
-  int it, jt, kt;
+  int    it, jt, kt;
   double tx, ty, tz;
 
   force0 = 0.8;
@@ -3464,7 +3474,7 @@ static void calcForceMine(double &force0, double &force1, double &force,
   ////////////////////////////////////////////////////////////////
   // count non-zero voxels in the strip
   int countoutside = 0;
-  int countinside = 0;
+  int countinside  = 0;
   for (int h = -noutside; h < 0; h++) {
 
     double tx, ty, tz;
@@ -3527,15 +3537,15 @@ static void calcForceMine(double &force0, double &force1, double &force,
 static void calcForce2(double &force0, double &force1, double &force, double sd,
                        const TVector &Pos, const TVector &S, const TVector &N,
                        MRI_variables *MRI_var, double forceParam) {
-  int nb_GM, nb_TR, nb_GTM;
+  int    nb_GM, nb_TR, nb_GTM;
   double r, F, E, rmin = 3.33, rmax = 10.;
-  float n1[3], n2[3];
-  int h, a, b;
+  float  n1[3], n2[3];
+  int    h, a, b;
   double tx, ty, tz;
-  int kt, jt, it;
-  int val;
-  float test_samp[4][9];
-  float samp_mean[4];
+  int    kt, jt, it;
+  int    val;
+  float  test_samp[4][9];
+  float  samp_mean[4];
 
   double x = Pos.x;
   double y = Pos.y;
@@ -3556,8 +3566,8 @@ static void calcForce2(double &force0, double &force1, double &force, double sd,
   F = 6 / (1 / rmin - 1 / rmax);
 
   if (nc) {
-    r = (nc > 0) ? nc : -nc;
-    r = SQR(sd) / (2 * r);
+    r      = (nc > 0) ? nc : -nc;
+    r      = SQR(sd) / (2 * r);
     force1 = (1 + tanh(F * (1 / r - E))) / 2;
   } else
     Error("pbm de normale!");
@@ -3606,8 +3616,8 @@ static void calcForce2(double &force0, double &force1, double &force, double sd,
         if (samp_mean[1] * 100 > samp_mean[2] * 90)
           force = -0.1;
     } else {
-      nb_GM = 0; // count number of grey matter
-      nb_TR = 0; // count number of transition voxels
+      nb_GM  = 0; // count number of grey matter
+      nb_TR  = 0; // count number of transition voxels
       nb_GTM = 0;
       for (h = 0; h < 4; h++) {
         if (samp_mean[h] >= MRI_var->GM_INTENSITY)
@@ -3670,9 +3680,9 @@ static void MRISfit(MRI_variables *MRI_var,
   double force, force1;
   double force0;
   double d;
-  int iter, k, m, n;
-  int it, jt;
-  int niter;
+  int    iter, k, m, n;
+  int    it, jt;
+  int    niter;
 
   double decay = 0.8, update = 0.9;
 
@@ -3681,9 +3691,9 @@ static void MRISfit(MRI_variables *MRI_var,
   MRIS *mris;
   //  char surf_fname[100];
 
-  double lm, d10m[3], d10, f1m, f2m, dm, dbuff;
+  double   lm, d10m[3], d10, f1m, f2m, dm, dbuff;
   float ***dist;
-  float cout, cout_prec, coutbuff, varbuff, mean_sd[10], mean_dist[10];
+  float    cout, cout_prec, coutbuff, varbuff, mean_sd[10], mean_dist[10];
 
   mris = MRI_var->mris;
   MRIScomputeNormals(mris);
@@ -3705,7 +3715,7 @@ static void MRISfit(MRI_variables *MRI_var,
         dist[k][m][n] = 0;
 
   for (n = 0; n < 10; n++) {
-    mean_sd[n] = 0;
+    mean_sd[n]   = 0;
     mean_dist[n] = 0;
   }
 
@@ -3717,9 +3727,9 @@ static void MRISfit(MRI_variables *MRI_var,
   /* momentum -> 0*/
   for (k = 0; k < mris->nvertices; k++) {
     VERTEX *const v = &mris->vertices[k];
-    v->odx = 0;
-    v->ody = 0;
-    v->odz = 0;
+    v->odx          = 0;
+    v->ody          = 0;
+    v->odz          = 0;
   }
 
   ///////////////////////////////////////////////////////////////
@@ -3728,18 +3738,18 @@ static void MRISfit(MRI_variables *MRI_var,
     lm = d10 = f1m = f2m = dm = 0;
     for (k = 0; k < mris->nvertices; k++) {
       VERTEX *const v = &mris->vertices[k];
-      v->tx = v->x; // initialize t(mp)
-      v->ty = v->y;
-      v->tz = v->z;
+      v->tx           = v->x; // initialize t(mp)
+      v->ty           = v->y;
+      v->tz           = v->z;
     }
 
     for (k = 0; k < mris->nvertices; k++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[k];
-      VERTEX *const v = &mris->vertices[k]; // vertex position
-      TVector Pos(v->tx, v->ty, v->tz);
-      TVector S(0., 0., 0.);
+      VERTEX *const                v  = &mris->vertices[k]; // vertex position
+      TVector                      Pos(v->tx, v->ty, v->tz);
+      TVector                      S(0., 0., 0.);
       sd = 0;
-      n = 0;
+      n  = 0;
       // get the mean position of neighboring vertices
       // try to minimize
       TVector dX;
@@ -3841,7 +3851,7 @@ static void MRISfit(MRI_variables *MRI_var,
     d10 /= mris->nvertices; //
 
     // save the value
-    mean_sd[iter % 10] = lm;
+    mean_sd[iter % 10]   = lm;
     mean_dist[iter % 10] = d10;
 
     coutbuff = 0;

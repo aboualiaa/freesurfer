@@ -1,16 +1,11 @@
 /**
- * @file  RenderView.h
  * @brief View class for rendering 2D and 3D actors
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/02 16:40:06 $
- *    $Revision: 1.39 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -56,13 +51,13 @@ public:
     IM_SurfacePath
   };
 
-  void SetWorldCoordinateInfo(const double *origin, const double *size,
-                              bool bResetView = true);
+  void         SetWorldCoordinateInfo(const double *origin, const double *size,
+                                      bool bResetView = true);
   virtual void UpdateViewByWorldCoordinate() {}
 
   int PickCell(vtkProp *prop, int posX, int posY, double *pos_out = NULL);
 
-  int GetInteractionMode();
+  int          GetInteractionMode();
   virtual void SetInteractionMode(int nMode);
 
   int GetAction();
@@ -97,6 +92,8 @@ public:
   bool SaveScreenShot(const QString &filename, bool bAntiAliasing, int nMag = 1,
                       bool bAutoTrim = false);
 
+  void TrimImageFiles(const QStringList &files);
+
   virtual void TriggerContextMenu(QMouseEvent *event) { Q_UNUSED(event); }
 
 signals:
@@ -106,20 +103,20 @@ signals:
   void DoubleClicked();
 
 public slots:
-  void RequestRedraw(bool bForce = false);
-  void MoveUp();
-  void MoveDown();
-  void MoveLeft();
-  void MoveRight();
-  void Zoom(double factor);
-  void PanToWorld(double *pos);
-  void Reset();
-  void SetAction(int nAction);
-  void ShowScalarBar(bool bShow);
-  void SetScalarBarLayer(Layer *layer);
-  void SetScalarBarLayer(QAction *act);
-  void CenterAtWorldPosition(double *pos);
-  void AlignViewToNormal(double *v);
+  void         RequestRedraw(bool bForce = false);
+  void         MoveUp();
+  void         MoveDown();
+  void         MoveLeft();
+  void         MoveRight();
+  void         Zoom(double factor);
+  void         PanToWorld(double *pos);
+  void         Reset();
+  void         SetAction(int nAction);
+  void         ShowScalarBar(bool bShow);
+  void         SetScalarBarLayer(Layer *layer);
+  void         SetScalarBarLayer(QAction *act);
+  void         CenterAtWorldPosition(double *pos);
+  void         AlignViewToNormal(double *v);
   virtual void UpdateScalarBar();
 
 protected:
@@ -133,16 +130,16 @@ protected slots:
   }
 
 protected:
-  bool m_bNeedRedraw;
+  bool   m_bNeedRedraw;
   double m_dWorldOrigin[3];
   double m_dWorldSize[3];
 
   Interactor *m_interactor;
-  int m_nInteractionMode;
+  int         m_nInteractionMode;
 
-  vtkSmartPointer<vtkActor2D> m_actorFocusFrame;
+  vtkSmartPointer<vtkActor2D>        m_actorFocusFrame;
   vtkSmartPointer<vtkScalarBarActor> m_actorScalarBar;
-  QPointer<Layer> m_layerScalarBar;
+  QPointer<Layer>                    m_layerScalarBar;
 };
 
 #endif // RENDERVIEW_H

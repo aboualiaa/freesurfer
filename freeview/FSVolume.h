@@ -1,16 +1,11 @@
 /**
- * @file  FSVolume.h
  * @brief Base volume class that takes care of I/O and data conversion.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/09/27 15:45:33 $
- *    $Revision: 1.49 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,16 +21,16 @@
 #ifndef FSVolume_h
 #define FSVolume_h
 
-#include <QObject>
-#include "vtkSmartPointer.h"
+#include "CommonDataStruct.h"
 #include "vtkImageData.h"
 #include "vtkMatrix4x4.h"
-#include "CommonDataStruct.h"
+#include "vtkSmartPointer.h"
+#include <QObject>
 #include <vector>
 
-#include "mri.h"
-#include "histo.h"
 #include "colortab.h"
+#include "histo.h"
+#include "mri.h"
 #include "transform.h"
 
 class vtkTransform;
@@ -117,9 +112,9 @@ public:
 
   void NativeRASToTkReg(const double *pos_in, double *pos_out);
 
-  bool RASToTalairachVoxel(const double *pos_in, double *pos_out);
+  bool RASToTalairach(const double *pos_in, double *pos_out);
 
-  void TalairachVoxelToRAS(const double *pos_in, double *pos_out);
+  void TalairachToRAS(const double *pos_in, double *pos_out);
 
   void SetMRITarget(MRI *mri);
 
@@ -208,14 +203,14 @@ protected:
   MRI *m_MRITarget; // target space. header only
   MRI *m_MRIRef; // reference target space, can also serve as the registration
                  // target. header only
-  MRI *m_MRIOrigTarget; // orignal target space, header only
-  MRI *m_MRITemp;       // temp mri for saving
-  LTA *m_lta;
-  MATRIX *m_matReg;
+  MRI *        m_MRIOrigTarget; // orignal target space, header only
+  MRI *        m_MRITemp;       // temp mri for saving
+  LTA *        m_lta;
+  MATRIX *     m_matReg;
   COLOR_TABLE *m_ctabEmbedded;
-  HISTOGRAM *m_histoCDF;
-  int m_nHistoFrame;
-  bool m_bValidHistogram;
+  HISTOGRAM *  m_histoCDF;
+  int          m_nHistoFrame;
+  bool         m_bValidHistogram;
 
   FSVolume *m_volumeRef;
 
@@ -229,21 +224,21 @@ protected:
   float m_fMaxValue;
   float m_fMaxValueFull;
 
-  bool m_bResampleToRAS;
-  bool m_bIgnoreHeader;
+  bool   m_bResampleToRAS;
+  bool   m_bIgnoreHeader;
   double m_MRIToImageMatrix[16];
 
   // RAS bounds.
-  bool m_bBoundsCacheDirty;
+  bool  m_bBoundsCacheDirty;
   float m_RASBounds[6];
 
-  int m_nInterpolationMethod;
+  int  m_nInterpolationMethod;
   bool m_bConform;
   char m_strOrientation[4];
 
   double m_dBounds[6];
-  bool m_bCrop;
-  bool m_bCropToOriginal;
+  bool   m_bCrop;
+  bool   m_bCropToOriginal;
 
   bool m_bSharedMRI;
 };

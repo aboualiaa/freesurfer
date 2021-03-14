@@ -1,17 +1,12 @@
 /**
- * @file  mris_surface_change.c
  * @brief compute the change in the normal direction of a pair of surfaces
  *
  * compute the (longitudinal) change in a surface such as the pial or white.
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:34 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,8 +25,6 @@
 
 */
 
-// $Id: mris_surface_change.c,v 1.2 2011/03/02 00:04:34 nicks Exp $
-
 /*
   BEGINHELP
 
@@ -46,34 +39,32 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/utsname.h>
+#include <unistd.h>
 
-#include "utils.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "fio.h"
 #include "mrisurf.h"
+#include "utils.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
 static void usage_exit(void);
 static void print_help(void);
 static void print_version(void);
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
-static int compute_surface_distance(MRI_SURFACE *mris1, MRI_SURFACE *mris2,
-                                    MRI_SURFACE *mris_out);
+int         main(int argc, char *argv[]);
+static int  compute_surface_distance(MRI_SURFACE *mris1, MRI_SURFACE *mris2,
+                                     MRI_SURFACE *mris_out);
 
-static char vcid[] =
-    "$Id: mris_surface_change.c,v 1.2 2011/03/02 00:04:34 nicks Exp $";
-const char *Progname = NULL;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
 char *TempVolFile = NULL;
@@ -81,14 +72,15 @@ char *subject, *hemi, *SUBJECTS_DIR;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs;
-  char *surf1_fname ;
-  char *surf2_fname ;
-  char *out_fname ;
-  MRI_SURFACE *mris1, *mris2 ;
+  int          nargs;
+  char *       surf1_fname;
+  char *       surf2_fname;
+  char *       out_fname;
+  MRI_SURFACE *mris1, *mris2;
 
   nargs = handleVersionOption(argc, argv, "mris_surface_change");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -115,8 +107,8 @@ int main(int argc, char *argv[]) {
 
   surf1_fname = argv[0];
   surf2_fname = argv[1];
-  out_fname = argv[2];
-  mris1 = MRISread(surf1_fname);
+  out_fname   = argv[2];
+  mris1       = MRISread(surf1_fname);
   if (mris1 == NULL)
     ErrorExit(ERROR_NOFILE, "could not read surface 1 from %s", surf1_fname);
   mris2 = MRISread(surf2_fname);
@@ -136,7 +128,7 @@ int main(int argc, char *argv[]) {
 */
 /* ------ Doxygen markup ends on the line above ---- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   return (NO_ERROR);
@@ -170,7 +162,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       TempVolFile = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))
@@ -213,7 +205,7 @@ static void print_usage(void) {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -238,7 +230,7 @@ static void print_help(void) {
 /* ------ Doxygen markup ends on the line above  (this line not needed for
  * Doxygen) -- */
 static void print_version(void) {
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -261,7 +253,7 @@ static void check_options(void) { return; }
  * Doxygen) -- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);
@@ -273,8 +265,8 @@ static void dump_options(FILE *fp) {
 }
 static int compute_surface_distance(MRI_SURFACE *mris1, MRI_SURFACE *mris2,
                                     MRI_SURFACE *mris_out) {
-  int vno;
-  double dx, dy, dz;
+  int     vno;
+  double  dx, dy, dz;
   VERTEX *v1, *v2;
 
   if (mris1->nvertices != mris2->nvertices)
@@ -282,11 +274,11 @@ static int compute_surface_distance(MRI_SURFACE *mris1, MRI_SURFACE *mris2,
               mris1->nvertices, mris2->nvertices);
 
   for (vno = 0; vno < mris1->nvertices; vno++) {
-    v1 = &mris1->vertices[vno];
-    v2 = &mris2->vertices[vno];
-    dx = v1->x - v2->x;
-    dy = v1->y - v2->y;
-    dz = v1->z - v2->z;
+    v1                          = &mris1->vertices[vno];
+    v2                          = &mris2->vertices[vno];
+    dx                          = v1->x - v2->x;
+    dy                          = v1->y - v2->y;
+    dz                          = v1->z - v2->z;
     mris_out->vertices[vno].val = dx * v1->nx + dy * v1->ny + dz * v1->nz;
   }
   return (NO_ERROR);

@@ -1,16 +1,7 @@
-/**
- * @file  DialogVolumeFilter.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:47 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,8 +13,8 @@
  *
  */
 #include "DialogVolumeFilter.h"
-#include "ui_DialogVolumeFilter.h"
 #include "VolumeFilter.h"
+#include "ui_DialogVolumeFilter.h"
 #include <QMessageBox>
 
 DialogVolumeFilter::DialogVolumeFilter(QWidget *parent)
@@ -50,7 +41,7 @@ void DialogVolumeFilter::SetSigma(double dvalue) {
 
 double DialogVolumeFilter::GetSigma() {
   double dvalue = 0;
-  dvalue = ui->lineEditSigma->text().toDouble();
+  dvalue        = ui->lineEditSigma->text().toDouble();
   return dvalue;
 }
 

@@ -1,29 +1,29 @@
 #include "SurfaceSpline.h"
+#include "FSSurface.h"
+#include "FSVolume.h"
+#include "LayerMRI.h"
+#include "LayerSurface.h"
 #include "vtkActor.h"
+#include "vtkCellArray.h"
+#include "vtkPoints.h"
+#include "vtkPolyData.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkRenderer.h"
 #include "vtkSplineFilter.h"
 #include "vtkTubeFilter.h"
-#include "vtkPolyDataMapper.h"
-#include "LayerSurface.h"
-#include "LayerMRI.h"
-#include "FSVolume.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "vtkPolyData.h"
-#include "vtkProperty.h"
 #include <QDebug>
-#include "FSSurface.h"
 #include <QFileInfo>
-#include "vtkRenderer.h"
 #include <vtkAppendPolyData.h>
 #include <vtkSphereSource.h>
 
 SurfaceSpline::SurfaceSpline(LayerSurface *parent)
     : QObject(parent), m_mri(NULL), m_mriSurf(NULL), m_nActiveVertex(-1),
       m_bProjection(true), m_bLocked(false), m_bVisible(true) {
-  m_actor = vtkSmartPointer<vtkActor>::New();
+  m_actor        = vtkSmartPointer<vtkActor>::New();
   m_actorSpheres = vtkSmartPointer<vtkActor>::New();
   for (int i = 0; i < 3; i++) {
-    m_actor2D[i] = vtkSmartPointer<vtkActor>::New();
+    m_actor2D[i]        = vtkSmartPointer<vtkActor>::New();
     m_actor2DSpheres[i] = vtkSmartPointer<vtkActor>::New();
   }
   SetColor(QColor(255, 128, 0));
@@ -125,8 +125,8 @@ void SurfaceSpline::RebuildActors() {
   surf->GetSlicePosition(slice_pos);
   LayerMRI *mri = surf->GetRefVolume();
   if (m_nActiveVertex >= 0) {
-    vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+    vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+    vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
     lines->InsertNextCell(m_mri->height);
     double pos[3];
     for (int i = 0; i < m_mri->height; i++) {
@@ -182,8 +182,8 @@ void SurfaceSpline::RebuildActors() {
       spline->SetInput(polydata);
 #endif
       spline->Update();
-      vtkPolyData *spline_poly = spline->GetOutput();
-      vtkPoints *spline_points = spline_poly->GetPoints();
+      vtkPolyData *              spline_poly   = spline->GetOutput();
+      vtkPoints *                spline_points = spline_poly->GetPoints();
       vtkSmartPointer<vtkPoints> ctrl_points =
           vtkSmartPointer<vtkPoints>::New();
       for (int i = 0; i < points->GetNumberOfPoints(); i++) {
@@ -220,9 +220,9 @@ void SurfaceSpline::RebuildActors() {
 }
 
 void SurfaceSpline::SetVisible(bool visible_in) {
-  m_bVisible = visible_in;
-  bool visible = visible_in;
-  LayerSurface *surf = qobject_cast<LayerSurface *>(parent());
+  m_bVisible            = visible_in;
+  bool          visible = visible_in;
+  LayerSurface *surf    = qobject_cast<LayerSurface *>(parent());
   if (!visible)
     SetActorVisible(false);
   else if (surf && surf->IsVisible()) {
@@ -241,7 +241,7 @@ void SurfaceSpline::SetActorVisible(bool visible) {
 }
 
 void SurfaceSpline::SetColor(const QColor &c) {
-  m_color = c;
+  m_color   = c;
   QColor c2 = c.lighter();
   m_actor->GetProperty()->SetColor(c.redF(), c.greenF(), c.blueF());
   m_actorSpheres->GetProperty()->SetColor(c2.redF(), c2.greenF(), c2.blueF());

@@ -1,17 +1,6 @@
-/**
- * @file  ipmpar.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:45 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -408,15 +397,15 @@ int ipmpar(int *i) {
          3B SERIES, MOTOROLA 68000 BASED MACHINES (E.G. SUN 3 AND AT&T
          PC 7300), AND 8087 BASED MICROS (E.G. IBM PC AND AT&T 6300). */
 
-  imach[1] = 2;
-  imach[2] = 31;
-  imach[3] = 2147483647;
-  imach[4] = 2;
-  imach[5] = 24;
-  imach[6] = -125;
-  imach[7] = 128;
-  imach[8] = 53;
-  imach[9] = -1021;
+  imach[1]  = 2;
+  imach[2]  = 31;
+  imach[3]  = 2147483647;
+  imach[4]  = 2;
+  imach[5]  = 24;
+  imach[6]  = -125;
+  imach[7]  = 128;
+  imach[8]  = 53;
+  imach[9]  = -1021;
   imach[10] = 1024;
 
   /*     MACHINE CONSTANTS FOR THE UNIVAC 1100 SERIES. */

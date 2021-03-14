@@ -11,12 +11,8 @@
 ##   tcl (but not csh!) can read such over-20-char-long env vars
 ##   set,setenv (but not tcl set!) create empty var w/o arg (tcl returns err!)
 ##
-## CVS Revision Info:
-##    $Author: nicks $
-##    $Date: 2011/03/02 00:04:36 $
-##    $Revision: 1.5 $
 ##
-## Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+## Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 ##
 ## Terms and conditions for use, reproduction, distribution and contribution
 ## are found in the 'FreeSurfer Software License Agreement' contained

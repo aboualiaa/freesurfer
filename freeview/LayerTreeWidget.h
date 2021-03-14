@@ -1,16 +1,7 @@
-/**
- * @file  LayerTreeWidget.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/05/31 18:30:40 $
- *    $Revision: 1.15 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,10 +15,12 @@
 #ifndef LAYERTREEWIDGET_H
 #define LAYERTREEWIDGET_H
 
-#include <QTreeWidget>
 #include <QItemDelegate>
+#include <QList>
+#include <QTreeWidget>
 
 class Layer;
+class LayerMRI;
 class QDropEvent;
 
 class MyItemDelegate : public QItemDelegate {
@@ -38,7 +31,7 @@ public:
       : QItemDelegate(parent), ParentView(parent) {}
   ~MyItemDelegate() {}
 
-  QRect GetCheckBoxRect(const QModelIndex &index,
+  QRect GetCheckBoxRect(const QModelIndex &         index,
                         const QStyleOptionViewItem &option) const;
 
 private:
@@ -55,6 +48,8 @@ public:
   void mouseMoveEvent(QMouseEvent *event);
   void mouseReleaseEvent(QMouseEvent *event);
 
+  QList<LayerMRI *> GetLinkedVolumes() { return m_linkedVolumes; }
+
 signals:
   void ToReorderLayers(const QList<Layer *> &newlist);
 
@@ -65,6 +60,8 @@ public slots:
   void OnHideAll();
   void OnLockAll();
   void OnUnlockAll();
+  void OnLockOthers();
+  void OnUnlockOthers();
   void OnShowAllInfo();
   void OnHideAllInfo();
   void OnSetColorMap();
@@ -74,16 +71,20 @@ public slots:
   void selectAll() { SelectAll(); }
   void DeselectAll();
   void SetSelectedLayers(const QList<int> &layer_ids);
+  void OnLinkVolumes();
+  void OnUnlinkVolumes();
+  void LinkVolume(LayerMRI *vol);
 
 protected:
-  bool event(QEvent *e);
-  void drawRow(QPainter *painter, const QStyleOptionViewItem &option,
-               const QModelIndex &index) const;
+  bool         event(QEvent *e);
+  void         drawRow(QPainter *painter, const QStyleOptionViewItem &option,
+                       const QModelIndex &index) const;
   virtual void dropEvent(QDropEvent *event);
 
-  MyItemDelegate *m_itemDelegate;
-  QRect rectCheckbox;
-  bool m_bCheckBoxClicked;
+  MyItemDelegate *  m_itemDelegate;
+  QRect             rectCheckbox;
+  bool              m_bCheckBoxClicked;
+  QList<LayerMRI *> m_linkedVolumes;
 };
 
 #endif // LAYERTREEWIDGET_H

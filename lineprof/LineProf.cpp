@@ -1,12 +1,14 @@
+#include <vtkCellArray.h>
+
 #include "LineProf.h"
-#include "Preprocessor.h"
 #include "PetscSolver.h"
+#include "Preprocessor.h"
 
 LineProf::LineProf(const std::vector<std::vector<double>> &points2d,
-                   const std::vector<int> &segment0,
-                   const std::vector<int> &segment1,
-                   const std::vector<int> &segmentL,
-                   const std::vector<int> &segmentR)
+                   const std::vector<int> &                segment0,
+                   const std::vector<int> &                segment1,
+                   const std::vector<int> &                segmentL,
+                   const std::vector<int> &                segmentR)
     : _points2d(points2d), _segment0(segment0), _segment1(segment1),
       _segmentL(segmentL), _segmentR(segmentR), _tracer(NULL) {
   // maybe some error check here? e.g. if points are really 2d?
@@ -47,15 +49,15 @@ void LineProf::solveLaplace(int paddingL, int paddingR, double dresolution,
 
   // filter the mask
   typedef PetscSolver::MaskImageType MaskImageType;
-  MaskImageType::Pointer mask = MaskImageType::New();
+  MaskImageType::Pointer             mask = MaskImageType::New();
   mask->SetRegions(solver.GetOutputMask()->GetRequestedRegion());
   mask->Allocate();
   mask->CopyInformation(solver.GetOutputMask());
   typedef itk::ImageRegionConstIterator<MaskImageType> MaskConstIteratorType;
-  typedef itk::ImageRegionIterator<MaskImageType> MaskIteratorType;
+  typedef itk::ImageRegionIterator<MaskImageType>      MaskIteratorType;
   MaskConstIteratorType inputIter(solver.GetOutputMask(),
                                   solver.GetOutputMask()->GetRequestedRegion());
-  MaskIteratorType outputIter(mask, mask->GetRequestedRegion());
+  MaskIteratorType      outputIter(mask, mask->GetRequestedRegion());
   for (inputIter.GoToBegin(), outputIter.GoToBegin(); !outputIter.IsAtEnd();
        ++inputIter, ++outputIter)
     if (inputIter.Get() == solver.GetInsideValue())
@@ -127,7 +129,7 @@ LineProf::samplePointsMidline(double offset, double dspacing) {
   std::vector<std::vector<double>> points;
 
   // compute isoline at 0.5 level (in the middle)
-  std::vector<double> dv(1, 0.5);
+  std::vector<double>                           dv(1, 0.5);
   std::vector<std::vector<std::vector<double>>> vml;
   vml = ComputeIsolines(dv, _points2d[_segment0[0]][0],
                         _points2d[_segment0[0]][1]);
@@ -135,7 +137,7 @@ LineProf::samplePointsMidline(double offset, double dspacing) {
 
   // compute length of reference line
   unsigned int s = rl.size();
-  double l = 0.0;
+  double       l = 0.0;
   for (unsigned int i = 1; i < s; i++) {
     l += pointDistance(rl[i], rl[i - 1]);
     // std::cout << rl[i][0]  << "  " << rl[i][1] << std::endl;
@@ -155,10 +157,10 @@ LineProf::samplePointsMidline(double offset, double dspacing) {
   double remain = sl - num * dspacing;
 
   // where to place the first (at offset plus half the unused space)
-  double lnext = offset + 0.5 * remain;
-  double lstop = l - offset;
-  double dist = 0.0;
-  double lastl = 0.0;
+  double              lnext = offset + 0.5 * remain;
+  double              lstop = l - offset;
+  double              dist  = 0.0;
+  double              lastl = 0.0;
   std::vector<double> point(2);
   for (unsigned int i = 1; i < s; i++) {
     // std::cout << "lnext: " << lnext << std::endl;
@@ -169,11 +171,11 @@ LineProf::samplePointsMidline(double offset, double dspacing) {
     if (lastl + dist > lnext) // subsample segment
     {
       double d = (lnext - lastl) / dist;
-      // cout << " d :"<< d << endl;
-      // cout << " x(i-1): "<<rl[i-1][0] << "  x(i): " << rl[i][0] <<endl;
+      // std::cout << " d :"<< d << std::endl;
+      // std::cout << " x(i-1): "<<rl[i-1][0] << "  x(i): " << rl[i][0] <<endl;
       point[0] = rl[i - 1][0] * (1 - d) + rl[i][0] * d;
       point[1] = rl[i - 1][1] * (1 - d) + rl[i][1] * d;
-      // cout << " add point " << point[0] << " " << point[1] << endl;
+      // std::cout << " add point " << point[0] << " " << point[1] << std::endl;
       points.push_back(point);
       lnext += dspacing; // try next point
       i--;               // check this segment again
@@ -206,10 +208,10 @@ LineProf::ComputeIsolines(const std::vector<double> &vec, double x0,
   for (std::vector<double>::const_iterator cit = vec.begin(); cit != vec.end();
        ++cit) {
     Tracer::LineType bufLine = _tracer->ComputeIsoline(*cit);
-    double d1 = x0 - bufLine.front()[0];
-    double d2 = y0 - bufLine.front()[1];
-    double d3 = x0 - bufLine.back()[0];
-    double d4 = y0 - bufLine.back()[1];
+    double           d1      = x0 - bufLine.front()[0];
+    double           d2      = y0 - bufLine.front()[1];
+    double           d3      = x0 - bufLine.back()[0];
+    double           d4      = y0 - bufLine.back()[1];
     if (d1 * d1 + d2 * d2 > d3 * d3 + d4 * d4)
       std::reverse(bufLine.begin(), bufLine.end());
     lc.push_back(ConvertLine(bufLine));
@@ -219,9 +221,9 @@ LineProf::ComputeIsolines(const std::vector<double> &vec, double x0,
 }
 
 vtkPolyData *LineProf::GetPolyData() {
-  vtkPolyData *outData = vtkPolyData::New();
-  vtkPoints *outPoints = vtkPoints::New();
-  vtkCellArray *outLines = vtkCellArray::New();
+  vtkPolyData * outData   = vtkPolyData::New();
+  vtkPoints *   outPoints = vtkPoints::New();
+  vtkCellArray *outLines  = vtkCellArray::New();
 
   for (unsigned int ui(0), noPts(_points2d.size()); ui < noPts; ++ui) {
     assert(_points2d[ui].size() == 2);
@@ -284,7 +286,7 @@ double LineProf::pointDistance(const std::vector<double> &pt1,
 }
 
 int LineProf::InitializePetsc(bool DoNotExitOnError) {
-  PetscInitialize(0, 0, (char *)0, NULL);
+  PetscInitializeNoArguments();
   PetscMPIInt mpiSize;
   MPI_Comm_size(PETSC_COMM_WORLD, &mpiSize);
   Tracer::DoNotExitOnError = DoNotExitOnError;

@@ -1,16 +1,11 @@
 /**
- * @file  DialogCropVolume.cpp
  * @brief Dialog window to apply volume crop
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/09/13 16:11:19 $
- *    $Revision: 1.13 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,13 +17,13 @@
  *
  */
 #include "DialogCropVolume.h"
-#include "ui_DialogCropVolume.h"
+#include "LayerMRI.h"
 #include "MainWindow.h"
 #include "RenderView3D.h"
 #include "VolumeCropper.h"
-#include "LayerMRI.h"
-#include <QShowEvent>
+#include "ui_DialogCropVolume.h"
 #include <QSettings>
+#include <QShowEvent>
 
 DialogCropVolume::DialogCropVolume(QWidget *parent, LayerMRI *mri)
     : QDialog(parent), ui(new Ui::DialogCropVolume) {
@@ -50,7 +45,7 @@ DialogCropVolume::DialogCropVolume(QWidget *parent, LayerMRI *mri)
   connect(ui->pushButtonSaveAs, SIGNAL(clicked()), MainWindow::GetMainWindow(),
           SLOT(SaveVolumeAs()));
 
-  QSettings s;
+  QSettings  s;
   QByteArray val = s.value("VolumeCropper/Geometry").toByteArray();
   if (!val.isEmpty())
     restoreGeometry(val);

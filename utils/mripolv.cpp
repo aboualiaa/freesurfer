@@ -1,16 +1,11 @@
 /**
- * @file  mripolv.c
  * @brief utils for calcing/filtring MRI data based on planes of least variance
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:46 $
- *    $Revision: 1.43 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,15 +23,21 @@
 
 #include <math.h>
 #include <memory.h>
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include "box.h"
 #include "diag.h"
 #include "error.h"
+#include "filter.h"
 #include "macros.h"
+#include "minc.h"
 #include "mri.h"
+#include "mrimorph.h"
 #include "mrisegment.h"
 #include "proto.h"
+#include "region.h"
 
 /*-----------------------------------------------------
                     MACROS AND CONSTANTS
@@ -64,7 +65,7 @@ float ic_z_vertices[NVERTICES] = {
     0.8507, 0.8507, 0.5257, 0.8507, 0.5257, 0.8507, 0.5257, 0.5257,
     0,      0,      0,      0,      0,      0.00};
 
-static int vertices_initialized = 0;
+static int   vertices_initialized = 0;
 static float e1_x_v[NVERTICES];
 static float e1_y_v[NVERTICES];
 static float e1_z_v[NVERTICES];
@@ -76,9 +77,9 @@ static float e2_z_v[NVERTICES];
                     STATIC PROTOTYPES
 -------------------------------------------------------*/
 
-static int compare_sort_array(const void *pc1, const void *pc2);
-static int compare_sort_farray(const void *pc1, const void *pc2);
-static void init_basis_vectors();
+static int  compare_sort_array(const void *pc1, const void *pc2);
+static int  compare_sort_farray(const void *pc1, const void *pc2);
+static void init_basis_vectors(void);
 
 /*-----------------------------------------------------
                     GLOBAL FUNCTIONS
@@ -93,22 +94,22 @@ static void init_basis_vectors();
 MRI *MRIpolvMean(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
   int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi,
       *pyi, *pzi;
-  float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase, total;
+  float    e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase, total;
   BUFTYPE *pdst, *pptr;
 
   init_basis_vectors();
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
   pzi = mri_src->zi;
-  n = wsize * wsize;
+  n   = wsize * wsize;
   for (z = 0; z < depth; z++) {
     DiagHeartbeat((float)z / (float)(depth - 1));
     for (y = 0; y < height; y++) {
@@ -116,12 +117,12 @@ MRI *MRIpolvMean(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
       pptr = &MRIvox(mri_polv, 0, y, z); /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
         vertex = *pptr++;
-        e1_x = e1_x_v[vertex]; /* basis vectors for plane */
-        e1_y = e1_y_v[vertex];
-        e1_z = e1_z_v[vertex];
-        e2_x = e2_x_v[vertex];
-        e2_y = e2_y_v[vertex];
-        e2_z = e2_z_v[vertex];
+        e1_x   = e1_x_v[vertex]; /* basis vectors for plane */
+        e1_y   = e1_y_v[vertex];
+        e1_z   = e1_z_v[vertex];
+        e2_x   = e2_x_v[vertex];
+        e2_y   = e2_y_v[vertex];
+        e2_z   = e2_z_v[vertex];
 
         /*
            calculate the mean in the plane orthogonal to (a,b,c),
@@ -162,14 +163,14 @@ MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv,
                             int wsize) {
   int width, height, depth, x, y, z, whalf, yk, n, vertex, xi, yi, zi, *pxi,
       *pyi, *pzi;
-  float nx, ny, nz, mean, var, val, std, *pdst;
+  float    nx, ny, nz, mean, var, val, std, *pdst;
   BUFTYPE *pptr;
 
   init_basis_vectors();
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   if (!mri_dst) {
     mri_dst =
@@ -180,7 +181,7 @@ MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv,
   pxi = mri_src->xi;
   pyi = mri_src->yi;
   pzi = mri_src->zi;
-  n = wsize - 1; /* excludes central point */
+  n   = wsize - 1; /* excludes central point */
   for (z = 0; z < depth; z++) {
     DiagHeartbeat((float)z / (float)(depth - 1));
     for (y = whalf; y < height; y++) {
@@ -188,9 +189,9 @@ MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv,
       pptr = &MRIvox(mri_polv, 0, y, z); /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
         vertex = *pptr++;
-        nx = ic_x_vertices[vertex]; /* normal vector */
-        ny = ic_y_vertices[vertex];
-        nz = ic_z_vertices[vertex];
+        nx     = ic_x_vertices[vertex]; /* normal vector */
+        ny     = ic_y_vertices[vertex];
+        nz     = ic_z_vertices[vertex];
 
         /*
            calculate the mean in the plane orthogonal to (a,b,c),
@@ -201,9 +202,9 @@ MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv,
         for (yk = -whalf; yk <= whalf; yk++) {
           if (!yk)
             continue; /* skip central point */
-          xi = pxi[nint((float)x + (float)yk * nx)];
-          yi = pyi[nint((float)y + (float)yk * ny)];
-          zi = pzi[nint((float)z + (float)yk * nz)];
+          xi  = pxi[nint((float)x + (float)yk * nx)];
+          yi  = pyi[nint((float)y + (float)yk * ny)];
+          zi  = pzi[nint((float)z + (float)yk * nz)];
           val = (float)MRIvox(mri_src, xi, yi, zi);
           var += val * val;
           mean += val;
@@ -231,14 +232,14 @@ MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv,
 MRI *MRIpolvZscore(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
   int width, height, depth, x, y, z, whalf, yk, n, vertex, xi, yi, zi, *pxi,
       *pyi, *pzi;
-  float nx, ny, nz, mean, var, val, std, *pdst, xf, yf, zf;
+  float    nx, ny, nz, mean, var, val, std, *pdst, xf, yf, zf;
   BUFTYPE *pptr;
 
   init_basis_vectors();
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   if (!mri_dst) {
     mri_dst =
@@ -249,7 +250,7 @@ MRI *MRIpolvZscore(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
   pxi = mri_src->xi;
   pyi = mri_src->yi;
   pzi = mri_src->zi;
-  n = wsize;
+  n   = wsize;
   for (z = 0; z < depth; z++) {
     DiagHeartbeat((float)z / (float)(depth - 1));
     for (y = whalf; y < height; y++) {
@@ -257,9 +258,9 @@ MRI *MRIpolvZscore(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
       pptr = &MRIvox(mri_polv, 0, y, z); /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
         vertex = *pptr++;
-        nx = ic_x_vertices[vertex]; /* normal vector */
-        ny = ic_y_vertices[vertex];
-        nz = ic_z_vertices[vertex];
+        nx     = ic_x_vertices[vertex]; /* normal vector */
+        ny     = ic_y_vertices[vertex];
+        nz     = ic_z_vertices[vertex];
 
         /*
            calculate the mean in the plane orthogonal to (a,b,c),
@@ -267,13 +268,13 @@ MRI *MRIpolvZscore(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
            */
         /* now find the values in the normal direction */
         mean = var = 0.0f;
-        xf = (float)x - whalf * nx;
-        yf = (float)y - whalf * ny;
-        zf = (float)z - whalf * nz;
+        xf         = (float)x - whalf * nx;
+        yf         = (float)y - whalf * ny;
+        zf         = (float)z - whalf * nz;
         for (yk = -whalf; yk <= whalf; yk++) {
-          xi = pxi[nint(xf)];
-          yi = pyi[nint(yf)];
-          zi = pzi[nint(zf)];
+          xi  = pxi[nint(xf)];
+          yi  = pyi[nint(yf)];
+          zi  = pzi[nint(zf)];
           val = (float)MRIvox(mri_src, xi, yi, zi);
           var += val * val;
           mean += val;
@@ -304,22 +305,22 @@ MRI *MRIpolvZscore(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
 MRI *MRIpolvMedian(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
   int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi,
       *pyi, *pzi;
-  float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
+  float    e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   BUFTYPE *pdst, *pptr, plane_vals[MAXLEN], *pvals;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   init_basis_vectors();
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
   pzi = mri_src->zi;
-  n = wsize * wsize;
+  n   = wsize * wsize;
   for (z = 0; z < depth; z++) {
     DiagHeartbeat((float)z / (float)(depth - 1));
     for (y = 0; y < height; y++) {
@@ -327,12 +328,12 @@ MRI *MRIpolvMedian(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
       pptr = &MRIvox(mri_polv, 0, y, z); /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
         vertex = *pptr++;
-        e1_x = e1_x_v[vertex]; /* basis vectors for plane */
-        e1_y = e1_y_v[vertex];
-        e1_z = e1_z_v[vertex];
-        e2_x = e2_x_v[vertex];
-        e2_y = e2_y_v[vertex];
-        e2_z = e2_z_v[vertex];
+        e1_x   = e1_x_v[vertex]; /* basis vectors for plane */
+        e1_y   = e1_y_v[vertex];
+        e1_z   = e1_z_v[vertex];
+        e2_x   = e2_x_v[vertex];
+        e2_y   = e2_y_v[vertex];
+        e2_z   = e2_z_v[vertex];
 
         /*
            calculate the median in the plane orthogonal to (a,b,c),
@@ -347,12 +348,12 @@ MRI *MRIpolvMedian(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
           zbase = (float)z + (float)yk * e2_z;
           for (xk = -whalf; xk <= whalf; xk++) {
             /* in-plane vect. is linear combination of scaled basis vects */
-            xi = nint(xbase + xk * e1_x);
-            xi = pxi[xi];
-            yi = nint(ybase + xk * e1_y);
-            yi = pyi[yi];
-            zi = nint(zbase + xk * e1_z);
-            zi = pzi[zi];
+            xi       = nint(xbase + xk * e1_x);
+            xi       = pxi[xi];
+            yi       = nint(ybase + xk * e1_y);
+            yi       = pyi[yi];
+            zi       = nint(zbase + xk * e1_z);
+            zi       = pzi[zi];
             *pvals++ = (float)MRIvox(mri_src, xi, yi, zi);
           }
         }
@@ -375,22 +376,22 @@ MRI *MRIpolvOrder(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
                   int thresh) {
   int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi,
       *pyi, *pzi, order;
-  float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
+  float    e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   BUFTYPE *pdst, *pptr, plane_vals[MAXLEN], *pvals;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   init_basis_vectors();
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
   pzi = mri_src->zi;
-  n = wsize * wsize;
+  n   = wsize * wsize;
   for (z = 0; z < depth; z++) {
     DiagHeartbeat((float)z / (float)(depth - 1));
     for (y = 0; y < height; y++) {
@@ -398,12 +399,12 @@ MRI *MRIpolvOrder(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
       pptr = &MRIvox(mri_polv, 0, y, z); /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
         vertex = *pptr++;
-        e1_x = e1_x_v[vertex]; /* basis vectors for plane */
-        e1_y = e1_y_v[vertex];
-        e1_z = e1_z_v[vertex];
-        e2_x = e2_x_v[vertex];
-        e2_y = e2_y_v[vertex];
-        e2_z = e2_z_v[vertex];
+        e1_x   = e1_x_v[vertex]; /* basis vectors for plane */
+        e1_y   = e1_y_v[vertex];
+        e1_z   = e1_z_v[vertex];
+        e2_x   = e2_x_v[vertex];
+        e2_y   = e2_y_v[vertex];
+        e2_z   = e2_z_v[vertex];
 
         /*
            calculate the median in the plane orthogonal to (a,b,c),
@@ -418,12 +419,12 @@ MRI *MRIpolvOrder(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
           zbase = (float)z + (float)yk * e2_z;
           for (xk = -whalf; xk <= whalf; xk++) {
             /* in-plane vect. is linear combination of scaled basis vects */
-            xi = nint(xbase + xk * e1_x);
-            xi = pxi[xi];
-            yi = nint(ybase + xk * e1_y);
-            yi = pyi[yi];
-            zi = nint(zbase + xk * e1_z);
-            zi = pzi[zi];
+            xi       = nint(xbase + xk * e1_x);
+            xi       = pxi[xi];
+            yi       = nint(ybase + xk * e1_y);
+            yi       = pyi[yi];
+            zi       = nint(zbase + xk * e1_z);
+            zi       = pzi[zi];
             *pvals++ = (float)MRIvox(mri_src, xi, yi, zi);
           }
         }
@@ -452,7 +453,7 @@ MRI *MRIpolvMeanRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
                        MRI_REGION *region) {
   int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, x0, y0, z0, xi,
       yi, zi, *pxi, *pyi, *pzi;
-  float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase, total;
+  float    e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase, total;
   BUFTYPE *pdst, *pptr;
 
   init_basis_vectors();
@@ -460,9 +461,9 @@ MRI *MRIpolvMeanRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
     ErrorReturn(mri_dst,
                 (ERROR_UNSUPPORTED, "MRIpolvMeanRegion: unsupported src type"));
 
-  pxi = mri_src->xi;
-  pyi = mri_src->yi;
-  pzi = mri_src->zi;
+  pxi   = mri_src->xi;
+  pyi   = mri_src->yi;
+  pzi   = mri_src->zi;
   width = region->x + region->dx;
   if (width > mri_src->width)
     width = mri_src->width;
@@ -490,17 +491,17 @@ MRI *MRIpolvMeanRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
   if (!mri_dst) {
     int w, h, d;
 
-    w = width - region->x;
-    h = height - region->y;
-    d = depth - region->z;
+    w       = width - region->x;
+    h       = height - region->y;
+    d       = depth - region->z;
     mri_dst = MRIalloc(w, h, d, MRI_UCHAR);
     MRIcopyHeader(mri_src, mri_dst);
     mri_dst->xstart = mri_src->xstart + region->x * mri_src->xsize;
     mri_dst->ystart = mri_src->ystart + region->y * mri_src->ysize;
     mri_dst->zstart = mri_src->zstart + region->z * mri_src->zsize;
-    mri_dst->xend = mri_src->xstart + w * mri_src->xsize;
-    mri_dst->yend = mri_src->ystart + h * mri_src->ysize;
-    mri_dst->zend = mri_src->zstart + d * mri_src->zsize;
+    mri_dst->xend   = mri_src->xstart + w * mri_src->xsize;
+    mri_dst->yend   = mri_src->ystart + h * mri_src->ysize;
+    mri_dst->zend   = mri_src->zstart + d * mri_src->zsize;
   }
 
   n = wsize * wsize;
@@ -510,12 +511,12 @@ MRI *MRIpolvMeanRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
       pptr = &MRIvox(mri_polv, x0, y, z);         /* ptr to normal vectors */
       for (x = x0; x < width; x++) {
         vertex = *pptr++;
-        e1_x = e1_x_v[vertex]; /* basis vectors for plane */
-        e1_y = e1_y_v[vertex];
-        e1_z = e1_z_v[vertex];
-        e2_x = e2_x_v[vertex];
-        e2_y = e2_y_v[vertex];
-        e2_z = e2_z_v[vertex];
+        e1_x   = e1_x_v[vertex]; /* basis vectors for plane */
+        e1_y   = e1_y_v[vertex];
+        e1_z   = e1_z_v[vertex];
+        e2_x   = e2_x_v[vertex];
+        e2_y   = e2_y_v[vertex];
+        e2_z   = e2_z_v[vertex];
 
         /*
            calculate the mean in the plane orthogonal to (a,b,c),
@@ -556,7 +557,7 @@ MRI *MRIpolvMedianRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
                          MRI_REGION *region) {
   int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, x0, y0, z0, xi,
       yi, zi, *pxi, *pyi, *pzi, median_index;
-  float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
+  float    e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   BUFTYPE *pdst, *pptr, plane_vals[MAXLEN], *pvals;
 
   init_basis_vectors();
@@ -564,9 +565,9 @@ MRI *MRIpolvMedianRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
     ErrorReturn(mri_dst, (ERROR_UNSUPPORTED,
                           "MRIpolvMedianRegion: unsupported src type"));
 
-  pxi = mri_src->xi;
-  pyi = mri_src->yi;
-  pzi = mri_src->zi;
+  pxi   = mri_src->xi;
+  pyi   = mri_src->yi;
+  pzi   = mri_src->zi;
   width = region->x + region->dx;
   if (width > mri_src->width)
     width = mri_src->width;
@@ -593,20 +594,20 @@ MRI *MRIpolvMedianRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
   if (!mri_dst) {
     int w, h, d;
 
-    w = width - region->x;
-    h = height - region->y;
-    d = depth - region->z;
+    w       = width - region->x;
+    h       = height - region->y;
+    d       = depth - region->z;
     mri_dst = MRIalloc(w, h, d, MRI_UCHAR);
     MRIcopyHeader(mri_src, mri_dst);
     mri_dst->xstart = mri_src->xstart + region->x * mri_src->xsize;
     mri_dst->ystart = mri_src->ystart + region->y * mri_src->ysize;
     mri_dst->zstart = mri_src->zstart + region->z * mri_src->zsize;
-    mri_dst->xend = mri_src->xstart + w * mri_src->xsize;
-    mri_dst->yend = mri_src->ystart + h * mri_src->ysize;
-    mri_dst->zend = mri_src->zstart + d * mri_src->zsize;
+    mri_dst->xend   = mri_src->xstart + w * mri_src->xsize;
+    mri_dst->yend   = mri_src->ystart + h * mri_src->ysize;
+    mri_dst->zend   = mri_src->zstart + d * mri_src->zsize;
   }
 
-  n = wsize * wsize;
+  n            = wsize * wsize;
   median_index = n / 2;
   for (z = z0; z < depth; z++) {
     for (y = y0; y < height; y++) {
@@ -614,12 +615,12 @@ MRI *MRIpolvMedianRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
       pptr = &MRIvox(mri_polv, x0, y, z);         /* ptr to normal vectors */
       for (x = x0; x < width; x++) {
         vertex = *pptr++;
-        e1_x = e1_x_v[vertex]; /* basis vectors for plane */
-        e1_y = e1_y_v[vertex];
-        e1_z = e1_z_v[vertex];
-        e2_x = e2_x_v[vertex];
-        e2_y = e2_y_v[vertex];
-        e2_z = e2_z_v[vertex];
+        e1_x   = e1_x_v[vertex]; /* basis vectors for plane */
+        e1_y   = e1_y_v[vertex];
+        e1_z   = e1_z_v[vertex];
+        e2_x   = e2_x_v[vertex];
+        e2_y   = e2_y_v[vertex];
+        e2_z   = e2_z_v[vertex];
 
         /*
            calculate the median in the plane orthogonal to (a,b,c),
@@ -632,12 +633,12 @@ MRI *MRIpolvMedianRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
           zbase = (float)z + (float)yk * e2_z;
           for (xk = -whalf; xk <= whalf; xk++) {
             /* in-plane vect. is linear combination of scaled basis vects */
-            xi = nint(xbase + xk * e1_x);
-            xi = pxi[xi];
-            yi = nint(ybase + xk * e1_y);
-            yi = pyi[yi];
-            zi = nint(zbase + xk * e1_z);
-            zi = pzi[zi];
+            xi       = nint(xbase + xk * e1_x);
+            xi       = pxi[xi];
+            yi       = nint(ybase + xk * e1_y);
+            yi       = pyi[yi];
+            zi       = nint(zbase + xk * e1_z);
+            zi       = pzi[zi];
             *pvals++ = (int)MRIvox(mri_src, xi, yi, zi);
           }
         }
@@ -659,18 +660,18 @@ MRI *MRIpolvMedianRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
 MRI *MRIextractCpolvCoords(MRI *mri_src, int *px, int *py, int *pz,
                            MRI *mri_polv, int x, int y, int z, int wsize) {
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
-  int vertex, whalf, xk, yk, xi, yi, zi;
+  int   vertex, whalf, xk, yk, xi, yi, zi;
 
   init_basis_vectors();
   whalf = (wsize - 1) / 2;
 
   vertex = (int)MRIvox(mri_polv, x, y, z);
-  e1_x = e1_x_v[vertex]; /* get basis vectors for plane */
-  e1_y = e1_y_v[vertex];
-  e1_z = e1_z_v[vertex];
-  e2_x = e2_x_v[vertex];
-  e2_y = e2_y_v[vertex];
-  e2_z = e2_z_v[vertex];
+  e1_x   = e1_x_v[vertex]; /* get basis vectors for plane */
+  e1_y   = e1_y_v[vertex];
+  e1_z   = e1_z_v[vertex];
+  e2_x   = e2_x_v[vertex];
+  e2_y   = e2_y_v[vertex];
+  e2_z   = e2_z_v[vertex];
 
   for (yk = -whalf; yk <= whalf; yk++) {
     xbase = (float)x + (float)yk * e2_x;
@@ -678,9 +679,9 @@ MRI *MRIextractCpolvCoords(MRI *mri_src, int *px, int *py, int *pz,
     zbase = (float)z + (float)yk * e2_z;
     for (xk = -whalf; xk <= whalf; xk++) {
       /* in-plane vect. is linear combination of scaled basis vects */
-      xi = mri_src->xi[nint(xbase + xk * e1_x)];
-      yi = mri_src->yi[nint(ybase + xk * e1_y)];
-      zi = mri_src->zi[nint(zbase + xk * e1_z)];
+      xi    = mri_src->xi[nint(xbase + xk * e1_x)];
+      yi    = mri_src->yi[nint(ybase + xk * e1_y)];
+      zi    = mri_src->zi[nint(zbase + xk * e1_z)];
       *px++ = xi;
       *py++ = yi;
       *pz++ = zi;
@@ -699,7 +700,7 @@ MRI *MRIextractCpolvCoords(MRI *mri_src, int *px, int *py, int *pz,
 MRI *MRIextractCpolv(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x, int y,
                      int z, int wsize) {
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
-  int vertex, whalf, xk, yk, xi, yi, zi;
+  int   vertex, whalf, xk, yk, xi, yi, zi;
 
   init_basis_vectors();
   whalf = (wsize - 1) / 2;
@@ -710,20 +711,20 @@ MRI *MRIextractCpolv(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x, int y,
     mri_dst->xstart = x - whalf * mri_dst->xsize;
     mri_dst->ystart = y - whalf * mri_dst->ysize;
     mri_dst->zstart = z - whalf * mri_dst->zsize;
-    mri_dst->xend = mri_dst->xstart + wsize * mri_dst->xsize;
-    mri_dst->yend = mri_dst->ystart + wsize * mri_dst->ysize;
-    mri_dst->zend = mri_dst->zstart + wsize * mri_dst->zsize;
-    mri_dst->imnr0 = z + mri_src->imnr0;
-    mri_dst->imnr1 = mri_dst->imnr0;
+    mri_dst->xend   = mri_dst->xstart + wsize * mri_dst->xsize;
+    mri_dst->yend   = mri_dst->ystart + wsize * mri_dst->ysize;
+    mri_dst->zend   = mri_dst->zstart + wsize * mri_dst->zsize;
+    mri_dst->imnr0  = z + mri_src->imnr0;
+    mri_dst->imnr1  = mri_dst->imnr0;
   }
 
   vertex = (int)MRIvox(mri_polv, x, y, z);
-  e1_x = e1_x_v[vertex]; /* get basis vectors for plane */
-  e1_y = e1_y_v[vertex];
-  e1_z = e1_z_v[vertex];
-  e2_x = e2_x_v[vertex];
-  e2_y = e2_y_v[vertex];
-  e2_z = e2_z_v[vertex];
+  e1_x   = e1_x_v[vertex]; /* get basis vectors for plane */
+  e1_y   = e1_y_v[vertex];
+  e1_z   = e1_z_v[vertex];
+  e2_x   = e2_x_v[vertex];
+  e2_y   = e2_y_v[vertex];
+  e2_z   = e2_z_v[vertex];
 
   for (yk = -whalf; yk <= whalf; yk++) {
     xbase = (float)x + (float)yk * e2_x;
@@ -750,7 +751,7 @@ MRI *MRIextractCpolv(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x, int y,
 MRI *MRIextractPolvPlane(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x,
                          int y, int z, int wsize) {
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
-  int vertex, whalf, xk, yk, xi, yi, zi;
+  int   vertex, whalf, xk, yk, xi, yi, zi;
 
   init_basis_vectors();
   whalf = (wsize - 1) / 2;
@@ -761,20 +762,20 @@ MRI *MRIextractPolvPlane(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x,
     mri_dst->xstart = x - whalf * mri_dst->xsize;
     mri_dst->ystart = y - whalf * mri_dst->ysize;
     mri_dst->zstart = z - whalf * mri_dst->zsize;
-    mri_dst->xend = mri_dst->xstart + wsize * mri_dst->xsize;
-    mri_dst->yend = mri_dst->ystart + wsize * mri_dst->ysize;
-    mri_dst->zend = mri_dst->zstart + wsize * mri_dst->zsize;
-    mri_dst->imnr0 = z + mri_src->imnr0;
-    mri_dst->imnr1 = mri_dst->imnr0;
+    mri_dst->xend   = mri_dst->xstart + wsize * mri_dst->xsize;
+    mri_dst->yend   = mri_dst->ystart + wsize * mri_dst->ysize;
+    mri_dst->zend   = mri_dst->zstart + wsize * mri_dst->zsize;
+    mri_dst->imnr0  = z + mri_src->imnr0;
+    mri_dst->imnr1  = mri_dst->imnr0;
   }
 
   vertex = (int)MRIvox(mri_polv, x, y, z);
-  e1_x = e1_x_v[vertex]; /* get basis vectors for plane */
-  e1_y = e1_y_v[vertex];
-  e1_z = e1_z_v[vertex];
-  e2_x = e2_x_v[vertex];
-  e2_y = e2_y_v[vertex];
-  e2_z = e2_z_v[vertex];
+  e1_x   = e1_x_v[vertex]; /* get basis vectors for plane */
+  e1_y   = e1_y_v[vertex];
+  e1_z   = e1_z_v[vertex];
+  e2_x   = e2_x_v[vertex];
+  e2_y   = e2_y_v[vertex];
+  e2_z   = e2_z_v[vertex];
 
   for (yk = -whalf; yk <= whalf; yk++) {
     xbase = (float)x + (float)yk * e2_x;
@@ -800,16 +801,16 @@ MRI *MRIextractPolvPlane(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x,
 ------------------------------------------------------*/
 int MRIcountPlanarAboveThreshold(MRI *mri_src, int vertex, int x, int y, int z,
                                  int wsize, int lo_lim, int hi_lim) {
-  int whalf, xk, yk, n, xi, yi, zi, *pxi, *pyi, *pzi, count;
-  float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
+  int     whalf, xk, yk, n, xi, yi, zi, *pxi, *pyi, *pzi, count;
+  float   e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   BUFTYPE val;
 
   whalf = (wsize - 1) / 2;
 
-  pxi = mri_src->xi;
-  pyi = mri_src->yi;
-  pzi = mri_src->zi;
-  n = wsize * wsize;
+  pxi  = mri_src->xi;
+  pyi  = mri_src->yi;
+  pzi  = mri_src->zi;
+  n    = wsize * wsize;
   e1_x = e1_x_v[vertex]; /* basis vectors for plane */
   e1_y = e1_y_v[vertex];
   e1_z = e1_z_v[vertex];
@@ -829,12 +830,12 @@ int MRIcountPlanarAboveThreshold(MRI *mri_src, int vertex, int x, int y, int z,
     zbase = (float)z + (float)yk * e2_z;
     for (xk = -whalf; xk <= whalf; xk++) {
       /* in-plane vect. is linear combination of scaled basis vects */
-      xi = nint(xbase + xk * e1_x);
-      xi = pxi[xi];
-      yi = nint(ybase + xk * e1_y);
-      yi = pyi[yi];
-      zi = nint(zbase + xk * e1_z);
-      zi = pzi[zi];
+      xi  = nint(xbase + xk * e1_x);
+      xi  = pxi[xi];
+      yi  = nint(ybase + xk * e1_y);
+      yi  = pyi[yi];
+      zi  = nint(zbase + xk * e1_z);
+      zi  = pzi[zi];
       val = MRIvox(mri_src, xi, yi, zi);
       if (val >= lo_lim && val <= hi_lim)
         count++;
@@ -857,13 +858,13 @@ MRI *MRIplaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize) {
       varv[MAXLEN], avgv[MAXLEN], val, total_var;
   BUFTYPE *psrc, *pdst;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   depth -= whalf; /* don't do outer ring of pixels, so we don't have */
   width -= whalf; /* to deal with boundary conditions */
@@ -881,8 +882,8 @@ MRI *MRIplaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize) {
           the cortical surface.
           */
         maxi = mini = -1;
-        min_var = 100000.0f;  /* minimum variance of set of planes */
-        max_var = -100000.0f; /* maximum variance of set of planes */
+        min_var     = 100000.0f;  /* minimum variance of set of planes */
+        max_var     = -100000.0f; /* maximum variance of set of planes */
         if (MRIvox(mri_src, x, y, z) < 50)
           continue;
 
@@ -925,11 +926,11 @@ MRI *MRIplaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize) {
           total_var /= (float)wsize;
           if (total_var > max_var) {
             max_var = total_var;
-            maxi = vertex;
+            maxi    = vertex;
           }
           if (total_var < min_var) {
             min_var = total_var;
-            mini = vertex;
+            mini    = vertex;
           }
         }
         /* done - put vector components into output */
@@ -954,7 +955,7 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
   float min_mean, min_var, max_var, total, total_sq, nv, varv, avgv, val,
       background_val, fmax;
   BUFTYPE *pdst, max_val;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+  float    xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
       e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   if (getenv("USE_CACHED_CPOLV")) {
@@ -962,7 +963,12 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
     MRI *mri_tmp;
 
     /* try and read previously computed CPOLV file from disk */
-    sprintf(fname, "%s/cpolv.mnc", mri_src->fname);
+    int req = snprintf(fname, 100, "%s/cpolv.mnc", mri_src->fname);
+    if (req >= 100) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     mri_tmp = MRIread(fname);
     if (mri_tmp) {
       if (Gdiag & DIAG_SHOW)
@@ -970,7 +976,7 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
       if (mri_tmp->width == mri_src->width &&
           mri_tmp->height == mri_src->height &&
           mri_tmp->depth == mri_src->depth) {
-        mri_dst = MRIcopy(mri_tmp, nullptr);
+        mri_dst = MRIcopy(mri_tmp, NULL);
         MRIfree(&mri_tmp);
         return (mri_dst);
       }
@@ -986,13 +992,13 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
   MRIvalRange(mri_src, &background_val, &fmax);
   background_val *= 0.2f; /* anything smaller than 20% of peak is bg */
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
 #if 0
   depth -= whalf ;   /* don't do outer ring of pixels, so we don't have */
@@ -1009,9 +1015,9 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
     z1 = MIN(z0 + mri_src->roi.dz - 1, depth - 1);
   } else {
     x0 = y0 = z0 = 0;
-    x1 = width - 1;
-    y1 = height - 1;
-    z1 = depth - 1;
+    x1           = width - 1;
+    y1           = height - 1;
+    z1           = depth - 1;
   }
 
   for (z = z0; z <= z1; z++) {
@@ -1032,15 +1038,15 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
           the cortical surface.
           */
         maxi = mini = -1;
-        min_mean = 1000.0f;   /* mean of minimum variance plane */
-        min_var = 100000.0f;  /* minimum variance of central planes */
-        max_var = -100000.0f; /* maximum variance of central planes */
-        pe1_x = e1_x_v;
-        pe1_y = e1_y_v;
-        pe1_z = e1_z_v;
-        pe2_x = e2_x_v;
-        pe2_y = e2_y_v;
-        pe2_z = e2_z_v;
+        min_mean    = 1000.0f;    /* mean of minimum variance plane */
+        min_var     = 100000.0f;  /* minimum variance of central planes */
+        max_var     = -100000.0f; /* maximum variance of central planes */
+        pe1_x       = e1_x_v;
+        pe1_y       = e1_y_v;
+        pe1_z       = e1_z_v;
+        pe2_x       = e2_x_v;
+        pe2_y       = e2_y_v;
+        pe2_z       = e2_z_v;
         for (vertex = 0; vertex < NVERTICES; vertex++) {
           e1_x = *pe1_x++; /* first in-plane basis vector */
           e1_y = *pe1_y++;
@@ -1050,7 +1056,7 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
           e2_z = *pe2_z++;
 
           total = total_sq = nv = 0.0f;
-          max_val = 0;
+          max_val               = 0;
           /* now find the values in this plane */
           for (yk = -whalf; yk <= whalf; yk++) {
             xbase = (float)x + (float)yk * e2_x;
@@ -1058,12 +1064,12 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
             zbase = (float)z + (float)yk * e2_z;
             for (xk = -whalf; xk <= whalf; xk++) {
               /* in-plane vect. is linear combination of scaled basis vects */
-              xi = nint(xbase + xk * e1_x);
-              xi = pxi[xi];
-              yi = nint(ybase + xk * e1_y);
-              yi = pyi[yi];
-              zi = nint(zbase + xk * e1_z);
-              zi = pzi[zi];
+              xi  = nint(xbase + xk * e1_x);
+              xi  = pxi[xi];
+              yi  = nint(ybase + xk * e1_y);
+              yi  = pyi[yi];
+              zi  = nint(zbase + xk * e1_z);
+              zi  = pzi[zi];
               val = (float)MRIvox(mri_src, xi, yi, zi);
               total += val;          /* sum of all values in this plane */
               total_sq += val * val; /* sum of squared values in this plane */
@@ -1080,11 +1086,11 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
 
           if (varv > max_var) {
             max_var = varv;
-            maxi = vertex;
+            maxi    = vertex;
           }
           if (varv < min_var) {
-            min_var = varv;
-            mini = vertex;
+            min_var  = varv;
+            mini     = vertex;
             min_mean = avgv;
           }
           if (FZERO(varv)) /* zero variance - won't find anything less */
@@ -1114,7 +1120,7 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask,
   float min_mean, min_var, max_var, total, total_sq, nv, varv, avgv, val;
 
   BUFTYPE *pdst, max_val, *pmask;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+  float    xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
       e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
@@ -1123,13 +1129,13 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask,
   pyi = mri_src->yi;
   pzi = mri_src->zi;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   if (mri_src->roi.dx > 0) {
     x0 = MAX(0, mri_src->roi.x);
@@ -1140,14 +1146,14 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask,
     z1 = MIN(z0 + mri_src->roi.dz - 1, depth - 1);
   } else {
     x0 = y0 = z0 = 0;
-    x1 = width - 1;
-    y1 = height - 1;
-    z1 = depth - 1;
+    x1           = width - 1;
+    y1           = height - 1;
+    z1           = depth - 1;
   }
 
   for (z = z0; z <= z1; z++) {
     for (y = y0; y <= y1; y++) {
-      pdst = &MRIvox(mri_dst, x0, y, z);
+      pdst  = &MRIvox(mri_dst, x0, y, z);
       pmask = &MRIvox(mri_mask, x0, y, z);
       for (x = x0; x <= x1; x++) {
         if (*pmask++ == 0) /* don't do this one */
@@ -1163,15 +1169,15 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask,
           the cortical surface.
           */
         maxi = mini = -1;
-        min_mean = 1000.0f;   /* mean of minimum variance plane */
-        min_var = 100000.0f;  /* minimum variance of central planes */
-        max_var = -100000.0f; /* maximum variance of central planes */
-        pe1_x = e1_x_v;
-        pe1_y = e1_y_v;
-        pe1_z = e1_z_v;
-        pe2_x = e2_x_v;
-        pe2_y = e2_y_v;
-        pe2_z = e2_z_v;
+        min_mean    = 1000.0f;    /* mean of minimum variance plane */
+        min_var     = 100000.0f;  /* minimum variance of central planes */
+        max_var     = -100000.0f; /* maximum variance of central planes */
+        pe1_x       = e1_x_v;
+        pe1_y       = e1_y_v;
+        pe1_z       = e1_z_v;
+        pe2_x       = e2_x_v;
+        pe2_y       = e2_y_v;
+        pe2_z       = e2_z_v;
         for (vertex = 0; vertex < NVERTICES; vertex++) {
           e1_x = *pe1_x++; /* first in-plane basis vector */
           e1_y = *pe1_y++;
@@ -1181,7 +1187,7 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask,
           e2_z = *pe2_z++;
 
           total = total_sq = nv = 0.0f;
-          max_val = 0;
+          max_val               = 0;
           /* now find the values in this plane */
           for (yk = -whalf; yk <= whalf; yk++) {
             xbase = (float)x + (float)yk * e2_x;
@@ -1189,12 +1195,12 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask,
             zbase = (float)z + (float)yk * e2_z;
             for (xk = -whalf; xk <= whalf; xk++) {
               /* in-plane vect. is linear combination of scaled basis vects */
-              xi = nint(xbase + xk * e1_x);
-              xi = pxi[xi];
-              yi = nint(ybase + xk * e1_y);
-              yi = pyi[yi];
-              zi = nint(zbase + xk * e1_z);
-              zi = pzi[zi];
+              xi  = nint(xbase + xk * e1_x);
+              xi  = pxi[xi];
+              yi  = nint(ybase + xk * e1_y);
+              yi  = pyi[yi];
+              zi  = nint(zbase + xk * e1_z);
+              zi  = pzi[zi];
               val = (float)MRIvox(mri_src, xi, yi, zi);
               total += val;          /* sum of all values in this plane */
               total_sq += val * val; /* sum of squared values in this plane */
@@ -1211,11 +1217,11 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask,
 
           if (varv > max_var) {
             max_var = varv;
-            maxi = vertex;
+            maxi    = vertex;
           }
           if (varv < min_var) {
-            min_var = varv;
-            mini = vertex;
+            min_var  = varv;
+            mini     = vertex;
             min_mean = avgv;
           }
           if (FZERO(varv)) /* zero variance - won't find anything less */
@@ -1273,7 +1279,7 @@ static int compare_sort_array(const void *pc1, const void *pc2) {
              product of that vector with the normal (ez) to obtain
              the 2nd in-plane basis vector.
 ------------------------------------------------------*/
-static void init_basis_vectors() {
+static void init_basis_vectors(void) {
   float vx, vy, vz, *px, *py, *pz, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y,
       *pe2_z, e3_x, e3_y, e3_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, len;
   int vertex;
@@ -1281,9 +1287,9 @@ static void init_basis_vectors() {
   if (vertices_initialized)
     return;
 
-  px = ic_x_vertices;
-  py = ic_y_vertices;
-  pz = ic_z_vertices;
+  px    = ic_x_vertices;
+  py    = ic_y_vertices;
+  pz    = ic_z_vertices;
   pe1_x = e1_x_v;
   pe1_y = e1_y_v;
   pe1_z = e1_z_v;
@@ -1335,14 +1341,14 @@ static void init_basis_vectors() {
     e1_x = *pe1_x++ = e1_x * len;
     e1_y = *pe1_y++ = e1_y * len;
     e1_z = *pe1_z++ = e1_z * len;
-    len = sqrt(e1_x * e1_x + e1_y * e1_y + e1_z * e1_z);
+    len             = sqrt(e1_x * e1_x + e1_y * e1_y + e1_z * e1_z);
 
     e2_x = e1_y * e3_z - e1_z * e3_y;
     e2_y = e1_x * e3_z - e1_z * e3_x;
     e2_z = e1_y * e3_x - e1_x * e3_y;
-    vx = fabs(e2_x);
-    vy = fabs(e2_y);
-    vz = fabs(e2_z);            /* use symmetry */
+    vx   = fabs(e2_x);
+    vy   = fabs(e2_y);
+    vz   = fabs(e2_z);          /* use symmetry */
     if ((vx > vy) && (vx > vz)) /* scale using x component */
       len = 1.0f / vx;
     else if (vy > vz) /* scale using y component */
@@ -1377,24 +1383,24 @@ static void init_basis_vectors() {
 MRI *MRIfindThinWMStrands(MRI *mri_src, MRI *mri_dst, int wsize) {
   int width, height, depth, x, y, z, whalf, yk, n, vertex, xi, yi, zi, *pxi,
       *pyi, *pzi, thin, was_white, black_white, val;
-  float nx, ny, nz, xf, yf, zf;
+  float    nx, ny, nz, xf, yf, zf;
   BUFTYPE *pdst, *psrc;
 
   printf("MRIfindThinWMStrands() wsize=%d\n", wsize);
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   init_basis_vectors();
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
   pzi = mri_src->zi;
-  n = wsize * wsize;
+  n   = wsize * wsize;
   for (z = 0; z < depth; z++) {
     DiagHeartbeat((float)z / (float)(depth - 1));
     for (y = 0; y < height; y++) {
@@ -1404,19 +1410,19 @@ MRI *MRIfindThinWMStrands(MRI *mri_src, MRI *mri_dst, int wsize) {
         thin = 0;
         if (*psrc++)
           for (vertex = 0; !thin && vertex < NVERTICES; vertex++) {
-            was_white = -1;
+            was_white   = -1;
             black_white = -wsize - 1;
-            nx = ic_x_vertices[vertex]; /* normal vector */
-            ny = ic_y_vertices[vertex];
-            nz = ic_z_vertices[vertex];
+            nx          = ic_x_vertices[vertex]; /* normal vector */
+            ny          = ic_y_vertices[vertex];
+            nz          = ic_z_vertices[vertex];
 
             xf = (float)x - wsize * nx;
             yf = (float)y - wsize * ny;
             zf = (float)z - wsize * nz;
             for (yk = -wsize; yk <= wsize; yk++) {
-              xi = pxi[nint(xf)];
-              yi = pyi[nint(yf)];
-              zi = pzi[nint(zf)];
+              xi  = pxi[nint(xf)];
+              yi  = pyi[nint(yf)];
+              zi  = pzi[nint(zf)];
               val = (float)MRIvox(mri_src, xi, yi, zi);
               if ((was_white > 0) && !val) /* white to black transition */
               {
@@ -1451,21 +1457,21 @@ MRI *MRIfindThinWMStrands(MRI *mri_src, MRI *mri_dst, int wsize) {
 ------------------------------------------------------*/
 #define MAX_LABELS 10000
 MRI *MRIresegmentThinWMStrands(MRI *mri_src, MRI *mri_dst, int thickness) {
-  int width, height, depth, x, y, z, vertex, thin, i;
-  float nx, ny, nz, nd;
-  BUFTYPE *pdst, *psrc;
-  double val, xf, yf, zf, max_dist, up_dist, down_dist;
-  MRI *mri_label;
+  int               width, height, depth, x, y, z, vertex, thin, i;
+  float             nx, ny, nz, nd;
+  BUFTYPE *         pdst, *psrc;
+  double            val, xf, yf, zf, max_dist, up_dist, down_dist;
+  MRI *             mri_label;
   MRI_SEGMENTATION *mriseg;
 
-  width = mri_src->width;
-  height = mri_src->height;
-  depth = mri_src->depth;
+  width    = mri_src->width;
+  height   = mri_src->height;
+  depth    = mri_src->depth;
   max_dist = thickness / 2 + 1; /* allow search to extend into non-white */
 
   init_basis_vectors();
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   for (vertex = 0; vertex < NVERTICES; vertex++) {
     nx = ic_x_vertices[vertex]; /* normal vector */
@@ -1527,13 +1533,13 @@ MRI *MRIresegmentThinWMStrands(MRI *mri_src, MRI *mri_dst, int thickness) {
     fprintf(stderr, "%d segments found\n", mriseg->nsegments);
     {
       float max_area = 0.0;
-      int max_i = -1;
+      int   max_i    = -1;
 
-      mri_label = nullptr;
+      mri_label = NULL;
       for (i = 0; i < mriseg->max_segments; i++) {
         if (mriseg->segments[i].area > max_area) {
           max_area = mriseg->segments[i].area;
-          max_i = i;
+          max_i    = i;
           if (mriseg->segments[i].nvoxels > 100) {
             fprintf(stderr, "segment %3d, area = %2.2f, nvox=%d\n", i,
                     mriseg->segments[i].area, mriseg->segments[i].nvoxels);
@@ -1543,7 +1549,7 @@ MRI *MRIresegmentThinWMStrands(MRI *mri_src, MRI *mri_dst, int thickness) {
       }
       if (max_i >= 0) {
         if (!mri_label)
-          mri_label = MRIsegmentToImage(mri_src, nullptr, mriseg, i);
+          mri_label = MRIsegmentToImage(mri_src, NULL, mriseg, i);
         MRIwrite(mri_label, "max_label.mgh");
         MRIfree(&mri_label);
       }
@@ -1697,27 +1703,27 @@ Returns value:
 Description
 ------------------------------------------------------*/
 #define MAX_LABELS 10000
-#define TOO_THIN 2
+#define TOO_THIN   2
 MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst,
                              int thickness, int nsegments, float wm_hi) {
   int width, height, depth, x, y, z, thin, i, dont_fill, up_added, down_added,
       total_filled, nfilled, nseg, nx, ny, nz, xv, yv, zv, v;
-  float nd;
+  float  nd;
   double val, xf, yf, zf, max_dist, up_dist, down_dist /*, xt, yt, zt*/;
   MRI_SEGMENTATION *mriseg;
-  MRI *mri_thin, *mri_tmp;
+  MRI *             mri_thin, *mri_tmp;
   printf("MRIthickenThinWMStrands(): thickness=%d, nsegments=%d\n", thickness,
          nsegments);
-  width = mri_src->width;
-  height = mri_src->height;
-  depth = mri_src->depth;
+  width    = mri_src->width;
+  height   = mri_src->height;
+  depth    = mri_src->depth;
   max_dist = thickness / 2 + 1; /* allow search to extend into non-white */
 
   init_basis_vectors();
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
-  mri_thin = MRIclone(mri_src, nullptr);
-  mri_tmp = MRIremoveIslands(mri_src, nullptr, 3, 27 - 3);
+    mri_dst = MRIclone(mri_src, NULL);
+  mri_thin = MRIclone(mri_src, NULL);
+  mri_tmp  = MRIremoveIslands(mri_src, NULL, 3, 27 - 3);
   MRIclose(mri_tmp, mri_tmp);
 
   MRIcopy(mri_src, mri_dst);
@@ -1775,21 +1781,20 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst,
     }
   }
 
-  /* now thicken the strand, being careful not to connect with other  strands.
-   */
+  /* now thicken the strand, being careful not to connect with other  strands.  */
   total_filled = 0;
-  mriseg = MRIsegment(mri_thin, 1, 255);
+  mriseg       = MRIsegment(mri_thin, 1, 255);
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-    char fname[200];
+    char         fname[200];
     MRI_SEGMENT *mseg;
-    MRI *mri_tmp = nullptr;
+    MRI *        mri_tmp = NULL;
 
     for (nseg = 0; nseg < nsegments; nseg++) {
       i = MRIsegmentMax(mriseg); /* find largest remaining segment */
       if (i < 0)
         break;
-      mseg = &mriseg->segments[i];
+      mseg    = &mriseg->segments[i];
       mri_tmp = MRIsegmentToImage(mri_src, mri_tmp, mriseg, i);
       sprintf(fname, "seg%d.mgh", i);
       MRIwrite(mri_tmp, fname);
@@ -1802,15 +1807,15 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst,
     MRIsegmentDilate(mriseg, mri_src);
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-    char fname[200];
-    MRI *mri_tmp = nullptr;
+    char         fname[200];
+    MRI *        mri_tmp = NULL;
     MRI_SEGMENT *mseg;
 
     for (nseg = 0; nseg < nsegments; nseg++) {
       i = MRIsegmentMax(mriseg); /* find largest remaining segment */
       if (i < 0)
         break;
-      mseg = &mriseg->segments[i];
+      mseg    = &mriseg->segments[i];
       mri_tmp = MRIsegmentToImage(mri_src, mri_tmp, mriseg, i);
       sprintf(fname, "dilated_seg%d.mgh", i);
       MRIwrite(mri_tmp, fname);
@@ -1894,9 +1899,9 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst,
                 if ((MRIindexNotInVolume(mri_T1, xv, yv, zv) == 0) &&
                     !MRIgetVoxVal(mri_dst, xv, yv, zv, 0)) {
                   up_added = 1;
-                  xv = nint((double)x + (up_dist + .5) * nx);
-                  yv = nint((double)y + (up_dist + .5) * ny);
-                  zv = nint((double)z + (up_dist + .5) * nz);
+                  xv       = nint((double)x + (up_dist + .5) * nx);
+                  yv       = nint((double)y + (up_dist + .5) * ny);
+                  zv       = nint((double)z + (up_dist + .5) * nz);
 
                   if (MRIgetVoxVal(mri_T1, xv, yv, zv, 0) < wm_hi) {
                     if (xv == 110 && yv == 125 && zv == 172)
@@ -1920,9 +1925,9 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst,
                 }
                 if (!MRIgetVoxVal(mri_dst, xv, yv, zv, 0)) {
                   down_added = 1;
-                  xv = nint((double)x - (down_dist + .5) * nx);
-                  yv = nint((double)y - (down_dist + .5) * ny);
-                  zv = nint((double)z - (down_dist + .5) * nz);
+                  xv         = nint((double)x - (down_dist + .5) * nx);
+                  yv         = nint((double)y - (down_dist + .5) * ny);
+                  zv         = nint((double)z - (down_dist + .5) * nz);
                   if (MRIgetVoxVal(mri_T1, xv, yv, zv, 0) < wm_hi) {
                     if (xv == 110 && yv == 125 && zv == 172)
                       DiagBreak(); /* T1=148, wm=THICKEN */
@@ -2023,14 +2028,14 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst,
         Description
 ------------------------------------------------------*/
 MRI *MRIorderThreshold(MRI *mri_src, MRI *mri_dst, MRI *mri_order, int num) {
-  int width, height, depth, x, y, z, frame;
+  int      width, height, depth, x, y, z, frame;
   BUFTYPE *psrc, *pdst, *porder, val;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   if (mri_src->type != MRI_UCHAR || mri_dst->type != MRI_UCHAR ||
       mri_order->type != MRI_UCHAR)
@@ -2040,8 +2045,8 @@ MRI *MRIorderThreshold(MRI *mri_src, MRI *mri_dst, MRI *mri_order, int num) {
   for (frame = 0; frame < mri_src->nframes; frame++) {
     for (z = 0; z < depth; z++) {
       for (y = 0; y < height; y++) {
-        psrc = &MRIseq_vox(mri_src, 0, y, z, frame);
-        pdst = &MRIseq_vox(mri_dst, 0, y, z, frame);
+        psrc   = &MRIseq_vox(mri_src, 0, y, z, frame);
+        pdst   = &MRIseq_vox(mri_dst, 0, y, z, frame);
         porder = &MRIseq_vox(mri_order, 0, y, z, frame);
         for (x = 0; x < width; x++, psrc++) {
           if (*porder++ >= num)
@@ -2069,30 +2074,30 @@ MRI *MRIpolvCount(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   float val;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   init_basis_vectors();
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
   pzi = mri_src->zi;
-  n = wsize * wsize;
+  n   = wsize * wsize;
   for (z = 0; z < depth; z++) {
     DiagHeartbeat((float)z / (float)(depth - 1));
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
         vertex = (int)MRIgetVoxVal(mri_polv, x, y, z, 0);
-        e1_x = e1_x_v[vertex]; /* basis vectors for plane */
-        e1_y = e1_y_v[vertex];
-        e1_z = e1_z_v[vertex];
-        e2_x = e2_x_v[vertex];
-        e2_y = e2_y_v[vertex];
-        e2_z = e2_z_v[vertex];
+        e1_x   = e1_x_v[vertex]; /* basis vectors for plane */
+        e1_y   = e1_y_v[vertex];
+        e1_z   = e1_z_v[vertex];
+        e2_x   = e2_x_v[vertex];
+        e2_y   = e2_y_v[vertex];
+        e2_z   = e2_z_v[vertex];
 
         /*
            calculate the median in the plane orthogonal to (a,b,c),
@@ -2106,12 +2111,12 @@ MRI *MRIpolvCount(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
           zbase = (float)z + (float)yk * e2_z;
           for (xk = -whalf; xk <= whalf; xk++) {
             /* in-plane vect. is linear combination of scaled basis vects */
-            xi = nint(xbase + xk * e1_x);
-            xi = pxi[xi];
-            yi = nint(ybase + xk * e1_y);
-            yi = pyi[yi];
-            zi = nint(zbase + xk * e1_z);
-            zi = pzi[zi];
+            xi  = nint(xbase + xk * e1_x);
+            xi  = pxi[xi];
+            yi  = nint(ybase + xk * e1_y);
+            yi  = pyi[yi];
+            zi  = nint(zbase + xk * e1_z);
+            zi  = pzi[zi];
             val = MRIvox(mri_src, xi, yi, zi);
             if (val >= lo_lim && val <= hi_lim)
               order++;
@@ -2134,30 +2139,30 @@ MRI *MRIpolvCount(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
 ------------------------------------------------------*/
 
 #define WHITE_LOW 90
-#define GRAY_HI 95
-#define WHITE_HI 130
-#define WSIZE 9
+#define GRAY_HI   95
+#define WHITE_HI  130
+#define WSIZE     9
 
-#define LABEL_NOTWHITE 0
-#define LABEL_UNKNOWN 255
+#define LABEL_NOTWHITE  0
+#define LABEL_UNKNOWN   255
 #define LABEL_AMBIGUOUS LABEL_UNKNOWN
 
 #define PSLOPE 1.0
 #define NSLOPE 1.0
 
-#define AMBIGUOUS_PCT 0.8
-#define N1_SIZE 27
+#define AMBIGUOUS_PCT    0.8
+#define N1_SIZE          27
 #define AMBIGUOUS_THRESH (N1_SIZE * AMBIGUOUS_PCT)
-#define N2_SIZE (5 * 5)
-#define REVERSE_PCT 0.6
-#define REVERSE_THRESH (N2_SIZE * REVERSE_PCT)
+#define N2_SIZE          (5 * 5)
+#define REVERSE_PCT      0.6
+#define REVERSE_THRESH   (N2_SIZE * REVERSE_PCT)
 
 #define DEBUG_POINT(x, y, z) (((x) == 75) && ((y) == 96) && ((z) == 127))
 MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
                  float pslope) {
   int width, height, depth, x, y, z, whalf, vertex, xi, yi, zi, xo, yo, zo,
       *pxi, *pyi, *pzi, i, nwhite, nblack, count;
-  float nx, ny, nz, dx, dy, dz, curv;
+  float    nx, ny, nz, dx, dy, dz, curv;
   BUFTYPE *pdst, *pptr, val0, /* *psrc, */ gray_hi, white_low /*,mean, *pmean*/,
       *plabel, *psrc, l;
   MRI *mri_curv, *mri_label /*, *mri_tmp*/;
@@ -2167,9 +2172,9 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
   if (FZERO(nslope))
     nslope = NSLOPE;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (DIAG_VERBOSE_ON)
     mri_curv = MRIalloc(width, height, depth, MRI_FLOAT);
   mri_label = MRIalloc(width, height, depth, MRI_UCHAR);
@@ -2178,7 +2183,7 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
 
   init_basis_vectors();
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -2190,20 +2195,20 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
      */
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      psrc = &MRIvox(mri_src, 0, y, z);
+      psrc   = &MRIvox(mri_src, 0, y, z);
       plabel = &MRIvox(mri_label, 0, y, z);
-      pdst = &MRIvox(mri_dst, 0, y, z);
-      pptr = &MRIvox(mri_polv, 0, y, z); /* ptr to normal vectors */
+      pdst   = &MRIvox(mri_dst, 0, y, z);
+      pptr   = &MRIvox(mri_polv, 0, y, z); /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
         if (DEBUG_POINT(x, y, z))
           DiagBreak();
 
         /* calculate through-polv curvature */
         vertex = *pptr++;
-        nx = ic_x_vertices[vertex];
-        ny = ic_y_vertices[vertex];
-        nz = ic_z_vertices[vertex];
-        val0 = *psrc++;
+        nx     = ic_x_vertices[vertex];
+        ny     = ic_y_vertices[vertex];
+        nz     = ic_z_vertices[vertex];
+        val0   = *psrc++;
 
 #if 1
         /* now compute the curvature in the normal direction */
@@ -2226,9 +2231,9 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
         for (curv = 0.0f, i = -whalf; i <= whalf; i++) {
           if (!i)
             continue;
-          dx = (float)i * nx;
-          dy = (float)i * ny;
-          dz = (float)i * nz;
+          dx  = (float)i * nx;
+          dy  = (float)i * ny;
+          dz  = (float)i * nz;
 #if 0
           xi = pxi[x+nint(dx)] ;
           yi = pyi[y+nint(dy)] ;
@@ -2253,7 +2258,7 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
           MRIFvox(mri_curv, x, y, z) = curv;
 
         white_low = WHITE_LOW;
-        gray_hi = GRAY_HI;
+        gray_hi   = GRAY_HI;
         if (curv < 0.0f) /* gyrus */
         {
           white_low += nint(nslope * curv);
@@ -2297,8 +2302,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
      */
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pdst = &MRIvox(mri_dst, 0, y, z); /* ptr to destination */
-      psrc = &MRIvox(mri_src, 0, y, z);
+      pdst   = &MRIvox(mri_dst, 0, y, z); /* ptr to destination */
+      psrc   = &MRIvox(mri_src, 0, y, z);
       plabel = &MRIvox(mri_label, 0, y, z);
       for (x = 0; x < width; x++) {
         if (DEBUG_POINT(x, y, z))
@@ -2317,7 +2322,7 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
             yi = pyi[y + yo];
             for (xo = -1; xo <= 1; xo++) {
               xi = pxi[x + xo];
-              l = MRIvox(mri_label, xi, yi, zi);
+              l  = MRIvox(mri_label, xi, yi, zi);
               if (l)
                 nwhite++;
               else
@@ -2326,7 +2331,7 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
           }
         }
         val0 = *psrc++;
-        l = *plabel++;
+        l    = *plabel++;
         if (l && nwhite > AMBIGUOUS_THRESH)
           l = val0;
         else if (!l && nblack > AMBIGUOUS_THRESH)
@@ -2347,10 +2352,10 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
     */
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pdst = &MRIvox(mri_dst, 0, y, z);     /* ptr to destination */
+      pdst   = &MRIvox(mri_dst, 0, y, z);   /* ptr to destination */
       plabel = &MRIvox(mri_label, 0, y, z); /* ptr to destination */
-      pptr = &MRIvox(mri_polv, 0, y, z);    /* ptr to normal vectors */
-      psrc = &MRIvox(mri_src, 0, y, z);     /* ptr to normal vectors */
+      pptr   = &MRIvox(mri_polv, 0, y, z);  /* ptr to normal vectors */
+      psrc   = &MRIvox(mri_src, 0, y, z);   /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
         if (DEBUG_POINT(x, y, z))
           DiagBreak();
@@ -2364,10 +2369,10 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
         }
 
         vertex = *pptr++;
-        val0 = *plabel++;
-        nx = ic_x_vertices[vertex];
-        ny = ic_y_vertices[vertex];
-        nz = ic_z_vertices[vertex];
+        val0   = *plabel++;
+        nx     = ic_x_vertices[vertex];
+        ny     = ic_y_vertices[vertex];
+        nz     = ic_z_vertices[vertex];
         count =
             MRIcountPlanarAboveThreshold(mri_label, vertex, x, y, z, 5, 1, 255);
         if (val0 && count < N2_SIZE - REVERSE_THRESH)
@@ -2465,19 +2470,19 @@ MRI *MRIwmfilterMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize,
                        float pct, int onoff) {
   int width, height, depth, x, y, z, whalf, vertex, num_on, num_off, num,
       changed, low_thresh;
-  float thresh;
+  float    thresh;
   BUFTYPE *pdst, *pmask, *psrc, l;
 
-  thresh = wsize * wsize * pct;
-  width = mri_src->width;
-  height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  thresh     = wsize * wsize * pct;
+  width      = mri_src->width;
+  height     = mri_src->height;
+  depth      = mri_src->depth;
+  whalf      = (wsize - 1) / 2;
   low_thresh = (wsize * wsize) / 2;
 
   init_basis_vectors();
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   /*
     now go through again, and for any voxel which was labeled ambiguous,
@@ -2486,9 +2491,9 @@ MRI *MRIwmfilterMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize,
     */
   for (num = changed = z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pdst = &MRIvox(mri_dst, 0, y, z);   /* ptr to destination */
+      pdst  = &MRIvox(mri_dst, 0, y, z);  /* ptr to destination */
       pmask = &MRIvox(mri_mask, 0, y, z); /* ptr to destination */
-      psrc = &MRIvox(mri_src, 0, y, z);   /* ptr to normal vectors */
+      psrc  = &MRIvox(mri_src, 0, y, z);  /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
         if (DEBUG_POINT(x, y, z))
           DiagBreak();
@@ -2561,15 +2566,15 @@ int MRIcountCpolvAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
     of all the planes is smallest. This will hopefully be the normal to
     the cortical surface.
     */
-  pe1_x = e1_x_v;
-  pe1_y = e1_y_v;
-  pe1_z = e1_z_v;
-  pe2_x = e2_x_v;
-  pe2_y = e2_y_v;
-  pe2_z = e2_z_v;
+  pe1_x     = e1_x_v;
+  pe1_y     = e1_y_v;
+  pe1_z     = e1_z_v;
+  pe2_x     = e2_x_v;
+  pe2_y     = e2_y_v;
+  pe2_z     = e2_z_v;
   max_count = peak_vertex = 0;
   for (vertex = 0; vertex < NVERTICES; vertex++) {
-    num = 0;
+    num  = 0;
     e1_x = *pe1_x++; /* first in-plane basis vector */
     e1_y = *pe1_y++;
     e1_z = *pe1_z++;
@@ -2584,12 +2589,12 @@ int MRIcountCpolvAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
       zbase = (float)z + (float)yk * e2_z;
       for (xk = -whalf; xk <= whalf; xk++) {
         /* in-plane vect. is linear combination of scaled basis vects */
-        xi = nint(xbase + xk * e1_x);
-        xi = pxi[xi];
-        yi = nint(ybase + xk * e1_y);
-        yi = pyi[yi];
-        zi = nint(zbase + xk * e1_z);
-        zi = pzi[zi];
+        xi    = nint(xbase + xk * e1_x);
+        xi    = pxi[xi];
+        yi    = nint(ybase + xk * e1_y);
+        yi    = pyi[yi];
+        zi    = nint(zbase + xk * e1_z);
+        zi    = pzi[zi];
         label = MRIgetVoxVal(mri_src, xi, yi, zi, 0);
         if (label == label_to_check)
           num++;
@@ -2597,7 +2602,7 @@ int MRIcountCpolvAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
     }
     if (num >= max_count) {
       peak_vertex = vertex;
-      max_count = num;
+      max_count   = num;
     }
   }
 
@@ -2638,15 +2643,15 @@ int MRIcountCpolvOnAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
     of all the planes is smallest. This will hopefully be the normal to
     the cortical surface.
     */
-  pe1_x = e1_x_v;
-  pe1_y = e1_y_v;
-  pe1_z = e1_z_v;
-  pe2_x = e2_x_v;
-  pe2_y = e2_y_v;
-  pe2_z = e2_z_v;
+  pe1_x     = e1_x_v;
+  pe1_y     = e1_y_v;
+  pe1_z     = e1_z_v;
+  pe2_x     = e2_x_v;
+  pe2_y     = e2_y_v;
+  pe2_z     = e2_z_v;
   max_count = peak_vertex = 0;
   for (vertex = 0; vertex < NVERTICES; vertex++) {
-    num = 0;
+    num  = 0;
     e1_x = *pe1_x++; /* first in-plane basis vector */
     e1_y = *pe1_y++;
     e1_z = *pe1_z++;
@@ -2661,12 +2666,12 @@ int MRIcountCpolvOnAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
       zbase = (float)z + (float)yk * e2_z;
       for (xk = -whalf; xk <= whalf; xk++) {
         /* in-plane vect. is linear combination of scaled basis vects */
-        xi = nint(xbase + xk * e1_x);
-        xi = pxi[xi];
-        yi = nint(ybase + xk * e1_y);
-        yi = pyi[yi];
-        zi = nint(zbase + xk * e1_z);
-        zi = pzi[zi];
+        xi    = nint(xbase + xk * e1_x);
+        xi    = pxi[xi];
+        yi    = nint(ybase + xk * e1_y);
+        yi    = pyi[yi];
+        zi    = nint(zbase + xk * e1_z);
+        zi    = pzi[zi];
         label = MRIvox(mri_src, xi, yi, zi);
         if (label)
           num++;
@@ -2674,7 +2679,7 @@ int MRIcountCpolvOnAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
     }
     if (num >= max_count) {
       peak_vertex = vertex;
-      max_count = num;
+      max_count   = num;
     }
   }
 
@@ -2715,15 +2720,15 @@ int MRIcountCpolvOffAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
     of all the planes is smallest. This will hopefully be the normal to
     the cortical surface.
     */
-  pe1_x = e1_x_v;
-  pe1_y = e1_y_v;
-  pe1_z = e1_z_v;
-  pe2_x = e2_x_v;
-  pe2_y = e2_y_v;
-  pe2_z = e2_z_v;
+  pe1_x       = e1_x_v;
+  pe1_y       = e1_y_v;
+  pe1_z       = e1_z_v;
+  pe2_x       = e2_x_v;
+  pe2_y       = e2_y_v;
+  pe2_z       = e2_z_v;
   peak_vertex = max_count = 0;
   for (vertex = 0; vertex < NVERTICES; vertex++) {
-    num = 0;
+    num  = 0;
     e1_x = *pe1_x++; /* first in-plane basis vector */
     e1_y = *pe1_y++;
     e1_z = *pe1_z++;
@@ -2738,12 +2743,12 @@ int MRIcountCpolvOffAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
       zbase = (float)z + (float)yk * e2_z;
       for (xk = -whalf; xk <= whalf; xk++) {
         /* in-plane vect. is linear combination of scaled basis vects */
-        xi = nint(xbase + xk * e1_x);
-        xi = pxi[xi];
-        yi = nint(ybase + xk * e1_y);
-        yi = pyi[yi];
-        zi = nint(zbase + xk * e1_z);
-        zi = pzi[zi];
+        xi    = nint(xbase + xk * e1_x);
+        xi    = pxi[xi];
+        yi    = nint(ybase + xk * e1_y);
+        yi    = pyi[yi];
+        zi    = nint(zbase + xk * e1_z);
+        zi    = pzi[zi];
         label = MRIvox(mri_src, xi, yi, zi);
         if (!label)
           num++;
@@ -2751,7 +2756,7 @@ int MRIcountCpolvOffAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
     }
     if (num >= max_count) {
       peak_vertex = vertex;
-      max_count = num;
+      max_count   = num;
     }
   }
 
@@ -2772,7 +2777,7 @@ MRI *MRIcpolvThreshold(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low,
   int width, height, depth, x, y, z, whalf, vertex, xk, yk, xi, yi, zi, *pxi,
       *pyi, *pzi, label, nlabeled, num_white, num_ambiguous, num_non_white;
   BUFTYPE *pdst, src, thresh;
-  float xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+  float    xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
 
@@ -2781,13 +2786,13 @@ MRI *MRIcpolvThreshold(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low,
   pzi = mri_labeled->zi;
 
   thresh = (wm_low + gray_hi) / 2;
-  width = mri_labeled->width;
+  width  = mri_labeled->width;
   height = mri_labeled->height;
-  depth = mri_labeled->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_labeled->depth;
+  whalf  = (wsize - 1) / 2;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_labeled, nullptr);
+    mri_dst = MRIclone(mri_labeled, NULL);
 
   nlabeled = 0;
   for (z = 0; z < depth; z++) {
@@ -2823,12 +2828,12 @@ MRI *MRIcpolvThreshold(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low,
               /*
                 in-plane vect. is linear combination of scaled basis vects
                 */
-              xi = nint(xbase + xk * e1_x);
-              xi = pxi[xi];
-              yi = nint(ybase + xk * e1_y);
-              yi = pyi[yi];
-              zi = nint(zbase + xk * e1_z);
-              zi = pzi[zi];
+              xi  = nint(xbase + xk * e1_x);
+              xi  = pxi[xi];
+              yi  = nint(ybase + xk * e1_y);
+              yi  = pyi[yi];
+              zi  = nint(zbase + xk * e1_z);
+              zi  = pzi[zi];
               src = MRIvox(mri_src, xi, yi, zi);
               if (src >= thresh)
                 num_white++;
@@ -2864,8 +2869,8 @@ MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize,
       *pyi, *pzi, label, nvox, nlabeled, num_white, num_ambiguous,
       num_non_white;
   BUFTYPE *pdst;
-  float xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
-  MRI *mri_tmp = nullptr;
+  float    xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+  MRI *    mri_tmp = NULL;
 
   init_basis_vectors();
 
@@ -2873,15 +2878,15 @@ MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize,
   pyi = mri_labeled->yi;
   pzi = mri_labeled->zi;
 
-  width = mri_labeled->width;
+  width  = mri_labeled->width;
   height = mri_labeled->height;
-  depth = mri_labeled->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_labeled->depth;
+  whalf  = (wsize - 1) / 2;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_labeled, nullptr);
+    mri_dst = MRIclone(mri_labeled, NULL);
   if (niter > 1) {
-    mri_tmp = MRIcopy(mri_labeled, nullptr);
+    mri_tmp     = MRIcopy(mri_labeled, NULL);
     mri_labeled = mri_tmp;
   }
 
@@ -2920,12 +2925,12 @@ MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize,
               zbase = (float)z + (float)yk * e2_z;
               for (xk = -whalf; xk <= whalf; xk++) {
                 /*in-plane vect. is linear combination of scaled basis vects */
-                xi = nint(xbase + xk * e1_x);
-                xi = pxi[xi];
-                yi = nint(ybase + xk * e1_y);
-                yi = pyi[yi];
-                zi = nint(zbase + xk * e1_z);
-                zi = pzi[zi];
+                xi    = nint(xbase + xk * e1_x);
+                xi    = pxi[xi];
+                yi    = nint(ybase + xk * e1_y);
+                yi    = pyi[yi];
+                zi    = nint(zbase + xk * e1_z);
+                zi    = pzi[zi];
                 label = MRIvox(mri_labeled, xi, yi, zi);
                 switch (label) {
                 default:
@@ -2988,21 +2993,21 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize,
       black_vertex, x0, y0, z0, xi, yi, zi, nskipped, dst_label, num_black,
       nwhite_to_black, nblack_to_white, i, skip;
   BUFTYPE *pdst, *psrc, *porig, orig;
-  float thresh, hi_thresh, sthresh;
-  MRI *mri_tmp;
+  float    thresh, hi_thresh, sthresh;
+  MRI *    mri_tmp;
 
   init_basis_vectors();
 
-  width = mri_src->width;
-  height = mri_src->height;
-  depth = mri_src->depth;
-  thresh = (float)(wsize * wsize) / 3.0f;
+  width     = mri_src->width;
+  height    = mri_src->height;
+  depth     = mri_src->depth;
+  thresh    = (float)(wsize * wsize) / 3.0f;
   hi_thresh = (float)(wsize * wsize) - thresh;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
   if (niter > 1)
-    mri_tmp = MRIcopy(mri_src, nullptr);
+    mri_tmp = MRIcopy(mri_src, NULL);
   else
     mri_tmp = mri_src;
   mri_src = mri_tmp; /* don't overwrite input */
@@ -3013,8 +3018,8 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize,
     for (z = 0; z < depth; z++) {
       DiagHeartbeat((float)(z) / (float)(depth - 1));
       for (y = 0; y < height; y++) {
-        pdst = &MRIvox(mri_dst, 0, y, z);
-        psrc = &MRIvox(mri_src, 0, y, z);
+        pdst  = &MRIvox(mri_dst, 0, y, z);
+        psrc  = &MRIvox(mri_src, 0, y, z);
         porig = &MRIvox(mri_orig, 0, y, z);
         for (x = 0; x < width; x++) {
           if (x == 10 && y == 43 && z == 13)
@@ -3026,15 +3031,15 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize,
           dst_label = *psrc++;
 
           total_vox++;
-          orig = *porig++;
-          skip = (orig < low_val) || (orig > hi_val);
+          orig      = *porig++;
+          skip      = (orig < low_val) || (orig > hi_val);
           num_black = num_white = 0;
           for (z0 = z - 1; !skip && z0 <= z + 1; z0++) {
             zi = mri_src->zi[z0];
             for (y0 = y - 1; !skip && y0 <= y + 1; y0++) {
               yi = mri_src->yi[y0];
               for (x0 = x - 1; !skip && x0 <= x + 1; x0++) {
-                xi = mri_src->xi[x0];
+                xi    = mri_src->xi[x0];
                 label = MRIvox(mri_src, xi, yi, zi);
                 if (label == MRI_WHITE)
                   ++num_white;
@@ -3059,11 +3064,11 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize,
           }
           if (dst_label == MRI_WHITE) {
             white_vertex =
-                MRIneighborhoodCpolv(mri_src, x, y, z, 3, wsize, nullptr);
+                MRIneighborhoodCpolv(mri_src, x, y, z, 3, wsize, NULL);
             num_white = MRIwhiteInPlane(mri_src, x, y, z, white_vertex, wsize);
             if (num_white < (wsize * wsize) / 2) {
-              black_vertex = MRIneighborhoodBlackCpolv(mri_src, x, y, z, 3,
-                                                       wsize, nullptr);
+              black_vertex =
+                  MRIneighborhoodBlackCpolv(mri_src, x, y, z, 3, wsize, NULL);
               num_black = wsize * wsize - MRIwhiteInPlane(mri_src, x, y, z,
                                                           black_vertex, wsize);
               if ((num_white < num_black) &&
@@ -3074,12 +3079,12 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize,
             }
           } else {
             black_vertex =
-                MRIneighborhoodBlackCpolv(mri_src, x, y, z, 3, wsize, nullptr);
+                MRIneighborhoodBlackCpolv(mri_src, x, y, z, 3, wsize, NULL);
             num_black = wsize * wsize -
                         MRIwhiteInPlane(mri_src, x, y, z, black_vertex, wsize);
             if (num_black < wsize * wsize / 2) {
               white_vertex =
-                  MRIneighborhoodCpolv(mri_src, x, y, z, 3, wsize, nullptr);
+                  MRIneighborhoodCpolv(mri_src, x, y, z, 3, wsize, NULL);
               num_white =
                   MRIwhiteInPlane(mri_src, x, y, z, white_vertex, wsize);
               if ((num_white > num_black) &&
@@ -3105,11 +3110,6 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize,
       fprintf(stderr, "              %8d skipped (%%%2.2f)\n", nskipped,
               100.0f * (float)nskipped / (float)total_vox);
     }
-    if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      char fname[100];
-      sprintf(fname, "/tmp/smooth%d.mnc", i + 1);
-      MRIwrite(mri_dst, fname);
-    }
     if (i < niter - 1)
       MRIcopy(mri_dst, mri_src);
   }
@@ -3126,7 +3126,7 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize,
 MRI *MRIextractVertexCoords(MRI *mri_src, int *px, int *py, int *pz, int vertex,
                             int x, int y, int z, int wsize) {
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
-  int whalf, xk, yk, xi, yi, zi;
+  int   whalf, xk, yk, xi, yi, zi;
 
   init_basis_vectors();
   whalf = (wsize - 1) / 2;
@@ -3144,9 +3144,9 @@ MRI *MRIextractVertexCoords(MRI *mri_src, int *px, int *py, int *pz, int vertex,
     zbase = (float)z + (float)yk * e2_z;
     for (xk = -whalf; xk <= whalf; xk++) {
       /* in-plane vect. is linear combination of scaled basis vects */
-      xi = mri_src->xi[nint(xbase + xk * e1_x)];
-      yi = mri_src->yi[nint(ybase + xk * e1_y)];
-      zi = mri_src->zi[nint(zbase + xk * e1_z)];
+      xi    = mri_src->xi[nint(xbase + xk * e1_x)];
+      yi    = mri_src->yi[nint(ybase + xk * e1_y)];
+      zi    = mri_src->zi[nint(zbase + xk * e1_z)];
       *px++ = xi;
       *py++ = yi;
       *pz++ = zi;
@@ -3164,8 +3164,8 @@ MRI *MRIextractVertexCoords(MRI *mri_src, int *px, int *py, int *pz, int vertex,
 ------------------------------------------------------*/
 MRI *MRIextractVertexPlane(MRI *mri_src, MRI *mri_dst, int vertex, int x0,
                            int y0, int z0, int wsize) {
-  float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase, x, y, z;
-  int whalf, xk, yk;
+  float  e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase, x, y, z;
+  int    whalf, xk, yk;
   double val;
 
   init_basis_vectors();
@@ -3177,11 +3177,11 @@ MRI *MRIextractVertexPlane(MRI *mri_src, MRI *mri_dst, int vertex, int x0,
     mri_dst->xstart = x0 - whalf * mri_dst->xsize;
     mri_dst->ystart = y0 - whalf * mri_dst->ysize;
     mri_dst->zstart = z0 - whalf * mri_dst->zsize;
-    mri_dst->xend = mri_dst->xstart + wsize * mri_dst->xsize;
-    mri_dst->yend = mri_dst->ystart + wsize * mri_dst->ysize;
-    mri_dst->zend = mri_dst->zstart + wsize * mri_dst->zsize;
-    mri_dst->imnr0 = z0 + mri_src->imnr0;
-    mri_dst->imnr1 = mri_dst->imnr0;
+    mri_dst->xend   = mri_dst->xstart + wsize * mri_dst->xsize;
+    mri_dst->yend   = mri_dst->ystart + wsize * mri_dst->ysize;
+    mri_dst->zend   = mri_dst->zstart + wsize * mri_dst->zsize;
+    mri_dst->imnr0  = z0 + mri_src->imnr0;
+    mri_dst->imnr1  = mri_dst->imnr0;
   }
 
   e1_x = e1_x_v[vertex]; /* get basis vectors for plane */
@@ -3242,12 +3242,12 @@ int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
     the cortical surface.
     */
   memset(best_plane, 0, sizeof(best_plane));
-  x0 = MAX(0, xv - nhalf);
-  x1 = MIN(mri_src->width - 1, xv + nhalf);
-  y0 = MAX(0, yv - nhalf);
-  y1 = MIN(mri_src->height - 1, yv + nhalf);
-  z0 = MAX(0, zv - nhalf);
-  z1 = MIN(mri_src->depth - 1, zv + nhalf);
+  x0        = MAX(0, xv - nhalf);
+  x1        = MIN(mri_src->width - 1, xv + nhalf);
+  y0        = MAX(0, yv - nhalf);
+  y1        = MIN(mri_src->height - 1, yv + nhalf);
+  z0        = MAX(0, zv - nhalf);
+  z1        = MIN(mri_src->depth - 1, zv + nhalf);
   max_count = 0;
   for (z = z0; z <= z1; z++) {
     for (y = y0; y <= y1; y++) {
@@ -3263,12 +3263,12 @@ int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
         pe2_z = e2_z_v;
         for (vertex = 0; vertex < NVERTICES; vertex++) {
           num_black = 0;
-          e1_x = *pe1_x++; /* first in-plane basis vector */
-          e1_y = *pe1_y++;
-          e1_z = *pe1_z++;
-          e2_x = *pe2_x++; /* second in-plane basis vector */
-          e2_y = *pe2_y++;
-          e2_z = *pe2_z++;
+          e1_x      = *pe1_x++; /* first in-plane basis vector */
+          e1_y      = *pe1_y++;
+          e1_z      = *pe1_z++;
+          e2_x      = *pe2_x++; /* second in-plane basis vector */
+          e2_y      = *pe2_y++;
+          e2_z      = *pe2_z++;
 
           /* now find the values in this plane */
           for (yk = -whalf; yk <= whalf; yk++) {
@@ -3277,12 +3277,12 @@ int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
             zbase = (float)z + (float)yk * e2_z;
             for (xk = -whalf; xk <= whalf; xk++) {
               /* in-plane vect. is linear combination of scaled basis vects */
-              xi = nint(xbase + xk * e1_x);
-              xi = pxi[xi];
-              yi = nint(ybase + xk * e1_y);
-              yi = pyi[yi];
-              zi = nint(zbase + xk * e1_z);
-              zi = pzi[zi];
+              xi    = nint(xbase + xk * e1_x);
+              xi    = pxi[xi];
+              yi    = nint(ybase + xk * e1_y);
+              yi    = pyi[yi];
+              zi    = nint(zbase + xk * e1_z);
+              zi    = pzi[zi];
               label = MRIvox(mri_src, xi, yi, zi);
               if (label < MRI_AMBIGUOUS)
                 num_black++;
@@ -3309,7 +3309,7 @@ int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
   for (vertex = 1; vertex < NVERTICES; vertex++) {
     if (best_plane[vertex] > max_count) {
       peak_vertex_index = vertex;
-      max_count = best_plane[vertex];
+      max_count         = best_plane[vertex];
     }
   }
   return (peak_vertex_index);
@@ -3349,12 +3349,12 @@ int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
     the cortical surface.
     */
   memset(best_plane, 0, sizeof(best_plane));
-  x0 = MAX(0, xv - nhalf);
-  x1 = MIN(mri_src->width - 1, xv + nhalf);
-  y0 = MAX(0, yv - nhalf);
-  y1 = MIN(mri_src->height - 1, yv + nhalf);
-  z0 = MAX(0, zv - nhalf);
-  z1 = MIN(mri_src->depth - 1, zv + nhalf);
+  x0        = MAX(0, xv - nhalf);
+  x1        = MIN(mri_src->width - 1, xv + nhalf);
+  y0        = MAX(0, yv - nhalf);
+  y1        = MIN(mri_src->height - 1, yv + nhalf);
+  z0        = MAX(0, zv - nhalf);
+  z1        = MIN(mri_src->depth - 1, zv + nhalf);
   max_count = 0;
   for (z = z0; z <= z1; z++) {
     for (y = y0; y <= y1; y++) {
@@ -3370,12 +3370,12 @@ int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
         pe2_z = e2_z_v;
         for (vertex = 0; vertex < NVERTICES; vertex++) {
           num_white = 0;
-          e1_x = *pe1_x++; /* first in-plane basis vector */
-          e1_y = *pe1_y++;
-          e1_z = *pe1_z++;
-          e2_x = *pe2_x++; /* second in-plane basis vector */
-          e2_y = *pe2_y++;
-          e2_z = *pe2_z++;
+          e1_x      = *pe1_x++; /* first in-plane basis vector */
+          e1_y      = *pe1_y++;
+          e1_z      = *pe1_z++;
+          e2_x      = *pe2_x++; /* second in-plane basis vector */
+          e2_y      = *pe2_y++;
+          e2_z      = *pe2_z++;
 
           /* now find the values in this plane */
           for (yk = -whalf; yk <= whalf; yk++) {
@@ -3384,12 +3384,12 @@ int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
             zbase = (float)z + (float)yk * e2_z;
             for (xk = -whalf; xk <= whalf; xk++) {
               /* in-plane vect. is linear combination of scaled basis vects */
-              xi = nint(xbase + xk * e1_x);
-              xi = pxi[xi];
-              yi = nint(ybase + xk * e1_y);
-              yi = pyi[yi];
-              zi = nint(zbase + xk * e1_z);
-              zi = pzi[zi];
+              xi    = nint(xbase + xk * e1_x);
+              xi    = pxi[xi];
+              yi    = nint(ybase + xk * e1_y);
+              yi    = pyi[yi];
+              zi    = nint(zbase + xk * e1_z);
+              zi    = pzi[zi];
               label = MRIvox(mri_src, xi, yi, zi);
               if (label == MRI_WHITE)
                 num_white++;
@@ -3416,7 +3416,7 @@ int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
   for (vertex = 1; vertex < NVERTICES; vertex++) {
     if (best_plane[vertex] > max_count) {
       peak_vertex_index = vertex;
-      max_count = best_plane[vertex];
+      max_count         = best_plane[vertex];
     }
   }
   return (peak_vertex_index);
@@ -3457,12 +3457,12 @@ int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv,
     the cortical surface.
     */
   memset(best_white_plane, 0, sizeof(best_white_plane));
-  x0 = MAX(0, xv - nhalf);
-  x1 = MIN(mri_src->width - 1, xv + nhalf);
-  y0 = MAX(0, yv - nhalf);
-  y1 = MIN(mri_src->height - 1, yv + nhalf);
-  z0 = MAX(0, zv - nhalf);
-  z1 = MIN(mri_src->depth - 1, zv + nhalf);
+  x0              = MAX(0, xv - nhalf);
+  x1              = MIN(mri_src->width - 1, xv + nhalf);
+  y0              = MAX(0, yv - nhalf);
+  y1              = MIN(mri_src->height - 1, yv + nhalf);
+  z0              = MAX(0, zv - nhalf);
+  z1              = MIN(mri_src->depth - 1, zv + nhalf);
   max_black_count = max_white_count = 0;
   for (z = z0; z <= z1; z++) {
     for (y = y0; y <= y1; y++) {
@@ -3478,12 +3478,12 @@ int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv,
         pe2_z = e2_z_v;
         for (vertex = 0; vertex < NVERTICES; vertex++) {
           num_black = num_white = 0;
-          e1_x = *pe1_x++; /* first in-plane basis vector */
-          e1_y = *pe1_y++;
-          e1_z = *pe1_z++;
-          e2_x = *pe2_x++; /* second in-plane basis vector */
-          e2_y = *pe2_y++;
-          e2_z = *pe2_z++;
+          e1_x                  = *pe1_x++; /* first in-plane basis vector */
+          e1_y                  = *pe1_y++;
+          e1_z                  = *pe1_z++;
+          e2_x                  = *pe2_x++; /* second in-plane basis vector */
+          e2_y                  = *pe2_y++;
+          e2_z                  = *pe2_z++;
 
           /* now find the values in this plane */
           for (yk = -whalf; yk <= whalf; yk++) {
@@ -3492,12 +3492,12 @@ int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv,
             zbase = (float)z + (float)yk * e2_z;
             for (xk = -whalf; xk <= whalf; xk++) {
               /* in-plane vect. is linear combination of scaled basis vects */
-              xi = nint(xbase + xk * e1_x);
-              xi = pxi[xi];
-              yi = nint(ybase + xk * e1_y);
-              yi = pyi[yi];
-              zi = nint(zbase + xk * e1_z);
-              zi = pzi[zi];
+              xi    = nint(xbase + xk * e1_x);
+              xi    = pxi[xi];
+              yi    = nint(ybase + xk * e1_y);
+              yi    = pyi[yi];
+              zi    = nint(zbase + xk * e1_z);
+              zi    = pzi[zi];
               label = MRIvox(mri_src, xi, yi, zi);
               if (label >= MRI_WHITE)
                 num_white++;
@@ -3533,7 +3533,7 @@ int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv,
   for (vertex = 1; vertex < NVERTICES; vertex++) {
     if (best_white_plane[vertex] + best_black_plane[vertex] > max_white_count) {
       peak_vertex_index = vertex;
-      max_white_count = best_white_plane[vertex] + best_black_plane[vertex];
+      max_white_count   = best_white_plane[vertex] + best_black_plane[vertex];
     }
   }
   return (peak_vertex_index);
@@ -3546,7 +3546,7 @@ int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv,
         Description
 ------------------------------------------------------*/
 int MRIwhiteInPlane(MRI *mri_src, int x, int y, int z, int vertex, int wsize) {
-  int whalf, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, num_white;
+  int   whalf, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, num_white;
   float xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
@@ -3564,12 +3564,12 @@ int MRIwhiteInPlane(MRI *mri_src, int x, int y, int z, int vertex, int wsize) {
     of all the planes is smallest. This will hopefully be the normal to
     the cortical surface.
     */
-  e1_x = e1_x_v[vertex]; /* first in-plane basis vector */
-  e1_y = e1_y_v[vertex];
-  e1_z = e1_z_v[vertex];
-  e2_x = e2_x_v[vertex]; /* second in-plane basis vector */
-  e2_y = e2_y_v[vertex];
-  e2_z = e2_z_v[vertex];
+  e1_x      = e1_x_v[vertex]; /* first in-plane basis vector */
+  e1_y      = e1_y_v[vertex];
+  e1_z      = e1_z_v[vertex];
+  e2_x      = e2_x_v[vertex]; /* second in-plane basis vector */
+  e2_y      = e2_y_v[vertex];
+  e2_z      = e2_z_v[vertex];
   num_white = 0;
 
   /* now find the values in this plane */
@@ -3579,12 +3579,12 @@ int MRIwhiteInPlane(MRI *mri_src, int x, int y, int z, int vertex, int wsize) {
     zbase = (float)z + (float)yk * e2_z;
     for (xk = -whalf; xk <= whalf; xk++) {
       /* in-plane vect. is linear combination of scaled basis vects */
-      xi = nint(xbase + xk * e1_x);
-      xi = pxi[xi];
-      yi = nint(ybase + xk * e1_y);
-      yi = pyi[yi];
-      zi = nint(zbase + xk * e1_z);
-      zi = pzi[zi];
+      xi    = nint(xbase + xk * e1_x);
+      xi    = pxi[xi];
+      yi    = nint(ybase + xk * e1_y);
+      yi    = pyi[yi];
+      zi    = nint(zbase + xk * e1_z);
+      zi    = pzi[zi];
       label = MRIvox(mri_src, xi, yi, zi);
       if (label >= MRI_WHITE)
         num_white++;
@@ -3606,17 +3606,17 @@ MRI *MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct,
   int width, height, depth, x, y, z, whalf, x0, y0, z0, thresh, xi, yi, zi,
       num_on, num_off, in_val, nvox, nprocessed, nlabeled;
   BUFTYPE val, *pdst;
-  float wcubed;
+  float   wcubed;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
-    mri_dst = MRIcopy(mri_src, nullptr);
+    mri_dst = MRIcopy(mri_src, NULL);
 
   wcubed = (float)(wsize * wsize * wsize);
   thresh = nint((float)wcubed * pct);
-  whalf = wsize / 2;
+  whalf  = wsize / 2;
 
   nlabeled = nprocessed = 0;
   for (z = 0; z < depth; z++) {
@@ -3636,7 +3636,7 @@ MRI *MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct,
           for (y0 = -whalf; y0 <= whalf; y0++) {
             yi = mri_src->yi[y + y0];
             for (x0 = -whalf; x0 <= whalf; x0++) {
-              xi = mri_src->xi[x + x0];
+              xi  = mri_src->xi[x + x0];
               val = MRIvox(mri_src, xi, yi, zi);
               if (val != MRI_AMBIGUOUS) {
                 nvox++;
@@ -3683,27 +3683,27 @@ MRI *MRImeanLabel(MRI *mri_src, MRI *mri_label, MRI *mri_dst, int wsize) {
   int width, height, depth, x, y, z, whalf, x0, y0, z0, xi, yi, zi, in_val,
       label, total;
   BUFTYPE val, *pdst, *plabel, *psrc;
-  float wcubed, mean;
+  float   wcubed, mean;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   wcubed = (float)(wsize * wsize * wsize);
-  whalf = wsize / 2;
+  whalf  = wsize / 2;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       plabel = &MRIvox(mri_label, 0, y, z);
-      pdst = &MRIvox(mri_dst, 0, y, z);
-      psrc = &MRIvox(mri_src, 0, y, z);
+      pdst   = &MRIvox(mri_dst, 0, y, z);
+      psrc   = &MRIvox(mri_src, 0, y, z);
       for (x = 0; x < width; x++) {
         if (x == 80 && y == 2 && z == 0)
           DiagBreak();
         in_val = *psrc++;
-        label = *plabel++;
+        label  = *plabel++;
         if (label != MRI_AMBIGUOUS) {
           *pdst++ = label;
           continue;
@@ -3713,7 +3713,7 @@ MRI *MRImeanLabel(MRI *mri_src, MRI *mri_label, MRI *mri_dst, int wsize) {
           for (y0 = -whalf; y0 <= whalf; y0++) {
             yi = mri_src->yi[y + y0];
             for (x0 = -whalf; x0 <= whalf; x0++) {
-              xi = mri_src->xi[x + x0];
+              xi  = mri_src->xi[x + x0];
               val = MRIvox(mri_src, xi, yi, zi);
               total += val;
             }
@@ -3740,14 +3740,14 @@ MRI *MRImeanLabel(MRI *mri_src, MRI *mri_label, MRI *mri_dst, int wsize) {
 ------------------------------------------------------*/
 MRI *MRIintensitySegmentation(MRI *mri_src, MRI *mri_labeled, float wm_low,
                               float wm_hi, float gray_hi) {
-  int width, height, depth, x, y, z, nwhite, nblack, nambiguous;
+  int   width, height, depth, x, y, z, nwhite, nblack, nambiguous;
   float val;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_labeled)
-    mri_labeled = MRIclone(mri_src, nullptr);
+    mri_labeled = MRIclone(mri_src, NULL);
 
   nwhite = nblack = nambiguous = 0;
   for (z = 0; z < depth; z++) {
@@ -3790,23 +3790,23 @@ MRI *MRIintensitySegmentation(MRI *mri_src, MRI *mri_labeled, float wm_low,
 ------------------------------------------------------*/
 MRI *MRIthresholdLabel(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst,
                        int wm_low) {
-  int width, height, depth, x, y, z;
+  int     width, height, depth, x, y, z;
   BUFTYPE val, *psrc, *plabel, *pdst, label;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       plabel = &MRIvox(mri_labeled, 0, y, z);
-      pdst = &MRIvox(mri_dst, 0, y, z);
-      psrc = &MRIvox(mri_src, 0, y, z);
+      pdst   = &MRIvox(mri_dst, 0, y, z);
+      psrc   = &MRIvox(mri_src, 0, y, z);
       for (x = 0; x < width; x++) {
         label = *plabel++;
-        val = *psrc++;
+        val   = *psrc++;
         if (label == MRI_AMBIGUOUS) /* change label to white or non-white */
         {
           if (val < wm_low)
@@ -3832,35 +3832,35 @@ MRI *MRIthresholdLabel(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst,
 MRI *MRIorderSegment(MRI *mri_src, MRI *mri_labeled, float thresh, int wsize) {
   int width, height, depth, x, y, z, whalf, x0, y0, z0, xi, yi, zi, in_val,
       thresh_index, label, nvox;
-  BUFTYPE val, *pdst, *sptr;
-  float wcubed;
-  static BUFTYPE *sort_array = nullptr;
-  static int sort_size = 0;
+  BUFTYPE         val, *pdst, *sptr;
+  float           wcubed;
+  static BUFTYPE *sort_array = NULL;
+  static int      sort_size  = 0;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_labeled)
-    mri_labeled = MRIclone(mri_src, nullptr);
+    mri_labeled = MRIclone(mri_src, NULL);
 
-  wcubed = (float)(wsize * wsize * wsize);
-  whalf = wsize / 2;
+  wcubed       = (float)(wsize * wsize * wsize);
+  whalf        = wsize / 2;
   thresh_index = thresh * wcubed;
 
   if (sort_array && (wcubed != sort_size)) {
     free(sort_array);
-    sort_array = nullptr;
+    sort_array = NULL;
   }
   if (!sort_array) {
     sort_array = (BUFTYPE *)calloc(wcubed, sizeof(BUFTYPE));
-    sort_size = wcubed;
+    sort_size  = wcubed;
   }
   for (nvox = z = 0; z < depth; z++) {
     DiagHeartbeat((float)z / (float)(depth - 1));
     for (y = 0; y < height; y++) {
       pdst = &MRIvox(mri_labeled, 0, y, z);
       for (x = 0; x < width; x++) {
-        label = *pdst;
+        label  = *pdst;
         in_val = MRIvox(mri_src, x, y, z);
         if (x == 28 && y == 10 && z == 63)
           DiagBreak();
@@ -3874,7 +3874,7 @@ MRI *MRIorderSegment(MRI *mri_src, MRI *mri_labeled, float thresh, int wsize) {
           for (y0 = -whalf; y0 <= whalf; y0++) {
             yi = mri_src->yi[y + y0];
             for (x0 = -whalf; x0 <= whalf; x0++) {
-              xi = mri_src->xi[x + x0];
+              xi      = mri_src->xi[x + x0];
               *sptr++ = MRIvox(mri_src, xi, yi, zi);
             }
           }
@@ -3902,14 +3902,14 @@ MRI *MRIorderSegment(MRI *mri_src, MRI *mri_labeled, float thresh, int wsize) {
         Description
 ------------------------------------------------------*/
 MRI *MRImaskLabels(MRI *mri_src, MRI *mri_mask, MRI *mri_dst) {
-  int width, height, depth, x, y, z;
+  int   width, height, depth, x, y, z;
   float mask, src;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
@@ -3917,7 +3917,7 @@ MRI *MRImaskLabels(MRI *mri_src, MRI *mri_mask, MRI *mri_dst) {
         if (x == 157 && y == 154 && z == 127)
           DiagBreak();
         mask = MRIgetVoxVal(mri_mask, x, y, z, 0);
-        src = MRIgetVoxVal(mri_src, x, y, z, 0);
+        src  = MRIgetVoxVal(mri_src, x, y, z, 0);
         if (mask == MRI_AMBIGUOUS)
           MRIsetVoxVal(mri_dst, x, y, z, 0, MRI_AMBIGUOUS);
         else if (mask == MRI_WHITE)
@@ -3940,9 +3940,9 @@ int MRIcentralPlaneOfLeastVarianceNormalVoxel(MRI *mri_src, int wsize, int x,
                                               int y, int z) {
   int width, height, depth, whalf, vertex, xk, yk, min_vertex, max_vertex, xi,
       yi, zi, *pxi, *pyi, *pzi;
-  float min_mean, min_var, max_var, total, total_sq, nv, varv, avgv, val;
+  float   min_mean, min_var, max_var, total, total_sq, nv, varv, avgv, val;
   BUFTYPE max_val;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+  float   xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
       e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
@@ -3951,10 +3951,10 @@ int MRIcentralPlaneOfLeastVarianceNormalVoxel(MRI *mri_src, int wsize, int x,
   pyi = mri_src->yi;
   pzi = mri_src->zi;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
-  whalf = (wsize - 1) / 2;
+  depth  = mri_src->depth;
+  whalf  = (wsize - 1) / 2;
 
   /*
     for this point (x,y,z), go through a set of directions on the unit
@@ -3964,15 +3964,15 @@ int MRIcentralPlaneOfLeastVarianceNormalVoxel(MRI *mri_src, int wsize, int x,
     the cortical surface.
     */
   max_vertex = min_vertex = -1;
-  min_mean = 1000.0f;   /* mean of minimum variance plane */
-  min_var = 100000.0f;  /* minimum variance of central planes */
-  max_var = -100000.0f; /* maximum variance of central planes */
-  pe1_x = e1_x_v;
-  pe1_y = e1_y_v;
-  pe1_z = e1_z_v;
-  pe2_x = e2_x_v;
-  pe2_y = e2_y_v;
-  pe2_z = e2_z_v;
+  min_mean                = 1000.0f;    /* mean of minimum variance plane */
+  min_var                 = 100000.0f;  /* minimum variance of central planes */
+  max_var                 = -100000.0f; /* maximum variance of central planes */
+  pe1_x                   = e1_x_v;
+  pe1_y                   = e1_y_v;
+  pe1_z                   = e1_z_v;
+  pe2_x                   = e2_x_v;
+  pe2_y                   = e2_y_v;
+  pe2_z                   = e2_z_v;
   for (vertex = 0; vertex < NVERTICES; vertex++) {
     e1_x = *pe1_x++; /* first in-plane basis vector */
     e1_y = *pe1_y++;
@@ -3982,7 +3982,7 @@ int MRIcentralPlaneOfLeastVarianceNormalVoxel(MRI *mri_src, int wsize, int x,
     e2_z = *pe2_z++;
 
     total = total_sq = nv = 0.0f;
-    max_val = 0;
+    max_val               = 0;
     /* now find the values in this plane */
     for (yk = -whalf; yk <= whalf; yk++) {
       xbase = (float)x + (float)yk * e2_x;
@@ -3990,12 +3990,12 @@ int MRIcentralPlaneOfLeastVarianceNormalVoxel(MRI *mri_src, int wsize, int x,
       zbase = (float)z + (float)yk * e2_z;
       for (xk = -whalf; xk <= whalf; xk++) {
         /* in-plane vect. is linear combination of scaled basis vects */
-        xi = nint(xbase + xk * e1_x);
-        xi = pxi[xi];
-        yi = nint(ybase + xk * e1_y);
-        yi = pyi[yi];
-        zi = nint(zbase + xk * e1_z);
-        zi = pzi[zi];
+        xi  = nint(xbase + xk * e1_x);
+        xi  = pxi[xi];
+        yi  = nint(ybase + xk * e1_y);
+        yi  = pyi[yi];
+        zi  = nint(zbase + xk * e1_z);
+        zi  = pzi[zi];
         val = (float)MRIvox(mri_src, xi, yi, zi);
         total += val;          /* sum of all values in this plane */
         total_sq += val * val; /* sum of squared values in this plane */
@@ -4011,13 +4011,13 @@ int MRIcentralPlaneOfLeastVarianceNormalVoxel(MRI *mri_src, int wsize, int x,
     }
 
     if (varv > max_var) {
-      max_var = varv;
+      max_var    = varv;
       max_vertex = vertex;
     }
     if (varv < min_var) {
-      min_var = varv;
+      min_var    = varv;
       min_vertex = vertex;
-      min_mean = avgv;
+      min_mean   = avgv;
     }
     if (FZERO(varv)) /* zero variance - won't find anything less */
       break;
@@ -4038,11 +4038,11 @@ MRI *MRIcpolvMedianCurveSegment(MRI *mri, MRI *mri_labeled, MRI *mri_dst,
          wsize, len, gray_hi, wm_low);
 
   if (!mri_dst)
-    mri_dst = MRIcopy(mri_labeled, nullptr);
+    mri_dst = MRIcopy(mri_labeled, NULL);
 
-  width = mri->width;
+  width  = mri->width;
   height = mri->height;
-  depth = mri->depth;
+  depth  = mri->depth;
   for (non = noff = nlabeled = z = 0; z < depth; z++) {
     DiagShowPctDone((float)z / (float)(depth - 1), 5);
     for (y = 0; y < height; y++) {
@@ -4083,8 +4083,8 @@ MRI *MRIcpolvMedianCurveSegment(MRI *mri, MRI *mri_labeled, MRI *mri_dst,
 int MRIcpolvMedianCurveVoxel(MRI *mri, MRI *mri_labeled, int x0, int y0, int z0,
                              int wsize, float len, float gray_hi,
                              float wm_low) {
-  int vertex, what, i, maxi;
-  FILE *fp = nullptr;
+  int   vertex, what, i, maxi;
+  FILE *fp = NULL;
   float dist, x, y, z, median, nx, ny, nz, white_dist, gray_dist, gray_val,
       white_val, val, white_grad, gray_grad, max_val, min_val, max_val_dist,
       min_val_dist;
@@ -4095,41 +4095,41 @@ int MRIcpolvMedianCurveVoxel(MRI *mri, MRI *mri_labeled, int x0, int y0, int z0,
 #else
   vertex = MRIcentralPlaneOfLeastVarianceNormalVoxel(mri, wsize, x0, y0, z0);
 #endif
-  nx = ic_x_vertices[vertex]; /* normal vector */
-  ny = ic_y_vertices[vertex];
-  nz = ic_z_vertices[vertex];
+  nx   = ic_x_vertices[vertex]; /* normal vector */
+  ny   = ic_y_vertices[vertex];
+  nz   = ic_z_vertices[vertex];
   dist = sqrt(nx * nx + ny * ny + nz * nz);
   nx /= dist;
   ny /= dist;
   nz /= dist;
 
   white_dist = gray_dist = 1000.0f;
-  what = MRI_AMBIGUOUS;
+  what                   = MRI_AMBIGUOUS;
   gray_val = white_val = val = -1.0;
   min_val_dist = max_val_dist = 0.0;
-  max_val = 0.0;
-  min_val = 1000.0;
+  max_val                     = 0.0;
+  min_val                     = 1000.0;
   for (i = 0, dist = -len; dist <= len; dist += 0.25f, i++) {
-    x = x0 + nx * dist;
-    y = y0 + ny * dist;
-    z = z0 + nz * dist;
-    median = MRIcpolvMedianAtVoxel(mri, vertex, x, y, z, wsize);
+    x          = x0 + nx * dist;
+    y          = y0 + ny * dist;
+    z          = z0 + nz * dist;
+    median     = MRIcpolvMedianAtVoxel(mri, vertex, x, y, z, wsize);
     medians[i] = median;
-    dists[i] = dist;
+    dists[i]   = dist;
     if ((median >= gray_hi) && (fabs(dist) < white_dist)) {
-      white_val = median;
+      white_val  = median;
       white_dist = fabs(dist);
     } else if ((median <= wm_low) && (fabs(dist) < gray_dist)) {
-      gray_val = median;
+      gray_val  = median;
       gray_dist = fabs(dist);
     }
     if (median > max_val) {
       max_val_dist = fabs(dist);
-      max_val = median;
+      max_val      = median;
     }
     if (median < min_val) {
       min_val_dist = fabs(dist);
-      min_val = median;
+      min_val      = median;
     }
 
     if (FZERO(dist)) /* central vertex */
@@ -4160,7 +4160,7 @@ int MRIcpolvMedianCurveVoxel(MRI *mri, MRI *mri_labeled, int x0, int y0, int z0,
 #endif
 
   if ((Gdiag & DIAG_WRITE) && DIAG_VERBOSE_ON) {
-    fp = fopen("med.plt", "w");
+    fp   = fopen("med.plt", "w");
     maxi = i;
     for (i = 0; i < maxi; i++)
       fprintf(fp, "%2.2f  %2.3f\n", dists[i], medians[i]);
@@ -4172,7 +4172,7 @@ int MRIcpolvMedianCurveVoxel(MRI *mri, MRI *mri_labeled, int x0, int y0, int z0,
     maxi = i;
     for (i = 0; i < maxi; i++) {
       if ((medians[i] > white_val) && (medians[i] > wm_low)) {
-        white_val = medians[i];
+        white_val  = medians[i];
         white_dist = fabs(dists[i]);
       }
     }
@@ -4182,11 +4182,11 @@ int MRIcpolvMedianCurveVoxel(MRI *mri, MRI *mri_labeled, int x0, int y0, int z0,
 
   if (gray_dist > len) /* couldn't find gray matter - look for peak */
   {
-    maxi = i;
+    maxi     = i;
     gray_val = 10000;
     for (i = 0; i < maxi; i++) {
       if ((medians[i] < gray_val) && (medians[i] < gray_hi)) {
-        gray_val = medians[i];
+        gray_val  = medians[i];
         gray_dist = fabs(dists[i]);
       }
     }
@@ -4216,7 +4216,7 @@ int MRIcpolvMedianCurveVoxel(MRI *mri, MRI *mri_labeled, int x0, int y0, int z0,
       gray_grad = fabs(gray_val-val) / gray_dist ;
 #else
       white_grad = fabs(white_val - val);
-      gray_grad = fabs(gray_val - val);
+      gray_grad  = fabs(gray_val - val);
 #endif
       if (white_grad > gray_grad)
         what = MRI_NOT_WHITE;
@@ -4246,9 +4246,9 @@ int MRIcpolvMedianCurveVoxel(MRI *mri, MRI *mri_labeled, int x0, int y0, int z0,
 ------------------------------------------------------*/
 float MRIcpolvMedianAtVoxel(MRI *mri_src, int vertex, float x, float y, float z,
                             int wsize) {
-  int whalf, xk, yk;
-  float xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
-  float plane_vals[MAXLEN], *pvals;
+  int    whalf, xk, yk;
+  float  xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+  float  plane_vals[MAXLEN], *pvals;
   double rval, xr, yr, zr;
 
   init_basis_vectors();
@@ -4318,14 +4318,14 @@ MRI *MRIremoveIslands(MRI *mri_src, MRI *mri_dst, int wsize, int thresh) {
   float val, out_val;
   float wcubed;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, nullptr);
+    mri_dst = MRIclone(mri_src, NULL);
 
   wcubed = (float)(wsize * wsize * wsize);
-  whalf = wsize / 2;
+  whalf  = wsize / 2;
 
   for (z = whalf; z < depth; z++) {
     for (y = whalf; y < height; y++) {
@@ -4335,7 +4335,7 @@ MRI *MRIremoveIslands(MRI *mri_src, MRI *mri_dst, int wsize, int thresh) {
           for (y0 = -whalf; y0 <= whalf; y0++) {
             yi = mri_src->yi[y + y0];
             for (x0 = -whalf; x0 <= whalf; x0++) {
-              xi = mri_src->xi[x + x0];
+              xi  = mri_src->xi[x + x0];
               val = MRIgetVoxVal(mri_src, xi, yi, zi, 0);
               if (!val)
                 num_off++;
@@ -4360,22 +4360,22 @@ MRI *MRIremoveIslands(MRI *mri_src, MRI *mri_dst, int wsize, int thresh) {
 }
 MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst,
                         MRI_SEGMENT *mseg) {
-  int width, height, depth, x, y, z, nfilled, total_filled, vertex;
+  int  width, height, depth, x, y, z, nfilled, total_filled, vertex;
   MRI *mri_binary_strand, *mri_strand_border;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
   init_basis_vectors();
   mri_dst = MRIcopy(mri_src, mri_dst);
 
   /* make it 0-1 */
-  mri_binary_strand = MRIbinarize(mri_segment, nullptr, WM_MIN_VAL, 0, 1);
+  mri_binary_strand = MRIbinarize(mri_segment, NULL, WM_MIN_VAL, 0, 1);
 
   /* mri_strand_border will be all voxels not in the segment, but within 2
      voxels of a segment voxel.
   */
-  mri_strand_border = MRIdilate(mri_binary_strand, nullptr);
+  mri_strand_border = MRIdilate(mri_binary_strand, NULL);
   MRIdilate(mri_strand_border, mri_strand_border);
   MRIxor(mri_binary_strand, mri_strand_border, mri_strand_border, 1, 255);
 
@@ -4439,7 +4439,7 @@ MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst,
 }
 
 int MRIcpolvMaxWhiteAtVoxel(MRI *mri, int x, int y, int z, int wsize) {
-  int whalf, vertex, xk, yk, peak_vertex, max_count, num, xi, yi, zi;
+  int   whalf, vertex, xk, yk, peak_vertex, max_count, num, xi, yi, zi;
   float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, xf, yf, zf, *pe2_x, *pe2_y,
       *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
   double val;
@@ -4458,15 +4458,15 @@ int MRIcpolvMaxWhiteAtVoxel(MRI *mri, int x, int y, int z, int wsize) {
     of all the planes is smallest. This will hopefully be the normal to
     the cortical surface.
     */
-  pe1_x = e1_x_v;
-  pe1_y = e1_y_v;
-  pe1_z = e1_z_v;
-  pe2_x = e2_x_v;
-  pe2_y = e2_y_v;
-  pe2_z = e2_z_v;
+  pe1_x     = e1_x_v;
+  pe1_y     = e1_y_v;
+  pe1_z     = e1_z_v;
+  pe2_x     = e2_x_v;
+  pe2_y     = e2_y_v;
+  pe2_z     = e2_z_v;
   max_count = peak_vertex = 0;
   for (vertex = 0; vertex < NVERTICES; vertex++) {
-    num = 0;
+    num  = 0;
     e1_x = *pe1_x++; /* first in-plane basis vector */
     e1_y = *pe1_y++;
     e1_z = *pe1_z++;
@@ -4498,7 +4498,7 @@ int MRIcpolvMaxWhiteAtVoxel(MRI *mri, int x, int y, int z, int wsize) {
     }
     if (num >= max_count) {
       peak_vertex = vertex;
-      max_count = num;
+      max_count   = num;
     }
   }
 
@@ -4508,8 +4508,8 @@ int MRIcpolvMaxWhiteAtVoxel(MRI *mri, int x, int y, int z, int wsize) {
 int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex,
                                int wsize) {
 #if 1
-  int whalf;
-  float xf, yf, zf, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, dist;
+  int    whalf;
+  float  xf, yf, zf, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, dist;
   double val;
 
   init_basis_vectors();
@@ -4588,8 +4588,8 @@ int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex,
 
   return (1);
 #else
-  int whalf, xk, yk, quads[2][2], xi, yi, i, j;
-  float xbase, ybase, zbase, xf, yf, zf, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+  int    whalf, xk, yk, quads[2][2], xi, yi, i, j;
+  float  xbase, ybase, zbase, xf, yf, zf, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
   double val;
 
   init_basis_vectors();
@@ -4624,8 +4624,8 @@ int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex,
       zf = zbase + xk * e1_z;
       MRIsampleVolume(mri, xf, yf, zf, &val);
       if (val > 0.5) {
-        xi = xk < 0;
-        yi = yk < 0;
+        xi            = xk < 0;
+        yi            = yk < 0;
         quads[xi][yi] = 1;
       }
     }

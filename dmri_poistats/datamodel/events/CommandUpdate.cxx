@@ -1,7 +1,7 @@
-#include <iostream>
-#include <fstream>
-#include <string>
 #include <cstddef>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 // I need to include this for ofstream to work for some reason...
 #include <itkImageSeriesReader.h>
@@ -10,26 +10,26 @@
 
 #include "PoistatsEvents.h"
 
-void CommandUpdate::Execute(itk::Object *caller,
+void CommandUpdate::Execute(itk::Object *           caller,
                             const itk::EventObject &event) {
   Execute((const itk::Object *)caller, event);
 }
 
-void CommandUpdate::Execute(const itk::Object *object,
+void CommandUpdate::Execute(const itk::Object *     object,
                             const itk::EventObject &event) {
 
   if (itk::IterationEvent().CheckEvent(&event)) {
 
     PoistatsFilterPointer filter = dynamic_cast<PoistatsFilterPointer>(object);
 
-    const int currentIteration = filter->GetCurrentIteration();
-    const int currentLull = filter->GetCurrentLull();
+    const int    currentIteration = filter->GetCurrentIteration();
+    const int    currentLull      = filter->GetCurrentLull();
     const double energyDifference = filter->GetCurrentEnergyDifference();
-    const double meanOfEnergies = filter->GetCurrentMeanOfEnergies();
-    const double minOfEnergies = filter->GetCurrentMinOfEnergies();
-    const double globalMin = filter->GetGlobalMinEnergy();
-    const int exchanges = filter->GetExchanges();
-    const double elapsedTime = filter->GetElapsedTime();
+    const double meanOfEnergies   = filter->GetCurrentMeanOfEnergies();
+    const double minOfEnergies    = filter->GetCurrentMinOfEnergies();
+    const double globalMin        = filter->GetGlobalMinEnergy();
+    const int    exchanges        = filter->GetExchanges();
+    const double elapsedTime      = filter->GetElapsedTime();
 
     std::ostringstream output;
     output << currentIteration << "   lull: " << currentLull
@@ -68,7 +68,7 @@ void CommandUpdate::Execute(const itk::Object *object,
 
       PoistatsFilterPointer filter =
           dynamic_cast<PoistatsFilterPointer>(object);
-      const int nInitialPoints = filter->GetNumberOfInitialPoints();
+      const int          nInitialPoints = filter->GetNumberOfInitialPoints();
       std::ostringstream output;
       output << "Finding " << nInitialPoints << " seeds" << std::endl;
       PostMessage(output.str());

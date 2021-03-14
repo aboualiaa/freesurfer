@@ -1,5 +1,4 @@
 /**
- * @file  cmat.c
  * @brief utilities for reading/writing a Connectome MATrix structure
  *
  * Reading and writing and utilities for the Connectome Matrix (CMAT)
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2014/09/05 12:58:16 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -35,7 +30,7 @@
 
 CMAT *CMATread(const char *fname) {
   CMAT *cmat;
-  int nlabels, i, j, ind1, ind2;
+  int   nlabels, i, j, ind1, ind2;
   FILE *fp;
 
   fp = fopen(fname, "r");
@@ -96,7 +91,7 @@ CMAT *CMATread(const char *fname) {
 
 int CMATwrite(CMAT *cmat, const char *fname) {
   FILE *fp;
-  int i, j;
+  int   i, j;
 
   fp = fopen(fname, "w");
 
@@ -123,16 +118,16 @@ int CMATwrite(CMAT *cmat, const char *fname) {
 
 CMAT *CMATalloc(int nlabels, int *labels) {
   CMAT *cmat;
-  int i;
+  int   i;
 
   cmat = (CMAT *)calloc(1, sizeof(CMAT));
   if (cmat == nullptr)
     ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat",
               nlabels);
 
-  cmat->coords = LABEL_COORDS_NONE;
+  cmat->coords  = LABEL_COORDS_NONE;
   cmat->nlabels = nlabels;
-  cmat->labels = (int *)calloc(nlabels, sizeof(int));
+  cmat->labels  = (int *)calloc(nlabels, sizeof(int));
   if (cmat->labels == nullptr)
     ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat->labels",
               nlabels);
@@ -164,9 +159,9 @@ CMAT *CMATalloc(int nlabels, int *labels) {
 
 int CMATfree(CMAT **pcmat) {
   CMAT *cmat;
-  int i, j;
+  int   i, j;
 
-  cmat = *pcmat;
+  cmat   = *pcmat;
   *pcmat = nullptr;
 
   free(cmat->labels);

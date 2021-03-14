@@ -4,12 +4,8 @@
 # reg-mni305.2mm
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/16 17:17:20 $
-#    $Revision: 1.4 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -21,7 +17,7 @@
 #
 #
 
-set VERSION = '$Id: reg-mni305.2mm,v 1.4 2016/02/16 17:17:20 zkaufman Exp $';
+set VERSION = 'reg-mni305.2mm @FS_VERSION@';
 
 set subject = ();
 set regfile = ();
@@ -58,9 +54,9 @@ set mni2mmreg = $FREESURFER_HOME/average/mni305.cor.subfov2.reg
 # Compute registration from the mni305 subject (fsaverage) to the 
 # target subject. This is just another way to express the 
 # talairach.xfm file.
-set mni305reg = /tmp/tmp.$$.mni305toAnat.dat
+set mni305reg = `fs_temp_file --suffix mni305toAnat.dat`
 set cmd = (tkregister2_cmdl --fstal --reg $mni305reg --s $subject \
-  --xfmout /tmp/tmp.$$.mni305toAnat.xfm --noedit)
+  --xfmout `fs_temp_file --suffix mni305toAnat.xfm` --noedit)
 echo $cmd
 $cmd
 if($status) exit 1;

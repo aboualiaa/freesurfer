@@ -22,7 +22,6 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
   <name>mri_robust_register</name>
   <synopsis>mri_robust_register --mov &lt;mov.mgz&gt; --dst &lt;dst.mgz&gt; --lta &lt;reg.lta&gt; [options]</synopsis>
@@ -105,22 +104,20 @@ Use --noinit if center of mass is meaningless, e.g. when registering different r
       SCR    (symetrized correlation ratio) experimental.
 Note: most cost functions require the image backgrounds to be black! Also, only ROB and ROBENT use gradient decend, the others use a Powell optimizer.
 </explanation>
-     <argument>--entradius</argument>
+      <argument>--entradius</argument>
       <explanation>with ROBENT: specify box radius for entropy computation, default: 5 (may be slow)</explanation>
-     <argument>--entcorrection</argument>
+      <argument>--entcorrection</argument>
       <explanation>with ROBENT: uses better entropy computation that works on smaller boxes. For 3D recommended to switch this on and set entradius to around 2.</explanation>
-     <argument>--entball</argument>
+      <argument>--entball</argument>
       <explanation>with ROBENT: use ball around voxel instead of box (default no), does not seem to make a big difference.</explanation>
-     <argument>--entmov &lt;entmov.mgz&gt;</argument>
+      <argument>--entmov &lt;entmov.mgz&gt;</argument>
       <explanation>with ROBENT: write movable entropy image.</explanation>
-     <argument>--powelltol &lt;real&gt;</argument>
+      <argument>--powelltol &lt;real&gt;</argument>
       <explanation>with MI,NMI etc: set Powell tolerance (default 0.00001 = 1e-5).</explanation>
-      
-
       <argument>--nosym</argument>
       <explanation>do not map to half way space, but resample mov to dst internally (destroys symmetry, but is useful when registering a larger block to a part)</explanation>
       <argument>--maxit &lt;#&gt;</argument>
-     <argument>--entdst &lt;entdst.mgz&gt;</argument>
+      <argument>--entdst &lt;entdst.mgz&gt;</argument>
       <explanation>with ROBENT: write target entropy image.</explanation>
       <explanation>iterate max # times on each resolution (default 5)</explanation>
       <argument>--highit &lt;#&gt;</argument>
@@ -132,20 +129,19 @@ Note: most cost functions require the image backgrounds to be black! Also, only 
       <argument>--maxsize &lt;#&gt;</argument>
       <explanation>specify largest voxel dimension for gaussian pyramid (e.g. --maxsize 256 will not process resolutions with more than 256 voxels in any direction). Default: process up to the input resolution. You can use this to prevent the algorithm to run on the high resolutions (to avoid long runtimes and memory issues)</explanation>
       <argument>--minsize &lt;#&gt;</argument>
-      <explanation>specify smallest voxel dimension for gaussian pyramid (will not downsample resolutions smaller than #). Default: smallest dimension 16 voxels</explanation>      
+      <explanation>specify smallest voxel dimension for gaussian pyramid (will not downsample resolutions smaller than #). Default: smallest dimension 16 voxels</explanation>
       <argument>--wlimit &lt;real&gt;</argument>
       <explanation>(expert option) sets maximal outlier limit for --satit (default 0.16), reduce to decrease outlier sensitivity </explanation>
       <argument>--subsample &lt;real&gt;</argument>
       <explanation>subsample if dim &gt; # on all axes (default no subsampling)</explanation>
       <argument>--floattype</argument>
-      <explanation>convert images to float internally (default: keep input type)</explanation> 
+      <explanation>convert images to float internally (default: keep input type)</explanation>
       <argument>--whitebgmov</argument>
-      <explanation>assume white background in MOV for padding (default: black)</explanation> 
+      <explanation>assume white background in MOV for padding (default: black)</explanation>
       <argument>--whitebgdst</argument>
-      <explanation>assume white background in DST for padding (default: black)</explanation> 
+      <explanation>assume white background in DST for padding (default: black)</explanation>
       <argument>--uchar</argument>
-      <explanation>convert inputs to UCHAR (with re-scale and histogram cropping) (default: keep original type)</explanation> 
-            
+      <explanation>convert inputs to UCHAR (with re-scale and histogram cropping) (default: keep original type)</explanation>
       <argument>--maskmov &lt;mask.mgz&gt;</argument>
       <explanation>mask mov image with mask.mgz</explanation>
       <argument>--maskdst &lt;mask.mgz&gt;</argument>
@@ -160,12 +156,10 @@ Note: most cost functions require the image backgrounds to be black! Also, only 
       <explanation>outputs transform from mov to half-way space</explanation>
       <argument>--halfdstlta hd.lta</argument>
       <explanation>outputs transform from dst to half-way space</explanation>
-
       <argument>--debug</argument>
       <explanation>show debug output (default no debug output)</explanation>
       <argument>--verbose</argument>
       <explanation>0 quiet, 1 normal (default), 2 detail</explanation>
-      
     </optional-flagged>
   </arguments>
   <example>Simple Full Head Registration (same modality):
@@ -202,7 +196,7 @@ mri_robust_register --mov movT2.mgz --dst dstT1.mgz --satit --iscale --mapmov T2
 Registers a T2 image to T1 using robust entropy with correction mode and box radius 2 (= side length of 5 for boxes).
 Look at results with:
 
-freeview dstT1.mgz T2_to_T1.mgz T2_to_T1_weights.mgz:colormap=heat </example> 
+freeview dstT1.mgz T2_to_T1.mgz T2_to_T1_weights.mgz:colormap=heat </example>
   <example>Standard cross modal registration:
   
 mri_robust_register --mov movT2.mgz --dst dstT1.mgz --mapmov T2_to_T1.mgz --lta T2_to_T1.lta --cost NMI
@@ -210,7 +204,7 @@ mri_robust_register --mov movT2.mgz --dst dstT1.mgz --mapmov T2_to_T1.mgz --lta 
 Registers a T2 image to T1 using normalized mutual information (no outlier detection, Powell method is used for optimization). Here no saturation or intensity scaling is necessary. NMI or MI may be the prefered option for non-isotropic voxel whereas ROBENT has not been tested much. Also if you register a slab to a whole image you should probably add --nosym and play around with masking the images (e.g. --maskmov brainmask ).
 Look at results with:
 
-freeview dstT1.mgz T2_to_T1.mgz </example> 
+freeview dstT1.mgz T2_to_T1.mgz </example>
   <references>
 Please cite this:
   

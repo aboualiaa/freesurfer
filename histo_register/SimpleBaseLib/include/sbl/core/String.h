@@ -68,7 +68,7 @@ public:
   bool contains(unsigned short c) const { return firstCharPos(c) >= 0; }
 
   /// compare with another string
-  bool operator==(const String &s) const;
+  bool        operator==(const String &s) const;
   inline bool operator!=(const String &s) const { return !operator==(s); }
 
   /// returns true if all characters lower case a-z (assuming basic ascii)
@@ -130,7 +130,7 @@ public:
   void append(const String &s);
 
   /// return a string with new string appended
-  inline void operator+=(const String &s) { append(s); } // fix
+  inline void         operator+=(const String &s) { append(s); } // fix
   inline const String operator+(const String &s) const {
     String sNew(*this);
     sNew.append(s);
@@ -138,7 +138,7 @@ public:
   }
 
   /// replace each instance of the specified character
-  void replaceInPlace(unsigned short find, unsigned short replace);
+  void   replaceInPlace(unsigned short find, unsigned short replace);
   String replace(unsigned short find, unsigned short replace) const;
 
   /// returns string with whitespace removed from beginning and end
@@ -155,9 +155,9 @@ public:
   String lower() const;
 
   /// convert string to numeric value
-  int toInt() const;
-  float toFloat() const;
-  double toDouble() const;
+  int         toInt() const;
+  float       toFloat() const;
+  double      toDouble() const;
   inline bool toBool() const { return toInt() ? true : false; }
 
 private:

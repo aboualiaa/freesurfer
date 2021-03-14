@@ -1,17 +1,11 @@
 /**
- * @file  Layer.h
- * @brief Base Layer class. A layer is an independent data object with 2D and 3D
- * graphical representations.
+ * @brief Base Layer class. A layer is an independent data object with 2D and 3D graphical representations.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2014/03/28 19:29:38 $
- *    $Revision: 1.30 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,11 +21,11 @@
 #ifndef Layer_h
 #define Layer_h
 
+#include "CommonDataStruct.h"
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <vector>
-#include "CommonDataStruct.h"
 
 class vtkRenderer;
 class vtkProp;
@@ -49,7 +43,7 @@ public:
 
   virtual void Append2DProps(vtkRenderer *renderer, int nPlane) = 0;
   virtual void Append3DProps(vtkRenderer *renderer,
-                             bool *bPlaneVisibility = NULL) = 0;
+                             bool *       bPlaneVisibility = NULL)     = 0;
 
   virtual bool HasProp(vtkProp *prop) = 0;
 
@@ -124,21 +118,21 @@ public:
   void UpdateTransform(int sample_method = 0);
 
   double *GetWorldOrigin();
-  void GetWorldOrigin(double *origin);
-  void SetWorldOrigin(double *origin);
+  void    GetWorldOrigin(double *origin);
+  void    SetWorldOrigin(double *origin);
 
   double *GetWorldVoxelSize();
-  void GetWorldVoxelSize(double *voxelsize);
-  void SetWorldVoxelSize(double *voxelsize);
+  void    GetWorldVoxelSize(double *voxelsize);
+  void    SetWorldVoxelSize(double *voxelsize);
 
   double *GetWorldSize();
-  void GetWorldSize(double *size);
-  void SetWorldSize(double *size);
+  void    GetWorldSize(double *size);
+  void    SetWorldSize(double *size);
 
   double *GetSlicePosition();
-  void GetSlicePosition(double *slicePos);
-  void SetSlicePosition(double *slicePos);
-  void SetSlicePosition(int nPlane, double slicePos);
+  void    GetSlicePosition(double *slicePos);
+  void    SetSlicePosition(double *slicePos);
+  void    SetSlicePosition(int nPlane, double slicePos);
 
   virtual void OnSlicePositionChanged(int nPlane) = 0;
 
@@ -224,31 +218,31 @@ protected:
   virtual void DoTransform(int sample_method) { Q_UNUSED(sample_method); }
 
   QString m_strName;
-  double m_dSlicePosition[3];
-  double m_dWorldOrigin[3];
-  double m_dWorldVoxelSize[3];
-  double m_dWorldSize[3];
+  double  m_dSlicePosition[3];
+  double  m_dWorldOrigin[3];
+  double  m_dWorldVoxelSize[3];
+  double  m_dWorldSize[3];
 
   // translate and scale are for volume transformation
   double m_dTranslate[3];
   double m_dScale[3];
   double m_dRotate[3];
-  bool m_bFlip[3];
+  bool   m_bFlip[3];
   double m_dRotationCenter[3];
-  bool m_bRotateAroundCenter;
-  bool m_bUseRotationCenter;
+  bool   m_bRotateAroundCenter;
+  bool   m_bUseRotationCenter;
 
   bool m_bLocked;
   bool m_bAboutToDelete;
 
   LayerProperty *mProperty;
 
-  QString m_sFilename;
-  QString m_sSubjectName;
+  QString     m_sFilename;
+  QString     m_sSubjectName;
   QStringList m_strTypeNames;
-  QString m_sPrimaryType;
+  QString     m_sPrimaryType;
 
-  int m_nID;
+  int        m_nID;
   static int m_nLastID;
 
   int m_nLayerIndex;

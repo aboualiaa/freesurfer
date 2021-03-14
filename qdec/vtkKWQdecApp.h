@@ -1,5 +1,4 @@
 /**
- * @file  vtkKWQdecApp.h
  * @brief Command line parsing and registry
  *
  * Application code that parses the command line options and passes
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:35 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,9 +23,9 @@
 #ifndef __vtkKWQdecApp_h
 #define __vtkKWQdecApp_h
 
-#include <string>
 #include "vtkKWApplication.h"
 #include "vtkSmartPointer.h"
+#include <string>
 
 class vtkKWDialog;
 class vtkKWQdecWindow;

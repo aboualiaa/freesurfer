@@ -1,17 +1,12 @@
 /**
- * @file  MyMRI.h
  * @brief A class for MRI utils as used for registration
  *
  */
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2014/11/15 04:02:30 $
- *    $Revision: 1.18 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -32,8 +27,8 @@
 #include "matrix.h"
 #include "mri.h"
 
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define export // obsolete feature 'export template' used in these headers
@@ -55,13 +50,13 @@ public:
   //! Get blurred image
   static MRI *getBlur(MRI *mriS, MRI *mriT);
   //! Subsample the image
-  static MRI *subSample(MRI *mri_src, MRI *mri_dst = nullptr,
+  static MRI *subSample(MRI *mri_src, MRI *mri_dst = NULL,
                         bool fixheader = true, int randpos = 0);
   //! Get Entropy image (old)
   static MRI *entropyImage(MRI *mri, int radius, int sigma);
   //! Get Entropy image using box or ball
   static MRI *entropyImage(MRI *mri, int radius, bool ball = false,
-                           bool correction = false, MRI *mask = nullptr);
+                           bool correction = false, MRI *mask = NULL);
   //! NLSD not tested
   static MRI *nlsdImage(MRI *mri, int prad, int nrad);
 
@@ -80,8 +75,8 @@ public:
   static double noiseVar(MRI *mri);
 
   static vnl_matrix_fixed<double, 4, 4>
-  MRIvoxelXformToRasXform(MRI *src, MRI *trg,
-                          const vnl_matrix_fixed<double, 4, 4> &vox);
+              MRIvoxelXformToRasXform(MRI *src, MRI *trg,
+                                      const vnl_matrix_fixed<double, 4, 4> &vox);
   static MRI *MRIlinearTransform(MRI *mriS, MRI *mriT,
                                  const vnl_matrix_fixed<double, 4, 4> &m);
 
@@ -113,8 +108,8 @@ private:
   static bool isConform(MRI *mri);
 
   static MATRIX *MRIgetZslice(MRI *mri, int slice, int frame = 0);
-  static double entropyPatch(MRI *mri, int x, int y, int z, int radius,
-                             int nbins, MRI *kernel, bool ball = false);
+  static double  entropyPatch(MRI *mri, int x, int y, int z, int radius,
+                              int nbins, MRI *kernel, bool ball = false);
   static void get3Dcorrection(double *histo, unsigned int v1, unsigned int v2,
                               unsigned int v3, unsigned int v4,
                               unsigned int intRange);

@@ -1,18 +1,8 @@
 /**
- * @file  mri_mosaic.c
- * @brief program for taking a set of images and constructing one large image
+ * @brief program for taking a set of images and constructing one large image 
  * that contains them all
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
-/*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2015/09/25 16:05:20 $
- *    $Revision: 1.1 $
- *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,20 +14,20 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
 #include "timer.h"
+#include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -49,11 +39,11 @@ static int rectify = 0;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs, i;
-  char *in_fname, *out_fname;
-  int msec, minutes, seconds, nimages;
-  Timer start;
-  MRI *mri[MAX_INPUT_IMAGES], *mri_mosaic;
+  int    ac, nargs, i;
+  char * in_fname, *out_fname;
+  int    msec, minutes, seconds, nimages;
+  Timer  start;
+  MRI *  mri[MAX_INPUT_IMAGES], *mri_mosaic;
 
   nargs = handleVersionOption(argc, argv, "mri_mosaic");
   if (nargs && argc - nargs == 1)
@@ -78,7 +68,7 @@ int main(int argc, char *argv[]) {
     usage_exit(1);
 
   out_fname = argv[argc - 1];
-  nimages = argc - 2;
+  nimages   = argc - 2;
   printf("processing %d images and writing output to %s\n", nimages, out_fname);
 
   for (i = 0; i < nimages; i++) {
@@ -92,7 +82,7 @@ int main(int argc, char *argv[]) {
   mri_mosaic = MRImakeMosaic(mri, nimages, rectify);
 
   MRIwrite(mri_mosaic, out_fname);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -107,7 +97,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

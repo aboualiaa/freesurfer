@@ -8,10 +8,10 @@ int mrisComputeSurfaceDimensions(MRIS *mris) {
 
   int vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
-    VERTEX *vertex = &mris->vertices[vno];
-    float const x = vertex->x;
-    float const y = vertex->y;
-    float const z = vertex->z;
+    VERTEX *    vertex = &mris->vertices[vno];
+    float const x      = vertex->x;
+    float const y      = vertex->y;
+    float const z      = vertex->z;
     if (x > xhi)
       xhi = x;
     if (x < xlo)
@@ -65,8 +65,8 @@ static float mrisTriangleArea(MRIS *mris, int fno, int n) {
 }
 
 static void mrisFaceAreaNormal(MRIS *mris, int fno, float norm[]) {
-  FACE const *const f = &mris->faces[fno];
-  int const *const pv = f->v;
+  FACE const *const f  = &mris->faces[fno];
+  int const *const  pv = f->v;
 
   int const vno0 = pv[0];
   int const vno1 = pv[1];
@@ -114,8 +114,8 @@ static void mrisFaceAreaNormal(MRIS *mris, int fno, float norm[]) {
 
  */
 int mrisNormalFace(MRIS *mris, int fno, int n, float norm[]) {
-  FACE const *const f = &mris->faces[fno];
-  int const *const pv = f->v;
+  FACE const *const f  = &mris->faces[fno];
+  int const *const  pv = f->v;
 
   int const n0 = (n == 0) ? VERTICES_PER_FACE - 1 : n - 1;
   int const n1 = (n == VERTICES_PER_FACE - 1) ? 0 : n + 1;
@@ -227,9 +227,9 @@ int MRIScomputeNormals(MRIS *mris) {
       // Build the initial pending list
       //
       int pendingCapacity = mris->nvertices;
-  int *pending = (int *)malloc(pendingCapacity * sizeof(int));
-  int *nextPending = (int *)malloc(pendingCapacity * sizeof(int));
-  int pendingSize = 0;
+  int *   pending         = (int *)malloc(pendingCapacity * sizeof(int));
+  int *   nextPending     = (int *)malloc(pendingCapacity * sizeof(int));
+  int     pendingSize     = 0;
 
   for (k = 0; k < mris->nvertices; k++) {
     VERTEX *v = &mris->vertices[k];
@@ -260,9 +260,9 @@ int MRIScomputeNormals(MRIS *mris) {
         for (p = 0; p < pendingSize; p++) {
       ROMP_PFLB_begin
 
-          int const k = pending[p];
+          int const                k  = pending[p];
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[k];
-      VERTEX *const v = &mris->vertices[k];
+      VERTEX *const                v  = &mris->vertices[k];
 
       // calculate the vertex area (sum of the face areas)
       // and       the average of the face normals
@@ -341,9 +341,9 @@ int MRIScomputeNormals(MRIS *mris) {
     // If this is a performance problem, can be fixed, but I doubt it will be
     //
     for (p = 0; p < nextPendingSize; p++) {
-      int const k = nextPending[p];
+      int const                    k  = nextPending[p];
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[k];
-      VERTEX *const v = &mris->vertices[k];
+      VERTEX *const                v  = &mris->vertices[k];
 
       // Warn
       //
@@ -387,7 +387,7 @@ int MRIScomputeNormals(MRIS *mris) {
         //
         for (n = 0; n < vt->num; n++) {
           int const fno = vt->f[n];
-          FACE *f = &mris->faces[fno];
+          FACE *    f   = &mris->faces[fno];
           if (f->ripflag)
             continue;
           float norm[3];
@@ -401,9 +401,9 @@ int MRIScomputeNormals(MRIS *mris) {
     // enough
     //
     int *tempPending = pending;
-    pending = nextPending;
-    nextPending = tempPending;
-    pendingSize = nextPendingSize;
+    pending          = nextPending;
+    nextPending      = tempPending;
+    pendingSize      = nextPendingSize;
 
   } // trials
 
@@ -445,8 +445,8 @@ void MRIScomputeAvgInterVertexDist(MRIS *mris, double *StdDev) {
   double N = 0.0;
 
 #define ROMP_VARIABLE vno
-#define ROMP_LO 0
-#define ROMP_HI mris->nvertices
+#define ROMP_LO       0
+#define ROMP_HI       mris->nvertices
 
 #define ROMP_SUMREDUCTION0 Sum
 #define ROMP_SUMREDUCTION1 Sum2
@@ -460,17 +460,17 @@ void MRIScomputeAvgInterVertexDist(MRIS *mris, double *StdDev) {
 #include "romp_for_begin.h"
   ROMP_for_begin
 
-#define Sum ROMP_PARTIALSUM(0)
+#define Sum  ROMP_PARTIALSUM(0)
 #define Sum2 ROMP_PARTIALSUM(1)
-#define N ROMP_PARTIALSUM(2)
+#define N    ROMP_PARTIALSUM(2)
 
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-  VERTEX const *const v = &mris->vertices[vno];
+  VERTEX const *const              v  = &mris->vertices[vno];
   if (v->ripflag) {
     continue;
   }
   int const vnum = vt->vnum;
-  int m;
+  int       m;
   for (m = 0; m < vnum; m++) {
     int const vno2 = vt->v[m];
 
@@ -568,8 +568,8 @@ static int mrisOrientEllipsoid(MRI_SURFACE *mris) {
     double total_area = 0.0, neg_area = 0.0, neg_orig_area = 0.0;
 
 #define ROMP_VARIABLE fno
-#define ROMP_LO 0
-#define ROMP_HI mris->nfaces
+#define ROMP_LO       0
+#define ROMP_HI       mris->nfaces
 
 #define ROMP_SUMREDUCTION0 total_area
 #define ROMP_SUMREDUCTION1 neg_area
@@ -583,8 +583,8 @@ static int mrisOrientEllipsoid(MRI_SURFACE *mris) {
 #include "romp_for_begin.h"
     ROMP_for_begin
 
-#define total_area ROMP_PARTIALSUM(0)
-#define neg_area ROMP_PARTIALSUM(1)
+#define total_area    ROMP_PARTIALSUM(0)
+#define neg_area      ROMP_PARTIALSUM(1)
 #define neg_orig_area ROMP_PARTIALSUM(2)
 
         FACE const *const face = &mris->faces[fno];
@@ -605,9 +605,9 @@ static int mrisOrientEllipsoid(MRI_SURFACE *mris) {
 
 #include "romp_for_end.h"
 
-    mris->total_area = total_area;
+    mris->total_area    = total_area;
     mris->neg_orig_area = neg_orig_area;
-    mris->neg_area = neg_area;
+    mris->neg_area      = neg_area;
   }
 
   return (NO_ERROR);
@@ -664,7 +664,7 @@ int mrisOrientPlane(MRI_SURFACE *mris) {
   int vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
+    VERTEX *const                v  = &mris->vertices[vno];
 
     if (v->ripflag)
       continue;
@@ -744,9 +744,9 @@ float mrisSampleMinimizationEnergy(MRIS *mris, int vno,
   MRISsampleFaceCoordsCanonical((MHT *)(parms->mht), mris, cx, cy, cz,
                                 PIAL_VERTICES, &xp, &yp, &zp);
 
-  dx = xp - xw;
-  dy = yp - yw;
-  dz = zp - zw;
+  dx       = xp - xw;
+  dy       = yp - yw;
+  dz       = zp - zw;
   thick_sq = dx * dx + dy * dy + dz * dz;
 
   return (thick_sq);
@@ -756,7 +756,7 @@ float mrisSampleNormalEnergy(MRIS *mris, int vno, INTEGRATION_PARMS *parms,
                              float cx, float cy, float cz) {
   VERTEX const *const v = &mris->vertices[vno];
 
-  float dx, dy, dz, len, xw, yw, zw, xp, yp, zp, pnx, pny, pnz;
+  float  dx, dy, dz, len, xw, yw, zw, xp, yp, zp, pnx, pny, pnz;
   double sse;
 
   if (v - mris->vertices == Gdiag_no)
@@ -767,9 +767,9 @@ float mrisSampleNormalEnergy(MRIS *mris, int vno, INTEGRATION_PARMS *parms,
   MRISsampleFaceCoordsCanonical((MHT *)(parms->mht), mris, cx, cy, cz,
                                 PIAL_VERTICES, &xp, &yp, &zp);
 
-  dx = xp - xw;
-  dy = yp - yw;
-  dz = zp - zw;
+  dx  = xp - xw;
+  dy  = yp - yw;
+  dz  = zp - zw;
   len = sqrt(dx * dx + dy * dy + dz * dz);
   if (len < 0.01) // can't reliably estimate normal. Probably not in cortex
   {
@@ -805,14 +805,14 @@ float mrisSampleNormalEnergy(MRIS *mris, int vno, INTEGRATION_PARMS *parms,
 float mrisSampleSpringEnergy(MRIS *mris, int const vno, float cx, float cy,
                              float cz, INTEGRATION_PARMS *parms) {
   VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-  VERTEX const *const v = &mris->vertices[vno];
+  VERTEX const *const          v  = &mris->vertices[vno];
 
-  float xn, yn, zn, xp, yp, zp, xc, yc, zc;
+  float  xn, yn, zn, xp, yp, zp, xc, yc, zc;
   double sse, fdist, vdist = mris->avg_vertex_dist;
-  int n, num, fno;
+  int    n, num, fno;
 
   FACE *face;
-  MHT *mht = (MHT *)(parms->mht);
+  MHT * mht = (MHT *)(parms->mht);
 
   if (vdist == 0.0)
     vdist = 1.0;
@@ -858,20 +858,20 @@ float mrisSampleSpringEnergy(MRIS *mris, int const vno, float cx, float cy,
 float mrisSampleParallelEnergyAtVertex(MRIS *mris, int const vno,
                                        INTEGRATION_PARMS *parms) {
   VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-  VERTEX *const v = &mris->vertices[vno];
+  VERTEX *const                v  = &mris->vertices[vno];
 
   float xw, yw, zw, xp, yp, zp, dx, dy, dz, dxn, dyn, dzn, len, dxn_total,
       dyn_total, dzn_total;
-  int n, num;
+  int    n, num;
   double sse;
 
   MRISvertexCoord2XYZ_float(v, WHITE_VERTICES, &xw, &yw, &zw);
   MRISsampleFaceCoords(mris, v->fno, v->x, v->y, v->z, PIAL_VERTICES,
                        CANONICAL_VERTICES, &xp, &yp, &zp);
 
-  dx = xp - xw;
-  dy = yp - yw;
-  dz = zp - zw;
+  dx  = xp - xw;
+  dy  = yp - yw;
+  dz  = zp - zw;
   len = sqrt(dx * dx + dy * dy + dz * dz);
   if (FZERO(len))
     return (0.0);
@@ -942,19 +942,19 @@ float mrisSampleParallelEnergy(MRIS *mris, int const vno,
                                INTEGRATION_PARMS *parms, float cx, float cy,
                                float cz) {
   VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-  VERTEX *const v = &mris->vertices[vno];
+  VERTEX *const                v  = &mris->vertices[vno];
 
-  int fno = 0, old_fno, num;
+  int    fno = 0, old_fno, num;
   double sse, fdist;
-  FACE *face;
-  float x, y, z;
-  MHT *mht = (MHT *)(parms->mht);
-  int n;
+  FACE * face;
+  float  x, y, z;
+  MHT *  mht = (MHT *)(parms->mht);
+  int    n;
 
   project_point_onto_sphere(cx, cy, cz, mris->radius, &cx, &cy, &cz);
-  x = v->x;
-  y = v->y;
-  z = v->z;         // store old coordinates
+  x       = v->x;
+  y       = v->y;
+  z       = v->z;   // store old coordinates
   old_fno = v->fno; // store old face
   MHTfindClosestFaceGeneric(mht, mris, cx, cy, cz, 4, 4, 1, &face, &fno,
                             &fdist);
@@ -967,11 +967,11 @@ float mrisSampleParallelEnergy(MRIS *mris, int const vno,
   v->x = cx;
   v->y = cy;
   v->z = cz; // change coords to here and compute effects on sse
-  sse = mrisSampleParallelEnergyAtVertex(mris, vno, parms);
+  sse  = mrisSampleParallelEnergyAtVertex(mris, vno, parms);
 #if 1
   for (num = 1, n = 0; n < vt->vnum; n++) {
     int const vnno = vt->v[n];
-    VERTEX *vn;
+    VERTEX *  vn;
     vn = &mris->vertices[vnno];
     if (vn->ripflag)
       continue;
@@ -982,9 +982,9 @@ float mrisSampleParallelEnergy(MRIS *mris, int const vno,
 #else
   num = 1;
 #endif
-  v->x = x;
-  v->y = y;
-  v->z = z;         // restore old coordinates
+  v->x   = x;
+  v->y   = y;
+  v->z   = z;       // restore old coordinates
   v->fno = old_fno; // restore old face
   sse /= (num);
   return (sse);
@@ -993,10 +993,10 @@ float mrisSampleParallelEnergy(MRIS *mris, int const vno,
 int MRISsampleFaceCoordsCanonical(MHT *mht, MRIS *mris, float x, float y,
                                   float z, int which, float *px, float *py,
                                   float *pz) {
-  float xv, yv, zv;
-  double lambda[3], fdist, norm;
-  int n, ret = NO_ERROR, fno;
-  FACE *face;
+  float   xv, yv, zv;
+  double  lambda[3], fdist, norm;
+  int     n, ret = NO_ERROR, fno;
+  FACE *  face;
   VERTEX *v;
 
   norm = sqrt(x * x + y * y + z * z);

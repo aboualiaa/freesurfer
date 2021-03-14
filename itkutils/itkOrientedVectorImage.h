@@ -17,15 +17,15 @@
 #ifndef __itkOrientedVectorImage_h
 #define __itkOrientedVectorImage_h
 
+#include "itkContinuousIndex.h"
+#include "itkDefaultVectorPixelAccessor.h"
+#include "itkDefaultVectorPixelAccessorFunctor.h"
 #include "itkImageBase.h"
 #include "itkImageRegion.h"
 #include "itkImportImageContainer.h"
-#include "itkDefaultVectorPixelAccessor.h"
-#include "itkDefaultVectorPixelAccessorFunctor.h"
-#include "itkVectorImageNeighborhoodAccessorFunctor.h"
 #include "itkPoint.h"
-#include "itkContinuousIndex.h"
 #include "itkVariableLengthVector.h"
+#include "itkVectorImageNeighborhoodAccessorFunctor.h"
 #include "itkWeakPointer.h"
 
 #include "itkOrientedImage.h"
@@ -82,11 +82,11 @@ class ITK_EXPORT OrientedVectorImage
     : public OrientedImage<TPixel, VImageDimension> {
 public:
   /** Standard class typedefs */
-  typedef OrientedVectorImage Self;
+  typedef OrientedVectorImage                    Self;
   typedef OrientedImage<TPixel, VImageDimension> Superclass;
-  typedef SmartPointer<Self> Pointer;
-  typedef SmartPointer<const Self> ConstPointer;
-  typedef WeakPointer<const Self> ConstWeakPointer;
+  typedef SmartPointer<Self>                     Pointer;
+  typedef SmartPointer<const Self>               ConstPointer;
+  typedef WeakPointer<const Self>                ConstWeakPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -156,7 +156,7 @@ public:
   typedef typename Superclass::PointType PointType;
 
   /** A pointer to the pixel container. */
-  typedef typename PixelContainer::Pointer PixelContainerPointer;
+  typedef typename PixelContainer::Pointer      PixelContainerPointer;
   typedef typename PixelContainer::ConstPointer PixelContainerConstPointer;
 
   /** Offset typedef (relative position between indices) */
@@ -212,7 +212,7 @@ public:
    * pixel on the stack. */
   const PixelType GetPixel(const IndexType &index) const {
     OffsetValueType offset = m_VectorLength * this->ComputeOffset(index);
-    PixelType p(&((*m_Buffer)[offset]), m_VectorLength);
+    PixelType       p(&((*m_Buffer)[offset]), m_VectorLength);
     return p;
   }
 
@@ -222,7 +222,7 @@ public:
    * image has actually been allocated yet. */
   PixelType GetPixel(const IndexType &index) {
     OffsetValueType offset = m_VectorLength * this->ComputeOffset(index);
-    PixelType p(&((*m_Buffer)[offset]), m_VectorLength);
+    PixelType       p(&((*m_Buffer)[offset]), m_VectorLength);
     return p;
   }
 
@@ -297,7 +297,7 @@ public:
 
   /** Get/Set the number of components each pixel has, ie the VectorLength */
   virtual unsigned int GetNumberOfComponentsPerPixel() const;
-  virtual void SetNumberOfComponentsPerPixel(unsigned int n);
+  virtual void         SetNumberOfComponentsPerPixel(unsigned int n);
 
 #if 0
   /** \brief Get the continuous index from a physical point

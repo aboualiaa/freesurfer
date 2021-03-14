@@ -1,17 +1,6 @@
-/**
- * @file  mri_ca_util.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:10 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,30 +15,28 @@
 #ifndef util_h
 #define util_h
 
-#include <stdio.h>
-#include <math.h>
-#include <string>
-#include <iostream>
 #include <fstream>
-#include <vector>
-#include <set>
+#include <iostream>
 #include <map>
+#include <math.h>
+#include <set>
+#include <stdio.h>
+#include <string>
+#include <vector>
 
 #include "mri.h"
 
-using namespace std;
+typedef std::vector<double>           TypeVectorDouble;
+typedef std::vector<TypeVectorDouble> TypeMatrixDouble;
 
-typedef vector<double> TypeVectorDouble;
-typedef vector<TypeVectorDouble> TypeMatrixDouble;
+typedef std::vector<float>           TypeVectorFloat;
+typedef std::vector<TypeVectorFloat> TypeMatrixFloat;
 
-typedef vector<float> TypeVectorFloat;
-typedef vector<TypeVectorFloat> TypeMatrixFloat;
+typedef std::vector<int>           TypeVectorInt;
+typedef std::vector<TypeVectorInt> TypeMatrixInt;
 
-typedef vector<int> TypeVectorInt;
-typedef vector<TypeVectorInt> TypeMatrixInt;
-
-typedef vector<string> TypeVectorString;
-typedef vector<TypeVectorString> TypeMatrixString;
+typedef std::vector<std::string>      TypeVectorString;
+typedef std::vector<TypeVectorString> TypeMatrixString;
 
 void printType(TypeVectorDouble vectorDouble, ostream &ofs = cout) {
   char strMsg[500];
@@ -64,7 +51,7 @@ void printType(TypeVectorDouble vectorDouble, ostream &ofs = cout) {
   for (nWhichIndex = 0; nWhichIndex <= nMaxIndex; nWhichIndex++) {
     if (nWhichIndex == nMaxIndex) {
       sprintf(strMsg, "%8.3f", vectorDouble[nWhichIndex]);
-      ofs << strMsg << endl;
+      ofs << strMsg << std::endl;
     } else {
       sprintf(strMsg, "%8.3f, ", vectorDouble[nWhichIndex]);
       ofs << strMsg;
@@ -87,7 +74,7 @@ void printType(TypeMatrixDouble matrixDouble, ostream &ofs = cout) {
     for (nWhichColIndex = 0; nWhichColIndex <= nMaxColIndex; nWhichColIndex++) {
       if (nWhichColIndex == nMaxColIndex) {
         sprintf(strMsg, "%8.3f", matrixDouble[nWhichRowIndex][nWhichColIndex]);
-        ofs << strMsg << endl;
+        ofs << strMsg << std::endl;
       } else {
         sprintf(strMsg, "%8.3f, ",
                 matrixDouble[nWhichRowIndex][nWhichColIndex]);
@@ -110,7 +97,7 @@ void printType(TypeVectorFloat vectorFloat, ostream &ofs = cout) {
   for (nWhichIndex = 0; nWhichIndex <= nMaxIndex; nWhichIndex++) {
     if (nWhichIndex == nMaxIndex) {
       sprintf(strMsg, "%8.3f", vectorFloat[nWhichIndex]);
-      ofs << strMsg << endl;
+      ofs << strMsg << std::endl;
     } else {
       sprintf(strMsg, "%8.3f, ", vectorFloat[nWhichIndex]);
       ofs << strMsg;
@@ -133,7 +120,7 @@ void printType(TypeMatrixFloat matrixFloat, ostream &ofs = cout) {
     for (nWhichColIndex = 0; nWhichColIndex <= nMaxColIndex; nWhichColIndex++) {
       if (nWhichColIndex == nMaxColIndex) {
         sprintf(strMsg, "%8.3f", matrixFloat[nWhichRowIndex][nWhichColIndex]);
-        ofs << strMsg << endl;
+        ofs << strMsg << std::endl;
       } else {
         sprintf(strMsg, "%8.3f, ", matrixFloat[nWhichRowIndex][nWhichColIndex]);
         ofs << strMsg;
@@ -155,7 +142,7 @@ void printType(TypeVectorInt vectorInt, ostream &ofs = cout) {
 
     if (nWhichIndex == nMaxIndex) {
       sprintf(strMsg, "%8d", vectorInt[nWhichIndex]);
-      ofs << strMsg << endl;
+      ofs << strMsg << std::endl;
     } else {
       sprintf(strMsg, "%8d, ", vectorInt[nWhichIndex]);
       ofs << strMsg;
@@ -183,7 +170,7 @@ void printType(TypeMatrixInt matrixInt, ostream &ofs = cout) {
 
       if (nWhichColIndex == nMaxColIndex) {
         sprintf(strMsg, "%8d", matrixInt[nWhichRowIndex][nWhichColIndex]);
-        ofs << strMsg << endl;
+        ofs << strMsg << std::endl;
       } else {
         sprintf(strMsg, "%8d, ", matrixInt[nWhichRowIndex][nWhichColIndex]);
         ofs << strMsg;
@@ -192,11 +179,11 @@ void printType(TypeMatrixInt matrixInt, ostream &ofs = cout) {
   }
 }
 
-void printType(string strString, ostream &ofs = cout) {
+void printType(std::string strString, ostream &ofs = cout) {
   char strMsg[500];
 
   sprintf(strMsg, "%s", strString.c_str());
-  ofs << strMsg << endl;
+  ofs << strMsg << std::endl;
 }
 
 void printType(TypeVectorString vectorString, ostream &ofs = cout) {
@@ -211,7 +198,7 @@ void printType(TypeVectorString vectorString, ostream &ofs = cout) {
   for (nWhichIndex = 0; nWhichIndex <= nMaxIndex; nWhichIndex++) {
     if (nWhichIndex == nMaxIndex) {
       sprintf(strMsg, "%s", vectorString[nWhichIndex].c_str());
-      ofs << strMsg << endl;
+      ofs << strMsg << std::endl;
     } else {
       sprintf(strMsg, "%s, ", vectorString[nWhichIndex].c_str());
       ofs << strMsg;
@@ -239,7 +226,7 @@ void printType(TypeMatrixString matrixString, ostream &ofs = cout) {
       if (nWhichColIndex == nMaxColIndex) {
         sprintf(strMsg, "%s",
                 matrixString[nWhichRowIndex][nWhichColIndex].c_str());
-        ofs << strMsg << endl;
+        ofs << strMsg << std::endl;
       } else {
         sprintf(strMsg, "%s, ",
                 matrixString[nWhichRowIndex][nWhichColIndex].c_str());

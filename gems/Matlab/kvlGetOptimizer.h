@@ -10,9 +10,9 @@ namespace kvl {
 class GetOptimizer : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef GetOptimizer Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef GetOptimizer                  Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -21,8 +21,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(GetOptimizer, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // Make sure input arguments are correct
@@ -42,7 +42,7 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     kvl::AtlasMesh::ConstPointer constMesh =
         dynamic_cast<const kvl::AtlasMesh *>(object.GetPointer());
-    if (constMesh.GetPointer() == nullptr) {
+    if (!constMesh.GetPointer()) {
       std::cout << "typeid: " << typeid(*object).name() << std::endl;
       mexErrMsgTxt("mesh doesn't refer to the correct ITK object type");
     }
@@ -56,7 +56,7 @@ public:
         constCalculator = dynamic_cast<
             const kvl::AtlasMeshPositionCostAndGradientCalculator *>(
             object.GetPointer());
-    if (constCalculator.GetPointer() == nullptr) {
+    if (!constCalculator.GetPointer()) {
       std::cout << "typeid: " << typeid(*object).name() << std::endl;
       mexErrMsgTxt("calculator doesn't refer to the correct ITK object type");
     }
@@ -66,7 +66,7 @@ public:
 
     // Construct the correct type of optimizer
     AtlasMeshDeformationOptimizer::Pointer optimizer = nullptr;
-    const std::string typeName = mxArrayToString(prhs[0]);
+    const std::string                      typeName  = mxArrayToString(prhs[0]);
     switch (typeName[0]) {
     case 'F': {
       std::cout << "FixedStepGradientDescent" << std::endl;
@@ -115,13 +115,13 @@ public:
       const std::string optionName =
           mxArrayToString(prhs[3 + 2 * argumentNumber]);
       const double optionValue = *(mxGetPr(prhs[3 + 2 * argumentNumber + 1]));
-      // std::cout << "optionName: " << optionName << std::endl;
-      // std::cout << "optionValue: " << optionValue << std::endl;
+      //std::cout << "optionName: " << optionName << std::endl;
+      //std::cout << "optionValue: " << optionValue << std::endl;
 
       switch (optionName[0]) {
       case 'V': {
         std::cout << "Verbose: " << optionValue << std::endl;
-        if (optionValue != 0.0) {
+        if (optionValue) {
           optimizer->SetVerbose(true);
         }
 
@@ -156,7 +156,7 @@ public:
         AtlasMeshDeformationLBFGSOptimizer::Pointer myOptimizer =
             dynamic_cast<AtlasMeshDeformationLBFGSOptimizer *>(
                 optimizer.GetPointer());
-        if (myOptimizer != nullptr) {
+        if (myOptimizer) {
           const int maximumMemoryLength = static_cast<int>(optionValue);
           std::cout << "BFGS-MaximumMemoryLength: " << maximumMemoryLength
                     << std::endl;
@@ -193,11 +193,11 @@ public:
   }
 
 protected:
-  GetOptimizer()= default;;
-  ~GetOptimizer() override= default;;
+  GetOptimizer(){};
+  virtual ~GetOptimizer(){};
 
-  GetOptimizer(const Self &);   // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  GetOptimizer(const Self &);   //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

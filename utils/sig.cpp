@@ -1,17 +1,12 @@
 /**
- * @file  sig.c
  * @brief stats routines
  *
  * such things as FDR and beta and gamma incomplete functions
  */
 /*
  * Original Author: Bruce Fischl and Doug Greve
- * CVS Revision Info:
- *    $Author: zkaufman $
- *    $Date: 2015/03/12 20:22:57 $
- *    $Revision: 1.24 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,11 +18,11 @@
  *
  */
 
-#include <float.h>
 #include <cmath>
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <float.h>
+#include <math.h>
 
 #include "macros.h"
 #include "numerics.h"
@@ -53,7 +48,7 @@
   Thomas E. Nichols (2002).  NeuroImage 15:870-878.
   ---------------------------------------------------------*/
 double fdr2vwth(double *p, int np, double fdr) {
-  int n;
+  int    n;
   double r;
   r = fdr / np;
 
@@ -82,7 +77,7 @@ double fdr2vwth(double *p, int np, double fdr) {
   ---------------------------------------------------------*/
 double vwth2fdr(double *p, int np, double vwth) {
   double fdr = 0, r = 0;
-  int n;
+  int    n;
 
   // Sort in ascending order
   qsort(p, np, sizeof(double), doublecompar);
@@ -93,7 +88,7 @@ double vwth2fdr(double *p, int np, double vwth) {
       break;
 
   // Compute the corresponding FDR
-  r = (double)n / np; // Normalize rank for index n
+  r   = (double)n / np; // Normalize rank for index n
   fdr = vwth / r;
 
   return (fdr);
@@ -113,7 +108,7 @@ int doublecompar(const void *v1, const void *v2) {
   return (+1);
 }
 
-#define MAXT 30.0
+#define MAXT   30.0
 #define MAXDOF 200
 /* note, everything here is Doug's fault */
 double sigt(double t, int df) {
@@ -134,8 +129,10 @@ double sigt(double t, int df) {
       sig = sig2;
   }
 
-  if (!std::isfinite(sig)) printf("### Numerical error: sigt(%e,%d) = %e\n", t, df, sig);
-  if (sig > 1.0) sig = 1.0;
+  if (!std::isfinite(sig))
+    printf("### Numerical error: sigt(%e,%d) = %e\n", t, df, sig);
+  if (sig > 1.0)
+    sig = 1.0;
 
   return sig;
 }

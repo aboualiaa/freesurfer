@@ -8,28 +8,28 @@ project(tktools)
 
 if(NOT APPLE)
 
-  install_symlinks(
-    qdec
-    tkmedit
-    tkregister2
-    tksurfer
-    TYPE programs
-    DESTINATION bin
-  )
+  install_symlinks(qdec
+                   tkmedit
+                   tkregister2
+                   tksurfer
+                   TYPE
+                   programs
+                   DESTINATION
+                   bin
+                   )
 
-  install(PROGRAMS
-    scripts/tkanalyse.tcl
-    scripts/tkm_common.tcl
-    scripts/tkm_dialog.tcl
-    scripts/tkmedit.tcl
-    scripts/tkm_functional.tcl
-    scripts/tkm_graph.tcl
-    scripts/tkm_wrappers.tcl
-    scripts/tkregister2.tcl
-    scripts/tksurfer.tcl
-    scripts/tkUtils.tcl
-    DESTINATION tktools
-  )
+  install(PROGRAMS scripts/tkanalyse.tcl
+                   scripts/tkm_common.tcl
+                   scripts/tkm_dialog.tcl
+                   scripts/tkmedit.tcl
+                   scripts/tkm_functional.tcl
+                   scripts/tkm_graph.tcl
+                   scripts/tkm_wrappers.tcl
+                   scripts/tkregister2.tcl
+                   scripts/tksurfer.tcl
+                   scripts/tkUtils.tcl
+          DESTINATION tktools
+          )
 
   install_tarball(resources.tar.gz DESTINATION lib)
 

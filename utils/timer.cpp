@@ -54,8 +54,8 @@ std::string currentDateTime(bool allowOverride) {
   if (allowOverride && overrideString) {
     return overrideString;
   } else {
-    char datetime[1000];
-    time_t t = std::time(nullptr);
+    char       datetime[1000];
+    time_t     t   = std::time(nullptr);
     struct tm *now = localtime(&t);
     std::strftime(datetime, 1000, "%c", now);
     return datetime;

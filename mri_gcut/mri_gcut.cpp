@@ -1,5 +1,4 @@
 /**
- * @file  mri_gcut.cpp
  * @input T1.mgz; output brainmask.auto.mgz
  *
  * the main idea of the program:
@@ -45,13 +44,9 @@
  */
 /*
  * Original Authors: Vitali Zagorodnov, ZHU Jiaqi
- * CVS Revision Info: 1.4
- *    $Author: Vitali Zagorodnov, ZHU Jiaqi
- *    $Date: Feb. 2010
- *    $Revision: 1.4
  *
  * Copyright © 2009-2010 Nanyang Technological University, Singapore
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -63,23 +58,22 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "version.h"
 
-#include "pre_pro.cpp"
 #include "graphcut.cpp"
+#include "pre_pro.cpp"
 
-const char *Progname;
-static char vcid[] = "$Id: mri_gcut.cpp,v 1.14 2011/03/02 00:04:16 nicks Exp $";
-static char in_filename[STRLEN];
-static char out_filename[STRLEN];
-static char mask_filename[STRLEN];
-static char diff_filename[STRLEN];
-static bool bNeedPreprocessing = true;
-static bool bNeedMasking = false;
-static double _t = 0.40;
+const char *  Progname;
+static char   in_filename[STRLEN];
+static char   out_filename[STRLEN];
+static char   mask_filename[STRLEN];
+static char   diff_filename[STRLEN];
+static bool   bNeedPreprocessing = true;
+static bool   bNeedMasking       = false;
+static double _t                 = 0.40;
 
 bool matrix_alloc(int ****pointer, int z, int y, int x) {
   (*pointer) = new int **[z];
@@ -114,14 +108,14 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 3) {
@@ -190,9 +184,8 @@ static int parse_commandline(int argc, char **argv) {
 int main(int argc, char *argv[]) {
   /* check for and handle version tag */
   int nargs = handleVersionOption(argc, argv, "mri_gcut");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -208,7 +201,7 @@ int main(int argc, char *argv[]) {
     printf("can't read file %s\nexit!\n", in_filename);
     exit(0);
   }
-  mri = MRISeqchangeType(mri3, MRI_UCHAR, 0.0, 0.999, FALSE);
+  mri  = MRISeqchangeType(mri3, MRI_UCHAR, 0.0, 0.999, FALSE);
   mri2 = MRISeqchangeType(mri3, MRI_UCHAR, 0.0, 0.999, FALSE);
   // MRI* mri4 = MRIread("gcutted.mgz");
 
@@ -337,9 +330,9 @@ int main(int argc, char *argv[]) {
   }
 
   // if the output might have some problem
-  int numGcut = 0, numMask = 0;
-  double _ratio = 0;
-  int error_Hurestic = 0;
+  int    numGcut = 0, numMask = 0;
+  double _ratio         = 0;
+  int    error_Hurestic = 0;
   if (bNeedMasking == 1) //-110 and masking are both set
   {
     for (int z = 0; z < mri_mask->depth; z++) {

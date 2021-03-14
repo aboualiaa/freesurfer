@@ -1,17 +1,12 @@
 /**
- * @file  ic42.c
  * @brief 1st order icosahedral subdivision with 42 vertices.
  *
  * in memory version of ic1.tri
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:45 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -68,7 +63,7 @@ MRI_SURFACE *ic42_make_surface(int max_vertices, int max_faces) {
     first_time = 0;
     int fno;
     for (fno = 0; fno < ICO_NFACES; fno++) {
-      int vno = ic42_faces[fno].vno[1];
+      int vno                = ic42_faces[fno].vno[1];
       ic42_faces[fno].vno[1] = ic42_faces[fno].vno[2];
       ic42_faces[fno].vno[2] = vno;
     }

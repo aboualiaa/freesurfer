@@ -34,9 +34,9 @@
 
 #ifndef vtkNIFTIImageReader_h
 #define vtkNIFTIImageReader_h
-#include "vtkNIFTIImageHeader.h"
 #include "vtkIOImageModule.h" // For export macro
 #include "vtkImageReader2.h"
+#include "vtkNIFTIImageHeader.h"
 
 class vtkNIFTIImageHeader;
 class vtkMatrix4x4;
@@ -92,7 +92,7 @@ public:
   /**
    * Get the time dimension that was stored in the NIFTI header.
    */
-  int GetTimeDimension() { return this->Dim[4]; }
+  int    GetTimeDimension() { return this->Dim[4]; }
   double GetTimeSpacing() { return this->PixDim[4]; }
 
   /**
@@ -172,9 +172,9 @@ protected:
   /**
    * Read the header information.
    */
-  int RequestInformation(vtkInformation *request,
+  int RequestInformation(vtkInformation *       request,
                          vtkInformationVector **inputVector,
-                         vtkInformationVector *outputVector) override;
+                         vtkInformationVector * outputVector) override;
 
   /**
    * Read the voxel data.

@@ -1,17 +1,6 @@
-/**
- * @file  mri_surf2vol.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/12/08 19:49:02 $
- *    $Revision: 1.28 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,20 +18,19 @@
   email:   analysis-bugs@nmr.mgh.harvard.edu
   Date:    2/27/02
   Purpose: converts values on a surface to a volume
-  $Id: mri_surf2vol.c,v 1.28 2014/12/08 19:49:02 greve Exp $
 */
 
 #include "diag.h"
 
+#include "fio.h"
+#include "fsenv.h"
 #include "mri2.h"
 #include "mri_identify.h"
 #include "registerio.h"
 #include "resample.h"
 #include "version.h"
-#include "fio.h"
-#include "fsenv.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -50,42 +38,40 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
-static int isflag(char *flag);
-static int nth_is_arg(int nargc, char **argv, int nth);
-static int istringnmatch(char *str1, char *str2, int n);
+static int  singledash(char *flag);
+static int  isflag(char *flag);
+static int  nth_is_arg(int nargc, char **argv, int nth);
+static int  istringnmatch(const char *str1, const char *str2, int n);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_surf2vol.c,v 1.28 2014/12/08 19:49:02 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 int debug = 0, gdiagno = -1;
 
-char *subjectsdir = nullptr;
-char *surfvalpath = nullptr;
-char *surfvalfmt = nullptr;
-int surfvalfmtid = 0;
-char *hemi = nullptr;
-char *surfname = "white";
-char *srcsubject = nullptr;
-char *subject = nullptr; // for overriding
-char *targsubject = nullptr;
-float projfrac = 0;
-static int fillribbon = 0;
+char *      subjectsdir  = NULL;
+char *      surfvalpath  = NULL;
+char *      surfvalfmt   = NULL;
+int         surfvalfmtid = 0;
+char *      hemi         = NULL;
+const char *surfname     = "white";
+char *      srcsubject   = NULL;
+char *      subject      = NULL; // for overriding
+char *      targsubject  = NULL;
+float       projfrac     = 0;
+static int  fillribbon   = 0;
 
-char *tempvolpath = nullptr;
+char *tempvolpath = NULL;
 char *tempvolfmt;
-int tempvolfmtid = 0;
+int   tempvolfmtid = 0;
 char *mergevolpath = nullptr;
 char *outvolpath;
 char *outvolfmt;
-int outvolfmtid = 0;
+int   outvolfmtid = 0;
 char *vtxvolpath;
 char *vtxvolfmt;
-int vtxvolfmtid = 0;
-int dim[3];
+int   vtxvolfmtid = 0;
+int   dim[3];
 float res[3];
 float xyz0[3];
 float cdircos[3], rdircos[3], sdircos[3];
@@ -93,40 +79,40 @@ char *precision;
 
 char *volregfile = nullptr;
 
-MRI *mritmp;
-MRI *SurfVal;
-MRI *RefAnat;
-MRI *TempVol, *OutVol;
-MRI *VtxVol;
+MRI *        mritmp;
+MRI *        SurfVal;
+MRI *        RefAnat;
+MRI *        TempVol, *OutVol;
+MRI *        VtxVol;
 MRI_SURFACE *SrcSurf;
 
 MATRIX *Ma2vTKR;
 MATRIX *Kvol, *invKvol;
 MATRIX *Qa2v;
 
-float reshapefactor;
-int mksurfmask = 0;
-int UseVolRegIdentity = 0;
+float  reshapefactor;
+int    mksurfmask        = 0;
+int    UseVolRegIdentity = 0;
 FSENV *fsenv;
-int fstalres;
-char tmpstr[2000];
-float ProjFracStart = 0.0, ProjFracDelta = 0.05, ProjFracStop = 1.0;
+int    fstalres;
+char   tmpstr[2000];
+float  ProjFracStart = 0.0, ProjFracDelta = 0.05, ProjFracStop = 1.0;
 
-int DoAddVal = 0;
-double AddVal = 0;
+int    DoAddVal = 0;
+double AddVal   = 0;
 
-int narray = 0;
+int          narray = 0;
 MRI_SURFACE *surfarray[100];
-MRI *overlayarray[100], *ribbon = nullptr;
-LTA *ArrayLTA = nullptr;
+MRI *        overlayarray[100], *ribbon = nullptr;
+LTA *        ArrayLTA = nullptr;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
   float ipr, bpr, intensity, v;
-  int float2int, err, vtx, nhits, c, r, s, f;
-  char fname[2000];
-  int nargs;
-  int n;
+  int   float2int, err, vtx, nhits, c, r, s, f;
+  char  fname[2000];
+  int   nargs;
+  int   n;
 
   nargs = handleVersionOption(argc, argv, "mri_surf2vol");
   if (nargs && argc - nargs == 1)
@@ -248,7 +234,7 @@ int main(int argc, char **argv) {
   }
 
   /* Construct the matrix to map from Surface XYZ to vol */
-  Kvol = MRIxfmCRS2XYZtkreg(TempVol);     /* converts crs to xyz in vol */
+  Kvol    = MRIxfmCRS2XYZtkreg(TempVol);  /* converts crs to xyz in vol */
   invKvol = MatrixInverse(Kvol, nullptr); /* converts xyz to crs in vol */
   Qa2v = MatrixMultiply(invKvol, Ma2vTKR, NULL); /* conv xyz anat to crs vol */
   printf("Qa2v: SurfXYZ to VolCRS: ------------------------------\n");
@@ -448,7 +434,7 @@ int main(int argc, char **argv) {
 /* ------------------------------------------------------------------ */
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int i, nargc, nargsused;
+  int    i, nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -485,14 +471,14 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       subjectsdir = pargv[0];
       setenv("SUBJECTS_DIR", pargv[0], 1);
-      fsenv = FSENVgetenv();
+      fsenv     = FSENVgetenv();
       nargsused = 1;
     } else if (istringnmatch(option, "--surfval", 0) ||
                istringnmatch(option, "--sval", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       surfvalpath = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         surfvalfmt = pargv[1];
         nargsused++;
@@ -502,16 +488,16 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       srcsubject = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--surf", 9)) {
       if (nargc < 1)
         argnerr(option, 1);
-      surfname = pargv[0];
+      surfname  = pargv[0];
       nargsused = 1;
     } else if (istringnmatch(option, "--hemi", 3)) {
       if (nargc < 1)
         argnerr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
       if (strcmp(hemi, "lh") && strcmp(hemi, "rh")) {
         printf("ERROR: hemi = %s, must be lh or rh\n", hemi);
@@ -525,7 +511,7 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--fillribbon")) {
       if (nargc < 0)
         argnerr(option, 1);
-      nargsused = 0;
+      nargsused  = 0;
       fillribbon = 1;
     } else if (!strcmp(option, "--fill-projfrac")) {
       if (nargc < 3)
@@ -534,30 +520,30 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[1], "%f", &ProjFracStop);
       sscanf(pargv[2], "%f", &ProjFracDelta);
       fillribbon = 1;
-      nargsused = 3;
+      nargsused  = 3;
     } else if (!strcmp(option, "--add")) {
       if (nargc < 1)
         argnerr(option, 1);
       sscanf(pargv[0], "%lf", &AddVal);
-      DoAddVal = 1;
+      DoAddVal  = 1;
       nargsused = 1;
     } else if (istringnmatch(option, "--volregidentity", 16) ||
                istringnmatch(option, "--identity", 16)) {
       if (nargc < 1)
         argnerr(option, 1);
-      srcsubject = pargv[0];
-      nargsused = 1;
+      srcsubject        = pargv[0];
+      nargsused         = 1;
       UseVolRegIdentity = 1;
     } else if (istringnmatch(option, "--volreg", 8) ||
                istringnmatch(option, "--reg", 8)) {
       if (nargc < 1)
         argnerr(option, 1);
       volregfile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (istringnmatch(option, "--subject", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (istringnmatch(option, "--fstal", 7)) {
       if (nargc < 1)
@@ -569,13 +555,13 @@ static int parse_commandline(int argc, char **argv) {
       sprintf(tmpstr, "%s/average/mni305.cor.subfov%d.mgz",
               fsenv->FREESURFER_HOME, fstalres);
       tempvolpath = strcpyalloc(tmpstr);
-      nargsused = 1;
+      nargsused   = 1;
     } else if (istringnmatch(option, "--outvol", 0) ||
                istringnmatch(option, "--o", 0)) {
       if (nargc < 1)
         argnerr(option, 1);
       outvolpath = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         outvolfmt = pargv[1];
         nargsused++;
@@ -585,7 +571,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       vtxvolpath = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         vtxvolfmt = pargv[1];
         nargsused++;
@@ -595,7 +581,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       tempvolpath = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
       if (nth_is_arg(nargc, pargv, 1)) {
         tempvolfmt = pargv[1];
         nargsused++;
@@ -618,7 +604,7 @@ static int parse_commandline(int argc, char **argv) {
       ArrayLTA = LTAread(pargv[0]);
       if (ArrayLTA == nullptr)
         exit(1);
-      subject = ArrayLTA->subject;
+      subject   = ArrayLTA->subject;
       nargsused = 1;
     } else if (istringnmatch(option, "--ribbon", 8)) {
       if (nargc < 1)
@@ -631,7 +617,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       mergevolpath = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcmp(option, "--dim")) {
       if (nargc < 3)
         argnerr(option, 3);
@@ -728,10 +714,10 @@ static void print_usage() {
   printf("  \n");
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
 
-  printf("\n%s\n\n", vcid);
+  printf("\n%s\n\n", getVersion().c_str());
 
   printf(
       "Resamples a surface into a volume using one of two methods. \n"
@@ -920,8 +906,8 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 
@@ -1154,7 +1140,7 @@ static int nth_is_arg(int nargc, char **argv, int nth) {
   return a 1 if they match (ignoring case), a zero otherwise. If
   n=0, then do a full comparison.
   ------------------------------------------------------------*/
-static int istringnmatch(char *str1, char *str2, int n) {
+static int istringnmatch(const char *str1, const char *str2, int n) {
   if (n > 0 && !strncasecmp(str1, str2, n))
     return (1);
   if (n <= 0 && !strcasecmp(str1, str2))

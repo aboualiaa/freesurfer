@@ -13,19 +13,14 @@ function RM = fmri_mrestriction2(wcond,wdelay,sumconds,sumdelays)
 %       ndelays   for sumconds=1
 %       nc*nd     for sumconds=0 and sumdelays=0
 %
-% '$Id: fmri_mrestriction2.m,v 1.3 2011/03/02 00:04:06 nicks Exp $'
 
 
 %
 % fmri_mrestriction2.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:06 $
-%    $Revision: 1.3 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

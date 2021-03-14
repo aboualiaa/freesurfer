@@ -22,12 +22,8 @@ function [edge, bincenter, binmap] = fast_histeq(y,nbins)
 % fast_histeq.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: greve $
-%    $Date: 2013/05/29 02:59:15 $
-%    $Revision: 1.7 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

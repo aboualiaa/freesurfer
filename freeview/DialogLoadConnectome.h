@@ -28,7 +28,7 @@ private:
   void UpdateLUT();
 
   Ui::DialogLoadConnectome *ui;
-  QString m_strLastDir;
+  QString                   m_strLastDir;
 };
 
 #endif // DIALOGLOADCONNECTOME_H

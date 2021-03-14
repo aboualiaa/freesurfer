@@ -1,16 +1,11 @@
 /**
- * @file  minmax.hpp
  * @brief Min/Max monitoring class
  *
  */
 /*
  * Original Authors: Richard Edgar
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2012/12/12 21:18:23 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011-2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,8 +20,8 @@
 #ifndef MINMAX_HPP
 #define MINMAX_HPP
 
-#include <limits>
 #include <iostream>
+#include <limits>
 
 namespace Freesurfer {
 
@@ -71,9 +66,9 @@ private:
   T minVal;
   T maxVal;
 
-  size_t nAcc;
+  size_t    nAcc;
   long long intTotal;
-  double doubleTotal;
+  double    doubleTotal;
 };
 
 } // namespace Freesurfer

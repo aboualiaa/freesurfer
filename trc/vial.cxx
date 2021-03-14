@@ -1,14 +1,12 @@
 /**
- * @file  vial.cxx
  * @brief Holds utilities for probabilistic tractography
  *
  * Holds utilities for probabilistic tractography
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,7 +25,7 @@ using namespace std;
 //
 // Affine registration class
 //
-AffineReg::AffineReg() = default;
+AffineReg::AffineReg() {}
 
 AffineReg::AffineReg(vector<float> &InToOut) {
   if (InToOut.size() != 16) {
@@ -39,7 +37,7 @@ AffineReg::AffineReg(vector<float> &InToOut) {
   copy(InToOut.begin(), InToOut.end(), mInToOut.begin());
 }
 
-AffineReg::~AffineReg() = default;
+AffineReg::~AffineReg() {}
 
 bool AffineReg::IsEmpty() { return mInToOut.empty(); }
 
@@ -51,8 +49,8 @@ void AffineReg::ReadXfm(const char *XfmFile, const MRI *InRefVol,
   // Read registration matrix from file
   mInToOut.clear();
 
-  if (XfmFile != nullptr) {
-    float val;
+  if (XfmFile) {
+    float    val;
     ifstream infile(XfmFile, ios::in);
 
     if (!infile) {
@@ -61,9 +59,8 @@ void AffineReg::ReadXfm(const char *XfmFile, const MRI *InRefVol,
     }
 
     cout << "Loading affine registration from " << XfmFile << endl;
-    while (infile >> val) {
+    while (infile >> val)
       mInToOut.push_back(val);
-}
 
     if (mInToOut.size() != 16) {
       cout << "ERROR: File " << XfmFile << " must contain a 4x4 matrix" << endl;
@@ -76,40 +73,36 @@ void AffineReg::ReadXfm(const char *XfmFile, const MRI *InRefVol,
 
   // Get resolution of input images
   mInVoxelSize.resize(3);
-  if (InRefVol != nullptr) {
+  if (InRefVol) {
     mInVoxelSize[0] = InRefVol->xsize;
     mInVoxelSize[1] = InRefVol->ysize;
     mInVoxelSize[2] = InRefVol->zsize;
-  } else {
+  } else
     fill(mInVoxelSize.begin(), mInVoxelSize.end(), 1.0);
-}
 
   // Get resolution of output images
   mOutVoxelSize.resize(3);
-  if (OutRefVol != nullptr) {
+  if (OutRefVol) {
     mOutVoxelSize[0] = OutRefVol->xsize;
     mOutVoxelSize[1] = OutRefVol->ysize;
     mOutVoxelSize[2] = OutRefVol->zsize;
-  } else {
+  } else
     fill(mOutVoxelSize.begin(), mOutVoxelSize.end(), 1.0);
-}
 }
 
 //
 // Apply an affine transform to a single point
 //
-void AffineReg::ApplyXfm(vector<float> &OutPoint,
+void AffineReg::ApplyXfm(vector<float> &               OutPoint,
                          vector<float>::const_iterator InPoint) {
-  auto in2out = mInToOut.begin();
-  vector<float> pin;
-vector<float> pout;
+  vector<float>::const_iterator in2out = mInToOut.begin();
+  vector<float>                 pin, pout;
 
   pin.resize(4);
   pout.resize(4);
 
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++)
     pin[i] = InPoint[i] * mInVoxelSize[i];
-}
   pin[3] = 1;
 
   for (int i = 0; i < 4; i++) {
@@ -121,41 +114,25 @@ vector<float> pout;
     pout[i] = psum;
   }
 
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++)
     OutPoint[i] = pout[i] / pout[3] / mOutVoxelSize[i];
-}
 }
 
 //
 // Decompose an affine transform into its parameters
 //
 void AffineReg::DecomposeXfm() {
-  float t11 = mInToOut[0];
-float t12 = mInToOut[1];
-float t13 = mInToOut[2];
-float t21 = mInToOut[4];
-float t22 = mInToOut[5];
-float t23 = mInToOut[6];
-float t31 = mInToOut[8];
-float t32 = mInToOut[9];
-float t33 = mInToOut[10];
-float yznorm;
-float zxnorm;
-float sinx;
-float cosx;
-float siny;
-float cosy;
-float sinz;
-float cosz;
-  const float x2 = t11 * t11 + t21 * t21 + t31 * t31;
-const float y2 = t12 * t12 + t22 * t22 + t32 * t32;
-const float z2 = t13 * t13 + t23 * t23 + t33 * t33;
-const float xy = t11 * t12 + t21 * t22 + t31 * t32;
-const float yz = t12 * t13 + t22 * t23 + t32 * t33;
-const float zx = t13 * t11 + t23 * t21 + t33 * t31;
-  const float cx = 0.0;
-const float cy = 0.0;
-const float cz = 0.0; // TODO: center of geometry
+  float t11 = mInToOut[0], t12 = mInToOut[1], t13 = mInToOut[2],
+        t21 = mInToOut[4], t22 = mInToOut[5], t23 = mInToOut[6],
+        t31 = mInToOut[8], t32 = mInToOut[9], t33 = mInToOut[10], yznorm,
+        zxnorm, sinx, cosx, siny, cosy, sinz, cosz;
+  const float x2 = t11 * t11 + t21 * t21 + t31 * t31,
+              y2 = t12 * t12 + t22 * t22 + t32 * t32,
+              z2 = t13 * t13 + t23 * t23 + t33 * t33,
+              xy = t11 * t12 + t21 * t22 + t31 * t32,
+              yz = t12 * t13 + t22 * t23 + t32 * t33,
+              zx = t13 * t11 + t23 * t21 + t33 * t31;
+  const float cx = 0.0, cy = 0.0, cz = 0.0; // TODO: center of geometry
 
   // Translation
   mTranslate.resize(3);
@@ -170,8 +147,8 @@ const float cz = 0.0; // TODO: center of geometry
   mScale[0] = sqrt(x2);
   mScale[1] = sqrt(y2 - xy * xy / x2);
   mShear[0] = xy / (mScale[0] * mScale[1]);
-  zxnorm = zx / mScale[0];
-  yznorm = yz / mScale[1] - mShear[0] * zx / mScale[0];
+  zxnorm    = zx / mScale[0];
+  yznorm    = yz / mScale[1] - mShear[0] * zx / mScale[0];
   mScale[2] = sqrt(z2 - zxnorm * zxnorm - yznorm * yznorm);
   mShear[1] = zxnorm / mScale[2];
   mShear[2] = yznorm / mScale[2];
@@ -211,7 +188,7 @@ const float cz = 0.0; // TODO: center of geometry
     siny = -t13;
 
     mRotate[0] = atan2(sinx, cosx);
-    mRotate[1] = atan2(siny, static_cast<float>(0.0));
+    mRotate[1] = atan2(siny, (float)0.0);
     mRotate[2] = 0.0;
   } else {
     sinx = t23 / cosy;
@@ -230,9 +207,8 @@ const float cz = 0.0; // TODO: center of geometry
 // Print scaling matrix
 //
 void AffineReg::PrintScale() {
-  if (mScale.empty()) {
+  if (mScale.empty())
     DecomposeXfm();
-}
 
   cout << "Scale matrix:" << endl
        << mScale[0] << "\t" << 0 << "\t" << 0 << endl
@@ -244,9 +220,8 @@ void AffineReg::PrintScale() {
 // Print shearing matrix
 //
 void AffineReg::PrintShear() {
-  if (mShear.empty()) {
+  if (mShear.empty())
     DecomposeXfm();
-}
 
   cout << "Shear matrix:" << endl
        << 1 << "\t" << mShear[0] << "\t" << mShear[1] << endl
@@ -258,16 +233,10 @@ void AffineReg::PrintShear() {
 // Print rotation matrix
 //
 void AffineReg::PrintRotate() {
-  float sinx;
-float cosx;
-float siny;
-float cosy;
-float sinz;
-float cosz;
+  float sinx, cosx, siny, cosy, sinz, cosz;
 
-  if (mRotate.empty()) {
+  if (mRotate.empty())
     DecomposeXfm();
-}
 
   sinx = sin(mRotate[0]);
   cosx = cos(mRotate[0]);
@@ -287,36 +256,32 @@ float cosz;
 //
 // Return components of affine transform
 //
-vector<float> AffineReg::GetTranslate() {
-  if (mTranslate.empty()) {
+vector<float>::const_iterator AffineReg::GetTranslate() {
+  if (mTranslate.empty())
     DecomposeXfm();
+
+  return mTranslate.begin();
 }
 
-  return mTranslate;
-}
-
-vector<float> AffineReg::GetRotate() {
-  if (mRotate.empty()) {
+vector<float>::const_iterator AffineReg::GetRotate() {
+  if (mRotate.empty())
     DecomposeXfm();
+
+  return mRotate.begin();
 }
 
-  return mRotate;
-}
-
-vector<float> AffineReg::GetShear() {
-  if (mShear.empty()) {
+vector<float>::const_iterator AffineReg::GetShear() {
+  if (mShear.empty())
     DecomposeXfm();
+
+  return mShear.begin();
 }
 
-  return mShear;
-}
-
-vector<float> AffineReg::GetScale() {
-  if (mScale.empty()) {
+vector<float>::const_iterator AffineReg::GetScale() {
+  if (mScale.empty())
     DecomposeXfm();
-}
 
-  return mScale;
+  return mScale.begin();
 }
 
 #ifndef NO_CVS_UP_IN_HERE
@@ -325,7 +290,7 @@ vector<float> AffineReg::GetScale() {
 // Non-linear registration class
 //
 NonlinReg::NonlinReg() {
-mMorph = std::shared_ptr<gmp::VolumeMorph>(new gmp::VolumeMorph);
+  mMorph = std::shared_ptr<gmp::VolumeMorph>(new gmp::VolumeMorph);
 }
 
 NonlinReg::~NonlinReg() {}
@@ -336,55 +301,55 @@ bool NonlinReg::IsEmpty() { return (mMorph->m_template == 0); }
 // Read a non-linear transform from file
 //
 void NonlinReg::ReadXfm(const char *XfmFile, MRI *OutRefVol) {
-unsigned int zlibBuffer = 5;
+  unsigned int zlibBuffer = 5;
 
-ifstream xfile(XfmFile, ios::in);	// Just to check if file exists
-if (!xfile) {
-cout << "ERROR: Could not open " << XfmFile << endl;
-exit(1);
-}
-xfile.close();
+  ifstream xfile(XfmFile, ios::in);	// Just to check if file exists
+  if (!xfile) {
+    cout << "ERROR: Could not open " << XfmFile << endl;
+    exit(1);
+  }
+  xfile.close();
+  
+  cout << "Loading non-linear registration from " << XfmFile << endl;
+  mMorph->m_template = OutRefVol;
 
-cout << "Loading non-linear registration from " << XfmFile << endl;
-mMorph->m_template = OutRefVol;
+  try {
+    mMorph->load(XfmFile, zlibBuffer);
+  }
+  catch (const char* msg) {
+    cout << "Exception caught while loading registration: " << msg << endl;
+    exit(1);
+  }
 
-try {
-mMorph->load(XfmFile, zlibBuffer);
-}
-catch (const char* msg) {
-cout << "Exception caught while loading registration: " << msg << endl;
-exit(1);
-}
-
-mMorph->m_interpolationType = SAMPLE_NEAREST;
-mMorph->invert();
+  mMorph->m_interpolationType = SAMPLE_NEAREST;
+  mMorph->invert();
 }
 
 //
 // Apply a non-linear transform to a single point
 //
 void NonlinReg::ApplyXfm(vector<float> &OutPoint,
-                 vector<float>::const_iterator InPoint) {
-Coords3d inpt, outpt;
+                         vector<float>::const_iterator InPoint) {
+  Coords3d inpt, outpt;
 
-for (int k = 0; k < 3; k++)
-inpt(k) = InPoint[k];
+  for (int k = 0; k < 3; k++)
+    inpt(k) = InPoint[k];
 
-outpt = mMorph->image(inpt);
+  outpt = mMorph->image(inpt);
 
-for (int k = 0; k < 3; k++)
-OutPoint[k] = (float) outpt(k);
+  for (int k = 0; k < 3; k++)
+    OutPoint[k] = (float) outpt(k);
 }
-*/
+	*/
 
 //
 // Non-linear registration class
 //
-NonlinReg::NonlinReg() : mMorph(nullptr) {}
+NonlinReg::NonlinReg() : mMorph(0) {}
 
-NonlinReg::~NonlinReg() = default;
+NonlinReg::~NonlinReg() {}
 
-bool NonlinReg::IsEmpty() { return (mMorph == nullptr); }
+bool NonlinReg::IsEmpty() { return (mMorph == 0); }
 
 //
 // Read a non-linear transform from file
@@ -400,9 +365,8 @@ void NonlinReg::ReadXfm(const char *XfmFile, MRI *OutRefVol) {
   cout << "Loading non-linear registration from " << XfmFile << endl;
   mMorph = GCAMreadAndInvertNonTal(XfmFile);
 
-  if (mMorph == nullptr) {
+  if (mMorph == NULL)
     exit(1);
-}
 
   mMorph->gca = gcaAllocMax(1, 1, 1, OutRefVol->width, OutRefVol->height,
                             OutRefVol->depth, 0, 0);
@@ -411,7 +375,7 @@ void NonlinReg::ReadXfm(const char *XfmFile, MRI *OutRefVol) {
 //
 // Apply a non-linear transform to a single point
 //
-void NonlinReg::ApplyXfm(vector<float> &OutPoint,
+void NonlinReg::ApplyXfm(vector<float> &               OutPoint,
                          vector<float>::const_iterator InPoint) {
   float inpoint[3];
 
@@ -423,7 +387,7 @@ void NonlinReg::ApplyXfm(vector<float> &OutPoint,
 //
 // Apply the inverse of a non-linear transform to a single point
 //
-void NonlinReg::ApplyXfmInv(vector<float> &OutPoint,
+void NonlinReg::ApplyXfmInv(vector<float> &               OutPoint,
                             vector<float>::const_iterator InPoint) {
   float inpoint[3];
 

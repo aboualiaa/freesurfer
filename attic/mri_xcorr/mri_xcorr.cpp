@@ -1,17 +1,6 @@
-/**
- * @file  dummy.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/01/14 21:28:11 $
- *    $Revision: 1.1 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,8 +19,6 @@
 
 */
 
-// $Id: mri_xcorr.c,v 1.1 2014/01/14 21:28:11 greve Exp $
-
 /*
   BEGINHELP
 
@@ -46,46 +33,46 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/utsname.h>
+#include <unistd.h>
 
-#include "utils.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
+#include "error.h"
+#include "fio.h"
 #include "fmriutils.h"
+#include "mri.h"
+#include "utils.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options(void);
 static void print_usage(void);
 static void usage_exit(void);
 static void print_help(void);
 static void print_version(void);
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_xcorr.c,v 1.1 2014/01/14 21:28:11 greve Exp $";
-const char *Progname = NULL;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *v1File = NULL;
-char *v2File = NULL;
+char *v1File   = NULL;
+char *v2File   = NULL;
 char *maskFile = NULL;
-char *outFile = NULL;
+char *outFile  = NULL;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs;
+  int  nargs;
   MRI *v1 = NULL, *v2 = NULL, *mask = NULL, *xcorr = NULL;
 
   nargs = handleVersionOption(argc, argv, "mri_xcorr");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -139,7 +126,7 @@ int main(int argc, char *argv[]) {
 }
 /*--------------------------------------------*/
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -171,22 +158,22 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--v1")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      v1File = pargv[0];
+      v1File    = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--v2")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      v2File = pargv[0];
+      v2File    = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      maskFile = pargv[0];
+      maskFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      outFile = pargv[0];
+      outFile   = pargv[0];
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
@@ -218,7 +205,7 @@ static void print_usage(void) {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /*--------------------------------------------*/
@@ -231,7 +218,7 @@ static void print_help(void) {
 }
 /*--------------------------------------------*/
 static void print_version(void) {
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /*--------------------------------------------*/
@@ -251,7 +238,7 @@ static void check_options(void) {
 /*--------------------------------------------*/
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

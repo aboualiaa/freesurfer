@@ -1,18 +1,13 @@
 function r = fast_selxavg(varargin)
 % r = fast_selxavg(varargin)
-% '$Id: fast_selxavg.m,v 1.45 2011/03/02 00:04:05 nicks Exp $'
 
 
 %
 % fast_selxavg.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:05 $
-%    $Revision: 1.45 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,7 +18,7 @@ function r = fast_selxavg(varargin)
 % Reporting: freesurfer@nmr.mgh.harvard.edu
 %
 
-version = '$Id: fast_selxavg.m,v 1.45 2011/03/02 00:04:05 nicks Exp $';
+version = 'fast_selxavg.m @FS_VERSION@';
 fprintf(1,'%s\n',version);
 r = 1;
 

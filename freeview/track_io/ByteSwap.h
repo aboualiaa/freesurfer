@@ -15,12 +15,12 @@ inline void SWAP_INT(int &x) {
 inline void SWAP_FLOAT(float &x) { SWAP_INT((*(int *)&(x))); }
 inline void SWAP_DOUBLE(double &x) {
   double retVal;
-  char *p = (char *)&retVal;
-  char *i = (char *)&x;
-  p[0] = i[7];
-  p[1] = i[6];
-  p[2] = i[5];
-  p[3] = i[4];
+  char * p = (char *)&retVal;
+  char * i = (char *)&x;
+  p[0]     = i[7];
+  p[1]     = i[6];
+  p[2]     = i[5];
+  p[3]     = i[4];
 
   p[4] = i[3];
   p[5] = i[2];
@@ -55,8 +55,8 @@ inline void SWAP_DOUBLE(double *x, long nSize) {
 }
 
 inline bool IS_BIG_ENDIAN() {
-  unsigned char ch[2] = {0, 1};
-  unsigned short *a = (unsigned short *)ch;
+  unsigned char   ch[2] = {0, 1};
+  unsigned short *a     = (unsigned short *)ch;
 
   return *a == 1;
 }

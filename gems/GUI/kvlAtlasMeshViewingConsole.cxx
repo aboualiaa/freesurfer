@@ -1,11 +1,13 @@
 #include "kvlAtlasMeshViewingConsole.h"
 
+#include "FL/Fl.H"
 #include "FL/fl_ask.H"
+#include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
+#include "itkIntensityWindowingImageFilter.h"
+#include "itkMinimumMaximumImageCalculator.h"
 #include "kvlAtlasMeshAlphaDrawer.h"
 #include "kvlAtlasMeshSummaryDrawer.h"
-#include "itkIntensityWindowingImageFilter.h"
-#include "itkImageFileWriter.h"
-#include "itkImageFileReader.h"
 
 namespace kvl {
 
@@ -14,10 +16,15 @@ namespace kvl {
 //
 AtlasMeshViewingConsole ::AtlasMeshViewingConsole() {
 
-  m_MeshCollection = 0;
+  m_MeshCollection  = 0;
   m_BackgroundImage = 0;
-  m_Compressor = 0;
+  m_Compressor      = 0;
 }
+
+//
+//
+//
+AtlasMeshViewingConsole ::~AtlasMeshViewingConsole() {}
 
 //
 //
@@ -103,8 +110,7 @@ void AtlasMeshViewingConsole ::LoadMeshCollection(
   }
   m_MeshNumber->value(1);
 
-  // Try to read the label strings from a lookup table, and fill in the GUI
-  // accordingly
+  // Try to read the label strings from a lookup table, and fill in the GUI accordingly
   m_Compressor = CompressionLookupTable::New();
   if (m_Compressor->Read("compressionLookupTable.txt")) {
     std::cout << "Read compressionLookupTable.txt" << std::endl;
@@ -172,7 +178,7 @@ void AtlasMeshViewingConsole ::Draw() {
 
     typedef itk::IntensityWindowingImageFilter<AtlasMeshAlphaDrawer::ImageType,
                                                ImageViewer::ImageType>
-        WindowerType;
+                          WindowerType;
     WindowerType::Pointer windower = WindowerType::New();
     windower->SetInput(alphaDrawer->GetImage());
     windower->SetWindowMinimum(0);
@@ -196,7 +202,7 @@ void AtlasMeshViewingConsole ::Draw() {
   // Show the mesh overlaid
   if (m_ShowMesh->value()) {
     m_ImageViewer->SetMesh(mesh);
-    // m_ImageViewer->SetEdgeIdToHighlight( m_EdgeIdToHighlight );
+    //m_ImageViewer->SetEdgeIdToHighlight( m_EdgeIdToHighlight );
   } else {
     m_ImageViewer->SetMesh(0);
   }
@@ -216,7 +222,7 @@ void AtlasMeshViewingConsole ::SetSliceLocation(
   m_ImageViewer->SetSliceLocation(sagittalSliceNumber, coronalSliceNumber,
                                   axialSliceNumber);
 
-  // this->Draw();
+  //this->Draw();
   // Redraw
   m_ImageViewer->redraw();
   Fl::check();
@@ -285,7 +291,7 @@ void AtlasMeshViewingConsole ::GetScreenShotSeries() {
 void AtlasMeshViewingConsole ::DumpImage() {
 
   typedef ImageViewer::ImageBaseType ImageBaseType;
-  typedef ImageViewer::ImageType ImageType;
+  typedef ImageViewer::ImageType     ImageType;
   typedef ImageViewer::RGBAImageType RGBAImageType;
 
   ImageBaseType::ConstPointer imageBase = m_ImageViewer->GetOverlayImage();
@@ -300,7 +306,7 @@ void AtlasMeshViewingConsole ::DumpImage() {
         static_cast<const ImageType *>(imageBase.GetPointer());
 
     typedef itk::ImageFileWriter<ImageType> WriterType;
-    WriterType::Pointer writer = WriterType::New();
+    WriterType::Pointer                     writer = WriterType::New();
     writer->SetFileName(fileName.c_str());
     writer->SetInput(castImage);
     writer->Update();
@@ -309,7 +315,7 @@ void AtlasMeshViewingConsole ::DumpImage() {
         static_cast<const RGBAImageType *>(imageBase.GetPointer());
 
     typedef itk::ImageFileWriter<RGBAImageType> WriterType;
-    WriterType::Pointer writer = WriterType::New();
+    WriterType::Pointer                         writer = WriterType::New();
     writer->SetFileName(fileName.c_str());
     writer->SetInput(castImage);
     writer->Update();
@@ -329,26 +335,26 @@ AtlasMeshViewingConsole ::ReadBackgroundImage(
     const std::string &backgroundImageFileName) {
 
   // Read the image
-  typedef itk::Image<unsigned short, 3> InputImageType;
+  typedef itk::Image<unsigned short, 3>        InputImageType;
   typedef itk::ImageFileReader<InputImageType> ReaderType;
-  ReaderType::Pointer reader = ReaderType::New();
+  ReaderType::Pointer                          reader = ReaderType::New();
   reader->SetFileName(backgroundImageFileName.c_str());
   reader->Update();
 
   // Unset the origin and spacing because we can't deal with that right now
   const double spacing[] = {1, 1, 1};
-  const double origin[] = {0, 0, 0};
+  const double origin[]  = {0, 0, 0};
   reader->GetOutput()->SetSpacing(spacing);
   reader->GetOutput()->SetOrigin(origin);
 
   // Convert to uchar as required by the viewer
   typedef itk::MinimumMaximumImageCalculator<InputImageType>
-      RangeCalculatorType;
+                               RangeCalculatorType;
   RangeCalculatorType::Pointer rangeCalculator = RangeCalculatorType::New();
   rangeCalculator->SetImage(reader->GetOutput());
   rangeCalculator->Compute();
   typedef itk::IntensityWindowingImageFilter<InputImageType, ImageType>
-      WindowerType;
+                        WindowerType;
   WindowerType::Pointer windower = WindowerType::New();
   windower->SetInput(reader->GetOutput());
   windower->SetWindowMinimum(rangeCalculator->GetMinimum());
@@ -385,7 +391,7 @@ void AtlasMeshViewingConsole ::GetScreenShotSeries(int directionNumber) {
     return;
   }
 
-  int startSliceNumber = 0;
+  int startSliceNumber     = 0;
   int incrementSliceNumber = 1;
   if (m_InvertOrder->value()) {
     startSliceNumber =

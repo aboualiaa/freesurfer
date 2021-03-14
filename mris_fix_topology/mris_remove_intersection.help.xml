@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_remove_intersection</name>
-	<synopsis>mris_remove_intersection [options] &lt;surface in-file&gt; &lt;corrected surface out-file&gt;</synopsis>
-	<description> </description>
+  <name>mris_remove_intersection</name>
+  <synopsis>mris_remove_intersection [options] &lt;surface in-file&gt; &lt;corrected surface out-file&gt;</synopsis>
+  <description> </description>
   <arguments>
     <positional>
       <argument>&lt;surface in-file&gt;</argument>

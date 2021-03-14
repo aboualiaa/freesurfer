@@ -1,21 +1,18 @@
 #ifndef __kvlAtlasMeshJacobianDeterminantDrawer_h
 #define __kvlAtlasMeshJacobianDeterminantDrawer_h
 
-#include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshRasterizor.h"
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshJacobianDeterminantDrawer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshJacobianDeterminantDrawer;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshJacobianDeterminantDrawer Self;
+  typedef AtlasMeshRasterizor                Superclass;
+  typedef itk::SmartPointer<Self>            Pointer;
+  typedef itk::SmartPointer<const Self>      ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -24,7 +21,7 @@ public:
   itkTypeMacro(AtlasMeshJacobianDeterminantDrawer, itk::Object);
 
   /** Some typedefs */
-  using ImageType = itk::Image<float, 3>;
+  typedef itk::Image<float, 3> ImageType;
 
   /** */
   void SetRegions(const ImageType::RegionType &region) {
@@ -42,13 +39,13 @@ protected:
   virtual ~AtlasMeshJacobianDeterminantDrawer();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
 private:
-  AtlasMeshJacobianDeterminantDrawer(const Self &); // purposely not implemented
-  void operator=(const Self &);                     // purposely not implemented
+  AtlasMeshJacobianDeterminantDrawer(const Self &); //purposely not implemented
+  void operator=(const Self &);                     //purposely not implemented
 
   //
   ImageType::Pointer m_Image;

@@ -1,16 +1,7 @@
-/**
- * @file  PanelPointSet.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2013/12/05 21:06:10 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -41,11 +32,11 @@ public:
   ~PanelPointSet();
 
 protected:
-  void DoUpdateWidgets();
-  void DoIdle();
+  void         DoUpdateWidgets();
+  void         DoIdle();
   virtual void ConnectLayer(Layer *layer);
-  void LoadScalarValues();
-  void UpdatePointInfo();
+  void         LoadScalarValues();
+  void         UpdatePointInfo();
 
 protected slots:
   void OnSliderOpacity(int nVal);
@@ -72,13 +63,13 @@ protected slots:
   void SetCurrentPoint(int nIndex);
 
 private:
-  QLabel *MakeCommentItem(const QVariantMap &map);
+  QLabel *MakeCommentItem(const QVariantMap &map, QLabel *label_in = NULL);
   QTreeWidgetItem *AddStatItem(const QString &name, double value);
 
   Ui::PanelPointSet *ui;
-  QList<QWidget *> m_widgetlistSolidColor;
-  QList<QWidget *> m_widgetlistHeatScale;
-  QList<QWidget *> m_widgetlistSpline;
+  QList<QWidget *>   m_widgetlistSolidColor;
+  QList<QWidget *>   m_widgetlistHeatScale;
+  QList<QWidget *>   m_widgetlistSpline;
 
   QString m_self;
 };

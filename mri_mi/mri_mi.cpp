@@ -1,5 +1,4 @@
 /**
- * @file  mri_mi.c
  * @brief computes the mi between two input volumes
  *
  * computes the mutual information (mi) between two input volumes
@@ -8,10 +7,8 @@
 
 /*
  * Original Author: Lilla Zollei
- * CVS Revision Info:
- *    $Date: 2017/02/07 04:02:05 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,10 +20,10 @@
  *
  */
 
-#include "mri2.h"
-#include "diag.h"
-#include "version.h"
 #include "mri_mi.h"
+#include "diag.h"
+#include "mri2.h"
+#include "version.h"
 
 static void print_usage();
 static void usage_exit();
@@ -34,19 +31,18 @@ static void print_help();
 static void print_version();
 
 static int get_option(int argc, char *argv[]);
-static char vcid[] = "$Id: mri_mi.c,v 1.1 2017/02/07 04:02:05 lzollei Exp $";
 
-const char *Progname = nullptr;
-int silent_mode = 0;
+const char *Progname    = nullptr;
+int         silent_mode = 0;
 
 static int bins_1 = 64;
 static int bins_2 = 64;
 
 /***-------------------------------------------------------****/
 int main(int argc, char *argv[]) {
-  int nargs, index, ac, nvolumes;
+  int    nargs, index, ac, nvolumes;
   char **av;
-  MRI *mri_1, *mri_2;
+  MRI *  mri_1, *mri_2;
 
   // printf("mri_mi 1\n") ;
 
@@ -79,7 +75,7 @@ int main(int argc, char *argv[]) {
   // printf("mri_mi 4\n") ;
 
   // Input volume #1
-  index = 0;
+  index       = 0;
   char *fname = argv[index + 1];
   if (!silent_mode)
     printf("processing input volume %d of %d: %s\n", index + 1, nvolumes,
@@ -114,14 +110,14 @@ int main(int argc, char *argv[]) {
 
   // printf("mri_mi 7\n") ;
 
-  int width1 = mri_1->width;
+  int width1  = mri_1->width;
   int height1 = mri_1->height;
-  int depth1 = mri_1->depth;
+  int depth1  = mri_1->depth;
   // int N = width1*height1*depth1;
   int N = depth1;
   // printf("mri_mi 1: N  = %d \n", N) ;
   double samples1[N];
-  int i, j, k;
+  int    i, j, k;
   for (i = 0; i < width1; i++)
     for (j = 0; j < height1; j++) {
       for (k = 0; k < depth1; k++) {
@@ -135,9 +131,9 @@ int main(int argc, char *argv[]) {
 
   // printf("mri_mi 8\n") ;
 
-  int width2 = mri_2->width;
+  int width2  = mri_2->width;
   int height2 = mri_2->height;
-  int depth2 = mri_2->depth;
+  int depth2  = mri_2->depth;
   // N = width2*height2*depth2;
   N = depth2;
   // printf("mri_mi 2: N  = %d \n", N) ;
@@ -162,8 +158,8 @@ int main(int argc, char *argv[]) {
 
   double marginalentropy1 = HISTOgetEntropy(histo1);
   double marginalentropy2 = HISTOgetEntropy(histo2);
-  double jointentropy = JHISTOgetEntropy(jhisto);
-  double mi_score = marginalentropy1 + marginalentropy2 - jointentropy;
+  double jointentropy     = JHISTOgetEntropy(jhisto);
+  double mi_score         = marginalentropy1 + marginalentropy2 - jointentropy;
   // printf("MI SCORE: %f\n", mi_score) ;
 
   MRIfree(&mri_1);
@@ -188,7 +184,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -197,7 +193,7 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "-bins")) {
     bins_1 = atoi(argv[2]);
     bins_2 = atoi(argv[3]);
-    nargs = 2;
+    nargs  = 2;
     // printf("Histogram bins = (%d, %d)\n", bins_1, bins_2);
   } else if (!stricmp(option, "-silent")) {
     silent_mode = 1;
@@ -240,8 +236,8 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 

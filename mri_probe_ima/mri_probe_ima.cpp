@@ -1,17 +1,6 @@
-/**
- * @file  mri_probe_ima.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:24 $
- *    $Revision: 1.13 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,55 +16,54 @@
 #include <malloc.h>
 #endif
 #include "diag.h"
-#include "mri2.h"
 #include "imautils.h"
+#include "mri2.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_probe_ima.c,v 1.13 2011/03/02 00:04:24 nicks Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
-static int singledash(char *flag);
-static int stringmatch(char *s1, char *s2);
+static int  singledash(char *flag);
+static int  stringmatch(const char *s1, const char *s2);
 
-char *imafile = nullptr;
-char *typestring = nullptr;
-int type = -1;
-int typesize = 1;
-int offset = -1;
-int stringlen = 1;
-const char *key = nullptr;
-int keyno = -1;
-int dumpfileinfo = 0;
-int debug, verbose;
-FILE *fp;
-char *attrname;
-int getattr = 0;
-char *bstem = "img";
-short *pixeldata;
-int npixels;
+char *      imafile      = NULL;
+char *      typestring   = NULL;
+int         type         = -1;
+int         typesize     = 1;
+int         offset       = -1;
+int         stringlen    = 1;
+const char *key          = NULL;
+int         keyno        = -1;
+int         dumpfileinfo = 0;
+int         debug, verbose;
+FILE *      fp;
+char *      attrname;
+int         getattr = 0;
+
+const char *bstem = "img";
+short *     pixeldata;
+int         npixels;
 
 #define TMPSTRLEN 10000
 static char tmpstr[TMPSTRLEN];
 
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
-  void *pVal;
+  void *       pVal;
   IMAFILEINFO *ifi;
-  int nargs;
+  int          nargs;
 
   nargs = handleVersionOption(argc, argv, "mri_probe_ima");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
   tmpstr[0] = 'a'; /* to stop compiler warning */
@@ -175,7 +163,7 @@ int main(int argc, char **argv) {
       return (0);
     }
     if (stringmatch(attrname, "pixeldata") != 0) {
-      npixels = ifi->NImageRows * ifi->NImageCols;
+      npixels   = ifi->NImageRows * ifi->NImageCols;
       pixeldata = imaReadPixelData(ifi, nullptr);
       if (pixeldata == nullptr) {
         printf("ERROR: could not read pixel data\n");
@@ -224,7 +212,7 @@ int main(int argc, char **argv) {
   }
 
   if (offset > -1) {
-    type = imaTypeFromString(typestring);
+    type     = imaTypeFromString(typestring);
     typesize = imaTypeSize[type];
     if (debug != 0) {
       printf("type = %s (%d), offset = %d\n", typestring, type, offset);
@@ -246,10 +234,10 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
+  int    nargc;
+  int    nargsused;
   char **pargv;
-  char *option;
+  char * option;
 
   if (argc < 1) {
     usage_exit();
@@ -284,20 +272,20 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      imafile = pargv[0];
+      imafile   = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--attr") == 0) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      attrname = pargv[0];
-      getattr = 1;
+      attrname  = pargv[0];
+      getattr   = 1;
       nargsused = 1;
     } else if (strcmp(option, "--ob") == 0) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      bstem = pargv[0];
+      bstem     = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--dictionary") == 0) {
       DumpImaDictionary(stdout);
@@ -306,7 +294,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      key = pargv[0];
+      key       = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--keyno") == 0) {
       if (nargc < 1) {
@@ -320,7 +308,7 @@ static int parse_commandline(int argc, char **argv) {
       }
       sscanf(pargv[0], "%d", &offset);
       typestring = pargv[1];
-      nargsused = 2;
+      nargsused  = 2;
       if (strcmp(typestring, "string") == 0) {
         if (nargc < 3) {
           printf("ERROR: type string needs length argument\n");
@@ -381,6 +369,10 @@ static void print_help() {
   printf("\n");
   print_usage();
   printf("\n");
+
+  printf("This program allows the user to query a Siemens IMA file, \n"
+         "and can be used to print out a single value from the IMA header \n"
+         "or to dump lots of info.\n");
 
   printf("This program allows the user to query a Siemens IMA file, \n"
          "and can be used to print out a single value from the IMA header \n"
@@ -529,13 +521,13 @@ static void print_help() {
       "\n"
       "VERSION\n"
       "\n");
-  printf("   %s\n\n", vcid);
+  printf("   %s\n\n", getVersion().c_str());
 
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 /* --------------------------------------------- */
@@ -586,9 +578,8 @@ static void check_options() {
   }
 }
 /*-------------------------------------------------------------*/
-static int stringmatch(char *s1, char *s2) {
-  if (strcmp(s1, s2) == 0) {
+static int stringmatch(const char *s1, const char *s2) {
+  if (strcmp(s1, s2) == 0)
     return (1);
-  }
   return (0);
 }

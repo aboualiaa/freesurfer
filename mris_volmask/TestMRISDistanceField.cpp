@@ -1,7 +1,7 @@
 #include "MRISDistanceField.h"
-#include <string>
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <string>
 
 #include "fsenv.h"
 
@@ -19,8 +19,8 @@ public:
     std::string fullpath1("/Users/krish/subjects/bert/surf/lh.white");
     std::string fullpath2("/Users/krish/subjects/bert/mri/aseg.mgz");
 
-    mris = MRISread(fullpath1.c_str());
-    tmp = MRIread(fullpath2.c_str());
+    mris    = MRISread(fullpath1.c_str());
+    tmp     = MRIread(fullpath2.c_str());
     mridist = MRIcloneDifferentType(tmp, MRI_FLOAT);
 
     Math::ConvertSurfaceRASToVoxel(mris, tmp);
@@ -38,8 +38,8 @@ public:
   void TestPointDist() {}
 
 private:
-  MRIS *mris;
-  MRI *tmp, *mridist;
+  MRIS *             mris;
+  MRI *              tmp, *mridist;
   MRISDistanceField *distrunner;
 };
 
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   Progname = argv[0];
 
   const int SUCCESS = 0;
-  const int FAIL = 1;
+  const int FAIL    = 1;
 
   CppUnit::TextUi::TestRunner runner;
   runner.addTest(TestMRISDistanceField::suite());

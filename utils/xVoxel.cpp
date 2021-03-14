@@ -1,15 +1,10 @@
 /**
- * @file  xVoxel.c
  * @brief general-purpose utils
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.15 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,13 +17,13 @@
  */
 
 #include "xVoxel.h"
-#include <math.h>
-#include <cstdlib>
 #include "xDebug.h"
+#include <cstdlib>
+#include <math.h>
 
 void xVoxl_New(xVoxelRef *oppVoxel) {
   xVoxelRef ref = (xVoxelRef)calloc(1, sizeof(xVoxel));
-  *oppVoxel = ref;
+  *oppVoxel     = ref;
 }
 
 void xVoxl_Delete(xVoxelRef *ioppVoxel) {

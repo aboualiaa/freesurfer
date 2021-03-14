@@ -1,12 +1,11 @@
 #pragma once
 /*
- * @file utilities common to mrisurf*.c but not used outside them
  *
  */
 /*
  * surfaces Author: Bruce Fischl, extracted from mrisurf.c by Bevin Brett
  *
- * $ © copyright-2014,2018 The General Hospital Corporation (Boston, MA) "MGH"
+ * $ Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,3 +28,11 @@
 
 int mrisFillFace(MRI_SURFACE *mris, MRI *mri, int fno);
 int mrisHatchFace(MRI_SURFACE *mris, MRI *mri, int fno, int on);
+int MRIScomputeMaxGradBorderValues(MRI_SURFACE *mris, MRI *mri_brain,
+                                   MRI *mri_smooth, double sigma,
+                                   float max_thickness, float dir, FILE *log_fp,
+                                   MRI *mri_wm, int callno);
+int MRIScomputeMaxGradBorderValuesPial(MRI_SURFACE *mris, MRI *mri_brain,
+                                       MRI *mri_smooth, double sigma,
+                                       float max_thickness, float dir,
+                                       FILE *log_fp, int callno, MRI *mri_mask);

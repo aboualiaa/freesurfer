@@ -1,17 +1,6 @@
-/**
- * @file  mri_flip2analyze.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,7 +13,6 @@
  */
 
 /**
- * @file   mri_flip2analyze.cpp
  * @author Yasunari Tosa
  * @date   Wed Dec 22 13:32:49 2004
  *
@@ -33,23 +21,20 @@
  *
  */
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
-extern "C" {
 #include "mri.h"
 
-char *Progname = "mri_flip2analyze";
-}
-
-using namespace std;
+const char *Progname = "mri_flip2analyze";
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    cout << "Usage: mri_flip2analyze <srcvol> <dstvol>" << endl;
-    cout << "   if you want analyze format, specify the destination with .img "
-            "extension"
-         << endl;
+    std::cout << "Usage: mri_flip2analyze <srcvol> <dstvol>" << std::endl;
+    std::cout
+        << "   if you want analyze format, specify the destination with .img "
+           "extension"
+        << std::endl;
     return 0;
   }
 
@@ -79,63 +64,63 @@ int main(int argc, char *argv[]) {
   float dstZsize = 0.;
 
   // fix axis size in the destination
-  int index = 0;
-  int dstWidth = 0;
+  int index     = 0;
+  int dstWidth  = 0;
   int dstHeight = 0;
-  int dstDepth = 0;
+  int dstDepth  = 0;
   switch (which_xras) {
   case 0:
     dstXsize = src->xsize;
     if (which_yras == 1) {
-      index = 0;
-      dstYsize = src->ysize;
-      dstZsize = src->zsize;
-      dstWidth = src->width;
+      index     = 0;
+      dstYsize  = src->ysize;
+      dstZsize  = src->zsize;
+      dstWidth  = src->width;
       dstHeight = src->height;
-      dstDepth = src->depth;
+      dstDepth  = src->depth;
     } else {
-      index = 1;
-      dstYsize = src->zsize;
-      dstZsize = src->ysize;
-      dstWidth = src->width;
+      index     = 1;
+      dstYsize  = src->zsize;
+      dstZsize  = src->ysize;
+      dstWidth  = src->width;
       dstHeight = src->depth;
-      dstDepth = src->height;
+      dstDepth  = src->height;
     }
     break;
   case 1:
     dstYsize = src->xsize;
     if (which_yras == 2) {
-      index = 2;
-      dstXsize = src->zsize;
-      dstZsize = src->ysize;
-      dstWidth = src->depth;
+      index     = 2;
+      dstXsize  = src->zsize;
+      dstZsize  = src->ysize;
+      dstWidth  = src->depth;
       dstHeight = src->width;
-      dstDepth = src->height;
+      dstDepth  = src->height;
     } else {
-      index = 3;
-      dstXsize = src->ysize;
-      dstZsize = src->zsize;
-      dstWidth = src->height;
+      index     = 3;
+      dstXsize  = src->ysize;
+      dstZsize  = src->zsize;
+      dstWidth  = src->height;
       dstHeight = src->width;
-      dstDepth = src->depth;
+      dstDepth  = src->depth;
     }
     break;
   case 2:
     dstZsize = src->xsize;
     if (which_yras == 0) {
-      index = 4;
-      dstXsize = src->ysize;
-      dstYsize = src->zsize;
-      dstWidth = src->height;
+      index     = 4;
+      dstXsize  = src->ysize;
+      dstYsize  = src->zsize;
+      dstWidth  = src->height;
       dstHeight = src->depth;
-      dstDepth = src->width;
+      dstDepth  = src->width;
     } else {
-      index = 5;
-      dstXsize = src->zsize;
-      dstYsize = src->ysize;
-      dstWidth = src->depth;
+      index     = 5;
+      dstXsize  = src->zsize;
+      dstYsize  = src->ysize;
+      dstWidth  = src->depth;
       dstHeight = src->height;
-      dstDepth = src->width;
+      dstDepth  = src->width;
     }
     break;
   }
@@ -218,7 +203,8 @@ int main(int argc, char *argv[]) {
             dstz = (src->x_s > 0.) ? x : (src->width - x - 1);  // X"
             break;
           default:
-            cerr << "NO such case is allowed. index is out of range" << endl;
+            std::cerr << "NO such case is allowed. index is out of range"
+                      << std::endl;
             return -1;
           }
           MRIsetVoxVal(dst, dstx, dsty, dstz, frame,

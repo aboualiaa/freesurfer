@@ -11,7 +11,7 @@
 
 #include "toctree.hpp"
 
-typedef TCoords<int, 3> tIntCoords;
+typedef TCoords<int, 3>    tIntCoords;
 typedef TCoords<double, 3> tDblCoords;
 
 tIntCoords icoords(int x, int y, int z);
@@ -29,13 +29,13 @@ public:
   Element3d();
 
   virtual SmallMatrix get_matrix() const;
-  virtual bool dst_contains(const tCoords &c) const;
-  virtual tCoords inv_img(const tDblCoords &dst_coords) const;
-  virtual double dst_volume() const;
+  virtual bool        dst_contains(const tCoords &c) const;
+  virtual tCoords     inv_img(const tDblCoords &dst_coords) const;
+  virtual double      dst_volume() const;
 
-  virtual bool src_contains(const tDblCoords &c) const;
+  virtual bool    src_contains(const tDblCoords &c) const;
   virtual tCoords dir_img(const tDblCoords &src_coords) const;
-  virtual double src_volume() const;
+  virtual double  src_volume() const;
 
   virtual bool orientation_pb(Frame f = both) const;
   virtual bool orientation_test(double dalpha) const;
@@ -48,9 +48,9 @@ public:
   virtual double shape_fct(int node_id, const tCoords &pt) const;
 
 private:
-  bool contains(const tDblCoords &c1, const tDblCoords &c2,
-                const tDblCoords &c3, const tDblCoords &c4,
-                const tCoords &ci) const;
+  bool   contains(const tDblCoords &c1, const tDblCoords &c2,
+                  const tDblCoords &c3, const tDblCoords &c4,
+                  const tCoords &ci) const;
   double vol(const tDblCoords &c1, const tDblCoords &c2, const tDblCoords &c3,
              const tDblCoords &c4) const;
 
@@ -58,14 +58,14 @@ private:
   // the shape function will be
   // a + bx + cy + dz
   mutable TCoords<double, 4> m_ca, m_cb, m_cc, m_cd;
-  mutable bool m_isShapeUpdated;
+  mutable bool               m_isShapeUpdated;
 
   //
   // interpol coefs
   // based on the previous, this assembles the shape functions of the elements
   mutable tCoords m_int_a, m_int_b, m_int_c, m_int_d;
-  void update_interpol_coefs() const;
-  mutable bool m_isInterpolUpdated;
+  void            update_interpol_coefs() const;
+  mutable bool    m_isInterpolUpdated;
 
   double det(const tCoords &c1, const tCoords &c2, const tCoords &c3) const;
   double det(double, double, double, double, double, double, double, double,
@@ -129,10 +129,10 @@ class ElementProxy;
 
 class CMesh3d : public TMesh3d {
 public:
-  typedef TMesh3d Superclass;
-  typedef Superclass::tNode tNode;
+  typedef TMesh3d              Superclass;
+  typedef Superclass::tNode    tNode;
   typedef Superclass::tElement tElement;
-  typedef Superclass::tCoords tCoords;
+  typedef Superclass::tCoords  tCoords;
 
   CMesh3d();
   CMesh3d(const CMesh3d &);
@@ -140,10 +140,10 @@ public:
 
   ~CMesh3d();
 
-  const tNode *closest_node(const tCoords &c) const;
+  const tNode *   closest_node(const tCoords &c) const;
   const tElement *element_at_point(const tCoords &c) const;
 
-  tNode *closest_node(const tCoords &c);
+  tNode *   closest_node(const tCoords &c);
   tElement *element_at_point(const tCoords &c);
 
   // this function's implementation actually uses an octree
@@ -151,13 +151,13 @@ public:
   //      since this is a virtual function, the argument will
   //      be set via a member variable
   unsigned int m_maxNodes;
-  int build_index_src();
+  int          build_index_src();
 
 protected:
 private:
   typedef toct::Octree<ElementProxy, 3> OctreeType;
-  OctreeType *m_poctree;
-  std::vector<ElementProxy> m_vpEltBlock;
+  OctreeType *                          m_poctree;
+  std::vector<ElementProxy>             m_vpEltBlock;
 };
 
 class DelaunayMesh {
@@ -174,9 +174,9 @@ protected:
 
   const PointsListType &surfPoints;
 
-  double dEltVol;
+  double     dEltVol;
   tDblCoords m_cmin, m_cmax;
-  double m_de, m_dnu;
+  double     m_de, m_dnu;
 
   void setupFacet(tetgenio::facet *, int, int, int, int);
 
@@ -221,12 +221,12 @@ private:
   tDblCoords m_cmin, m_cmax;
 
   typedef std::map<tIntCoords, TNode<3> *, cless<int, 3>> NodeMapType;
-  NodeMapType m_mnodes;
-  tIntCoords m_ticks;
-  tDblCoords m_step;
-  CMesh3d *m_pmesh;
-  bool m_is_active[3];
-  tDblCoords m_d3_zero;
+  NodeMapType                                             m_mnodes;
+  tIntCoords                                              m_ticks;
+  tDblCoords                                              m_step;
+  CMesh3d *                                               m_pmesh;
+  bool                                                    m_is_active[3];
+  tDblCoords                                              m_d3_zero;
 
   double m_de, m_dnu; // material constants -> to be set after
   // elements are created

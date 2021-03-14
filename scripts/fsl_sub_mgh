@@ -9,20 +9,20 @@
 #   Part of FSL - FMRIB's Software Library
 #   http://www.fmrib.ox.ac.uk/fsl
 #   fsl@fmrib.ox.ac.uk
-#   
+#
 #   Developed at FMRIB (Oxford Centre for Functional Magnetic Resonance
 #   Imaging of the Brain), Department of Clinical Neurology, Oxford
 #   University, Oxford, UK
-#   
-#   
+#
+#
 #   LICENCE
-#   
+#
 #   FMRIB Software Library, Release 4.0 (c) 2007, The University of
 #   Oxford (the "Software")
-#   
+#
 #   The Software remains the property of the University of Oxford ("the
 #   University").
-#   
+#
 #   The Software is distributed "AS IS" under this Licence solely for
 #   non-commercial use in the hope that it will be useful, but in order
 #   that the University as a charitable foundation protects its assets for
@@ -34,13 +34,13 @@
 #   all responsibility for the use which is made of the Software. It
 #   further disclaims any liability for the outcomes arising from using
 #   the Software.
-#   
+#
 #   The Licensee agrees to indemnify the University and hold the
 #   University harmless from and against any and all claims, damages and
 #   liabilities asserted by third parties (including claims for
 #   negligence) which arise directly or indirectly from the use of the
 #   Software or the sale of any products based on the Software.
-#   
+#
 #   No part of the Software may be reproduced, modified, transmitted or
 #   transferred in any form or by any means, electronic or mechanical,
 #   without the express permission of the University. The permission of
@@ -51,7 +51,7 @@
 #   transmitted product. You may be held legally responsible for any
 #   copyright infringement that is caused or encouraged by your failure to
 #   abide by these terms and conditions.
-#   
+#
 #   You are not permitted under this Licence to use this Software
 #   commercially. Use for which any financial return is received shall be
 #   defined as commercial use, and includes (1) integration of all or part
@@ -68,16 +68,10 @@
 #   University, to negotiate a licence. Contact details are:
 #   innovation@isis.ox.ac.uk quoting reference DE/1112.
 
-
-
-
-
-
 ###########################################################################
 # Edit this file in order to setup FSL to use your local compute
 # cluster.
 ###########################################################################
-
 
 ###########################################################################
 # The following section determines what to do when fsl_sub is called
@@ -93,38 +87,37 @@
 ###########################################################################
 
 METHOD=SGE
-if [ "x$SGE_ROOT" = "x" ] ; then
-    if [ -f /usr/local/share/sge/default/common/settings.sh ] ; then
-	. /usr/local/share/sge/default/common/settings.sh
-    elif [ -f /usr/local/sge/default/common/settings.sh ] ; then
-	. /usr/local/sge/default/common/settings.sh
-    elif [ -d /pbs ] && [ -z $PBS_JOBID ] ; then		# For PBS (AY)
-	METHOD=PBS
-	if [ "x$MYPBSQUEUE" = "x" ] ; then
-	    MYPBSQUEUE=default
-	fi
-	if [ "x$MYPBSMAXJOBS" = "x" ] ; then
-	    MYPBSMAXJOBS=40
-	fi
-	if [ "x$MYPBSWAIT" = "x" ] ; then
-	    MYPBSWAIT=20
-	fi
-    elif [ -f /usr/bin/srun ] && [ -z $SLURM_JOB_ID ] ; then	# For SLURM (AY)
-	METHOD=SLURM
-	if [ "x$MY_SLURM_PARTITION" = "x" ] ; then
-	    MY_SLURM_PARTITION=normal
-	fi
-	if [ "x$MY_SLURM_MAX_JOBS" = "x" ] ; then
-	    MY_SLURM_MAX_JOBS=200
-	fi
-	if [ "x$MY_SLURM_WAIT" = "x" ] ; then
-	    MY_SLURM_WAIT=20
-	fi
-    else
-	METHOD=NONE
+if [ "x$SGE_ROOT" = "x" ]; then
+  if [ -f /usr/local/share/sge/default/common/settings.sh ]; then
+    . /usr/local/share/sge/default/common/settings.sh
+  elif [ -f /usr/local/sge/default/common/settings.sh ]; then
+    . /usr/local/sge/default/common/settings.sh
+  elif [ -d /pbs ] && [ -z $PBS_JOBID ]; then # For PBS (AY)
+    METHOD=PBS
+    if [ "x$MYPBSQUEUE" = "x" ]; then
+      MYPBSQUEUE=default
     fi
+    if [ "x$MYPBSMAXJOBS" = "x" ]; then
+      MYPBSMAXJOBS=40
+    fi
+    if [ "x$MYPBSWAIT" = "x" ]; then
+      MYPBSWAIT=20
+    fi
+  elif [ -f /usr/bin/srun ] && [ -z $SLURM_JOB_ID ]; then # For SLURM (AY)
+    METHOD=SLURM
+    if [ "x$MY_SLURM_PARTITION" = "x" ]; then
+      MY_SLURM_PARTITION=normal
+    fi
+    if [ "x$MY_SLURM_MAX_JOBS" = "x" ]; then
+      MY_SLURM_MAX_JOBS=200
+    fi
+    if [ "x$MY_SLURM_WAIT" = "x" ]; then
+      MY_SLURM_WAIT=20
+    fi
+  else
+    METHOD=NONE
+  fi
 fi
-
 
 ###########################################################################
 # The following auto-decides what cluster queue to use. The calling
@@ -136,20 +129,18 @@ fi
 # matter how many you setup, that's up to you.
 ###########################################################################
 
-map_qname ()
-{
-    if [ $1 -le 20 ] ; then
-	queue=veryshort.q
-    elif [ $1 -le 120 ] ; then
-	queue=short.q
-    elif [ $1 -le 1440 ] ; then
-	queue=long.q
-    else
-	queue=verylong.q
-    fi
-    #echo "Estimated time was $1 mins: queue name is $queue"
+map_qname() {
+  if [ $1 -le 20 ]; then
+    queue=veryshort.q
+  elif [ $1 -le 120 ]; then
+    queue=short.q
+  elif [ $1 -le 1440 ]; then
+    queue=long.q
+  else
+    queue=verylong.q
+  fi
+  #echo "Estimated time was $1 mins: queue name is $queue"
 }
-
 
 ###########################################################################
 # Don't change the following (but keep scrolling down!)
@@ -157,10 +148,9 @@ map_qname ()
 
 POSIXLY_CORRECT=1
 export POSIXLY_CORRECT
-command=`basename $0`
+command=$(basename $0)
 
-usage ()
-{
+usage() {
   cat <<EOF
 
 $command V1.0beta - wrapper for job control system such as SGE
@@ -177,7 +167,7 @@ $command -a darwin regscript rawdata outputdir ...
                         Default is "long.q".
   -a <arch-name>        Architecture [e.g., darwin or lx24-amd64]
   -p <job-priority>     Lower priority [0:-1024] default = 0                 
-  -M <email-address>    Who to email, default = `whoami`@fmrib.ox.ac.uk 
+  -M <email-address>    Who to email, default = $(whoami)@fmrib.ox.ac.uk 
   -j <jid>              Place a hold on this task until job jid has completed
   -t <filename>         Specify a task file of commands to execute in parallel
   -N <jobname>          Specify jobname as it will appear on queue
@@ -197,43 +187,42 @@ EOF
 }
 
 nargs=$#
-if [ $nargs -eq 0 ] ; then
+if [ $nargs -eq 0 ]; then
   usage
 fi
 
-set -- `getopt T:q:a:p:M:j:t:N:Fvm:l:s: $*`
+set -- $(getopt T:q:a:p:M:j:t:N:Fvm:l:s: $*)
 result=$?
-if [ $result != 0 ] ; then
+if [ $result != 0 ]; then
   echo "What? Your arguments make no sense!"
 fi
 
-if [ $nargs -eq 0 ] || [ $result != 0 ] ; then
+if [ $nargs -eq 0 ] || [ $result != 0 ]; then
   usage
 fi
-
 
 ###########################################################################
 # The following sets up the default queue name, which you may want to
 # change. It also sets up the basic emailing control.
 ###########################################################################
 
-mailto=`whoami`
+mailto=$(whoami)
 
-if [ $METHOD = SGE ] ; then
-    queue=long.q
-    MailOpts="as"
-elif [ $METHOD = PBS ] ; then		# (AY)
-    queue=$MYPBSQUEUE
-    MailOpts="abe"
-    if [ "x$MYPBSARCH" != "x" ] ; then
-	pbs_arch="-l nodes=1:$MYPBSARCH"
-    fi
-elif [ $METHOD = SLURM ] ; then		# (AY)
-    queue=$MY_SLURM_PARTITION
-    MailOpts="ALL"
-    if [ "x$MY_SLURM_ARCH" != "x" ] ; then
-	slurm_arch="--constraint=$MY_SLURM_ARCH"
-    fi
+if [ $METHOD = SGE ]; then
+  queue=long.q
+  MailOpts="as"
+elif [ $METHOD = PBS ]; then # (AY)
+  queue=$MYPBSQUEUE
+  MailOpts="abe"
+  if [ "x$MYPBSARCH" != "x" ]; then
+    pbs_arch="-l nodes=1:$MYPBSARCH"
+  fi
+elif [ $METHOD = SLURM ]; then # (AY)
+  queue=$MY_SLURM_PARTITION
+  MailOpts="ALL"
+  if [ "x$MY_SLURM_ARCH" != "x" ]; then
+    slurm_arch="--constraint=$MY_SLURM_ARCH"
+  fi
 fi
 
 ###########################################################################
@@ -261,82 +250,93 @@ fi
 # -error logfiles for the submitted program.
 ###########################################################################
 
-if [ -z $FSLSUBVERBOSE ] ; then
-    verbose=0
+if [ -z $FSLSUBVERBOSE ]; then
+  verbose=0
 else
-    verbose=$FSLSUBVERBOSE;
-    echo "METHOD=$METHOD : args=$@" >&2
+  verbose=$FSLSUBVERBOSE
+  echo "METHOD=$METHOD : args=$@" >&2
 fi
 
 scriptmode=0
 
-while [ $1 != -- ] ; do
+while [ $1 != -- ]; do
   case $1 in
     -T)
       map_qname $2
-      if [ $METHOD = PBS ] ; then 	# (AY)
+      if [ $METHOD = PBS ]; then # (AY)
         queue=$MYPBSQUEUE
       fi
-      shift;;
+      shift
+      ;;
     -q)
       queue=$2
-      shift;;
+      shift
+      ;;
     -a)
       sge_arch="-l arch=$2"
       pbs_arch="-l nodes=1:$2"
       slurm_arch="--constraint=$2"
-      shift;;
+      shift
+      ;;
     -p)
       sge_priority="-p $2"
       pbs_priority="-p $2"
-      shift;;
+      shift
+      ;;
     -M)
       mailto=$2
-      shift;;
+      shift
+      ;;
     -j)
       jid=$2
       sge_hold="-hold_jid $jid"
       pbs_hold="-W depend=afterok:$jid"
       slurm_hold="--dependency=afterok:$jid"
-      shift;;
+      shift
+      ;;
     -t)
       taskfile=$2
-      tasks=`wc -l $taskfile | awk '{print $1}'`
+      tasks=$(wc -l $taskfile | awk '{print $1}')
       sge_tasks="-t 1-$tasks"
       # Split jobs in batches so that the total number of jobs running
       # at any given time does not exceed a user-specified maximum (AY)
-      if [ $METHOD = PBS ] ; then		# (AY)
-      	nbatch=$(($tasks/$MYPBSMAXJOBS + ($tasks%$MYPBSMAXJOBS > 0)))
-      	ninbatch=$(($tasks/$nbatch + ($tasks%$nbatch > 0)))
-      	pbs_tasks=""
-      elif [ $METHOD = SLURM ] ; then		# (AY)
-      	nbatch=$(($tasks/$MY_SLURM_MAX_JOBS + ($tasks%$MY_SLURM_MAX_JOBS > 0)))
-      	ninbatch=$(($tasks/$nbatch + ($tasks%$nbatch > 0)))
-      	slurm_tasks="--array 1-$nbatch"
+      if [ $METHOD = PBS ]; then # (AY)
+        nbatch=$(($tasks / $MYPBSMAXJOBS + ($tasks % $MYPBSMAXJOBS > 0)))
+        ninbatch=$(($tasks / $nbatch + ($tasks % $nbatch > 0)))
+        pbs_tasks=""
+      elif [ $METHOD = SLURM ]; then # (AY)
+        nbatch=$(($tasks / $MY_SLURM_MAX_JOBS + ($tasks % $MY_SLURM_MAX_JOBS > 0)))
+        ninbatch=$(($tasks / $nbatch + ($tasks % $nbatch > 0)))
+        slurm_tasks="--array 1-$nbatch"
       fi
-      shift;;
+      shift
+      ;;
     -N)
-      JobName=$2;
-      shift;;
+      JobName=$2
+      shift
+      ;;
     -m)
-      MailOpts=$2;
-      shift;;
+      MailOpts=$2
+      shift
+      ;;
     -s)
-      pbs_shell="-s $2";
-      shift;;
+      pbs_shell="-s $2"
+      shift
+      ;;
     -l)
-      LogOpts="-o $2 -e $2";
-      LogDir="${2}/";
-      mkdir -p $2;
-      shift;;
+      LogOpts="-o $2 -e $2"
+      LogDir="${2}/"
+      mkdir -p $2
+      shift
+      ;;
     -F)
-      scriptmode=1;
+      scriptmode=1
       ;;
     -v)
       verbose=1
       ;;
   esac
-  shift  # next flag
+  shift # next flag
 done
 shift
 
@@ -344,54 +344,54 @@ shift
 # Don't change the following (but keep scrolling down!)
 ###########################################################################
 
-if [ "x$JobName" = x ] ; then 
-    if [ "x$taskfile" != x ] ; then
-	JobName=`basename $taskfile`
-    else
-	JobName=`basename $1`
-    fi
+if [ "x$JobName" = x ]; then
+  if [ "x$taskfile" != x ]; then
+    JobName=$(basename $taskfile)
+  else
+    JobName=$(basename $1)
+  fi
 fi
 
-if [ "x$tasks" != x ] && [ ! -f "$taskfile" ] ; then
-    echo $taskfile: invalid input!
-    echo Should be a text file listing all the commands to run!
-    exit -1
+if [ "x$tasks" != x ] && [ ! -f "$taskfile" ]; then
+  echo $taskfile: invalid input!
+  echo Should be a text file listing all the commands to run!
+  exit -1
 fi
 
-if [ "x$tasks" != "x" ] && [ "x$@" != "x" ] ; then
-    echo $@
-    echo Spurious input after parsing command line!
-    exit -1
+if [ "x$tasks" != "x" ] && [ "x$@" != "x" ]; then
+  echo $@
+  echo Spurious input after parsing command line!
+  exit -1
 fi
 
 case $METHOD in
 
-###########################################################################
-# The following is the main call to the cluster, using the "qsub" SGE
-# program. If $tasks has not been set then qsub is running a single
-# command, otherwise qsub is processing a text file of parallel
-# commands.
-###########################################################################
+  ###########################################################################
+  # The following is the main call to the cluster, using the "qsub" SGE
+  # program. If $tasks has not been set then qsub is running a single
+  # command, otherwise qsub is processing a text file of parallel
+  # commands.
+  ###########################################################################
 
-    SGE)
-	if [ "x$tasks" = "x" ] ; then
-	    if [ $scriptmode -ne 1 ] ; then
-		sge_command="qsub -V -cwd -shell n -b y -r y -q $queue -M $mailto -N $JobName -m $MailOpts $LogOpts $sge_arch $sge_hold"
-	    else
-		sge_command="qsub $LogOpts $sge_arch $sge_hold"
-	    fi
-	    if [ $verbose -eq 1 ] ; then 
-		echo sge_command: $sge_command >&2
-		echo executing: $@ >&2
-	    fi
-	    exec $sge_command $@ | awk '{print $3}'
-	else
-	    sge_command="qsub -V -cwd -q $queue -M $mailto -N $JobName -m $MailOpts $LogOpts $sge_arch $sge_hold $sge_tasks"
-	    if [ $verbose -eq 1 ] ; then 
-		echo sge_command: $sge_command >&2
-		echo control file: $taskfile >&2
-	    fi
-	    exec $sge_command <<EOF | awk '{print $3}' | awk -F. '{print $1}'
+  SGE)
+    if [ "x$tasks" = "x" ]; then
+      if [ $scriptmode -ne 1 ]; then
+        sge_command="qsub -V -cwd -shell n -b y -r y -q $queue -M $mailto -N $JobName -m $MailOpts $LogOpts $sge_arch $sge_hold"
+      else
+        sge_command="qsub $LogOpts $sge_arch $sge_hold"
+      fi
+      if [ $verbose -eq 1 ]; then
+        echo sge_command: $sge_command >&2
+        echo executing: $@ >&2
+      fi
+      exec $sge_command $@ | awk '{print $3}'
+    else
+      sge_command="qsub -V -cwd -q $queue -M $mailto -N $JobName -m $MailOpts $LogOpts $sge_arch $sge_hold $sge_tasks"
+      if [ $verbose -eq 1 ]; then
+        echo sge_command: $sge_command >&2
+        echo control file: $taskfile >&2
+      fi
+      exec $sge_command <<EOF | awk '{print $3}' | awk -F. '{print $1}'
 #!/bin/sh
 
 #$ -S /bin/sh
@@ -400,111 +400,111 @@ command=\`sed -n -e "\${SGE_TASK_ID}p" $taskfile\`
 
 exec /bin/sh -c "\$command"
 EOF
-	fi
-	;;
+    fi
+    ;;
 
-###########################################################################
-# The following has been modified from "SGE)" above to submit jobs
-# to the Martinos Center cluster using PBS. Proceed at own peril. (AY)
-###########################################################################
+    ###########################################################################
+    # The following has been modified from "SGE)" above to submit jobs
+    # to the Martinos Center cluster using PBS. Proceed at own peril. (AY)
+    ###########################################################################
 
-    PBS)
-        mailto=`whoami`
-	if [ "x$tasks" = "x" ] ; then
-	    if [ $scriptmode -ne 1 ] ; then
-		qsubopts="-V -r y -q $queue -M $mailto -m $MailOpts"
-		qsubopts="$qsubopts -N $JobName"
-		qsubopts="$qsubopts $pbs_hold"
-		#qsubopts="$qsubopts $LogOpts"
-	    else
-		#qsubopts="$LogOpts $pbs_hold"
-		qsubopts="$pbs_hold"
-	    fi
-	    cmdline=$@
-	    if [ $verbose -eq 1 ] ; then 
-		echo pbsubmit -o \"$qsubopts\" -c \"$cmdline\" $pbs_arch $pbs_shell >&2
-	    fi
-	    jobid=`exec pbsubmit -o "$qsubopts" -c "$cmdline" $pbs_arch $pbs_shell | tail -n 1`
-	    echo $jobid | awk -v FS=. '{print $1}'
-	else
-	    if [ "x$LogDir" != x ] ; then
-		cp /dev/null $LogDir/joblist
-	    fi
-	    k=0
-	    while [ $k -lt $ninbatch ]; do
-		j=$k
-		pbs_hold_previous=$pbs_hold
-	    	while [ $j -lt $tasks ]; do
-		    taskno=`printf '%04d' $j`
-		    qsubopts="-V -r y -q $queue -M $mailto -m $MailOpts"
-		    qsubopts="$qsubopts -N ${JobName}_$taskno"
-		    qsubopts="$qsubopts $pbs_hold_previous"
-		    #qsubopts="$qsubopts $LogOpts"
-		    let lineno=j+1
-		    cmdline=`sed -n -e "$lineno p" $taskfile`
-		    if [ $verbose -eq 1 ] ; then 
-			echo pbsubmit -o \"$qsubopts\" -c \"$cmdline\" $pbs_arch $pbs_shell >&2
-		    fi
-		    jobid=`exec pbsubmit -o "$qsubopts" -c "$cmdline" $pbs_arch $pbs_shell | tail -n 1`
-		    jobid=`echo $jobid | awk -v FS=. '{print $1}'`
-		    pbs_hold_previous="-W depend=afterok:$jobid"
-		    if [ "x$LogDir" != x ] ; then
-			echo ${JobName}_$taskno $jobid >> $LogDir/joblist
-		    fi
-		    let j=j+ninbatch
-		    sleep $MYPBSWAIT
-		done
-		pbs_hold_last="$pbs_hold_last $jobid"
-		let k=k+1
-	    done
-	    # Return colon-separated list of job IDs:
-	    # This will allow the list to be passed as a single argument
-	    # to a potential next call of fsl_sub (e.g. $bedpostid in bedpostx).
-	    echo $pbs_hold_last | sed -e "s/ /:/g"
-	fi
-	# Check for jobs that are held and release them:
-	# Jobs are held if the jobs they depend on do not exist
-	# (e.g., in bedpostx, when a single-slice job happens to
-	# be submitted after the preprocessing job has already ended)
-	user=`whoami`
-	heldjobs=(`qstat -u $user | grep -w H | awk -v FS=. '{print $1}'`)
-	if [ ! -z $heldjobs ] ; then
-	    qrls ${heldjobs[*]}
-        fi
-	;;
+  PBS)
+    mailto=$(whoami)
+    if [ "x$tasks" = "x" ]; then
+      if [ $scriptmode -ne 1 ]; then
+        qsubopts="-V -r y -q $queue -M $mailto -m $MailOpts"
+        qsubopts="$qsubopts -N $JobName"
+        qsubopts="$qsubopts $pbs_hold"
+        #qsubopts="$qsubopts $LogOpts"
+      else
+        #qsubopts="$LogOpts $pbs_hold"
+        qsubopts="$pbs_hold"
+      fi
+      cmdline=$@
+      if [ $verbose -eq 1 ]; then
+        echo pbsubmit -o \"$qsubopts\" -c \"$cmdline\" $pbs_arch $pbs_shell >&2
+      fi
+      jobid=$(exec pbsubmit -o "$qsubopts" -c "$cmdline" $pbs_arch $pbs_shell | tail -n 1)
+      echo $jobid | awk -v FS=. '{print $1}'
+    else
+      if [ "x$LogDir" != x ]; then
+        cp /dev/null $LogDir/joblist
+      fi
+      k=0
+      while [ $k -lt $ninbatch ]; do
+        j=$k
+        pbs_hold_previous=$pbs_hold
+        while [ $j -lt $tasks ]; do
+          taskno=$(printf '%04d' $j)
+          qsubopts="-V -r y -q $queue -M $mailto -m $MailOpts"
+          qsubopts="$qsubopts -N ${JobName}_$taskno"
+          qsubopts="$qsubopts $pbs_hold_previous"
+          #qsubopts="$qsubopts $LogOpts"
+          let lineno=j+1
+          cmdline=$(sed -n -e "$lineno p" $taskfile)
+          if [ $verbose -eq 1 ]; then
+            echo pbsubmit -o \"$qsubopts\" -c \"$cmdline\" $pbs_arch $pbs_shell >&2
+          fi
+          jobid=$(exec pbsubmit -o "$qsubopts" -c "$cmdline" $pbs_arch $pbs_shell | tail -n 1)
+          jobid=$(echo $jobid | awk -v FS=. '{print $1}')
+          pbs_hold_previous="-W depend=afterok:$jobid"
+          if [ "x$LogDir" != x ]; then
+            echo ${JobName}_$taskno $jobid >>$LogDir/joblist
+          fi
+          let j=j+ninbatch
+          sleep $MYPBSWAIT
+        done
+        pbs_hold_last="$pbs_hold_last $jobid"
+        let k=k+1
+      done
+      # Return colon-separated list of job IDs:
+      # This will allow the list to be passed as a single argument
+      # to a potential next call of fsl_sub (e.g. $bedpostid in bedpostx).
+      echo $pbs_hold_last | sed -e "s/ /:/g"
+    fi
+    # Check for jobs that are held and release them:
+    # Jobs are held if the jobs they depend on do not exist
+    # (e.g., in bedpostx, when a single-slice job happens to
+    # be submitted after the preprocessing job has already ended)
+    user=$(whoami)
+    heldjobs=($(qstat -u $user | grep -w H | awk -v FS=. '{print $1}'))
+    if [ ! -z $heldjobs ]; then
+      qrls ${heldjobs[*]}
+    fi
+    ;;
 
-###########################################################################
-# The following has been modified from "SGE)" above to submit jobs
-# on a cluster using SLURM. (AY)
-###########################################################################
+    ###########################################################################
+    # The following has been modified from "SGE)" above to submit jobs
+    # on a cluster using SLURM. (AY)
+    ###########################################################################
 
-    SLURM)
-	if [ "x$tasks" = "x" ] ; then
-	    if [ "x$LogDir" = "x" ] ; then
-        	slurm_log="--output=$LogDir/slurm-%j.out"
-        	slurm_log="$slurm_log --error=$LogDir/slurm-%j.err"
-	    fi
-	    if [ $scriptmode -ne 1 ] ; then
-		slurm_command="srun --partition $queue --mail-user $mailto --job-name $JobName --mail-type $MailOpts $slurm_log $slurm_arch $slurm_hold"
-	    else
-		slurm_command="srun $slurm_log $slurm_arch $slurm_hold"
-	    fi
-	    if [ $verbose -eq 1 ] ; then 
-		echo slurm_command: $slurm_command >&2
-		echo executing: $@ >&2
-	    fi
-	    exec $slurm_command $@ | awk '{print $NF}'
-	else
-	    if [ "x$LogDir" = "x" ] ; then
-        	slurm_log="--output=$LogDir/slurm-%A_%a.out"
-        	slurm_log="$slurm_log --error=$LogDir/slurm-%A_%a.err"
-	    fi
-	    slurm_command="sbatch --partition $queue --mail-user $mailto --job-name $JobName --mail-type $MailOpts $slurm_log $slurm_arch $slurm_hold $slurm_tasks"
-	    if [ $verbose -eq 1 ] ; then 
-		echo slurm_command: $slurm_command >&2
-		echo control file: $taskfile >&2
-	    fi
-	    exec $slurm_command <<EOF | awk '{print $NF}'
+  SLURM)
+    if [ "x$tasks" = "x" ]; then
+      if [ "x$LogDir" = "x" ]; then
+        slurm_log="--output=$LogDir/slurm-%j.out"
+        slurm_log="$slurm_log --error=$LogDir/slurm-%j.err"
+      fi
+      if [ $scriptmode -ne 1 ]; then
+        slurm_command="srun --partition $queue --mail-user $mailto --job-name $JobName --mail-type $MailOpts $slurm_log $slurm_arch $slurm_hold"
+      else
+        slurm_command="srun $slurm_log $slurm_arch $slurm_hold"
+      fi
+      if [ $verbose -eq 1 ]; then
+        echo slurm_command: $slurm_command >&2
+        echo executing: $@ >&2
+      fi
+      exec $slurm_command $@ | awk '{print $NF}'
+    else
+      if [ "x$LogDir" = "x" ]; then
+        slurm_log="--output=$LogDir/slurm-%A_%a.out"
+        slurm_log="$slurm_log --error=$LogDir/slurm-%A_%a.err"
+      fi
+      slurm_command="sbatch --partition $queue --mail-user $mailto --job-name $JobName --mail-type $MailOpts $slurm_log $slurm_arch $slurm_hold $slurm_tasks"
+      if [ $verbose -eq 1 ]; then
+        echo slurm_command: $slurm_command >&2
+        echo control file: $taskfile >&2
+      fi
+      exec $slurm_command <<EOF | awk '{print $NF}'
 #!/bin/sh
 
 iline=\$(($ninbatch*(\$SLURM_ARRAY_TASK_ID - 1) + 1))
@@ -517,46 +517,45 @@ while [ \$iline -lt \$endline ] && [ \$iline -le $tasks ] ; do
   sleep $MY_SLURM_WAIT
 done
 EOF
-	fi
-	;;
+    fi
+    ;;
 
-###########################################################################
-# Don't change the following - this runs the commands directly if a
-# cluster is not being used.
-###########################################################################
+    ###########################################################################
+    # Don't change the following - this runs the commands directly if a
+    # cluster is not being used.
+    ###########################################################################
 
-    NONE)
-	if [ "x$tasks" = "x" ] ; then
-	    if [ $verbose -eq 1 ] ; then 
-		echo executing: $@ >&2
-	    fi
+  NONE)
+    if [ "x$tasks" = "x" ]; then
+      if [ $verbose -eq 1 ]; then
+        echo executing: $@ >&2
+      fi
 
-	    /bin/sh <<EOF1 > ${LogDir}${JobName}.o$$ 2> ${LogDir}${JobName}.e$$
+      /bin/sh <<EOF1 >${LogDir}${JobName}.o$$ 2>${LogDir}${JobName}.e$$
 $@
 EOF1
-	else
-	    if [ $verbose -eq 1 ] ; then 
-		echo "Running commands in: $taskfile" >&2
-	    fi
+    else
+      if [ $verbose -eq 1 ]; then
+        echo "Running commands in: $taskfile" >&2
+      fi
 
-	    n=1
-	    while [ $n -le $tasks ] ; do
-		line=`sed -n -e ''${n}'p' $taskfile`
-		if [ $verbose -eq 1 ] ; then 
-		    echo executing: $line >&2
-		fi
-		/bin/sh <<EOF2 > ${LogDir}${JobName}.o$$.$n 2> ${LogDir}${JobName}.e$$.$n
+      n=1
+      while [ $n -le $tasks ]; do
+        line=$(sed -n -e ''${n}'p' $taskfile)
+        if [ $verbose -eq 1 ]; then
+          echo executing: $line >&2
+        fi
+        /bin/sh <<EOF2 >${LogDir}${JobName}.o$$.$n 2>${LogDir}${JobName}.e$$.$n
 $line
 EOF2
-		n=`expr $n + 1`
-	    done
-	fi	
-	echo $$
-	;;
+        n=$(expr $n + 1)
+      done
+    fi
+    echo $$
+    ;;
 
 esac
 
 ###########################################################################
 # Done.
 ###########################################################################
-

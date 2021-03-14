@@ -1,16 +1,11 @@
 /**
- * @file  WidgetGroupPlot.h
  * @brief Widget drawing group plot
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/02/03 22:15:17 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,9 +20,9 @@
 #ifndef WidgetGroupPlot_H
 #define WidgetGroupPlot_H
 
-#include <QWidget>
-#include <QList>
 #include <QColor>
+#include <QList>
+#include <QWidget>
 
 class FSGroupDescriptor;
 
@@ -65,16 +60,16 @@ signals:
 public:
   static void DrawMarker(QPainter *p, const QPointF &pt, const QString &marker,
                          const QColor &c, double r, bool bHighlight = false);
-  void DrawMarker(QPainter *p, const QPointF &pt, const QString &marker,
-                  const QColor &c, bool bHighlight);
+  void        DrawMarker(QPainter *p, const QPointF &pt, const QString &marker,
+                         const QColor &c, bool bHighlight);
 
-  double m_dTR;
-  double m_dMin;
-  double m_dMax;
-  bool m_bAutoScale;
-  QRectF m_rectPlot;
+  double             m_dTR;
+  double             m_dMin;
+  double             m_dMax;
+  bool               m_bAutoScale;
+  QRectF             m_rectPlot;
   FSGroupDescriptor *m_fsgd;
-  int m_nCurrentDataIndex;
+  int                m_nCurrentDataIndex;
 
   int m_nCurrentVariableIndex;
   int m_nPlotType;

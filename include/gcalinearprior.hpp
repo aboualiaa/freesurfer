@@ -1,16 +1,11 @@
 /**
- * @file  gcalinearprior.hpp
  * @brief Class to hold a volume of GCA priors in linear memory
  *
  */
 /*
  * Original Authors: Richard Edgar
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2012/12/12 21:18:23 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011-2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,8 +22,8 @@
 
 #include <vector>
 
-#include "timer.h"
 #include "gca.h"
+#include "timer.h"
 
 // Forward declaration
 namespace GPU {
@@ -231,7 +226,7 @@ private:
   long long xDim;
   long long yDim;
   long long zDim;
-  size_t n4D;
+  size_t    n4D;
 
   //! Count of bytes allocated
   size_t bytes;

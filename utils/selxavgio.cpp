@@ -1,17 +1,6 @@
-/**
- * @file  selxavgio.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.10 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,7 +14,6 @@
 
 /***************************************************************
   Name:    selxavgio.c
-  $Id: selxavgio.c,v 1.10 2011/03/02 00:04:55 nicks Exp $
   Author:  Douglas Greve
   Purpose: Routines for handling header files for data created by
   selxavg or selavg (selectively averaged).
@@ -45,8 +33,8 @@ extern int errno;
    volid as base. volid can be either a stem or stem.ext
    ---------------------------------------------------- */
 int sv_sxadat_by_stem(SXADAT *sxadat, const char *volid) {
-  char tmpstr[1000];
-  int err;
+  char  tmpstr[1000];
+  int   err;
   char *stem;
 
   stem = IDstemFromName(volid);
@@ -61,8 +49,8 @@ int sv_sxadat_by_stem(SXADAT *sxadat, const char *volid) {
 }
 /* ---------------------------------------------------- */
 SXADAT *ld_sxadat_from_stem(const char *volid) {
-  char tmpstr[1000];
-  char *stem;
+  char    tmpstr[1000];
+  char *  stem;
   SXADAT *sxa;
 
   if (!is_sxa_volume(volid))
@@ -82,11 +70,11 @@ SXADAT *ld_sxadat_from_stem(const char *volid) {
 
 /* ---------------------------------------------------- */
 float *sxa_framepower(SXADAT *sxa, int *nframes) {
-  int frame;
-  int h, statid, condition;
+  int    frame;
+  int    h, statid, condition;
   float *framepower;
 
-  *nframes = 2 * sxa->Nc * sxa->Nh;
+  *nframes   = 2 * sxa->Nc * sxa->Nh;
   framepower = (float *)calloc(*nframes, sizeof(float));
 
   frame = 0;
@@ -106,7 +94,7 @@ float *sxa_framepower(SXADAT *sxa, int *nframes) {
 
 /* ---------------------------------------------------- */
 int is_sxa_volume(const char *volid) {
-  char tmpstr[1000];
+  char  tmpstr[1000];
   FILE *fp;
   char *stem;
 
@@ -130,9 +118,9 @@ int is_sxa_volume(const char *volid) {
 
 /* ---------------------------------------------------- */
 SXADAT *ld_sxadat(const char *sxadatfile) {
-  FILE *fp;
+  FILE *  fp;
   SXADAT *sxa;
-  int n, r, c, Nch;
+  int     n, r, c, Nch;
 
   fp = fopen(sxadatfile, "r");
   if (fp == nullptr) {
@@ -154,7 +142,7 @@ SXADAT *ld_sxadat(const char *sxadatfile) {
   fscanf(fp, "%*s %d", &sxa->Nc);
   fscanf(fp, "%*s %d", &sxa->Nh);
   sxa->Nnnc = sxa->Nc - 1;
-  n = fscanf(fp, "%*s %d", &sxa->version);
+  n         = fscanf(fp, "%*s %d", &sxa->version);
   if (n == 0) {
     sxa->version = 0;
     return (sxa);
@@ -191,7 +179,7 @@ SXADAT *ld_sxadat(const char *sxadatfile) {
 
   fscanf(fp, "%*s");
   sxa->SumXtX = (float *)calloc(Nch * Nch, sizeof(float));
-  n = 0;
+  n           = 0;
   for (r = 0; r < Nch; r++) {
     for (c = 0; c < Nch; c++) {
       fscanf(fp, "%f", &sxa->SumXtX[n]);
@@ -204,7 +192,7 @@ SXADAT *ld_sxadat(const char *sxadatfile) {
 
   fscanf(fp, "%*s");
   sxa->hCovMtx = (float *)calloc(Nch * Nch, sizeof(float));
-  n = 0;
+  n            = 0;
   for (r = 0; r < Nch; r++) {
     for (c = 0; c < Nch; c++) {
       fscanf(fp, "%f", &sxa->hCovMtx[n]);
@@ -225,7 +213,7 @@ SXADAT *ld_sxadat(const char *sxadatfile) {
 /* ---------------------------------------------------- */
 int sv_sxadat(SXADAT *sxa, const char *sxadatfile) {
   FILE *fp;
-  int n, r, c, Nch;
+  int   n, r, c, Nch;
 
   fp = fopen(sxadatfile, "w");
   if (fp == nullptr) {

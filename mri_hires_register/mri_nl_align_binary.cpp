@@ -1,22 +1,13 @@
 /**
- * @file  mri_nl_align_binary.c
  * @brief nonlinear alignment of binary images.
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  * Basically a binary implementation of the algorithm in:
  *
  * Fischl B, Salat DH, van der Kouwe AJW, Makris N, S�gonne F, Dale
  * AM. Sequence-Independent  Segmentation of Magnetic Resonance Images.
  * NeuroImage, 2004; 23 Suppl 1, S69-84.
- */
-/*
- * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:18 $
- *    $Revision: 1.16 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright � 2011 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,27 +19,29 @@
  *
  */
 
-//
-// mri_nl_align_binary.c
-//
-// written by Bruce Fischl
-// Nov. 9th ,2000
-//
-// Warning: Do not edit the following four lines.  CVS maintains them.
-// Revision Author: $Author: nicks $
-// Revision Date  : $Date: 2011/03/02 00:04:18 $
-// Revision       : $Revision: 1.16 $
-//
-////////////////////////////////////////////////////////////////////
-
-#include "gcamorph.h"
-#include "timer.h"
-#include "diag.h"
-#include "mrimorph.h"
 #include "cma.h"
+#include "diag.h"
+#include "error.h"
+#include "fastmarching.h"
+#include "gca.h"
+#include "gcamorph.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mrimorph.h"
+#include "proto.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
+#include "version.h"
+#include "voxlist.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define NONMAX 0
-#define PAD 10
+#define NONMAX       0
+#define PAD          10
 #define MAX_DISTANCE 100
 
 static int PADVOX = 1;
@@ -57,18 +50,18 @@ static int check_angio_labels(MRI *mri_source, MRI *mri_target);
 static int find_gcam_node(GCA_MORPH *gcam, int label, float x_ras, float y_ras,
                           float z_ras);
 
-static int surf_flag = 0;
+static int   surf_flag          = 0;
 static float smooth_intensities = -1.0;
-static int find_label = -1;
-static float x_ras = 0.0;
-static float y_ras = 0.0;
-static float z_ras = 0.0;
-static int mode_filters = 0;
-static int aseg = 0;
+static int   find_label         = -1;
+static float x_ras              = 0.0;
+static float y_ras              = 0.0;
+static float z_ras              = 0.0;
+static int   mode_filters       = 0;
+static int   aseg               = 0;
 
 static double min_sigma = 1.0;
 
-static int upsample = 0;
+static int upsample        = 0;
 static int apply_transform = 1;
 
 int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box);
@@ -77,18 +70,18 @@ static MRI *estimate_densities(GCA_MORPH *gcam, MRI *mri_target, MRI *mri_intens
 #endif
 static int write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
                           GCA_MORPH_PARMS *parms, int fno, int conform,
-                          char *fname);
+                          const char *fname);
 
 static int regrid = 0;
 
 static void usage_exit(int ecode);
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 
-static char *source_intensity_fname = nullptr;
-const char *Progname;
-static int target_label = 128;
+static char *source_intensity_fname = NULL;
+const char * Progname;
+static int   target_label = 128;
 
-static int skip = 2;
+static int    skip     = 2;
 static double distance = 1.0;
 
 static int non_artery_labels[] = {Left_Common_IliacV,
@@ -142,72 +135,72 @@ static int non_hippo_labels[] = {entorhinal_cortex,
   (sizeof(non_hippo_labels) / sizeof(non_hippo_labels[0]))
 static int target_aseg_label = Right_Hippocampus;
 
-static TRANSFORM *transform = nullptr;
+static TRANSFORM *     transform = NULL;
 static GCA_MORPH_PARMS mp;
 
-#define NONE 0
+#define NONE  0
 #define ANGIO 1
 #define HIPPO 2
-#define WM 3
+#define WM    3
 #define LABEL 4
-#define ASEG 5
+#define ASEG  5
 
 static int which = ANGIO;
 
-static MRI *mri_norm = nullptr;
+static MRI *mri_norm = NULL;
 
 int main(int argc, char *argv[]) {
   char **av, *source_fname, *target_fname, *out_fname, fname[STRLEN];
-  int ac, nargs, i, new_transform = 0, pad;
-  MRI *mri_target = nullptr, *mri_source, *mri_tmp, *mri_orig_source,
+  int    ac, nargs, i, new_transform = 0, pad;
+  MRI *  mri_target = nullptr, *mri_source, *mri_tmp, *mri_orig_source,
       *mri_orig_target;
 #if NONMAX
   MRI *mri_dist_target = nullptr, *mri_dist_source_sup, *mri_dist_target_sup,
       *mri_dist_source = nullptr;
 #endif
   MRI_REGION box;
-  Timer start;
-  int msec, hours, minutes, seconds, label;
+  Timer      start;
+  int        msec, hours, minutes, seconds, label;
   GCA_MORPH *gcam;
-  MATRIX *m_L /*, *m_I*/;
-  LTA *lta;
+  MATRIX *   m_L /*, *m_I*/;
+  LTA *      lta;
 
   /* for nonlinear morph */
   mp.l_jacobian = 1;
   mp.l_distance = 1;
-  mp.l_binary = .025;
-  mp.dt = 0.005;
-  mp.noneg = True;
-  mp.exp_k = 5;
-  mp.momentum = 0.9;
+  mp.l_binary   = .025;
+  mp.dt         = 0.005;
+  mp.noneg      = True;
+  mp.exp_k      = 5;
+  mp.momentum   = 0.9;
 #if 0
 	if (FZERO(mp.l_smoothness))
 		mp.l_smoothness = .001 ;
 #endif
-  mp.sigma = 8;
+  mp.sigma        = 8;
   mp.relabel_avgs = -1;
-  mp.uncompress = 1; // remove compression each time step
+  mp.uncompress   = 1; // remove compression each time step
   mp.ratio_thresh =
       0.25; // nodes with area/orig smaller than this are compressed
-  mp.navgs = 256;
-  mp.levels = 6;
+  mp.navgs            = 256;
+  mp.levels           = 6;
   mp.integration_type = GCAM_INTEGRATE_BOTH;
-  mp.nsmall = 1;
-  mp.reset_avgs = -1;
-  mp.npasses = 3;
-  mp.regrid = regrid ? True : False;
-  mp.tol = 0.1;
-  mp.niterations = 1000;
+  mp.nsmall           = 1;
+  mp.reset_avgs       = -1;
+  mp.npasses          = 3;
+  mp.regrid           = regrid ? True : False;
+  mp.tol              = 0.1;
+  mp.niterations      = 1000;
   mp.scale_smoothness = 1;
 
   start.reset();
   setRandomSeed(-1L);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
   ErrorInit(NULL, NULL, NULL);
 
   Progname = argv[0];
-  ac = argc;
-  av = argv;
+  ac       = argc;
+  av       = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -217,9 +210,9 @@ int main(int argc, char *argv[]) {
   if (argc < 3)
     usage_exit(1);
 
-  source_fname = argv[1];
-  target_fname = argv[2];
-  out_fname = argv[3];
+  source_fname   = argv[1];
+  target_fname   = argv[2];
+  out_fname      = argv[3];
   mp.write_fname = out_fname;
   printf("source = %s\ntarget = %s\noutput = %s\n", source_fname, target_fname,
          out_fname);
@@ -237,7 +230,7 @@ int main(int argc, char *argv[]) {
     if (!mri_target)
       ErrorExit(ERROR_NOFILE, "%s: could not read target surface %s", Progname,
                 target_fname);
-    mri_target = MRISfillInterior(mris, .25, nullptr);
+    mri_target = MRISfillInterior(mris, .25, NULL);
     MRIreplaceValues(mri_target, mri_target, 1, target_aseg_label);
     MRISfree(&mris);
   } else {
@@ -246,12 +239,12 @@ int main(int argc, char *argv[]) {
       ErrorExit(ERROR_NOFILE, "%s: could not read target label volume %s",
                 Progname, target_fname);
   }
-  mri_orig_target = MRIcopy(mri_target, nullptr);
+  mri_orig_target = MRIcopy(mri_target, NULL);
 
   // crop input volumes
   if (which == WM) {
     MRI *mri_tmp;
-    mri_tmp = MRIclone(mri_source, nullptr);
+    mri_tmp = MRIclone(mri_source, NULL);
     MRIcopyLabel(mri_source, mri_tmp, Left_Cerebral_White_Matter);
     MRIcopyLabel(mri_source, mri_tmp, Right_Cerebral_White_Matter);
     MRIcopyLabel(mri_source, mri_tmp, Left_Cerebellum_White_Matter);
@@ -262,7 +255,7 @@ int main(int argc, char *argv[]) {
     MRIeraseBorders(mri_source, 1);
   } else if (which == LABEL) {
     MRI *mri_tmp;
-    mri_tmp = MRIclone(mri_source, nullptr);
+    mri_tmp = MRIclone(mri_source, NULL);
     MRIcopyLabel(mri_source, mri_tmp, target_aseg_label);
     MRIfree(&mri_source);
     mri_source = mri_tmp;
@@ -271,20 +264,20 @@ int main(int argc, char *argv[]) {
     MRIboundingBox(mri_source, 0, &box);
     pad = PADVOX;
     printf("padding source with %d voxels...\n", pad);
-    mri_tmp = MRIextractRegionAndPad(mri_source, nullptr, &box, pad);
+    mri_tmp = MRIextractRegionAndPad(mri_source, NULL, &box, pad);
     MRIfree(&mri_source);
     mri_source = mri_tmp;
     //	if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
     MRIwrite(mri_source, "s.mgz");
   }
-  mri_orig_source = MRIcopy(mri_source, nullptr);
+  mri_orig_source = MRIcopy(mri_source, NULL);
 
   if (which == HIPPO || which == LABEL) // just copy label out of the target
   {
-    mri_tmp = MRIclone(mri_target, nullptr);
+    mri_tmp = MRIclone(mri_target, NULL);
     MRIcopyLabel(mri_target, mri_tmp, target_aseg_label);
     MRIfree(&mri_target);
-    mri_target = mri_tmp;
+    mri_target      = mri_tmp;
     mp.target_label = target_label = target_aseg_label;
   } else if (which == ANGIO) {
     MRIbinarize(mri_target, mri_target, 1, 0, target_label);
@@ -292,7 +285,7 @@ int main(int argc, char *argv[]) {
     mp.target_label = target_label;
   } else if (which == WM) {
     MRI *mri_tmp;
-    mri_tmp = MRIclone(mri_target, nullptr);
+    mri_tmp = MRIclone(mri_target, NULL);
     MRIcopyLabel(mri_target, mri_tmp, Left_Cerebral_White_Matter);
     MRIcopyLabel(mri_target, mri_tmp, Right_Cerebral_White_Matter);
     MRIcopyLabel(mri_target, mri_tmp, Left_Cerebellum_White_Matter);
@@ -320,24 +313,23 @@ int main(int argc, char *argv[]) {
     }
 
 #if 1
-    if (mri_norm) // won't work if the norm and aseg aren't in the same voxel
-                  // coords
+    if (mri_norm) // won't work if the norm and aseg aren't in the same voxel coords
     {
       MRI_REGION box_norm;
 
       *(&box_norm) = *(&box);
       MRImapRegionToTargetMRI(mri_orig_target, mri_norm, &box_norm);
-      mri_tmp = MRIextractRegionAndPad(mri_norm, nullptr, &box_norm, pad);
+      mri_tmp = MRIextractRegionAndPad(mri_norm, NULL, &box_norm, pad);
       MRIfree(&mri_norm);
       mri_norm = mri_tmp;
       //		if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
       MRIwrite(mri_norm, "n.mgz");
     }
 #endif
-    mri_tmp = MRIextractRegionAndPad(mri_target, nullptr, &box, pad);
+    mri_tmp = MRIextractRegionAndPad(mri_target, NULL, &box, pad);
     MRIfree(&mri_target);
     mri_target = mri_tmp;
-    mri_tmp = MRIextractRegionAndPad(mri_orig_target, nullptr, &box, pad);
+    mri_tmp    = MRIextractRegionAndPad(mri_orig_target, NULL, &box, pad);
     MRIfree(&mri_orig_target);
     mri_orig_target = mri_tmp;
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
@@ -394,22 +386,22 @@ int main(int argc, char *argv[]) {
 
   mp.max_grad = 0.3 * mri_source->xsize;
 
-  if (transform == nullptr ||
+  if (transform == NULL ||
       transform->type !=
           MORPH_3D_TYPE) // initializing m3d from a linear transform
   {
     double det;
     new_transform = 1;
 
-    if (transform == nullptr) {
-      transform = TransformAlloc(LINEAR_VOX_TO_VOX, nullptr);
-      m_L = MRIgetVoxelToVoxelXform(mri_source, mri_target);
-      lta = ((LTA *)(transform->xform));
+    if (transform == NULL) {
+      transform = TransformAlloc(LINEAR_VOX_TO_VOX, NULL);
+      m_L       = MRIgetVoxelToVoxelXform(mri_source, mri_target);
+      lta       = ((LTA *)(transform->xform));
     } else {
       lta = ((LTA *)(transform->xform));
       det = MatrixDeterminant(lta->xforms[0].m_L);
       m_L = MRIrasXformToVoxelXform(mri_source, mri_target, lta->xforms[0].m_L,
-                                    nullptr);
+                                    NULL);
     }
 
     MatrixFree(&lta->xforms[0].m_L);
@@ -421,7 +413,7 @@ int main(int argc, char *argv[]) {
     printf("initializing GCAM with vox->vox matrix:\n");
     MatrixPrint(stdout, m_L);
     gcam = GCAMalloc(mri_target->width, mri_target->height, mri_target->depth);
-    GCAMinit(gcam, mri_source, nullptr, transform, 0);
+    GCAMinit(gcam, mri_source, NULL, transform, 0);
     GCAMinitLabels(gcam, mri_orig_target);
     gcam->gca = gcaAllocMax(1, 1, 1, mri_target->width, mri_target->height,
                             mri_target->depth, 0, 0);
@@ -445,14 +437,14 @@ int main(int argc, char *argv[]) {
         Progname, gcam->width, gcam->height, gcam->depth, mri_target->width,
         mri_target->height, mri_target->depth);
 
-  if (mp.mri_binary == nullptr)
-    mp.mri_binary = MRIcopy(mri_target, nullptr);
+  if (mp.mri_binary == NULL)
+    mp.mri_binary = MRIcopy(mri_target, NULL);
   mp.diag_mode_filter = mode_filters;
   switch (which) {
   case ANGIO:
-    mp.mri_diag = mri_target;
+    mp.mri_diag              = mri_target;
     mp.diag_morph_from_atlas = 1;
-    mp.diag_volume = GCAM_LABEL;
+    mp.diag_volume           = GCAM_LABEL;
     for (i = 0; i < NUM_NON_ARTERY_LABELS; i++) {
       label = non_artery_labels[i];
       GCAMsetLabelStatus(gcam, label, GCAM_BINARY_ZERO);
@@ -479,7 +471,7 @@ int main(int argc, char *argv[]) {
       printf("writing target volume to %s...\n", fname);
       MRIwrite(mri_orig_target, fname);
     } else {
-      mri_gca = MRIclone(mri_source, nullptr);
+      mri_gca = MRIclone(mri_source, NULL);
       GCAMbuildMostLikelyVolume(gcam, mri_gca);
       printf("writing target volume to %s...\n", fname);
       MRIwrite(mri_gca, fname);
@@ -502,31 +494,31 @@ int main(int argc, char *argv[]) {
   }
 
   if (aseg) {
-    MRI *mri_target_dist, *mri_warp;
+    MRI *  mri_target_dist, *mri_warp;
     double old_sse, sse, pct_change;
-    int done;
+    int    done;
 
-    mri_warp = MRIallocSequence(mri_target->width, mri_target->height,
+    mri_warp         = MRIallocSequence(mri_target->width, mri_target->height,
                                 mri_target->depth, MRI_FLOAT, 3);
-    mp.ndtrans = NDTRANS_LABELS;
+    mp.ndtrans       = NDTRANS_LABELS;
     mp.dtrans_labels = dtrans_labels;
     replace_labels(mri_source, mri_source, combine_labels, NCOMBINE_LABELS,
                    &mp);
     replace_labels(mri_target, mri_target, combine_labels, NCOMBINE_LABELS,
                    &mp);
     mri_target_dist = MRIcreateDistanceTransforms(
-        mri_target, nullptr, MAX_DISTANCE, mp.dtrans_labels, mp.ndtrans);
+        mri_target, NULL, MAX_DISTANCE, mp.dtrans_labels, mp.ndtrans);
     GCAMwriteWarpToMRI(gcam, mri_warp);
     sse = MRIlabelMorphSSE(mri_source, mri_target, mri_warp);
     do {
       int start_t = mp.start_t, steps;
-      old_sse = sse;
+      old_sse     = sse;
       printf("calling demons registration with sigma = %2.1f\n", mp.sigma);
-      GCAMdemonsRegister(gcam, mri_source, mri_target, &mp, MAX_DISTANCE,
-                         nullptr, mri_target_dist);
-      sse = mp.last_sse;
+      GCAMdemonsRegister(gcam, mri_source, mri_target, &mp, MAX_DISTANCE, NULL,
+                         mri_target_dist);
+      sse        = mp.last_sse;
       pct_change = 100 * (old_sse - sse) / (old_sse);
-      done = pct_change < mp.tol;
+      done       = pct_change < mp.tol;
       printf("old sse %f, new sse %f, pct_change = %2.3f%%, done = %d\n",
              old_sse, sse, pct_change, done);
       steps = mp.start_t - start_t;
@@ -556,8 +548,7 @@ int main(int argc, char *argv[]) {
 
     FileNameRemoveExtension(out_fname, fname);
     strcat(fname, ".mgz");
-    mri_aligned =
-        GCAMmorphToAtlas(mp.mri, gcam, nullptr, -1, mp.diag_sample_type);
+    mri_aligned = GCAMmorphToAtlas(mp.mri, gcam, NULL, -1, mp.diag_sample_type);
     printf("writing transformed output volume to %s...\n", fname);
     MRIwrite(mri_aligned, fname);
     MRIfree(&mri_aligned);
@@ -568,9 +559,9 @@ int main(int argc, char *argv[]) {
   if (find_label >= 0)
     find_gcam_node(gcam, find_label, x_ras, y_ras, z_ras);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
-  hours = seconds / (60 * 60);
+  hours   = seconds / (60 * 60);
   minutes = (seconds / 60) % 60;
   seconds = seconds % 60;
   printf("registration took %d hours, %d minutes and %d seconds.\n", hours,
@@ -581,22 +572,22 @@ int main(int argc, char *argv[]) {
 
 extern int gcam_write_grad;
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   StrUpper(option);
   if (!stricmp(option, "debug_voxel")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
     nargs = 3;
     printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "CJ")) {
     mp.constrain_jacobian = 1;
-    mp.l_jacobian = 0;
-    mp.ratio_thresh = .25;
-    mp.noneg = False;
+    mp.l_jacobian         = 0;
+    mp.ratio_thresh       = .25;
+    mp.noneg              = False;
     printf("constraining jacobian to be in [%2.2f %2.2f]\n", mp.ratio_thresh,
            1 / mp.ratio_thresh);
   } else if (!stricmp(option, "neg")) {
@@ -607,27 +598,27 @@ static int get_option(int argc, char *argv[]) {
     printf("morphing %s atlas...\n", mp.diag_morph_from_atlas ? "from" : "to");
   } else if (!stricmp(option, "spring")) {
     mp.l_spring = atof(argv[2]);
-    nargs = 1;
+    nargs       = 1;
     printf("setting l_spring = %2.2f\n", mp.l_spring);
   } else if (!stricmp(option, "aseg")) {
-    aseg = 1;
-    mp.tol = .25;
-    mp.sigma = 14;
+    aseg            = 1;
+    mp.tol          = .25;
+    mp.sigma        = 14;
     mp.l_smoothness = 0.1;
-    which = ASEG;
+    which           = ASEG;
     printf("assuming input volumes are aseg labelings (setting tol=%2.1f, "
            "l_smooth=%2.2f)\n",
            mp.tol, mp.l_smoothness);
   } else if (!stricmp(option, "uncompress")) {
     mp.uncompress = atoi(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     printf("setting uncompress = %d\n", mp.uncompress);
   } else if (!stricmp(option, "find_label")) {
     find_label = atoi(argv[2]);
-    x_ras = atof(argv[3]);
-    y_ras = atof(argv[4]);
-    z_ras = atof(argv[5]);
-    nargs = 4;
+    x_ras      = atof(argv[3]);
+    y_ras      = atof(argv[4]);
+    z_ras      = atof(argv[5]);
+    nargs      = 4;
     printf("finding label %s (%d) at (%2.1f, %2.1f, %2.1f)\n",
            cma_label_to_name(find_label), find_label, x_ras, y_ras, z_ras);
   } else if (!stricmp(option, "wg")) {
@@ -635,7 +626,7 @@ static int get_option(int argc, char *argv[]) {
     printf("writing out gradient diagnostics\n");
   } else if (!stricmp(option, "scale_smoothness")) {
     mp.scale_smoothness = atoi(argv[2]);
-    mp.npasses = 2;
+    mp.npasses          = 2;
     printf("%sscaling smooothness coefficient (default=1), and setting "
            "npasses=%d\n",
            mp.scale_smoothness ? "" : "not ", mp.npasses);
@@ -645,84 +636,84 @@ static int get_option(int argc, char *argv[]) {
     printf("using optimal time-step integration\n");
   } else if (!stricmp(option, "diag")) {
     mp.mri_diag = MRIread(argv[2]);
-    if (mp.mri_diag == nullptr)
+    if (mp.mri_diag == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not read diag volume from %s",
                 Progname, argv[2]);
     nargs = 1;
     printf("writing diagnostics for input volume %s\n", argv[2]);
   } else if (!stricmp(option, "distance")) {
     distance = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("expanding border by %2.1f mm every outer cycle\n", distance);
   } else if (!stricmp(option, "intensity") || !stricmp(option, "ll")) {
     mp.l_log_likelihood = atof(argv[2]);
-    nargs = 2;
+    nargs               = 2;
     printf("setting l_log_likelihood = %2.1f\n", mp.l_log_likelihood);
     printf("reading intensity image from %s...\n", argv[3]);
     mri_norm = MRIread(argv[3]);
-    if (mri_norm == nullptr)
+    if (mri_norm == NULL)
       ErrorExit(ERROR_BADPARM, "%s: could not read intensity image from %s\n",
                 Progname, argv[3]);
   } else if (!stricmp(option, "likelihood")) {
     mp.l_likelihood = atof(argv[2]);
-    nargs = 2;
+    nargs           = 2;
     printf("setting l_likelihood = %2.1f\n", mp.l_likelihood);
     printf("reading intensity image from %s...\n", argv[3]);
     mri_norm = MRIread(argv[3]);
-    if (mri_norm == nullptr)
+    if (mri_norm == NULL)
       ErrorExit(ERROR_BADPARM, "%s: could not read intensity image from %s\n",
                 Progname, argv[3]);
   } else if (!stricmp(option, "noregrid")) {
-    regrid = 0;
+    regrid    = 0;
     mp.regrid = False;
     printf("disabling regridding...\n");
   } else if (!stricmp(option, "regrid")) {
-    regrid = atoi(argv[2]);
+    regrid    = atoi(argv[2]);
     mp.regrid = True;
     printf("enabling regridding...\n");
     nargs = 1;
   } else if (!stricmp(option, "view")) {
-    Gsx = atoi(argv[2]);
-    Gsy = atoi(argv[3]);
-    Gsz = atoi(argv[4]);
+    Gsx   = atoi(argv[2]);
+    Gsy   = atoi(argv[3]);
+    Gsz   = atoi(argv[4]);
     nargs = 3;
     printf("viewing voxel (%d, %d, %d)\n", Gsx, Gsy, Gsz);
   } else if (!stricmp(option, "LEVELS")) {
     mp.levels = atoi(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("levels = %d\n", mp.levels);
   } else if (!stricmp(option, "area")) {
     mp.l_area = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("using l_area=%2.3f\n", mp.l_area);
   } else if (!stricmp(option, "area_intensity") || !stricmp(option, "aint")) {
     mp.l_area_intensity = atof(argv[2]);
-    nargs = 2;
+    nargs               = 2;
     printf("using l_area_intensity=%2.3f\n", mp.l_area_intensity);
     printf("reading intensity image from %s...\n", argv[3]);
     mri_norm = MRIread(argv[3]);
-    if (mri_norm == nullptr)
+    if (mri_norm == NULL)
       ErrorExit(ERROR_BADPARM, "%s: could not read intensity image from %s\n",
                 Progname, argv[3]);
   } else if (!stricmp(option, "tol")) {
     mp.tol = atof(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("using tol=%2.3f\n", mp.tol);
   } else if (!stricmp(option, "si")) {
     smooth_intensities = atof(argv[2]);
-    nargs = 1;
+    nargs              = 1;
     printf("smoothing gcam intensities with sigma=%2.2f\n", smooth_intensities);
   } else if (!stricmp(option, "sigma")) {
     mp.sigma = atof(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("using sigma=%2.3f\n", mp.sigma);
   } else if (!stricmp(option, "min_sigma")) {
     min_sigma = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("using min sigma=%2.3f\n", min_sigma);
   } else if (!stricmp(option, "rthresh")) {
     mp.ratio_thresh = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     printf("using compression ratio threshold = %2.3f...\n", mp.ratio_thresh);
   } else if (!stricmp(option, "dt")) {
     mp.dt = atof(argv[2]);
@@ -730,7 +721,7 @@ static int get_option(int argc, char *argv[]) {
     printf("using dt = %2.3f\n", mp.dt);
   } else if (!stricmp(option, "passes")) {
     mp.npasses = atoi(argv[2]);
-    nargs = 1;
+    nargs      = 1;
     printf("integrating in %d passes (default=3)\n", mp.npasses);
   } else if (!stricmp(option, "skip")) {
     skip = atoi(argv[2]);
@@ -740,14 +731,14 @@ static int get_option(int argc, char *argv[]) {
     surf_flag = 1;
     printf("interpreting target as a surface\n");
   } else if (!stricmp(option, "hippo")) {
-    which = HIPPO;
-    mp.l_binary = 0.5;
+    which           = HIPPO;
+    mp.l_binary     = 0.5;
     mp.l_smoothness = 0.1;
-    mp.dt = 0.005;
-    mp.levels = 7;
-    mp.navgs = 1024;
-    mp.sigma = 0;
-    mp.l_distance = 0;
+    mp.dt           = 0.005;
+    mp.levels       = 7;
+    mp.navgs        = 1024;
+    mp.sigma        = 0;
+    mp.l_distance   = 0;
     printf("assuming source is hires hippo and dst is aseg volume\n");
     printf("setting l_binary=%2.4f, l_smooth=%2.4f\n", mp.l_binary,
            mp.l_smoothness);
@@ -765,31 +756,31 @@ static int get_option(int argc, char *argv[]) {
     switch (*option) {
     case 'P':
       PADVOX = atoi(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       printf("padding gcam with %d voxels\n", PADVOX);
       break;
     case 'D':
       mp.l_distance = atof(argv[2]);
-      nargs = 1;
+      nargs         = 1;
       printf("using l_distance = %2.3f\n", mp.l_distance);
       break;
     case 'M':
       mp.momentum = atof(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("momentum = %2.2f\n", mp.momentum);
       break;
     case 'N':
       mp.niterations = atoi(argv[2]);
-      nargs = 1;
+      nargs          = 1;
       printf("using niterations = %d\n", mp.niterations);
       break;
     case 'S':
       mp.l_smoothness = atof(argv[2]);
-      nargs = 1;
+      nargs           = 1;
       printf("using l_smoothness = %2.3f\n", mp.l_smoothness);
       break;
     case 'L':
-      which = LABEL;
+      which             = LABEL;
       target_aseg_label = atoi(argv[2]);
       printf("using %s %d as target label from source and destination\n",
              cma_label_to_name(target_aseg_label), target_aseg_label);
@@ -798,43 +789,43 @@ static int get_option(int argc, char *argv[]) {
     case 'T':
       printf("reading transform from %s...\n", argv[2]);
       transform = TransformRead(argv[2]);
-      if (transform == nullptr)
+      if (transform == NULL)
         ErrorExit(ERROR_NOFILE, "%s: could not read transform from %s\n",
                   Progname, argv[2]);
       nargs = 1;
       break;
     case 'I':
       source_intensity_fname = argv[2];
-      nargs = 1;
+      nargs                  = 1;
       printf("reading intensity image from %s for debugging...\n",
              source_intensity_fname);
       break;
     case 'F':
       mode_filters = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       printf("applying %d mode filters before writing out transformed volume\n",
              mode_filters);
       break;
     case 'B':
       mp.l_binary = atof(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       printf("using l_binary=%2.3f\n", mp.l_binary);
       break;
     case 'J':
       mp.l_jacobian = atof(argv[2]);
-      nargs = 1;
+      nargs         = 1;
       printf("using l_jacobian=%2.3f\n", mp.l_jacobian);
       break;
     case 'A':
       mp.navgs = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("smoothing gradient with %d averages...\n", mp.navgs);
       break;
     case 'K':
       printf("setting exp_k to %2.2f (default=%2.2f)\n", atof(argv[2]),
              mp.exp_k);
       mp.exp_k = atof(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'W':
       mp.write_iterations = atoi(argv[2]);
@@ -861,7 +852,7 @@ static void usage_exit(int ecode) {
 
 static int write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
                           GCA_MORPH_PARMS *parms, int fno, int conform,
-                          char *in_fname) {
+                          const char *in_fname) {
   MRI *mri_aligned;
   char fname[STRLEN];
 
@@ -870,7 +861,7 @@ static int write_snapshot(MRI *mri_target, MRI *mri_source, MATRIX *m_vox_xform,
     MatrixPrint(stdout, m_vox_xform);
   }
   if (conform) {
-    mri_aligned = MRIclone(mri_target, nullptr);
+    mri_aligned = MRIclone(mri_target, NULL);
     MRIlinearTransformInterp(mri_source, mri_aligned, m_vox_xform,
                              SAMPLE_NEAREST);
   } else {
@@ -1246,8 +1237,8 @@ estimate_densities(GCA_MORPH *gcam, MRI *mri_target, MRI *mri_intensities, MRI *
 
 static int find_gcam_node(GCA_MORPH *gcam, int label, float x0, float y0,
                           float z0) {
-  int x, y, z, nx, ny, nz;
-  double dist, min_dist, dx, dy, dz;
+  int             x, y, z, nx, ny, nz;
+  double          dist, min_dist, dx, dy, dz;
   GCA_MORPH_NODE *gcamn;
 
   printf("looking for label %s at (%2.1f, %2.1f, %2.1f)\n",
@@ -1261,15 +1252,15 @@ static int find_gcam_node(GCA_MORPH *gcam, int label, float x0, float y0,
         gcamn = &gcam->nodes[x][y][z];
         if (gcamn->label != label)
           continue;
-        dx = gcamn->x - x0;
-        dy = gcamn->y - y0;
-        dz = gcamn->z - z0;
+        dx   = gcamn->x - x0;
+        dy   = gcamn->y - y0;
+        dz   = gcamn->z - z0;
         dist = sqrt(dx * dx + dy * dy + dz * dz);
         if (dist < min_dist) {
           min_dist = dist;
-          nx = x;
-          ny = y;
-          nz = z;
+          nx       = x;
+          ny       = y;
+          nz       = z;
         }
       }
     }
@@ -1285,7 +1276,7 @@ static int find_gcam_node(GCA_MORPH *gcam, int label, float x0, float y0,
 }
 
 static int check_angio_labels(MRI *mri_source, MRI *mri_target) {
-  int label, imin, imax, scount, tcount;
+  int   label, imin, imax, scount, tcount;
   float smin, smax, tmin, tmax;
 
   MRInonzeroValRange(mri_source, &smin, &smax);
@@ -1313,9 +1304,9 @@ static int check_angio_labels(MRI *mri_source, MRI *mri_target) {
 
 #define NCORNERS 8
 int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box) {
-  VECTOR *v1, *v2 = nullptr;
+  VECTOR *v1, *v2 = NULL;
   MATRIX *m_vox2vox;
-  int xs[NCORNERS], ys[NCORNERS], zs[NCORNERS];
+  int     xs[NCORNERS], ys[NCORNERS], zs[NCORNERS];
   int xd[NCORNERS], yd[NCORNERS], zd[NCORNERS], xmin, xmax, ymin, ymax, zmin,
       zmax, i;
 
@@ -1344,22 +1335,22 @@ int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box) {
   ys[7] = box->y + box->dy - 1;
   zs[7] = box->z + box->dz - 1;
 
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_src, mri_dst);
-  v1 = VectorAlloc(4, MATRIX_REAL);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri_src, mri_dst);
+  v1                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
 
   xmax = ymax = zmax = 0;
-  xmin = mri_dst->width;
-  ymin = mri_dst->height;
-  zmin = mri_dst->depth;
+  xmin               = mri_dst->width;
+  ymin               = mri_dst->height;
+  zmin               = mri_dst->depth;
   for (i = 0; i < NCORNERS; i++) {
     V3_X(v1) = xs[i];
     V3_Y(v1) = ys[i];
     V3_Z(v1) = zs[i];
-    v2 = MatrixMultiply(m_vox2vox, v1, v2);
-    xd[i] = nint(V3_X(v2));
-    yd[i] = nint(V3_Y(v2));
-    zd[i] = nint(V3_Z(v2));
+    v2       = MatrixMultiply(m_vox2vox, v1, v2);
+    xd[i]    = nint(V3_X(v2));
+    yd[i]    = nint(V3_Y(v2));
+    zd[i]    = nint(V3_Z(v2));
     if (xd[i] > xmax)
       xmax = xd[i];
     if (xd[i] < xmin)
@@ -1376,9 +1367,9 @@ int MRImapRegionToTargetMRI(MRI *mri_src, MRI *mri_dst, MRI_REGION *box) {
       zmin = zd[i];
   }
 
-  box->x = xmin;
-  box->y = ymin;
-  box->z = zmin;
+  box->x  = xmin;
+  box->y  = ymin;
+  box->z  = zmin;
   box->dx = xmax - xmin + 1;
   box->dy = ymax - ymin + 1;
   box->dz = zmax - zmin + 1;

@@ -1,16 +1,11 @@
 /**
- * @file  loop.cpp
  * @brief topology fixer worker
  *
  */
 /*
  * Original Author: F. Segonne
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,9 +22,9 @@
 #include "loop.h"
 
 Loop::Loop() {
-  npoints = 0;
+  npoints   = 0;
   maxpoints = 0;
-  points = nullptr;
+  points    = nullptr;
 }
 
 Loop::Loop(int maxpts) {
@@ -45,10 +40,10 @@ Loop::~Loop() {
 void Loop::Alloc(int maxpts) {
   if (points)
     delete[] points;
-  points = nullptr;
+  points    = nullptr;
   maxpoints = maxpts;
-  points = new int[maxpoints];
-  npoints = 0;
+  points    = new int[maxpoints];
+  npoints   = 0;
 }
 
 #define INCREASE_FACTOR 1.2
@@ -77,8 +72,8 @@ void Loop::AddPoint(int pt) {
 
 void Loop::Print() const {
   for (int n = 0; n < npoints - 1; n++)
-    cout << points[n] << "->";
-  cout << points[npoints - 1] << "." << endl;
+    std::cout << points[n] << "->";
+  std::cout << points[npoints - 1] << "." << std::endl;
 }
 
 int Loop::End() { return points[npoints - 1]; }

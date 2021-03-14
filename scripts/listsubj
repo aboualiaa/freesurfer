@@ -1,8 +1,7 @@
 #!/bin/bash
 
-function help_exit
-{
-    cat <<-EOF
+function help_exit() {
+  cat <<-EOF
 List subject IDs in SUBJECT_DIR.
 Usage: $(basename $0) [OPTIONS] SUBJECT_DIR
 
@@ -18,72 +17,71 @@ Options:
     -h, --help          Show this help text
 
 EOF
-    exit 0
+  exit 0
 }
 
-function err_exit
-{
-    echo "ERROR: $@" && exit 1
+function err_exit() {
+  echo "ERROR: $@" && exit 1
 }
 
 # Parse arguments.
 [[ $# -eq 0 ]] && help_exit
 positional=()
 while [[ $# -gt 0 ]]; do
-    case "$1" in
-        -c|--cross)
-            stream="c" && shift
-        ;;
-        -b|--base)
-            stream="b" && shift
-        ;;
-        -l|--long)
-            stream="l" && shift
-        ;;
-        -d|--done)
-            state="d" && shift
-        ;;
-        -e|--error)
-            state="e" && shift
-        ;;
-        -r|--running)
-            state="r" && shift
-        ;;
-        -f|--full-path)
-            full_path=1 && shift
-        ;;
-        -n|--count)
-            count=1 && shift
-        ;;
-        -h|--help)
-            help_exit
-        ;;
-        -*)
-            err_exit "unknown flag \"$1\""
-        ;;
-        *)
-            positional+=("$1") && shift
-        ;;
-    esac
+  case "$1" in
+    -c | --cross)
+      stream="c" && shift
+      ;;
+    -b | --base)
+      stream="b" && shift
+      ;;
+    -l | --long)
+      stream="l" && shift
+      ;;
+    -d | --done)
+      state="d" && shift
+      ;;
+    -e | --error)
+      state="e" && shift
+      ;;
+    -r | --running)
+      state="r" && shift
+      ;;
+    -f | --full-path)
+      full_path=1 && shift
+      ;;
+    -n | --count)
+      count=1 && shift
+      ;;
+    -h | --help)
+      help_exit
+      ;;
+    -*)
+      err_exit "unknown flag \"$1\""
+      ;;
+    *)
+      positional+=("$1") && shift
+      ;;
+  esac
 done
-set -- "${positional[@]}" 
+set -- "${positional[@]}"
 sd=$(echo "$1" | sed -e 's,/\+$,,') # Trailing slashes.
 if [[ $# -ne 1 ]]; then
-    err_exit "number of positional arguments is not 1"
+  err_exit "number of positional arguments is not 1"
 elif [[ ! -d $sd ]]; then
-    err_exit "SUBJECTS_DIR \"$sd\" not found"
+  err_exit "SUBJECTS_DIR \"$sd\" not found"
 fi
 
 # Find subjects processed with stream.
 cmd="find \"$sd/\" -mindepth 1 -maxdepth 1 ! -type f ! -name fsaverage"
 if [[ -z $stream ]]; then
-    cmd="$cmd -exec test -e '{}/mri/orig' \; -print"
+  cmd="$cmd -exec test -e '{}/mri/orig' \; -print"
 elif [[ $stream == c ]]; then
-    cmd="$cmd -exec test -e '{}/mri/orig/001.mgz' \; -print"
+  cmd="$cmd -exec test -e '{}/mri/orig/001.mgz' \; -print"
 elif [[ $stream == b ]]; then
-    cmd="$cmd -exec test -e '{}/base-tps' \; -print"
+  cmd="$cmd -exec test -e '{}/base-tps' \; -print"
 elif [[ $stream == l ]]; then
-    cmd="$cmd -name '*.long.*'"
+  cmd="$cmd -name '*.long.*'"
 fi
 subj=$(eval $cmd)
 
@@ -91,22 +89,21 @@ subj=$(eval $cmd)
 [[ -n $full_path ]] && path=$(cd "$sd" && pwd -P)/
 out=()
 for s in $subj; do
-    d="$s/scripts"
-    if [[ $state == d && ! -e "$d/recon-all.done" ]]; then
-        continue
-    elif [[ $state == e && ! -e "$d/recon-all.error" ]]; then
-        continue
-    elif [[ $state == r && ! -e "$d/IsRunning.lh" && \
-            ! -e "$d/IsRunning.rh" ]]; then
-        continue
-    fi
-    out+=("${path}${s##*/}") # Basename only.
+  d="$s/scripts"
+  if [[ $state == d && ! -e "$d/recon-all.done" ]]; then
+    continue
+  elif [[ $state == e && ! -e "$d/recon-all.error" ]]; then
+    continue
+  elif [[ $state == r && ! -e "$d/IsRunning.lh" && ! -e \
+    "$d/IsRunning.rh" ]]; then
+    continue
+  fi
+  out+=("${path}${s##*/}") # Basename only.
 done
 
 # Print output.
 if [[ -n $count ]]; then
-    echo ${#out[@]}
+  echo ${#out[@]}
 else
-    printf '%s\n' "${out[@]}"
+  printf '%s\n' "${out[@]}"
 fi
-

@@ -14,32 +14,32 @@
  */
 class PoistatsReplicas {
 public:
-  typedef PoistatsReplica::MatrixType MatrixType;
+  typedef PoistatsReplica::MatrixType    MatrixType;
   typedef PoistatsReplica::MatrixPointer MatrixPointer;
-  typedef std::vector<MatrixPointer> MatrixListType;
+  typedef std::vector<MatrixPointer>     MatrixListType;
 
-  typedef PoistatsReplica::ArrayType ArrayType;
+  typedef PoistatsReplica::ArrayType    ArrayType;
   typedef PoistatsReplica::ArrayPointer ArrayPointer;
 
   PoistatsReplicas();
   PoistatsReplicas(PoistatsModel *model, const int nReplicas);
   ~PoistatsReplicas();
 
-  int GetNumberOfReplicas();
+  int  GetNumberOfReplicas();
   void SetNumberOfReplicas(const int nReplicas);
 
   double GetMinimumCurrentEnergy();
 
-  void FillCurrentMeanEnergies(const double energy);
+  void   FillCurrentMeanEnergies(const double energy);
   double GetCurrentMeanOfEnergies() const;
 
-  void FillPreviousMeanEnergies(const double energy);
+  void   FillPreviousMeanEnergies(const double energy);
   double GetPreviousMeanOfEnergies() const;
 
   double GetNormalizedMeanCurrentPreviousEnergiesDifference() const;
 
   double GetCurrentMeanEnergy(const int replica);
-  void SetCurrentMeanEnergy(const int replica, const double energy);
+  void   SetCurrentMeanEnergy(const int replica, const double energy);
 
   double GetPreviousMeanEnergy(const int replica);
 
@@ -50,10 +50,10 @@ public:
   void CopyCurrentToPreviousEnergy(int replica);
 
   static void SortArray(itk::Array<double> *unsorted,
-                        itk::Array<int> *sortedIndices);
+                        itk::Array<int> *   sortedIndices);
 
   double GetTemperature(const int replica);
-  void SetTemperature(const int replica, const double temperature);
+  void   SetTemperature(const int replica, const double temperature);
 
   void CoolTemperatures(const double coolingFactor);
 
@@ -78,19 +78,19 @@ public:
   void SetPreviousTrialPaths(const MatrixPointer path);
 
   void SetNumberOfSteps(const int nSteps);
-  int GetNumberOfSteps();
+  int  GetNumberOfSteps();
 
-  void SetCurrentTrialPaths(const MatrixPointer path);
+  void          SetCurrentTrialPaths(const MatrixPointer path);
   MatrixPointer GetCurrentTrialPath(const int replica);
 
-  void SetBestTrialPaths(const MatrixPointer path);
+  void          SetBestTrialPaths(const MatrixPointer path);
   MatrixPointer GetBestTrialPath(const int replica);
 
   MatrixListType GetBestTrialPaths();
 
   void GetBestTrialPathsProbabilities(MatrixPointer probabilities);
 
-  void SetBestTrialPathProbabilities(const int replica,
+  void SetBestTrialPathProbabilities(const int    replica,
                                      ArrayPointer probabilities);
 
   ArrayPointer GetBestTrialPathProbabilities(const int replica);
@@ -99,7 +99,7 @@ public:
                                const double ceilingTemp);
 
   void GetPerturbedBasePath(const int replica, MatrixPointer perturbedPath,
-                            const double sigma,
+                            const double        sigma,
                             const MatrixPointer possibleStartPoints,
                             const MatrixPointer possibleEndPoints);
 
@@ -113,7 +113,7 @@ public:
 private:
   PoistatsModel *m_PoistatsModel;
 
-  int m_NumberOfReplicas;
+  int              m_NumberOfReplicas;
   PoistatsReplica *m_Replicas;
 
   MatrixPointer m_InitialPoints;

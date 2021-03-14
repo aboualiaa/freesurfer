@@ -1,16 +1,11 @@
 /**
- * @file  gw_utils.h
  * @brief utility functions contributed by Graham Wideman
  *
  */
 /*
  * Original Author: Graham Wideman
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:09 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -59,12 +54,12 @@ typedef enum {
 MRI *MRIFromMHTandMRIS(MHT *mht, MRIS *mris, MFMM_Option_t mfmm_option);
 
 // Some simple log functions for test programs.
-extern int gw_log_init(char *AProgname, char *AProgversion, char *ALogfilepath,
-                       int newfile);
-extern void gw_log_message(char *msg);
+extern int  gw_log_init(char *AProgname, char *AProgversion, char *ALogfilepath,
+                        int newfile);
+extern void gw_log_message(const char *msg);
 extern void gw_log_timestamp(const char *label);
-extern void gw_log_begin();
-extern void gw_log_end();
+extern void gw_log_begin(void);
+extern void gw_log_end(void);
 //=============================================================================
 
 #endif

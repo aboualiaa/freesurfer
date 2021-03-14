@@ -1,13 +1,13 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include <QMessageBox>
+#include <QCloseEvent>
+#include <QDateTime>
 #include <QFileDialog>
+#include <QFileInfo>
+#include <QMessageBox>
 #include <QProcess>
 #include <QScrollBar>
-#include <QDateTime>
-#include <QFileInfo>
 #include <QSettings>
-#include <QCloseEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -101,7 +101,7 @@ void MainWindow::AddMessage(const QString &msg, int type) {
   if (msg.trimmed().isEmpty())
     return;
 
-  QString strg = msg;
+  QString strg  = msg;
   QString color = "black";
   switch (type) {
   case Highlight:

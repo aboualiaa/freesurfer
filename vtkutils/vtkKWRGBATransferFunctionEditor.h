@@ -1,5 +1,4 @@
 /**
- * @file  vtkKWRGBATransferFunctionEditor.h
  * @brief an RGBA tfunc function editor
  *
  * A widget that allows the user to edit a color transfer
@@ -15,12 +14,8 @@
  */
 /*
  * Original Author: Kitware, Inc, modified by Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -69,8 +64,8 @@
 #ifndef __vtkKWRGBATransferFunctionEditor_h
 #define __vtkKWRGBATransferFunctionEditor_h
 
-#include <map>
 #include "vtkKWParameterValueHermiteFunctionEditor.h"
+#include <map>
 
 class vtkRGBATransferFunction;
 class vtkKWEntryWithLabel;
@@ -195,11 +190,11 @@ public:
   // Proxy to the function.
   // IMPLEMENT those functions in the subclasses.
   // See protected: section too.
-  virtual int HasFunction();
-  virtual int GetFunctionSize();
+  virtual int           HasFunction();
+  virtual int           GetFunctionSize();
   virtual unsigned long GetFunctionMTime();
-  virtual int GetFunctionPointParameter(int id, double *parameter);
-  virtual int GetFunctionPointDimensionality();
+  virtual int           GetFunctionPointParameter(int id, double *parameter);
+  virtual int           GetFunctionPointDimensionality();
 
   // Description:
   // Modifcations to the original vtkKWColorTransferFunctionEditor
@@ -250,26 +245,26 @@ protected:
   // Higher-level methods to manipulate the function.
   virtual int MoveFunctionPointInColorSpace(int id, double parameter,
                                             const double *values,
-                                            int colorspace);
+                                            int           colorspace);
 
   virtual void UpdatePointEntries(int id);
 
   vtkRGBATransferFunction *RGBATransferFunction;
   vtkRGBATransferFunction *ColorRampTransferFunction;
 
-  int ValueEntriesVisibility;
-  int ColorSpaceOptionMenuVisibility;
-  int ColorRampVisibility;
-  int ColorRampHeight;
-  int ColorRampPosition;
-  int ColorRampOutlineStyle;
+  int           ValueEntriesVisibility;
+  int           ColorSpaceOptionMenuVisibility;
+  int           ColorRampVisibility;
+  int           ColorRampHeight;
+  int           ColorRampPosition;
+  int           ColorRampOutlineStyle;
   unsigned long LastRedrawColorRampTime;
 
   // GUI
 
-  vtkKWMenuButton *ColorSpaceOptionMenu;
+  vtkKWMenuButton *    ColorSpaceOptionMenu;
   vtkKWEntryWithLabel *ValueEntries[3];
-  vtkKWLabel *ColorRamp;
+  vtkKWLabel *         ColorRamp;
 
   // Description:
   // Redraw
@@ -294,7 +289,7 @@ protected:
   // Description:
   // Redraw the color ramp
   virtual void RedrawColorRamp();
-  virtual int IsColorRampUpToDate();
+  virtual int  IsColorRampUpToDate();
   virtual void GetColorRampOutlineSunkenColors(unsigned char bg_rgb[3],
                                                unsigned char ds_rgb[3],
                                                unsigned char ls_rgb[3],
@@ -312,8 +307,8 @@ protected:
   virtual void CreateColorSpaceOptionMenu();
   virtual void CreateColorRamp();
   virtual void CreateValueEntries();
-  virtual int IsTopLeftFrameUsed();
-  virtual int IsPointEntriesFrameUsed();
+  virtual int  IsTopLeftFrameUsed();
+  virtual int  IsPointEntriesFrameUsed();
 
   // Description:
   // Redraw the histogram
@@ -327,8 +322,8 @@ protected:
   // BTX
   std::map<int, int> PointSymmetry;
   std::map<int, int> PointSticky;
-  int UpdateDepth;
-  int DontUpdateSticky;
+  int                UpdateDepth;
+  int                DontUpdateSticky;
   // ETX
 
 private:

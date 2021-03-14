@@ -1,16 +1,11 @@
 /**
- * @file  FSPointSet.h
  * @brief Base way points class that takes care of I/O and data conversion.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/07/05 17:20:32 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,10 +21,10 @@
 #ifndef FSPointSet_h
 #define FSPointSet_h
 
-#include <QObject>
-#include "vtkMatrix4x4.h"
 #include "CommonDataStruct.h"
+#include "vtkMatrix4x4.h"
 #include <QList>
+#include <QObject>
 #include <QVariantMap>
 
 #include "label.h"
@@ -37,8 +32,8 @@
 class FSVolume;
 
 struct ControlPoint {
-  double pt[3];
-  double value;
+  double      pt[3];
+  double      value;
   QVariantMap info; // enhanced fields
 };
 
@@ -59,7 +54,7 @@ public:
   void UpdateLabel(PointSet &points_in, FSVolume *vol_ref);
   void LabelToPointSet(PointSet &points_out, FSVolume *vol_ref);
 
-  bool ReadFromStringAsControlPoints(const QString &content);
+  bool    ReadFromStringAsControlPoints(const QString &content);
   QString WriteAsControlPointsToString();
 
   bool GetCentroidRASPosition(double *pos, FSVolume *ref_vol);

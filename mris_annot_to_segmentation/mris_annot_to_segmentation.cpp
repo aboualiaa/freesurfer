@@ -1,17 +1,6 @@
-/**
- * @file  mris_annot_to_segmentation.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:26 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,13 +12,25 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "diag.h"
+#include "error.h"
+#include "label.h"
+#include "macros.h"
+#include "minc.h"
+#include "mri.h"
 #include "mrisurf.h"
+#include "proto.h"
+#include "utils.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static void print_usage();
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
+static void print_usage(void);
 
 const char *Progname;
 
@@ -38,21 +39,20 @@ const char *Progname;
 static char subjects_dir[NAME_LEN] = "";
 
 int main(int argc, char *argv[]) {
-  int ac, nargs;
+  int   ac, nargs;
   char *cp, *subject_name, *hemi, *surface, *annot_file, *color_file,
       *output_file;
   MRI_SURFACE *mris;
-  MRI *mri;
-  int err;
+  MRI *        mri;
+  int          err;
   COLOR_TABLE *ctab;
-  char surf_name[NAME_LEN];
-  char mri_name[NAME_LEN];
-  int vno;
-  VERTEX *v;
-  int structure;
-  float dx, dy, dz, len, d;
-  double idxx, idxy, idxz;
-
+  char         surf_name[NAME_LEN];
+  char         mri_name[NAME_LEN];
+  int          vno;
+  VERTEX *     v;
+  int          structure;
+  float        dx, dy, dz, len, d;
+  double       idxx, idxy, idxz;
 
   nargs = handleVersionOption(argc, argv, "mris_annot_to_segmentation");
   if (nargs && argc - nargs == 1)
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   /* read in command-line options */
   ac = argc;
@@ -75,19 +75,23 @@ int main(int argc, char *argv[]) {
     print_usage();
 
   subject_name = argv[1];
-  hemi = argv[2];
-  surface = argv[3];
-  annot_file = argv[4];
-  color_file = argv[5];
-  output_file = argv[6];
+  hemi         = argv[2];
+  surface      = argv[3];
+  annot_file   = argv[4];
+  color_file   = argv[5];
+  output_file  = argv[6];
 
   /* Read the surface first. */
   cp = getenv("SUBJECTS_DIR");
   if (!cp)
     ErrorExit(ERROR_BADPARM, "no subjects directory in environment.\n");
   strcpy(subjects_dir, cp);
-  sprintf(surf_name, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
-          surface);
+  int req = snprintf(surf_name, NAME_LEN, "%s/%s/surf/%s.%s", subjects_dir,
+                     subject_name, hemi, surface);
+  if (req >= NAME_LEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "reading %s...\n", surf_name);
   mris = MRISread(surf_name);
   if (!mris)
@@ -107,13 +111,19 @@ int main(int argc, char *argv[]) {
 
   /* Read the color look up table. */
   ctab = CTABreadASCII(color_file);
-  if (nullptr == ctab)
+  if (NULL == ctab)
     ErrorExit(ERROR_NOFILE, "%s: could not read color table %s\n", color_file);
 
   /* Read in the T1 for this subject and change its name to the one
      they passed in. Set all values to 0. We'll use this as the
      segmentation volume. */
-  sprintf(mri_name, "%s/%s/mri/T1", subjects_dir, subject_name);
+  req =
+      snprintf(mri_name, NAME_LEN, "%s/%s/mri/T1", subjects_dir, subject_name);
+  if (req >= NAME_LEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   mri = MRIread(mri_name);
   if (!mri)
     ErrorExit(ERROR_NOFILE, "%s: could not read T1 for template volume");
@@ -188,7 +198,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -206,7 +216,7 @@ static int get_option(int argc, char *argv[]) {
 
   return (nargs);
 }
-static void print_usage() {
+static void print_usage(void) {
   printf("usage: %s <subject name> <hemi> <surface> <annot file> <color table> "
          "<output volume>\n",
          Progname);

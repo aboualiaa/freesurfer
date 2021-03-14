@@ -1,15 +1,10 @@
 /**
- * @file  4dfptoanalyze.c
  * @brief Create ANALYZE 7.5 signed short version of a 4dfp stack.
  *
  */
 /*
  * Original Authors: Tom Yang, Avi Snyder, Mohana Ramaratnan
- *
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2007/05/05 00:00:06 $
- *    $Revision: 1.2 $
+ * 
  *
  * Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
  * Washington University, Mallinckrodt Institute of Radiology.
@@ -24,11 +19,11 @@
  *
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <rec.h>
 #include <Getifh.h>
 #include <endianio.h>
+#include <rec.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define MAXL 256
 
@@ -36,7 +31,7 @@
 /* replacement for FORTRAN-style intrinsic in Sun libsunmath */
 /*************************************************************/
 int nint(float x) {
-  int i;
+  int   i;
   float y;
 
   y = x + 0.5;
@@ -59,48 +54,46 @@ void setprog(char *program, char **argv) {
 extern void flipx(float *imgf, int *pnx, int *pny, int *pnz); /* cflip.c */
 extern void flipy(float *imgf, int *pnx, int *pny, int *pnz); /* cflip.c */
 extern void flipz(float *imgf, int *pnx, int *pny, int *pnz); /* cflip.c */
-extern int Inithdr(struct dsr *phdr, int *imgdim, float *voxsiz,
-                   char *proto_header);
+extern int  Inithdr(struct dsr *phdr, int *imgdim, float *voxsiz,
+                    char *proto_header);
 
-static char rcsid[] =
-    "$Id: 4dfptoanalyze.c,v 1.2 2007/05/05 00:00:06 nicks Exp $";
 int main(int argc, char *argv[]) {
   /*******/
   /* i/o */
   /*******/
-  FILE *fpimg, *fpout;
-  IFH ifh;
+  FILE *     fpimg, *fpout;
+  IFH        ifh;
   struct dsr hdr; /* ANALYZE hdr */
-  char imgroot[MAXL], imgfile[MAXL], outfile[MAXL];
-  char trailer[8] = ".4dint";
+  char       imgroot[MAXL], imgfile[MAXL], outfile[MAXL];
+  char       trailer[8] = ".4dint";
 
   /****************/
   /* image arrays */
   /****************/
-  float *imgf, cscale = 1.0;
-  short int *imgi = NULL;
+  float *        imgf, cscale = 1.0;
+  short int *    imgi = NULL;
   unsigned char *imgu = NULL;
-  float voxsiz[3];
-  int imgdim[4], vdim, orient, isbig;
-  int imin = 32767, imax = -32768;
-  char control = '\0';
-  short int origin[3]; /* used in SPM99 conversions */
+  float          voxsiz[3];
+  int            imgdim[4], vdim, orient, isbig;
+  int            imin = 32767, imax = -32768;
+  char           control = '\0';
+  short int      origin[3]; /* used in SPM99 conversions */
 
   /***********/
   /* utility */
   /***********/
-  int c, i, j, k;
+  int   c, i, j, k;
   char *str, command[MAXL], program[MAXL];
 
   /*********/
   /* flags */
   /*********/
-  int uchar = 0;
-  int debug = 0;
-  int spm99 = 0;
+  int uchar     = 0;
+  int debug     = 0;
+  int spm99     = 0;
   int swab_flag = 0;
 
-  fprintf(stdout, "%s\n", rcsid);
+  fprintf(stdout, "%s\n", "freesurfer 4dfptoanalyze.c");
   setprog(program, argv);
   /************************/
   /* process command line */
@@ -120,7 +113,7 @@ int main(int argc, char *argv[]) {
           break;
         case 'c':
           cscale = atof(str);
-          *str = '\0';
+          *str   = '\0';
           break;
         case 'S':
           if (!strcmp(str, "PM99"))
@@ -129,7 +122,7 @@ int main(int argc, char *argv[]) {
           break;
         case '@':
           control = *str++;
-          *str = '\0';
+          *str    = '\0';
           break;
         }
     } else
@@ -234,13 +227,13 @@ int main(int argc, char *argv[]) {
   Inithdr(&hdr, imgdim, voxsiz, "");
   if (uchar) {
     hdr.dime.datatype = 2; /* unsigned char */
-    hdr.dime.bitpix = 8;
+    hdr.dime.bitpix   = 8;
   } else {
     hdr.dime.datatype = 4; /* signed integer */
-    hdr.dime.bitpix = 16;
+    hdr.dime.bitpix   = 16;
   }
-  hdr.dime.glmax = imax;
-  hdr.dime.glmin = imin;
+  hdr.dime.glmax  = imax;
+  hdr.dime.glmin  = imin;
   hdr.hist.orient = orient - 2;
 
   swab_flag =
@@ -279,7 +272,7 @@ int main(int argc, char *argv[]) {
   /* create rec file */
   /*******************/
   sprintf(outfile, "%s%s.img", imgroot, trailer);
-  startrece(outfile, argc, argv, rcsid, control);
+  startrece(outfile, argc, argv, "freesurfer 4dfptoanalyze.c", control);
   sprintf(command, "Voxel values scaled by %f\n", cscale);
   printrec(command);
   catrec(imgfile);

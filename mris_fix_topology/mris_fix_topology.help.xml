@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_fix_topology</name>
-	<synopsis>mris_fix_topology [options] &lt;subject name&gt; &lt;hemisphere&gt;</synopsis>
-	<description>This program computes a mapping from the unit sphere onto the surface of the cortex from a previously generated approximation of the cortical surface, thus guaranteeing a topologically correct surface.</description>
+  <name>mris_fix_topology</name>
+  <synopsis>mris_fix_topology [options] &lt;subject name&gt; &lt;hemisphere&gt;</synopsis>
+  <description>This program computes a mapping from the unit sphere onto the surface of the cortex from a previously generated approximation of the cortical surface, thus guaranteeing a topologically correct surface.</description>
   <arguments>
     <positional>
       <argument>&lt;subject name&gt;</argument>
@@ -85,4 +84,3 @@
   </arguments>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

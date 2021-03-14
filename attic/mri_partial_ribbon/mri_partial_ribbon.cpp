@@ -1,5 +1,4 @@
 /**
- * @file  mri_partial_ribbon.c
  * @brief extract cortical ribbon
  *
  * Usage:
@@ -10,12 +9,8 @@
  */
 /*
  * Original Author: Andre van der Kouwe
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:23 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,12 +22,12 @@
  *
  */
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "mri.h"
 #include "mrisurf.h"
 #include "version.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define IMGSIZE 256
 
@@ -46,9 +41,9 @@ void usage() {
 int main(int argc, char *argv[]) {
   char *inner_mris_fname_lh, *outer_mris_fname_lh, *inner_mris_fname_rh,
       *outer_mris_fname_rh, *input_mri_pref, *output_mri_pref, *mask_mri_pref;
-  MRI *mri, *mri_src, *mri_mask;
+  MRI *        mri, *mri_src, *mri_mask;
   MRI_SURFACE *inner_mris_lh, *outer_mris_lh, *inner_mris_rh, *outer_mris_rh;
-  int nargs;
+  int          nargs;
 
   nargs = handleVersionOption(argc, argv, "mri_partial_ribbon");
   if (nargs && argc - nargs == 1)
@@ -66,8 +61,8 @@ int main(int argc, char *argv[]) {
   outer_mris_fname_lh = argv[2]; // lh.pial
   inner_mris_fname_rh = argv[3]; // rh.white
   outer_mris_fname_rh = argv[4]; // rh.pial
-  input_mri_pref = argv[5];      // volume
-  output_mri_pref = argv[6];     // output
+  input_mri_pref      = argv[5]; // volume
+  output_mri_pref     = argv[6]; // output
   if (argc == 8)
     mask_mri_pref = argv[7]; // cma mask
   else

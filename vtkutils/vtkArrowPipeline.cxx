@@ -1,5 +1,4 @@
 /**
- * @file  vtkArrowPipeline.cxx
  * @brief A simple wrapper for a array source, transform, mapper, and actor.
  *
  * This lets you easily instantiate and place a 3D arrow. You can set
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,8 +19,8 @@
  *
  */
 
-#include <limits>
 #include <cassert>
+#include <limits>
 
 #include "vtkArrowPipeline.h"
 
@@ -52,7 +47,7 @@ vtkArrowPipeline::vtkArrowPipeline() {
 
   // Initial points.
   mStartPoint[0] = mStartPoint[1] = mStartPoint[2] = 0;
-  mEndPoint[0] = 1;
+  mEndPoint[0]                                     = 1;
   mEndPoint[1] = mEndPoint[2] = 0;
 
   // This will be how we transform the source to go from point a to

@@ -1,16 +1,11 @@
 /**
- * @file  LivewireTool.h
  * @brief LivewireTool data object.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:47 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -50,11 +45,11 @@ public:
                          double *pt1_in, double *pt2_in, vtkPoints *pts_out);
 
 protected:
-  int m_nPlane;
-  int m_nSlice;
+  int                                           m_nPlane;
+  int                                           m_nSlice;
   vtkSmartPointer<vtkDijkstraImageGeodesicPath> m_path;
-  vtkImageData *m_imageData;
-  vtkImageData *m_imageSlice;
+  vtkImageData *                                m_imageData;
+  vtkImageData *                                m_imageSlice;
 };
 
 #endif

@@ -1,5 +1,4 @@
 /**
- * @file  talairach_afd.c
  * @brief Automatically detect Talairach alignment failures.
  *
  * Detect bad Talairach alignment by checking subjects Talairach transform
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Laurence Wastiaux
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:40 $
- *    $Revision: 1.13 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,56 +20,53 @@
  *
  */
 
-#include "error.h"
 #include "diag.h"
-#include "version.h"
+#include "error.h"
 #include "fio.h"
 #include "transform.h"
+#include "version.h"
 
-static char vcid[] =
-    "$Id: talairach_afd.c,v 1.13 2011/03/02 00:04:40 nicks Exp $";
-static int get_option(int argc, char *argv[]);
-static void usage(int exit_value);
-static char *subject_name = nullptr;
-static char *xfm_fname = nullptr;
-static char *afd_dir = nullptr;
+static int   get_option(int argc, char *argv[]);
+static void  usage(int exit_value);
+static char *subject_name = NULL;
+static char *xfm_fname    = NULL;
+static char *afd_dir      = NULL;
 #define DEFAULT_THRESHOLD 0.01f
 static float threshold = DEFAULT_THRESHOLD;
-static int verbose = 0;
-VECTOR *ReadMeanVect(char *fname);
-MATRIX *ReadCovMat(char *fname);
-VECTOR *Load_xfm(char *fname);
-double *LoadProbas(char *fname, int *nb_samples);
-float mvnpdf(VECTOR *t, VECTOR *v_mu, MATRIX *m_sigma);
-float ComputeArea(HISTO *h, int nbin);
+static int   verbose   = 0;
+VECTOR *     ReadMeanVect(char *fname);
+MATRIX *     ReadCovMat(char *fname);
+VECTOR *     Load_xfm(char *fname);
+double *     LoadProbas(char *fname, int *nb_samples);
+float        mvnpdf(VECTOR *t, VECTOR *v_mu, MATRIX *m_sigma);
+float        ComputeArea(HISTO *h, int nbin);
 
 int main(int argc, char *argv[]);
 
 const char *Progname;
 
 int main(int argc, char *argv[]) {
-  char **av;
-  char *fsenv = nullptr, *sname = nullptr;
-  char fsafd[1000], tmf[1000], cvf[1000], xfm[1000], probasf[1000];
-  int ac, nargs;
-  int b;
-  int nsamples, bin;
-  float p, pval;
+  char ** av;
+  char *  fsenv = nullptr, *sname = nullptr;
+  char    fsafd[1000], tmf[1000], cvf[1000], xfm[1000], probasf[1000];
+  int     ac, nargs;
+  int     b;
+  int     nsamples, bin;
+  float   p, pval;
   double *ts_probas;
   VECTOR *mu;
   MATRIX *sigma;
   VECTOR *txfm;
-  HISTO *h;
-  int ret_code = 0; // assume 'passed' return code
+  HISTO * h;
+  int     ret_code = 0; // assume 'passed' return code
 
-  mu = nullptr;
+  mu    = nullptr;
   sigma = nullptr;
-  txfm = nullptr;
+  txfm  = nullptr;
 
   nargs = handleVersionOption(argc, argv, "talairach_afd");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -125,9 +117,21 @@ int main(int argc, char *argv[]) {
     strcpy(fsafd, afd_dir);
   }
 
-  sprintf(tmf, "%s/TalairachingMean.adf", fsafd);
-  sprintf(cvf, "%s/TalairachingCovariance.adf", fsafd);
-  sprintf(probasf, "%s/TalairachingProbas.adf", fsafd);
+  int req = snprintf(tmf, 1000, "%s/TalairachingMean.adf", fsafd);
+  if (req >= 1000) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+  req = snprintf(cvf, 1000, "%s/TalairachingCovariance.adf", fsafd);
+  if (req >= 1000) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+  req = snprintf(probasf, 1000, "%s/TalairachingProbas.adf", fsafd);
+  if (req >= 1000) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
 
   /*----- load 1x9 mean vector computed from training set -----*/
   mu = ReadMeanVect(tmf);
@@ -219,13 +223,13 @@ int main(int argc, char *argv[]) {
 
   Description:
   ----------------------------------------------------------------------*/
-static void print_version() {
-  fprintf(stdout, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stdout, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -236,16 +240,16 @@ static int get_option(int argc, char *argv[]) {
   }
   if (!stricmp(option, "subj")) {
     subject_name = argv[2];
-    nargs = 1;
+    nargs        = 1;
   } else if (!stricmp(option, "xfm")) {
     xfm_fname = argv[2];
-    nargs = 1;
+    nargs     = 1;
   } else if (!stricmp(option, "afd")) {
     afd_dir = argv[2];
-    nargs = 1;
+    nargs   = 1;
   } else if (!stricmp(option, "T") || !stricmp(option, "threshold")) {
     threshold = (float)atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
   } else
     switch (toupper(*option)) {
     case 'T':
@@ -284,9 +288,9 @@ static void usage(int exit_value) {
   from "$FREESURFER_HOME/fsafd/TalairachingMean.adf"
   ----------------------------------------------------------------------*/
 VECTOR *ReadMeanVect(char *fname) {
-  FILE *fp;
-  char tag[1000], tmpstr[1000];
-  int nth, r;
+  FILE *  fp;
+  char    tag[1000], tmpstr[1000];
+  int     nth, r;
   VECTOR *v;
 
   v = MatrixAlloc(1, 9, MATRIX_REAL);
@@ -329,9 +333,9 @@ VECTOR *ReadMeanVect(char *fname) {
   from "$FREESURFER_HOME/fsafd/TalairachingCovariance.adf"
   ----------------------------------------------------------------------*/
 MATRIX *ReadCovMat(char *fname) {
-  FILE *fp;
-  char tag[1000], tmpstr[1000];
-  int nth, r, i, j;
+  FILE *  fp;
+  char    tag[1000], tmpstr[1000];
+  int     nth, r, i, j;
   MATRIX *s;
 
   s = MatrixAlloc(9, 9, MATRIX_REAL);
@@ -353,8 +357,8 @@ MATRIX *ReadCovMat(char *fname) {
       // header info -> skip the whole line
       fgets(tmpstr, 1000, fp);
     } else {
-      i = nth / 9;
-      j = nth - (i * 9);
+      i                     = nth / 9;
+      j                     = nth - (i * 9);
       s->rptr[i + 1][j + 1] = (float)atof(tag);
       nth++;
     }
@@ -375,12 +379,12 @@ MATRIX *ReadCovMat(char *fname) {
   Description:Load xfm matrix
   ----------------------------------------------------------------------*/
 VECTOR *Load_xfm(char *fname) {
-  FILE *fp;
-  char *sdir;
-  char tmp_name[1000];
+  FILE *  fp;
+  char *  sdir;
+  char    tmp_name[1000];
   VECTOR *v;
-  int i, j;
-  LTA *lta = LTAreadEx(fname);
+  int     i, j;
+  LTA *   lta = LTAreadEx(fname);
 
   v = MatrixAlloc(1, 9, MATRIX_REAL);
 
@@ -431,9 +435,9 @@ VECTOR *Load_xfm(char *fname) {
   and contained in probas table
   ----------------------------------------------------------------------*/
 double *LoadProbas(char *fname, int *nb_samples) {
-  FILE *fp;
-  char tag[1000], tmpstr[1000], c[1000];
-  int nth, r, len = 0;
+  FILE *  fp;
+  char    tag[1000], tmpstr[1000], c[1000];
+  int     nth, r, len = 0;
   double *p = nullptr;
 
   fp = fopen(fname, "r");
@@ -509,8 +513,8 @@ double *LoadProbas(char *fname, int *nb_samples) {
 float mvnpdf(VECTOR *t, VECTOR *v_mu, MATRIX *m_sigma) {
   VECTOR *sub, *t_sub;
   MATRIX *m_sinv, *m_tmp;
-  float num, det, den, tmp;
-  int d;
+  float   num, det, den, tmp;
+  int     d;
 
   if (!t || !v_mu || !m_sigma) {
     fprintf(stderr, "ERROR: talairach_afd::mvnpdf(): cannot compute mvnpdf\n");
@@ -519,16 +523,16 @@ float mvnpdf(VECTOR *t, VECTOR *v_mu, MATRIX *m_sigma) {
 
   d = t->cols;
 
-  sub = VectorSubtract(t, v_mu, nullptr);
+  sub    = VectorSubtract(t, v_mu, nullptr);
   m_sinv = MatrixInverse(m_sigma, nullptr);
-  t_sub = VectorTranspose(sub, nullptr);
+  t_sub  = VectorTranspose(sub, nullptr);
 
   m_tmp = MatrixMultiply(m_sinv, t_sub, NULL);
   m_tmp = MatrixMultiply(sub, m_tmp, NULL);
-  tmp = m_tmp->rptr[1][1];
-  num = exp(-(tmp / 2));
-  det = MatrixDeterminant(m_sigma);
-  den = 1 / (sqrt(det));
+  tmp   = m_tmp->rptr[1][1];
+  num   = exp(-(tmp / 2));
+  det   = MatrixDeterminant(m_sigma);
+  den   = 1 / (sqrt(det));
 
   num = 1 / sqrt(pow(2 * M_PI, d)) * num * den;
 
@@ -542,7 +546,7 @@ float mvnpdf(VECTOR *t, VECTOR *v_mu, MATRIX *m_sigma) {
   ----------------------------------------------------------------------*/
 float ComputeArea(HISTO *h, int nbin) {
   float a, s;
-  int i;
+  int   i;
 
   s = 0;
   for (i = 1; i <= nbin; i++) {

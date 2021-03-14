@@ -1,5 +1,4 @@
 /**
- * @file  mris_compute_volume_fractions.c
  * @brief Computes accurate volume fractions remaining within a surface
  *
  * This program computes an accurate estimate of the fraction of the volume
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Ender Konukoglu
- * CVS Revision Info:
- *    $Author: enderk $
- *    $Date: 2013/05/17 15:19:06 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,12 +21,12 @@
 
 #include <sys/utsname.h>
 
-#include "version.h"
 #include "cmdargs.h"
 #include "diag.h"
 #include "mris_compVolFrac.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -39,19 +34,17 @@ static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
 
-static char vcid[] = "$Id: mris_compute_volume_fractions.c,v 1.4 2013/05/17 "
-                     "15:19:06 enderk Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *VolFile = nullptr;
-char *SurfFile = nullptr;
-char *OutFile = nullptr;
+char * VolFile  = nullptr;
+char * SurfFile = nullptr;
+char * OutFile  = nullptr;
 double Accuracy = -1000.0;
-int main(int argc, char *argv[]) {
+int    main(int argc, char *argv[]) {
 
   printf("working!\n");
   int nargs;
@@ -83,9 +76,9 @@ int main(int argc, char *argv[]) {
 
   dump_options(stdout);
   volFraction v;
-  v.frac = 0.0;
-  v.err = 0.0;
-  MRI *mri = MRIread(VolFile);
+  v.frac            = 0.0;
+  v.err             = 0.0;
+  MRI *        mri  = MRIread(VolFile);
   MRI_SURFACE *mris = MRISread(SurfFile);
   printf("running the computation...\n");
   MRI *mri_fractions =
@@ -97,7 +90,7 @@ int main(int argc, char *argv[]) {
 }
 
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -129,22 +122,22 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--vol")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      VolFile = pargv[0];
+      VolFile   = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      SurfFile = pargv[0];
+      SurfFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--acc")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      Accuracy = atof(pargv[0]);
+      Accuracy  = atof(pargv[0]);
       nargsused = 1;
     } else if (!strcasecmp(option, "--out")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      OutFile = pargv[0];
+      OutFile   = pargv[0];
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
@@ -190,7 +183,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -212,10 +205,9 @@ static void print_help() {
 \fn static void print_version(void)
 \brief Prints version and exits
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for
- * Doxygen) -- */
-static void print_version() {
-  printf("%s\n", vcid);
+/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
@@ -247,7 +239,7 @@ static void check_options() {
  * Doxygen) -- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "Working Directory: %s\n", cwd);
   fprintf(fp, "cmdline: %s\n", cmdline);
   /*

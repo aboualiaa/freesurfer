@@ -1,17 +1,6 @@
-/**
- * @file  mris_segment_vals.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:34 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,27 +16,24 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_segment_vals.c,v 1.5 2011/03/02 00:04:34 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 static void print_help();
 static void print_version();
 
 const char *Progname;
 
-static int thresh = 0;
+static int thresh      = 0;
 static int area_thresh = 0;
 
 int main(int argc, char *argv[]) {
-  char **av, *in_fname, *out_fname, *surf_fname;
-  int ac, nargs, vno, nlabels, lno;
+  char **      av, *in_fname, *out_fname, *surf_fname;
+  int          ac, nargs, vno, nlabels, lno;
   MRI_SURFACE *mris;
-  VERTEX *v;
-  LABEL **label_array;
+  VERTEX *     v;
+  LABEL **     label_array;
 
   nargs = handleVersionOption(argc, argv, "mris_segment_vals");
   if (nargs && argc - nargs == 1)
@@ -70,8 +56,8 @@ int main(int argc, char *argv[]) {
     print_help();
 
   surf_fname = argv[1];
-  in_fname = argv[2];
-  out_fname = argv[3];
+  in_fname   = argv[2];
+  out_fname  = argv[3];
 
   mris = MRISread(surf_fname);
   if (!mris)
@@ -95,7 +81,7 @@ int main(int argc, char *argv[]) {
   MRISsetVals(mris, 0);
   for (lno = 0; lno < nlabels; lno++) {
     for (vno = 0; vno < label_array[lno]->n_points; vno++) {
-      v = &mris->vertices[label_array[lno]->lv[vno].vno];
+      v       = &mris->vertices[label_array[lno]->lv[vno].vno];
       v->curv = lno + 1;
     }
   }
@@ -112,7 +98,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -129,11 +115,11 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       thresh = atof(argv[2]);
-      nargs = 1;
+      nargs  = 1;
       break;
     case 'A':
       area_thresh = atof(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       break;
     default:
       fprintf(stderr, "unknown option %s\n", argv[1]);
@@ -162,7 +148,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

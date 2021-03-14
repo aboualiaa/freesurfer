@@ -1,17 +1,12 @@
 /**
- * @file  mri_create_tests.cpp
- * @brief Creates a modified image with noise or transformed
+ * @brief Creates a modified image with noise or transformed 
  *
  */
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2012/11/10 15:35:01 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,12 +25,28 @@
 // Oct. 12th ,2009
 //
 ////////////////////////////////////////////////////////////////////
+#include <cassert>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include "Quaternion.h"
+#include <cstdlib>
+#include <ctime>
+
 #include "MyMRI.h"
+#include "Quaternion.h"
 
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "matrix.h"
+#include "mri.h"
 #include "mrimorph.h"
+#include "timer.h"
 #include "version.h"
+#include <vnl/vnl_matrix.h>
 
 using namespace std;
 
@@ -47,14 +58,14 @@ struct Parameters {
   string ltain;
   string ltaout;
   string mask;
-  MRI *mri_in;
+  MRI *  mri_in;
   double noise;
-  int outlier;
-  int outlierbox;
-  bool translation;
-  bool rotation;
+  int    outlier;
+  int    outlierbox;
+  bool   translation;
+  bool   rotation;
   double iscale;
-  bool doiscale;
+  bool   doiscale;
   string iscaleout;
   string ltaouts;
   string ltaoutt;
@@ -62,28 +73,26 @@ struct Parameters {
   double maxdeg;
 };
 
-static struct Parameters P = {"",      "",  "", "", "",    "",    "",
-                              nullptr, 0.0, 0,  -1, false, false, 1.0,
-                              false,   "",  "", "", 11,    25};
+static struct Parameters P = {"",    "",  "", "", "",    "",    "",
+                              NULL,  0.0, 0,  -1, false, false, 1.0,
+                              false, "",  "", "", 11,    25};
 
-static void printUsage();
+static void printUsage(void);
 static bool parseCommandLine(int argc, char *argv[], Parameters &P);
 
-static char vcid[] =
-    "$Id: mri_create_tests.cpp,v 1.9 2012/11/10 15:35:01 mreuter Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
 std::vector<int> get_random(int lowest, int highest, int num = 3) {
 
-  unsigned int ttt = time(nullptr);
-  // cout << " seed: " << ttt << endl;
+  unsigned int ttt = time(0);
+  //cout << " seed: " << ttt << endl;
   srand(ttt);
   vector<int> ret(num);
-  // int lowest=1, highest=10;
+  //int lowest=1, highest=10;
   int range = (highest - lowest) + 1;
   for (int index = 0; index < num; index++) {
     int r = rand();
-    // cout << " rand: " << r/(RAND_MAX + 1.0) << endl;
+    //cout << " rand: " << r/(RAND_MAX + 1.0) << endl;
     ret[index] = lowest + int(range * (r / (RAND_MAX + 1.0)));
   }
   return ret;
@@ -92,7 +101,7 @@ std::vector<int> get_random(int lowest, int highest, int num = 3) {
 void testmalloc() {
 
   double *a = (double *)malloc(sizeof(double) * 200 * 111322800);
-  if (a == nullptr)
+  if (a == NULL)
     cout << " not enough mem" << endl;
   else
     cout << "OK" << endl;
@@ -105,7 +114,7 @@ void testmalloc() {
 void testvnl() {
 
   vnl_matrix<double> A;
-  bool OK = A.set_size(111322800, 7);
+  bool               OK = A.set_size(111322800, 7);
   if (OK)
     cout << " OK" << endl;
   else
@@ -141,7 +150,7 @@ int main(int argc, char *argv[]) {
   // testvnl();
 
   { // for valgrind, so that everything is freed
-    cout << vcid << endl;
+    cout << getVersion() << endl;
 
     // Default initialization
     int nargs = handleVersionOption(argc, argv, "mri_create_tests");
@@ -163,13 +172,13 @@ int main(int argc, char *argv[]) {
 
     // read input
     MRI *mriS = MRIread(P.in.c_str());
-    assert(mriS != nullptr);
-    MRI *mriT = nullptr;
+    assert(mriS != NULL);
+    MRI *mriT = NULL;
     if (P.in_t == "")
-      mriT = MRIcopy(mriS, nullptr);
+      mriT = MRIcopy(mriS, NULL);
     else
       mriT = MRIread(P.in_t.c_str());
-    assert(mriT != nullptr);
+    assert(mriT != NULL);
 
     // mask target
     if (P.mask != "") {
@@ -188,11 +197,11 @@ int main(int argc, char *argv[]) {
       cerr << " Cannot specify lta-in AND (translation OR rotation)" << endl;
       exit(1);
     }
-    LTA *lta = nullptr;
+    LTA *lta = NULL;
     if (P.ltain != "") {
       // try to read other transform
       TRANSFORM *trans = TransformRead(P.ltain.c_str());
-      lta = (LTA *)trans->xform;
+      lta              = (LTA *)trans->xform;
       if (!lta)
         ErrorExit(ERROR_BADFILE, "%s: could not read transform file %s",
                   Progname, P.ltain.c_str());
@@ -201,21 +210,19 @@ int main(int argc, char *argv[]) {
         ErrorExit(ERROR_BADFILE, "%s: must be LINEAR_VOX_TO_VOX (=0), but %d",
                   Progname, P.ltain.c_str(), lta->type);
       }
-      // R.setMinit(lta->xforms[0].m_L);
+      //R.setMinit(lta->xforms[0].m_L);
       cout << " Read " << P.ltain << " transform." << endl;
     } else {
-      lta = LTAalloc(1, mriS);
+      lta       = LTAalloc(1, mriS);
       lta->type = LINEAR_VOX_TO_VOX;
-      // MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); cout << endl
-      // <<endl;
+      //MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); cout << endl <<endl;
     }
 
     if (P.translation) {
       vector<int> t = get_random(-100, 100, 3);
       //    vector < int > t(3,4);
-      // cout << " T: " << t[0] << " " << t[1] << " " << t[2] << endl;
-      // cout << " length: " << sqrt(t[0]*t[0] + t[1] * t[1] + t[2] * t[2]) <<
-      // endl;
+      //cout << " T: " << t[0] << " " << t[1] << " " << t[2] << endl;
+      //cout << " length: " << sqrt(t[0]*t[0] + t[1] * t[1] + t[2] * t[2]) << endl;
 
       assert(t.size() == 3);
       ///    double transdist = 100 ; // large 100mm=10 cm
@@ -224,12 +231,11 @@ int main(int argc, char *argv[]) {
       //      double transdist = 0.05;
       double ff =
           0.5 * P.transdist / sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]);
-      // cout << " ff: " << ff << endl;
+      //cout << " ff: " << ff << endl;
       float t0 = (float)(ff * t[0]);
       float t1 = (float)(ff * t[1]);
       float t2 = (float)(ff * t[2]);
-      // cout << " New length: " << sqrt(t[0]*t[0] + t[1] * t[1] + t[2] * t[2])
-      // << endl;
+      //cout << " New length: " << sqrt(t[0]*t[0] + t[1] * t[1] + t[2] * t[2]) << endl;
       cout << " Random Translation: ( " << 2 * t[0] << " , " << 2 * t[1]
            << " , " << 2 * t[2] << " )  length: "
            << 2 * sqrt(t[0] * t[0] + t[1] * t[1] + t[2] * t[2]) << endl;
@@ -247,30 +253,29 @@ int main(int argc, char *argv[]) {
 
     if (P.rotation) // create half the rotation
     {
-      vector<int> t = get_random(-100, 100, 4);
-      double length = sqrt(t[1] * t[1] + t[2] * t[2] + t[3] * t[3]);
-      Quaternion Q;
-      // double maxdeg = 40.0; // large 40 degree
-      // double maxdeg = 25.0;
+      vector<int> t      = get_random(-100, 100, 4);
+      double      length = sqrt(t[1] * t[1] + t[2] * t[2] + t[3] * t[3]);
+      Quaternion  Q;
+      //double maxdeg = 40.0; // large 40 degree
+      //double maxdeg = 25.0;
       double maxrad = 2.0 * M_PI * P.maxdeg / 360;
-      // double rot    = 0.5 * maxrad * t[0]/100.0;
+      //double rot    = 0.5 * maxrad * t[0]/100.0;
       double rot = 0.5 * maxrad;
       Q.importRotVec(rot, t[1] / length, t[2] / length, t[3] / length);
       vector<double> R = Q.getRotMatrix3d();
       cout << " Random Rotation: " << endl;
       for (int r = 0; r < 3; r++) {
         for (int c = 0; c < 3; c++) {
-          // cout << R[r*3+c] << " " << flush;
+          //cout << R[r*3+c] << " " << flush;
           *MATRIX_RELT(lta->xforms[0].m_L, r + 1, c + 1) = R[r * 3 + c];
         }
-        // cout << endl;
+        //cout << endl;
       }
-      // MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); cout << endl
-      // <<endl;
+      //MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); cout << endl <<endl;
 
       // should be around center of the image:
-      MATRIX *T1 = MatrixIdentity(4, nullptr);
-      MATRIX *T2 = MatrixIdentity(4, nullptr);
+      MATRIX *T1             = MatrixIdentity(4, NULL);
+      MATRIX *T2             = MatrixIdentity(4, NULL);
       *MATRIX_RELT(T1, 1, 4) = -mriS->width / 2;
       *MATRIX_RELT(T2, 1, 4) = mriS->width / 2;
       *MATRIX_RELT(T1, 2, 4) = -mriS->height / 2;
@@ -281,17 +286,16 @@ int main(int argc, char *argv[]) {
           MatrixMultiply(lta->xforms[0].m_L, T1, lta->xforms[0].m_L);
       lta->xforms[0].m_L =
           MatrixMultiply(T2, lta->xforms[0].m_L, lta->xforms[0].m_L);
-      // MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); cout << endl
-      // <<endl;
+      //MatrixPrintFmt(stdout,"% 2.8f",lta->xforms[0].m_L); cout << endl <<endl;
 
       MatrixFree(&T1);
       MatrixFree(&T2);
     }
-    assert(lta != nullptr);
+    assert(lta != NULL);
 
     // apply lta to image:  // symmetric
-    MATRIX *a = MatrixCopy(lta->xforms[0].m_L, nullptr);
-    MATRIX *ai = MatrixInverse(lta->xforms[0].m_L, nullptr);
+    MATRIX *a          = MatrixCopy(lta->xforms[0].m_L, NULL);
+    MATRIX *ai         = MatrixInverse(lta->xforms[0].m_L, NULL);
     lta->xforms[0].m_L = MatrixMultiply(a, a, lta->xforms[0].m_L);
 
     cout << " Final Transform Matrix: " << endl;
@@ -299,14 +303,14 @@ int main(int argc, char *argv[]) {
     cout << " Determinant: " << MatrixDeterminant(lta->xforms[0].m_L) << endl
          << endl;
 
-    mriS = MRIlinearTransformInterp(mriS, nullptr, ai, SAMPLE_TRILINEAR);
-    mriT = MRIlinearTransformInterp(mriT, nullptr, a, SAMPLE_TRILINEAR);
+    mriS = MRIlinearTransformInterp(mriS, NULL, ai, SAMPLE_TRILINEAR);
+    mriT = MRIlinearTransformInterp(mriT, NULL, a, SAMPLE_TRILINEAR);
 
     // iscale random
     double iscale = P.iscale;
     if (P.doiscale) {
       vector<int> s = get_random(95, 105, 1);
-      iscale = s[0] / 100.0;
+      iscale        = s[0] / 100.0;
     }
 
     if (iscale != 1.0) // symmetric
@@ -319,8 +323,8 @@ int main(int argc, char *argv[]) {
     // noise
     if (P.noise > 0.0) {
       cout << " Applying noise to image: " << P.noise << endl;
-      MRI *mri_noise = MRIrandn(mriT->width, mriT->height, mriT->depth, 1, 0,
-                                P.noise, nullptr);
+      MRI *mri_noise =
+          MRIrandn(mriT->width, mriT->height, mriT->depth, 1, 0, P.noise, NULL);
       MRImaskZero(mri_noise, mriT, mri_noise);
       MRIadd(mriT, mri_noise, mriT);
       MRIfree(&mri_noise);
@@ -328,30 +332,29 @@ int main(int argc, char *argv[]) {
 
     // outlier
     if (P.outlier > 0) {
-      //     cout << " Setting " << P.outlier << " random voxels to [200...255]"
-      //     << endl; vector <int> p = get_random(0,255,P.outlier*3); vector
-      //     <int> t = get_random(0,255,P.outlier); for (int i =
-      //     0;i<P.outlier;i++)
+      //     cout << " Setting " << P.outlier << " random voxels to [200...255]" << endl;
+      //     vector <int> p = get_random(0,255,P.outlier*3);
+      //     vector <int> t = get_random(0,255,P.outlier);
+      //     for (int i = 0;i<P.outlier;i++)
       //        MRIvox(mriT,p[i*3],p[i*3+1],p[i*3+2]) = t[i];
-      //     cout << " Setting " << P.outlier << " random voxel boxes 20^3" <<
-      //     endl;
-      int bsize = 30; // should be even number
+      //     cout << " Setting " << P.outlier << " random voxel boxes 20^3" << endl;
+      int bsize  = 30; // should be even number
       int bsizeh = bsize / 2;
       cout << " Creating " << P.outlier << " outlier boxes " << bsize
            << "^3 (image copies)" << endl;
-      vector<int> p = get_random(bsizeh + 1, 254 - bsizeh, P.outlier * 3);
+      vector<int> p  = get_random(bsizeh + 1, 254 - bsizeh, P.outlier * 3);
       vector<int> ps = get_random(bsizeh + 50, 200 - bsizeh, P.outlier * 3);
-      // vector <int> t = get_random(0,255,P.outlier);
+      //vector <int> t = get_random(0,255,P.outlier);
       for (int i = 0; i < P.outlier; i++)
         for (int x = 0; x < bsize; x++)
           for (int y = 0; y < bsize; y++)
             for (int z = 0; z < bsize; z++) {
-              int xxs = ps[i * 3] + x - (bsizeh);
-              int yys = ps[i * 3 + 1] + y - (bsizeh);
-              int zzs = ps[i * 3 + 2] + z - (bsizeh);
-              int xx = p[i * 3] + x - (bsizeh);
-              int yy = p[i * 3 + 1] + y - (bsizeh);
-              int zz = p[i * 3 + 2] + z - (bsizeh);
+              int   xxs = ps[i * 3] + x - (bsizeh);
+              int   yys = ps[i * 3 + 1] + y - (bsizeh);
+              int   zzs = ps[i * 3 + 2] + z - (bsizeh);
+              int   xx  = p[i * 3] + x - (bsizeh);
+              int   yy  = p[i * 3 + 1] + y - (bsizeh);
+              int   zz  = p[i * 3 + 2] + z - (bsizeh);
               float val;
 
               if (i < P.outlier / 2) {
@@ -365,7 +368,7 @@ int main(int argc, char *argv[]) {
                   val = MRIgetVoxVal(mriT, xxs, yys, zzs, 0);
 
                 MRIsetVoxVal(mriT, xx, yy, zz, 0, val);
-                // MRIvox(mriT,xx,yy,zz) = val;
+                //MRIvox(mriT,xx,yy,zz) = val;
               } else {
                 if (xx < 0 || yy < 0 || zz < 0 || xx >= mriS->width ||
                     yy >= mriS->height || yy >= mriS->depth)
@@ -399,7 +402,7 @@ int main(int argc, char *argv[]) {
 
     //====================== OUTPUT ==========================================
 
-    // cout << " OUTPUT results ... " << endl;
+    //cout << " OUTPUT results ... " << endl;
 
     // output source and target
     cout << " OUTPUT source MRI : " << P.outs << endl;
@@ -454,7 +457,7 @@ int main(int argc, char *argv[]) {
 
 /*----------------------------------------------------------------------
  ----------------------------------------------------------------------*/
-static void printUsage() {
+static void printUsage(void) {
   cout << endl << endl;
   cout << "Usage: mri_create_tests <required arguments>" << endl << endl;
 
@@ -538,7 +541,7 @@ static void printUsage() {
  \returns       number of used arguments for this command
  */
 static int parseNextCommand(int argc, char *argv[], Parameters &P) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[0] + 1; // remove '-'
@@ -546,85 +549,85 @@ static int parseNextCommand(int argc, char *argv[], Parameters &P) {
     option = option + 1; // remove second '-'
   StrUpper(option);
 
-  // cout << " option: " << option << endl;
+  //cout << " option: " << option << endl;
 
   if (!strcmp(option, "IN")) {
-    P.in = string(argv[1]);
+    P.in  = string(argv[1]);
     nargs = 1;
     cout << "Using " << P.in << " as input volume." << endl;
   } else if (!strcmp(option, "INT")) {
     P.in_t = string(argv[1]);
-    nargs = 1;
+    nargs  = 1;
     cout << "Using " << P.in_t << " as input target volume." << endl;
   } else if (!strcmp(option, "OUTS")) {
     P.outs = string(argv[1]);
-    nargs = 1;
+    nargs  = 1;
     cout << "Using " << P.outs << " as output source volume." << endl;
   } else if (!strcmp(option, "OUTT")) {
     P.outt = string(argv[1]);
-    nargs = 1;
+    nargs  = 1;
     cout << "Using " << P.outt << " as output target volume." << endl;
   } else if (!strcmp(option, "LTA-IN")) {
     P.ltain = string(argv[1]);
-    nargs = 1;
+    nargs   = 1;
     cout << "Input transform as " << P.ltain << " . " << endl;
   } else if (!strcmp(option, "LTA-OUT")) {
     P.ltaout = string(argv[1]);
-    nargs = 1;
+    nargs    = 1;
     cout << "Storing transform as " << P.ltaout << " . " << endl;
   } else if (!strcmp(option, "LTA-OUTS")) {
     P.ltaouts = string(argv[1]);
-    nargs = 1;
+    nargs     = 1;
     cout << "Storing half way source lta (input -> out-source) " << P.ltaouts
          << " . " << endl;
   } else if (!strcmp(option, "LTA-OUTT")) {
     P.ltaoutt = string(argv[1]);
-    nargs = 1;
+    nargs     = 1;
     cout << "Storing half way target lta (input -> out-target) " << P.ltaoutt
          << " . " << endl;
   } else if (!strcmp(option, "MASK")) {
     P.mask = string(argv[1]);
-    nargs = 1;
+    nargs  = 1;
     cout << "Using mask " << P.mask << " . " << endl;
   } else if (!strcmp(option, "NOISE")) {
     P.noise = atof(argv[1]);
-    nargs = 1;
+    nargs   = 1;
     cout << "Using global Gaussian noise " << P.noise << " ." << endl;
   } else if (!strcmp(option, "OUTLIER")) {
     P.outlier = atoi(argv[1]);
-    nargs = 1;
+    nargs     = 1;
     cout << "Randomly inserting " << P.outlier << " outlier voxel." << endl;
   } else if (!strcmp(option, "OUTLIER-BOX")) {
     P.outlierbox = atoi(argv[1]);
-    nargs = 1;
+    nargs        = 1;
     cout << "Inserting outlier box at 128 .. " << P.outlierbox << " ." << endl;
   } else if (!strcmp(option, "TRANSLATION")) {
     P.translation = true;
-    nargs = 0;
+    nargs         = 0;
     cout << "Creating random translation." << endl;
   } else if (!strcmp(option, "TRANSDIST")) {
     P.transdist = atof(argv[1]);
-    nargs = 1;
+    nargs       = 1;
     cout << "Translation distance" << P.transdist << " ." << endl;
   } else if (!strcmp(option, "ROTATION")) {
     P.rotation = true;
-    nargs = 0;
+    nargs      = 0;
     cout << "Creating random rotation." << endl;
   } else if (!strcmp(option, "MAXDEG")) {
     P.maxdeg = atof(argv[1]);
-    nargs = 1;
+    nargs    = 1;
     cout << "Max rotation degree" << P.maxdeg << " ." << endl;
   } else if (!strcmp(option, "INTENSITY")) {
     P.doiscale = true;
-    nargs = 0;
+    nargs      = 0;
     cout << "Applying random intensity scaling." << endl;
   } else if (!strcmp(option, "ISCALE")) {
     P.iscale = atof(argv[1]);
-    nargs = 1;
+    nargs    = 1;
     cout << "Using intensity scale " << P.iscale << " . " << endl;
   } else if (!strcmp(option, "ISCALE-OUT")) {
     P.iscaleout = string(argv[1]);
-    nargs = 1;
+    nargs       = 1;
     cout << "Writing intensity scale as " << P.iscaleout << " . " << endl;
   } else {
     cerr << "Option: " << argv[0] << " unknown !! " << endl;

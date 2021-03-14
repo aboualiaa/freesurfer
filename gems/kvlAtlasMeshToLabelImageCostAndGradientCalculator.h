@@ -6,17 +6,14 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshToLabelImageCostAndGradientCalculator
     : public AtlasMeshPositionCostAndGradientCalculator {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshToLabelImageCostAndGradientCalculator;
-  using Superclass = AtlasMeshPositionCostAndGradientCalculator;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshToLabelImageCostAndGradientCalculator Self;
+  typedef AtlasMeshPositionCostAndGradientCalculator     Superclass;
+  typedef itk::SmartPointer<Self>                        Pointer;
+  typedef itk::SmartPointer<const Self>                  ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -26,10 +23,10 @@ public:
                AtlasMeshPositionCostAndGradientCalculator);
 
   // Some typedefs
-  using LabelImageType = CompressionLookupTable::ImageType;
+  typedef CompressionLookupTable::ImageType LabelImageType;
 
   // Set label image
-  void SetLabelImage(const LabelImageType *labelImage,
+  void SetLabelImage(const LabelImageType *        labelImage,
                      const CompressionLookupTable *lookupTable);
 
 protected:
@@ -39,22 +36,23 @@ protected:
   void AddDataContributionOfTetrahedron(
       const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
       const AtlasMesh::PointType &p2, const AtlasMesh::PointType &p3,
-      const AtlasAlphasType &alphasInVertex0,
-      const AtlasAlphasType &alphasInVertex1,
-      const AtlasAlphasType &alphasInVertex2,
-      const AtlasAlphasType &alphasInVertex3, double &priorPlusDataCost,
-      AtlasPositionGradientType &gradientInVertex0,
-      AtlasPositionGradientType &gradientInVertex1,
-      AtlasPositionGradientType &gradientInVertex2,
-      AtlasPositionGradientType &gradientInVertex3);
+      const AtlasAlphasType &               alphasInVertex0,
+      const AtlasAlphasType &               alphasInVertex1,
+      const AtlasAlphasType &               alphasInVertex2,
+      const AtlasAlphasType &               alphasInVertex3,
+      ThreadAccumDataType &                 priorPlusDataCost,
+      AtlasPositionGradientThreadAccumType &gradientInVertex0,
+      AtlasPositionGradientThreadAccumType &gradientInVertex1,
+      AtlasPositionGradientThreadAccumType &gradientInVertex2,
+      AtlasPositionGradientThreadAccumType &gradientInVertex3);
 
 private:
   AtlasMeshToLabelImageCostAndGradientCalculator(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
-  LabelImageType::ConstPointer m_LabelImage;
+  LabelImageType::ConstPointer         m_LabelImage;
   CompressionLookupTable::ConstPointer m_CompressionLookupTable;
 };
 

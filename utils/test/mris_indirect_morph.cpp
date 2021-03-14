@@ -1,6 +1,5 @@
 /**
- * @file  mris_indirect_morph.cpp
- * @brief register surface2 to surface1
+ * @brief register surface2 to surface1 
  *
  * This function will register surface2 to surface1 using ICP or input linear
  * transform (can be obtained through volume registration). It then maps
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: X. Han
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,33 +20,30 @@
  *
  */
 
-#include <iostream>
+#include "ANN/ANN.h"
 #include <fstream>
-#include "ANN.h"
+#include <iostream>
 
-extern "C" {
+#include "diag.h"
+#include "error.h"
+#include "fmarching3dnband.h"
+#include "icosahedron.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_identify.h"
+#include "mrishash.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "timer.h"
+#include "version.h"
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include "timer.h"
-#include "macros.h"
-#include "error.h"
-#include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
-#include "mrishash.h"
-#include "mri_identify.h"
-#include "icosahedron.h"
-#include "version.h"
-#include "fmarching3dnband.h"
-}
 
 #define MAX_DATA_NUMBERS 200
-#define DEBUG 0
+#define DEBUG            0
 
 typedef struct _double_3d {
   double x;
@@ -60,8 +52,8 @@ typedef struct _double_3d {
 } double3d;
 
 #define ROTATE(a, i, j, k, l)                                                  \
-  g = a[i][j];                                                                 \
-  h = a[k][l];                                                                 \
+  g       = a[i][j];                                                           \
+  h       = a[k][l];                                                           \
   a[i][j] = g - s * (h + g * tau);                                             \
   a[k][l] = h + s * (g - h * tau);
 #define TINY 1.0e-20;
@@ -73,14 +65,11 @@ void lubksb(double **a, int n, int *indx, double *b);
 void MRISsampleTemplateMappingToSource(MRI_SURFACE *mris,
                                        MRI_SURFACE *mris_template);
 
-static char vcid[] =
-    "$Id: mris_indirect_morph.cpp,v 1.7 2011/03/02 00:04:55 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
 int framesave = 0;
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -89,8 +78,8 @@ static void print_version(void);
 char *out_name = NULL;
 
 int debugflag = 0;
-int debugvtx = 0;
-int pathflag = 0;
+int debugvtx  = 0;
+int pathflag  = 0;
 
 int normflag = 0;
 
@@ -100,36 +89,34 @@ const char *Progname;
 
 double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
                   double shift[3]);
-void FindClosest(MRI_SURFACE *TrueMesh, ANNkd_tree *annkdTree,
-                 MRI_SURFACE *EstMesh, double3d *closest);
+void   FindClosest(MRI_SURFACE *TrueMesh, ANNkd_tree *annkdTree,
+                   MRI_SURFACE *EstMesh, double3d *closest);
 double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
                        int debug, double *sopt, double *topt);
-void register2to1(MRI_SURFACE *Surf1, MRI_SURFACE *Surf2);
-static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno);
+void   register2to1(MRI_SURFACE *Surf1, MRI_SURFACE *Surf2);
+//static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno);
 
 /* the following two are used when applying a lta transform to the surface */
-MRI *mri = 0;
+MRI *mri     = 0;
 MRI *mri_dst = 0;
 
-static int invert = 0;
+static int   invert      = 0;
 static char *xform_fname = NULL;
 
-static char *template_fname = NULL;
+static char *template_fname    = NULL;
 static char *template_map_name = "sphere.reg"; // Default
-
-using namespace std;
 
 int main(int argc, char *argv[]) {
   char **av, *in_surf_fname, *out_fname;
-  int fno, vno0, vno1, vno2;
-  int nargs, ac, msec;
-  Timer then;
+  int    fno, vno0, vno1, vno2;
+  int    nargs, ac, msec;
+  Timer  then;
 
   MRI_SURFACE *mris, *mris_template, *mris_template_map;
-  FACE *face;
+  FACE *       face;
 
   LTA *lta = 0;
-  int transform_type;
+  int  transform_type;
 
   nargs = handleVersionOption(argc, argv, "mris_indirect_morph");
   if (nargs && argc - nargs == 1)
@@ -161,7 +148,7 @@ int main(int argc, char *argv[]) {
   }
 
   in_surf_fname = argv[1];
-  out_fname = argv[2];
+  out_fname     = argv[2];
 
   printf("Reading input surface file\n");
   mris = MRISread(in_surf_fname);
@@ -288,8 +275,8 @@ int main(int argc, char *argv[]) {
 
     if (invert) {
       VOL_GEOM vgtmp;
-      LT *lt;
-      MATRIX *m_tmp = lta->xforms[0].m_L;
+      LT *     lt;
+      MATRIX * m_tmp     = lta->xforms[0].m_L;
       lta->xforms[0].m_L = MatrixInverse(lta->xforms[0].m_L, NULL);
       MatrixFree(&m_tmp);
       lt = &lta->xforms[0];
@@ -306,7 +293,8 @@ int main(int argc, char *argv[]) {
       copyVolGeom(&vgtmp, &lt->src);
     }
 
-    MRIStransform(mris, mri, lta, mri_dst);
+    // TODO: uncomment
+    //    MRIStransform(mris, mri, lta, mri_dst);
 
     if (mri)
       MRIfree(&mri);
@@ -361,7 +349,7 @@ static void print_usage(void) {
   fprintf(stdout, "   -src %%s  source volume for -xform \n");
   fprintf(stdout, "   -dst %%s  target volume for -xform \n");
   fprintf(stdout, "\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 
@@ -413,7 +401,7 @@ static void print_help(void) {
 
 /* --------------------------------------------- */
 static void print_version(void) {
-  fprintf(stdout, "%s\n", vcid);
+  fprintf(stdout, "%s\n", getVersion().c_str());
   exit(1);
 }
 
@@ -423,7 +411,7 @@ static void print_version(void) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -433,11 +421,11 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "template")) {
     template_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "template surface file is %s\n", template_fname);
   } else if (!stricmp(option, "template_map")) {
     template_map_name = argv[2];
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "template map name is %s\n", template_map_name);
   } else if (!stricmp(option, "register")) {
     register_flag = 1;
@@ -445,14 +433,14 @@ static int get_option(int argc, char *argv[]) {
            "template\n");
   } else if (!stricmp(option, "debug")) {
     debugflag = 1;
-    debugvtx = atoi(argv[2]);
-    nargs = 1;
+    debugvtx  = atoi(argv[2]);
+    nargs     = 1;
   } else if (!stricmp(option, "norm")) {
     normflag = 1;
     printf("Normalize the sampled mapping to same length\n");
   } else if (!stricmp(option, "xform")) {
     xform_fname = argv[2];
-    nargs = 1;
+    nargs       = 1;
     fprintf(stderr, "transform file name is %s\n", xform_fname);
   } else if (!stricmp(option, "invert")) {
     invert = 1;
@@ -490,17 +478,17 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   /* Compute the distance from point P0 to a face of the surface mesh */
   /* (sopt, topt) determines the closest point inside the triangle from P0 */
 
-  double a, b, c, d, e, f, det, s, t, invDet;
-  double numer, denom, tmp0, tmp1;
+  double  a, b, c, d, e, f, det, s, t, invDet;
+  double  numer, denom, tmp0, tmp1;
   VERTEX *V1, *V2, *V3;
-  FACE *face;
+  FACE *  face;
 
   VERTEX E0, E1, D;
 
   face = &mri_surf->faces[face_number];
-  V1 = &mri_surf->vertices[face->v[0]];
-  V2 = &mri_surf->vertices[face->v[1]];
-  V3 = &mri_surf->vertices[face->v[2]];
+  V1   = &mri_surf->vertices[face->v[0]];
+  V2   = &mri_surf->vertices[face->v[1]];
+  V3   = &mri_surf->vertices[face->v[2]];
 
   E0.x = V2->x - V1->x;
   E0.y = V2->y - V1->y;
@@ -508,9 +496,9 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   E1.x = V3->x - V1->x;
   E1.y = V3->y - V1->y;
   E1.z = V3->z - V1->z;
-  D.x = V1->x - P0->x;
-  D.y = V1->y - P0->y;
-  D.z = V1->z - P0->z;
+  D.x  = V1->x - P0->x;
+  D.y  = V1->y - P0->y;
+  D.z  = V1->z - P0->z;
 
   a = E0.x * E0.x + E0.y * E0.y + E0.z * E0.z;
   b = E0.x * E1.x + E0.y * E1.y + E0.z * E1.z;
@@ -520,8 +508,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
   f = D.x * D.x + D.y * D.y + D.z * D.z;
 
   det = a * c - b * b;
-  s = b * e - c * d;
-  t = b * d - a * e;
+  s   = b * e - c * d;
+  t   = b * d - a * e;
 
   if (debug)
     printf("det = %g\n", det);
@@ -571,8 +559,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
       if (tmp1 > tmp0) {
         numer = tmp1 - tmp0;
         denom = a - b - b + c;
-        s = (numer >= denom ? 1 : numer / denom);
-        t = 1 - s;
+        s     = (numer >= denom ? 1 : numer / denom);
+        t     = 1 - s;
 
       } else {
         s = 0;
@@ -588,8 +576,8 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
       if (tmp1 > tmp0) {     /* Minimum at line s + t = 1 */
         numer = tmp1 - tmp0; /* Positive */
         denom = a + c - b - b;
-        t = (numer >= denom ? 1 : (numer / denom));
-        s = 1 - t;
+        t     = (numer >= denom ? 1 : (numer / denom));
+        s     = 1 - t;
       } else { /* Minimum at line t = 0 */
         s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
         t = 0;
@@ -603,7 +591,7 @@ double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number,
         s = 0;
       } else {
         denom = a + c - b - b; /* denom is positive */
-        s = (numer >= denom ? 1 : (numer / denom));
+        s     = (numer >= denom ? 1 : (numer / denom));
       }
       t = 1 - s;
       if (debug)
@@ -627,13 +615,13 @@ void MRISsampleTemplateMappingToSource(MRI_SURFACE *mris,
   /* this function assumes the mapping function is stored as the "INFLATED
    * vertex" of mris_template */
 
-  int index, k, facenumber, closestface;
-  double sopt, topt, tmps, tmpt; /* triangle parametrization parameters */
-  double value, distance;
-  double Radius, length, scale;
-  double sumx, sumy, sumz, sumweight, weight;
+  int     index, k, facenumber, closestface;
+  double  sopt, topt, tmps, tmpt; /* triangle parametrization parameters */
+  double  value, distance;
+  double  Radius, length, scale;
+  double  sumx, sumy, sumz, sumweight, weight;
   VERTEX *vertex, *V1, *V2, *V3;
-  FACE *face;
+  FACE *  face;
   ANNpointArray QueryPt;
 
   ANNpointArray pa = annAllocPts(mris_template->nvertices, 3);
@@ -645,9 +633,9 @@ void MRISsampleTemplateMappingToSource(MRI_SURFACE *mris,
   }
 
   // construct and initialize the tree
-  ANNkd_tree *annkdTree = new ANNkd_tree(pa, mris_template->nvertices, 3);
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNkd_tree * annkdTree = new ANNkd_tree(pa, mris_template->nvertices, 3);
+  ANNidxArray  annIndex  = new ANNidx[1];
+  ANNdistArray annDist   = new ANNdist[1];
 
   QueryPt = annAllocPts(1, 3);
 
@@ -661,7 +649,7 @@ void MRISsampleTemplateMappingToSource(MRI_SURFACE *mris,
   }
 
   for (index = 0; index < mris->nvertices; index++) {
-    vertex = &mris->vertices[index];
+    vertex        = &mris->vertices[index];
     QueryPt[0][0] = vertex->x;
     QueryPt[0][1] = vertex->y;
     QueryPt[0][2] = vertex->z;
@@ -678,9 +666,9 @@ void MRISsampleTemplateMappingToSource(MRI_SURFACE *mris,
     /* Now need to find the closest face in order to perform linear
      * interpolation */
     distance = 1000.0;
-    for (k = 0; k < mris_template->vertices[annIndex[0]].num; k++) {
+    for (k = 0; k < mris_template->vertices_topology[annIndex[0]].num; k++) {
 
-      facenumber = mris_template->vertices[annIndex[0]]
+      facenumber = mris_template->vertices_topology[annIndex[0]]
                        .f[k]; /* index of the k-th face */
       if (facenumber < 0 || facenumber >= mris_template->nfaces)
         continue;
@@ -688,10 +676,10 @@ void MRISsampleTemplateMappingToSource(MRI_SURFACE *mris,
           v_to_f_distance(vertex, mris_template, facenumber, 0, &tmps, &tmpt);
 
       if (distance > value) {
-        distance = value;
+        distance    = value;
         closestface = facenumber;
-        sopt = tmps;
-        topt = tmpt;
+        sopt        = tmps;
+        topt        = tmpt;
       }
     }
 
@@ -702,15 +690,15 @@ void MRISsampleTemplateMappingToSource(MRI_SURFACE *mris,
        v_to_f_distance() to see how V1, V2, V3 is defined
      */
     /* Use the orig_vertex to store the interpolated cooridnate function */
-    face = &mris_template->faces[closestface];
-    V1 = &mris_template->vertices[face->v[0]];
-    V2 = &mris_template->vertices[face->v[1]];
-    V3 = &mris_template->vertices[face->v[2]];
-    sumx = 0.0;
-    sumy = 0.0;
-    sumz = 0.0;
+    face      = &mris_template->faces[closestface];
+    V1        = &mris_template->vertices[face->v[0]];
+    V2        = &mris_template->vertices[face->v[1]];
+    V3        = &mris_template->vertices[face->v[2]];
+    sumx      = 0.0;
+    sumy      = 0.0;
+    sumz      = 0.0;
     sumweight = 0.0;
-    weight = 1.0 / (1e-20 + (V1->x - vertex->x) * (V1->x - vertex->x) +
+    weight    = 1.0 / (1e-20 + (V1->x - vertex->x) * (V1->x - vertex->x) +
                     (V1->y - vertex->y) * (V1->y - vertex->y) +
                     (V1->z - vertex->z) * (V1->z - vertex->z));
     sumx += weight * V1->origx;
@@ -767,12 +755,12 @@ void MRISsampleTemplateMappingToSource(MRI_SURFACE *mris,
 
 void register2to1(MRI_SURFACE *Surf1, MRI_SURFACE *Surf2) {
 
-  double error_old, error_new;
-  int iter = 0;
-  double TR[3][3];
-  double shift[3];
+  double    error_old, error_new;
+  int       iter = 0;
+  double    TR[3][3];
+  double    shift[3];
   double3d *mesh2avtx, *closevtx2a;
-  int index, k;
+  int       index, k;
 
   /* Build the ANN tree repeatedly is time consuming, so
    *  move it outside of the function
@@ -795,7 +783,7 @@ void register2to1(MRI_SURFACE *Surf1, MRI_SURFACE *Surf2) {
   shift[1] = 0;
   shift[2] = 0;
 
-  mesh2avtx = (double3d *)malloc(Surf2->nvertices * sizeof(double3d));
+  mesh2avtx  = (double3d *)malloc(Surf2->nvertices * sizeof(double3d));
   closevtx2a = (double3d *)malloc(Surf2->nvertices * sizeof(double3d));
 
   /* Initialize */
@@ -843,8 +831,8 @@ void FindClosest(MRI_SURFACE *TrueMesh, ANNkd_tree *annkdTree,
                  MRI_SURFACE *EstMesh, double3d *closest) {
   int index;
 
-  ANNidxArray annIndex = new ANNidx[1];
-  ANNdistArray annDist = new ANNdist[1];
+  ANNidxArray  annIndex = new ANNidx[1];
+  ANNdistArray annDist  = new ANNdist[1];
 
   ANNpoint Qpt;
 
@@ -883,13 +871,13 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
 // V1 is equavilent to left frame in Horn paper
 {
   double3d centroid1a, centroid2a;
-  double Sxx, Sxy, Sxz, Syx, Syy, Syz, Szx, Szy, Szz;
-  float **M, **v, *d;
-  float *n;
-  double R[3][3], x, y, z;
-  double scale1, scale2;
-  float dummy;
-  double error = 0;
+  double   Sxx, Sxy, Sxz, Syx, Syy, Syz, Szx, Szy, Szz;
+  float ** M, **v, *d;
+  float *  n;
+  double   R[3][3], x, y, z;
+  double   scale1, scale2;
+  float    dummy;
+  double   error = 0;
 
   int k, l, nrot;
   int count;
@@ -963,14 +951,14 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
   M = (float **)malloc(4 * sizeof(float *));
   M--;
   for (k = 1; k <= 4; k++) {
-    n = (float *)malloc(4 * sizeof(float));
+    n    = (float *)malloc(4 * sizeof(float));
     M[k] = n - 1;
   }
 
   v = (float **)malloc(4 * sizeof(float *));
   v--;
   for (k = 1; k <= 4; k++) {
-    n = (float *)malloc(4 * sizeof(float));
+    n    = (float *)malloc(4 * sizeof(float));
     v[k] = n - 1;
   }
 
@@ -1007,11 +995,11 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
 
   jacobi(M, 4, d, v, &nrot);
   dummy = d[1];
-  l = 1;
+  l     = 1;
   for (k = 2; k <= 4; k++) {
     if (dummy < d[k]) {
       dummy = d[k];
-      l = k;
+      l     = k;
     }
   }
   for (k = 1; k <= 4; k++)
@@ -1114,7 +1102,7 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
   temp[0][0] = shift[0];
   temp[0][1] = shift[1];
   temp[0][2] = shift[2];
-  shift[0] = scale1 * (R[0][0] * (temp[0][0] - centroid1a.x) +
+  shift[0]   = scale1 * (R[0][0] * (temp[0][0] - centroid1a.x) +
                        R[1][0] * (temp[0][1] - centroid1a.y) +
                        R[2][0] * (temp[0][2] - centroid1a.z)) +
              centroid2a.x;
@@ -1140,8 +1128,8 @@ double transformS(double3d *V1a, double3d *V2a, int N, double TR[3][3],
 }
 
 void ludcmp(double **a, int n, int *indx, double *d) {
-  int i, imax, j, k;
-  double big, dum, sum, temp;
+  int     i, imax, j, k;
+  double  big, dum, sum, temp;
   double *vv;
 
   // vv=vector(1,n);
@@ -1171,17 +1159,17 @@ void ludcmp(double **a, int n, int *indx, double *d) {
         sum -= a[i][k] * a[k][j];
       a[i][j] = sum;
       if ((dum = vv[i] * fabs(sum)) >= big) {
-        big = dum;
+        big  = dum;
         imax = i;
       }
     }
     if (j != imax) {
       for (k = 1; k <= n; k++) {
-        dum = a[imax][k];
+        dum        = a[imax][k];
         a[imax][k] = a[j][k];
-        a[j][k] = dum;
+        a[j][k]    = dum;
       }
-      *d = -(*d);
+      *d       = -(*d);
       vv[imax] = vv[j];
     }
     indx[j] = imax;
@@ -1197,12 +1185,12 @@ void ludcmp(double **a, int n, int *indx, double *d) {
 }
 
 void lubksb(double **a, int n, int *indx, double *b) {
-  int i, ii = 0, ip, j;
+  int    i, ii = 0, ip, j;
   double sum;
 
   for (i = 1; i <= n; i++) {
-    ip = indx[i];
-    sum = b[ip];
+    ip    = indx[i];
+    sum   = b[ip];
     b[ip] = b[i];
     if (ii)
       for (j = ii; j <= i - 1; j++)
@@ -1222,7 +1210,7 @@ void lubksb(double **a, int n, int *indx, double *b) {
 void jacobi(float **a, int n, float *d, float **v, int *nrot)
 
 {
-  int j, iq, ip, i;
+  int   j, iq, ip, i;
   float tresh, theta, tau, t, sm, s, h, g, c, *b, *z;
 
   // b=vector(1,n);
@@ -1238,7 +1226,7 @@ void jacobi(float **a, int n, float *d, float **v, int *nrot)
   }
   for (ip = 1; ip <= n; ip++) {
     b[ip] = d[ip] = a[ip][ip];
-    z[ip] = 0.0;
+    z[ip]         = 0.0;
   }
   *nrot = 0;
   for (i = 1; i <= 50; i++) {
@@ -1268,14 +1256,14 @@ void jacobi(float **a, int n, float *d, float **v, int *nrot)
             t = (a[ip][iq]) / h;
           else {
             theta = 0.5 * h / (a[ip][iq]);
-            t = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
+            t     = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
             if (theta < 0.0)
               t = -t;
           }
-          c = 1.0 / sqrt(1 + t * t);
-          s = t * c;
+          c   = 1.0 / sqrt(1 + t * t);
+          s   = t * c;
           tau = s / (1.0 + c);
-          h = t * a[ip][iq];
+          h   = t * a[ip][iq];
           z[ip] -= h;
           z[iq] += h;
           d[ip] -= h;
@@ -1314,26 +1302,26 @@ void jacobi(float **a, int n, float *d, float **v, int *nrot)
           Search the face for vno and set the v->n[] field
           appropriately.
 ------------------------------------------------------*/
-static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
-  VERTEX *v;
-  FACE *f;
-  int n, i;
-
-  v = &mris->vertices[vno];
-  f = &mris->faces[fno];
-
-  for (n = 0; n < VERTICES_PER_FACE; n++) {
-    if (f->v[n] == vno)
-      break;
-  }
-  if (n >= VERTICES_PER_FACE)
-    return (ERROR_BADPARM);
-
-  for (i = 0; i < v->num; i++)
-    if (v->f[i] == fno)
-      v->n[i] = n;
-
-  return (n);
-}
+//static int mrisSetVertexFaceIndex(MRI_SURFACE *mris, int vno, int fno) {
+//  VERTEX *v;
+//  FACE *  f;
+//  int     n, i;
+//
+//  v = &mris->vertices[vno];
+//  f = &mris->faces[fno];
+//
+//  for (n = 0; n < VERTICES_PER_FACE; n++) {
+//    if (f->v[n] == vno)
+//      break;
+//  }
+//  if (n >= VERTICES_PER_FACE)
+//    return (ERROR_BADPARM);
+//
+//  for (i = 0; i < v->num; i++)
+//    if (v->f[i] == fno)
+//      v->n[i] = n;
+//
+//  return (n);
+//}
 
 #undef ROTATE

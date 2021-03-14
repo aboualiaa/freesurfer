@@ -1,18 +1,13 @@
 /**
- * @file  mris_average_curvature.c
  * @brief program for averaging "curvature" (scalar fields on the surface).
  *
- * average "curvature" format files (scalar fields on the surface) across
- * subjects using a surface-based registration (typically sphere.reg)
+ * average "curvature" format files (scalar fields on the surface) across subjects
+ * using a surface-based registration (typically sphere.reg)
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:26 $
- *    $Revision: 1.17 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,38 +19,45 @@
  *
  */
 
-#include "diag.h"
-#include "mrisurf.h"
-#include "version.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-static char vcid[] =
-    "$Id: mris_average_curvature.c,v 1.17 2011/03/02 00:04:26 nicks Exp $";
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "version.h"
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 const char *Progname;
 
-static char sdir[STRLEN] = "";
-static int which_norm = NORM_MEAN;
-static int normalize_flag = 0;
-static int condition_no = 0;
-static int stat_flag = 0;
-static char *output_surf_name = nullptr;
-static int navgs = 0;
-static char *ohemi = nullptr;
-static char *osurf = nullptr;
+static char  sdir[STRLEN]     = "";
+static int   which_norm       = NORM_MEAN;
+static int   normalize_flag   = 0;
+static int   condition_no     = 0;
+static int   stat_flag        = 0;
+static char *output_surf_name = NULL;
+static int   navgs            = 0;
+static char *ohemi            = NULL;
+static char *osurf            = NULL;
 
 int main(int argc, char *argv[]) {
-  char **av, *in_fname, *out_fname, *surf_name, fname[STRLEN], *hemi;
-  int ac, nargs, i, skipped;
+  char **      av, *in_fname, *out_fname, *surf_name, fname[STRLEN], *hemi;
+  int          ac, nargs, i, skipped;
   MRI_SURFACE *mris;
-  MRI_SP *mrisp, *mrisp_total;
+  MRI_SP *     mrisp, *mrisp_total;
 
   nargs = handleVersionOption(argc, argv, "mris_average_curvature");
   if (nargs && argc - nargs == 1)
@@ -64,7 +66,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   if (!strlen(sdir)) {
     char *cp;
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]) {
     usage_exit();
 
   in_fname = argv[1];
-  hemi = argv[2];
+  hemi     = argv[2];
   if (!ohemi)
     ohemi = hemi;
   surf_name = argv[3];
@@ -95,10 +97,15 @@ int main(int argc, char *argv[]) {
   out_fname = argv[argc - 1];
 
   mrisp_total = MRISPalloc(1, 3);
-  skipped = 0;
+  skipped     = 0;
   for (i = 4; i < argc - 1; i++) {
     fprintf(stderr, "processing subject %s...\n", argv[i]);
-    sprintf(fname, "%s/%s/surf/%s.%s", sdir, argv[i], hemi, surf_name);
+    int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, argv[i], hemi,
+                       surf_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     mris = MRISread(fname);
     if (!mris) {
       ErrorPrintf(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
@@ -115,7 +122,7 @@ int main(int argc, char *argv[]) {
     MRISaverageCurvatures(mris, navgs);
     if (normalize_flag)
       MRISnormalizeCurvature(mris, which_norm);
-    mrisp = MRIStoParameterization(mris, nullptr, 1, 0);
+    mrisp = MRIStoParameterization(mris, NULL, 1, 0);
 #if 0
     if (!FZERO(sigma)) {
       MRI_SP  *mrisp_blur ;
@@ -136,7 +143,12 @@ int main(int argc, char *argv[]) {
   }
 
   if (output_surf_name) {
-    sprintf(fname, "%s/%s/surf/%s.%s", sdir, output_surf_name, ohemi, osurf);
+    int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir,
+                       output_surf_name, ohemi, osurf);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stderr, "reading output surface %s...\n", fname);
     if (mris)
       MRISfree(&mris);
@@ -145,7 +157,7 @@ int main(int argc, char *argv[]) {
       ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
                 fname);
   }
-  if (mris == nullptr) {
+  if (mris == NULL) {
     printf("No output surface files found!\n");
     exit(1);
   }
@@ -153,9 +165,9 @@ int main(int argc, char *argv[]) {
   MRISfromParameterization(mrisp_total, mris, 0);
   if (stat_flag) /* write out summary statistics files */
   {
-    int vno;
+    int     vno;
     VERTEX *v;
-    float dof;
+    float   dof;
 #if 1
     MRI *mri;
 
@@ -233,7 +245,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -262,7 +274,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'O':
       output_surf_name = argv[2];
-      nargs = 1;
+      nargs            = 1;
       fprintf(stderr, "painting output onto subject %s.\n", output_surf_name);
       break;
     case '?':
@@ -271,9 +283,9 @@ static int get_option(int argc, char *argv[]) {
       exit(1);
       break;
     case 'S': /* write out stats */
-      stat_flag = 1;
+      stat_flag    = 1;
       condition_no = atoi(argv[2]);
-      nargs = 1;
+      nargs        = 1;
       fprintf(stderr, "writing out summary statistics as condition %d\n",
               condition_no);
       break;
@@ -289,12 +301,12 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   fprintf(
       stderr,
       "usage: %s [options] <input curv. file> <hemi> <surface> <subject> ... "
@@ -309,7 +321,7 @@ static void print_usage() {
           "as the output surface.\n");
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   fprintf(stderr,
           "\nThis program will add a template into an average surface.\n");
@@ -320,7 +332,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

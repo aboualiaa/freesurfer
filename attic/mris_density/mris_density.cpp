@@ -1,19 +1,13 @@
 /**
- * @file  mris_density.c
- * @brief program for generating a surface map of the density of the interior
- * voxels.
+ * @brief program for generating a surface map of the density of the interior voxels.
  *
  * Compute the # of voxels that are interior to the surface in a user-specified
  * radius at each point on the surface.
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:31 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,25 +19,22 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
+#include "error.h"
+#include "macros.h"
 #include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
-
-static char vcid[] =
-    "$Id: mris_density.c,v 1.7 2011/03/02 00:04:31 nicks Exp $";
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -51,16 +42,16 @@ static void print_version(void);
 
 const char *Progname;
 
-static double resolution = 1.0 / 8.0;
-static double radius = 20;
-static char *density_fname = NULL;
-static char *translate_fname = NULL;
+static double resolution      = 1.0 / 8.0;
+static double radius          = 20;
+static char * density_fname   = NULL;
+static char * translate_fname = NULL;
 
 int main(int argc, char *argv[]) {
-  char **av, *out_fname, *in_fname;
-  int ac, nargs;
+  char **      av, *out_fname, *in_fname;
+  int          ac, nargs;
   MRI_SURFACE *mris;
-  MRI *mri_density;
+  MRI *        mri_density;
 
   nargs = handleVersionOption(argc, argv, "mris_density");
   if (nargs && argc - nargs == 1)
@@ -82,7 +73,7 @@ int main(int argc, char *argv[]) {
   if (argc < 3)
     usage_exit();
 
-  in_fname = argv[1];
+  in_fname  = argv[1];
   out_fname = argv[2];
 
   fprintf(stderr, "reading surface from %s...\n", in_fname);
@@ -92,10 +83,10 @@ int main(int argc, char *argv[]) {
               in_fname);
   if (translate_fname && Gdiag_no >= 0) {
     MRI_SURFACE *mris2;
-    float x0, y0, z0, dist, min_dist, x, y, z;
-    int vno, min_vno = 0;
-    char surf_name[STRLEN];
-    VERTEX *v;
+    float        x0, y0, z0, dist, min_dist, x, y, z;
+    int          vno, min_vno = 0;
+    char         surf_name[STRLEN];
+    VERTEX *     v;
 
     mris2 = MRISread(translate_fname);
     if (!mris2)
@@ -105,22 +96,22 @@ int main(int argc, char *argv[]) {
     if (MRISreadCanonicalCoordinates(mris, surf_name) != NO_ERROR)
       ErrorExit(ERROR_NOFILE, "%s: could not read canonical coords from %s",
                 Progname, surf_name);
-    x0 = mris2->vertices[Gdiag_no].x;
-    y0 = mris2->vertices[Gdiag_no].y;
-    z0 = mris2->vertices[Gdiag_no].z;
+    x0       = mris2->vertices[Gdiag_no].x;
+    y0       = mris2->vertices[Gdiag_no].y;
+    z0       = mris2->vertices[Gdiag_no].z;
     min_dist = 1e10;
-    min_vno = -1;
+    min_vno  = -1;
     for (vno = 0; vno < mris->nvertices; vno++) {
       v = &mris->vertices[vno];
       if (v->ripflag)
         continue;
-      x = v->cx;
-      y = v->cy;
-      z = v->cz;
+      x    = v->cx;
+      y    = v->cy;
+      z    = v->cz;
       dist = sqrt(SQR(x - x0) + SQR(y - y0) + SQR(z - z0));
       if (dist < min_dist) {
         min_dist = dist;
-        min_vno = vno;
+        min_vno  = vno;
       }
     }
     printf("translating to vertex %d (min dist = %2.1f)\n", min_vno, min_dist);
@@ -146,7 +137,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -156,19 +147,19 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "radius")) {
     radius = atof(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     printf("using radius = %2.3f\n", radius);
   } else if (!stricmp(option, "debug")) {
-    Gdiag_no = atoi(argv[2]);
+    Gdiag_no      = atoi(argv[2]);
     density_fname = argv[3];
-    nargs = 2;
+    nargs         = 2;
     printf("debugging vertex %d, and writing density map for it to %s\n",
            Gdiag_no, density_fname);
   } else
     switch (toupper(*option)) {
     case 'R':
       resolution = (double)atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("setting resolution for intermediate calculations to %2.4f\n",
              resolution);
       break;
@@ -180,7 +171,7 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'U':
@@ -219,6 +210,6 @@ static void print_help(void) {
 }
 
 static void print_version(void) {
-  fprintf(stderr, "%s\n", vcid);
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

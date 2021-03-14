@@ -1,17 +1,6 @@
-/**
- * @file  AFNI.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:09 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,6 +12,11 @@
  *
  */
 
+#ifndef AFNI_H
+#define AFNI_H
+
+#include "mri.h"
+
 //
 // AFNI.h
 //
@@ -30,28 +24,30 @@
 
 typedef struct {
   // mandatory attributes
-  int dataset_rank[2];
-  int dataset_dimensions[3];
-  char typestring[16];
-  int scene_data[3];
-  int orient_specific[3];
+  int   dataset_rank[2];
+  int   dataset_dimensions[3];
+  char  typestring[16];
+  int   scene_data[3];
+  int   orient_specific[3];
   float origin[3];
   float delta[3];
   // almost mandatory attributes
-  char *idcode_string;
-  int numchars;
-  char byteorder_string[10];
+  char * idcode_string;
+  int    numchars;
+  char   byteorder_string[10];
   float *brick_stats;
-  int numstats;
-  int *brick_types;
-  int numtypes;
+  int    numstats;
+  int *  brick_types;
+  int    numtypes;
   float *brick_float_facs;
-  int numfacs;
+  int    numfacs;
 } AFNI_HEADER, AF;
 
 MRI *afniRead(const char *fname, int read_volume);
-int afniWrite(MRI *mri, const char *fname);
-int readAFNIHeader(FILE *fp, AF *paf);
+int  afniWrite(MRI *mri, const char *fname);
+int  readAFNIHeader(FILE *fp, AF *paf);
 void AFinit(AF *pAF);
 void AFclean(AF *pAF);
 void printAFNIHeader(AF *pAF);
+
+#endif

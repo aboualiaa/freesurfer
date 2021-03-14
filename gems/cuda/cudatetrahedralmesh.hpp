@@ -10,8 +10,8 @@ template <typename CoordinateType, typename MeshIndexType, typename AlphasType>
 class TetrahedralMesh_GPU {
 public:
   Image_GPU<CoordinateType, 2, MeshIndexType> vertices;
-  Image_GPU<MeshIndexType, 2, MeshIndexType> vertexMap;
-  Image_GPU<AlphasType, 2, MeshIndexType> alphas;
+  Image_GPU<MeshIndexType, 2, MeshIndexType>  vertexMap;
+  Image_GPU<AlphasType, 2, MeshIndexType>     alphas;
 
   typedef MeshIndexType MeshIdxType;
 
@@ -38,11 +38,11 @@ public:
 template <typename CoordinateType, typename MeshIndexType, typename AlphasType>
 class CudaTetrahedralMesh {
 public:
-  const unsigned char nDims = 3;
+  const unsigned char nDims     = 3;
   const unsigned char nVertices = 4;
 
   typedef TetrahedralMesh_GPU<CoordinateType, MeshIndexType, AlphasType>
-      GPUType;
+                         GPUType;
   typedef CoordinateType CoordType;
 
   void Send(kvl::AtlasMesh::ConstPointer mesh) {
@@ -99,9 +99,9 @@ public:
   getArg() const {
     TetrahedralMesh_GPU<CoordinateType, MeshIndexType, AlphasType> gpuArg;
 
-    gpuArg.vertices = this->d_vertices.getArg();
+    gpuArg.vertices  = this->d_vertices.getArg();
     gpuArg.vertexMap = this->d_vertexMap.getArg();
-    gpuArg.alphas = this->d_alphas.getArg();
+    gpuArg.alphas    = this->d_alphas.getArg();
 
     return gpuArg;
   }
@@ -112,8 +112,8 @@ public:
 
 private:
   CudaImage<CoordinateType, 2, MeshIndexType> d_vertices;
-  CudaImage<MeshIndexType, 2, MeshIndexType> d_vertexMap;
-  CudaImage<AlphasType, 2, MeshIndexType> d_alphas;
+  CudaImage<MeshIndexType, 2, MeshIndexType>  d_vertexMap;
+  CudaImage<AlphasType, 2, MeshIndexType>     d_alphas;
 
   std::vector<kvl::AtlasMesh::CellIdentifier>
   GetTetrahedronIds(kvl::AtlasMesh::ConstPointer mesh) const {
@@ -149,7 +149,7 @@ private:
     this->d_vertices.Send(vertices, vertexDims);
   }
 
-  void SendVertexMap(kvl::AtlasMesh::ConstPointer mesh,
+  void SendVertexMap(kvl::AtlasMesh::ConstPointer                       mesh,
                      const std::vector<kvl::AtlasMesh::CellIdentifier> &ids) {
     Dimension<2, MeshIndexType> mapDims;
     mapDims[0] = ids.size();
@@ -165,7 +165,7 @@ private:
       MeshIndexType pIdx = 0;
       for (auto pit = cell->PointIdsBegin(); pit != cell->PointIdsEnd();
            ++pit) {
-        size_t idx = mapDims.GetLinearIndex(iTet, pIdx);
+        size_t idx        = mapDims.GetLinearIndex(iTet, pIdx);
         vertexMap.at(idx) = *pit;
         pIdx++;
       }

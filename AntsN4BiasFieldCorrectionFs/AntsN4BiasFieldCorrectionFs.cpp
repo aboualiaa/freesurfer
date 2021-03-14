@@ -20,27 +20,47 @@
 #include "itkN4BiasFieldCorrectionImageFilter.h"
 #include "itkShrinkImageFilter.h"
 
-#include "argparse.h"
-#include "mri.h"
 #include "AntsN4BiasFieldCorrectionFs.help.xml.h"
+#include "argparse.h"
 #include "itk_5_4_map.h"
+#include "mri.h"
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   // parse args
   ArgumentParser parser;
-  parser.addHelp(AntsN4BiasFieldCorrectionFs_help_xml, AntsN4BiasFieldCorrectionFs_help_xml_len);
-  parser.addArgument("-i", "--input",  1, String, true);
+  parser.addHelp(AntsN4BiasFieldCorrectionFs_help_xml,
+                 AntsN4BiasFieldCorrectionFs_help_xml_len);
+  parser.addArgument("-i", "--input", 1, String, true);
   parser.addArgument("-o", "--output", 1, String, true);
   parser.addArgument("-s", "--shrink", 1, Int, false);
+  parser.addArgument("-t", "--iters", '+', Int, false);
+  parser.addArgument("-d", "--dtype", 1, String, false);
   parser.parse(argc, argv);
 
-  std::string inputname = parser.retrieve<std::string>("input");
+  std::string inputname  = parser.retrieve<std::string>("input");
   std::string outputname = parser.retrieve<std::string>("output");
 
-  MRI* mri = MRIread(inputname.c_str());
+  // read target data type (default is float)
+  int dtype = MRI_FLOAT;
+  if (parser.exists("dtype")) {
+    std::string dtype_str = parser.retrieve<std::string>("dtype");
+    std::transform(dtype_str.begin(), dtype_str.end(), dtype_str.begin(),
+                   ::tolower);
+    if (dtype_str == "float") {
+      dtype = MRI_FLOAT;
+    } else if (dtype_str == "uchar") {
+      dtype = MRI_UCHAR;
+    } else if (dtype_str == "int") {
+      dtype = MRI_INT;
+    } else {
+      fs::fatal() << "unrecognized target dtype '" << dtype_str << "'";
+    }
+  }
 
-  if (mri->nframes != 1) fs::fatal() << "input cannot be 4D (has " << mri->nframes << " frames)";
+  MRI *mri = MRIread(inputname.c_str());
+
+  if (mri->nframes != 1)
+    fs::fatal() << "input cannot be 4D (has " << mri->nframes << " frames)";
 
   // convert to ITK image
   ITKImageType::Pointer inputImage = mri->toITKImage();
@@ -53,22 +73,31 @@ int main(int argc, char **argv)
   maskImage->CopyInformation(inputImage);
   maskImage->SetRegions(inputImage->GetRequestedRegion());
   maskImage->Allocate(false);
-  maskImage->FillBuffer(itk::NumericTraits<ITKImageType::PixelType>::OneValue());
+  maskImage->FillBuffer(
+      itk::NumericTraits<ITKImageType::PixelType>::OneValue());
 
   // init the bias field correcter
-  typedef itk::N4BiasFieldCorrectionImageFilter<ITKImageType, ITKImageType, ITKImageType> CorrecterType;
+  typedef itk::N4BiasFieldCorrectionImageFilter<ITKImageType, ITKImageType,
+                                                ITKImageType>
+                         CorrecterType;
   CorrecterType::Pointer correcter = CorrecterType::New();
 
   // convergence options
-  CorrecterType::VariableSizeArrayType maximumNumberOfIterations(4);
-  maximumNumberOfIterations.Fill(50);
+  // set number of iterations (default is 50x50x50x50)
+  std::vector<int> numIters = {50, 50, 50, 50};
+  if (parser.exists("iters"))
+    numIters = parser.retrieve<std::vector<int>>("iters");
+  CorrecterType::VariableSizeArrayType maximumNumberOfIterations(
+      numIters.size());
+  for (unsigned int d = 0; d < numIters.size(); d++)
+    maximumNumberOfIterations[d] = numIters[d];
   correcter->SetMaximumNumberOfIterations(maximumNumberOfIterations);
-  correcter->SetNumberOfFittingLevels(4);
+  correcter->SetNumberOfFittingLevels(numIters.size());
   correcter->SetConvergenceThreshold(0.0);
 
   // shrink the image to save time
-  int shrinkFactor = parser.exists("shrink") ? parser.retrieve<int>("shrink") : 4;
-  std::cout << "Using shrink factor: " <<  shrinkFactor << std::endl;
+  int shrinkFactor =
+      parser.exists("shrink") ? parser.retrieve<int>("shrink") : 4;
 
   typedef itk::ShrinkImageFilter<ITKImageType, ITKImageType> ShrinkerType;
   ShrinkerType::Pointer shrinker = ShrinkerType::New();
@@ -86,7 +115,10 @@ int main(int argc, char **argv)
   correcter->Update();
 
   // reconstruct the bias field at full image resolution
-  typedef itk::BSplineControlPointImageFilter<CorrecterType::BiasFieldControlPointLatticeType, CorrecterType::ScalarImageType> BSplinerType;
+  typedef itk::BSplineControlPointImageFilter<
+      CorrecterType::BiasFieldControlPointLatticeType,
+      CorrecterType::ScalarImageType>
+                        BSplinerType;
   BSplinerType::Pointer bspliner = BSplinerType::New();
   bspliner->SetInput(correcter->GetLogBiasFieldControlPointLattice());
   bspliner->SetSplineOrder(correcter->GetSplineOrder());
@@ -106,9 +138,12 @@ int main(int argc, char **argv)
   logField->SetDirection(inputImage->GetDirection());
   logField->Allocate();
 
-  itk::ImageRegionIterator<CorrecterType::ScalarImageType> ItB(bspliner->GetOutput(), bspliner->GetOutput()->GetLargestPossibleRegion());
-  itk::ImageRegionIterator<ITKImageType> ItF(logField, logField->GetLargestPossibleRegion());
-  for(ItB.GoToBegin(), ItF.GoToBegin(); !ItB.IsAtEnd(); ++ItB, ++ItF) ItF.Set(ItB.Get()[0]);
+  itk::ImageRegionIterator<CorrecterType::ScalarImageType> ItB(
+      bspliner->GetOutput(), bspliner->GetOutput()->GetLargestPossibleRegion());
+  itk::ImageRegionIterator<ITKImageType> ItF(
+      logField, logField->GetLargestPossibleRegion());
+  for (ItB.GoToBegin(), ItF.GoToBegin(); !ItB.IsAtEnd(); ++ItB, ++ItF)
+    ItF.Set(ItB.Get()[0]);
 
   // exp bias field
   typedef itk::ExpImageFilter<ITKImageType, ITKImageType> ExpFilterType;
@@ -117,7 +152,8 @@ int main(int argc, char **argv)
   expFilter->Update();
 
   // divide original image by the bias field to get corrected image
-  typedef itk::DivideImageFilter<ITKImageType, ITKImageType, ITKImageType> DividerType;
+  typedef itk::DivideImageFilter<ITKImageType, ITKImageType, ITKImageType>
+                       DividerType;
   DividerType::Pointer divider = DividerType::New();
   divider->SetInput1(inputImage);
   divider->SetInput2(expFilter->GetOutput());
@@ -136,10 +172,13 @@ int main(int argc, char **argv)
   cropper->Update();
 
   // load ITK image back into MRI and write to disk
-  mri->loadITKImage(cropper->GetOutput());
-  MRIwrite(mri, outputname.c_str());
+  MRI *dest = MRIallocSequence(mri->width, mri->height, mri->depth, dtype,
+                               mri->nframes);
+  MRIcopyHeader(mri, dest);
+  dest->loadITKImage(cropper->GetOutput());
+  MRIwrite(dest, outputname.c_str());
+  MRIfree(&dest);
   MRIfree(&mri);
 
   return 0;
 }
-

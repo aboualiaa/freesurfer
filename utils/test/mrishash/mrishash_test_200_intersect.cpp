@@ -10,30 +10,30 @@
 #define TestRepetitions 100
 
 // Probably don't need all these includes...
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <time.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "version.h"
-#include "icosahedron.h"
+#include "error.h"
 #include "gw_utils.h"
+#include "icosahedron.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "version.h"
 
 const char *Progname;
-char progver[] = "V1.11";
-char logfilepath[1000];
-char surffilepath[1000];
-char mrifilepath[1000];
+char        progver[] = "V1.11";
+char        logfilepath[1000];
+char        surffilepath[1000];
+char        mrifilepath[1000];
 
 //------------------------------
 void init_various(char *AProgname) {
@@ -43,7 +43,8 @@ void init_various(char *AProgname) {
   sprintf(surffilepath, "lh.%s_.tri", Progname);
   sprintf(mrifilepath, "%s_mri.mgz", Progname);
 
-  rslt = gw_log_init(const_cast<char *>(Progname), progver, logfilepath, 1); // empty file
+  rslt = gw_log_init(const_cast<char *>(Progname), progver, logfilepath,
+                     1); // empty file
   if (rslt) {
     printf("Couldn't open log file %s", logfilepath);
     exit(-1);
@@ -53,29 +54,29 @@ void init_various(char *AProgname) {
 //---------------------------------------------
 int TestIntersectionDistance(int repnum) {
   //---------------------------------------------
-  int rslt = 0; // default OK
-  char msg[1000];
-  double radius1, radius2, rtot = 0.0, maxradius, mhtres, pctspheredev;
-  double offset;
-  double vecx, vecy, vecz, veclen, osx = 0.0, osy = 0.0, osz = 0.0;
-  double jump = 70;
-  int intersect;
+  int          rslt = 0; // default OK
+  char         msg[1000];
+  double       radius1, radius2, rtot = 0.0, maxradius, mhtres, pctspheredev;
+  double       offset;
+  double       vecx, vecy, vecz, veclen, osx = 0.0, osy = 0.0, osz = 0.0;
+  double       jump = 70;
+  int          intersect;
   MRI_SURFACE *mris = NULL;
-  msg[0] = 0;
+  msg[0]            = 0;
 
 #define pctspheredevMAX 0.125
 
   //---------------------------------------------
   // Random radii
   //---------------------------------------------
-  radius1 = (0.95 * ((double)rand() / RAND_MAX) + 0.5) * 40; // 3*radius < 127
-  radius2 = (0.95 * ((double)rand() / RAND_MAX) + 0.5) * 40; // 3*radius < 127
+  radius1   = (0.95 * ((double)rand() / RAND_MAX) + 0.5) * 40; // 3*radius < 127
+  radius2   = (0.95 * ((double)rand() / RAND_MAX) + 0.5) * 40; // 3*radius < 127
   maxradius = radius1;
   if (maxradius < radius2)
     maxradius = radius2;
 
   offset = radius1 + radius2 + 5;
-  jump = offset - maxradius; // don't want one to end up inside the other
+  jump   = offset - maxradius; // don't want one to end up inside the other
 
   //---------------------------------------------
   // Random mht resolution
@@ -87,9 +88,9 @@ int TestIntersectionDistance(int repnum) {
   // Random direction of offset
   //----------------------------------------
   // unit random vector
-  vecx = ((double)rand() / RAND_MAX);
-  vecy = ((double)rand() / RAND_MAX);
-  vecz = ((double)rand() / RAND_MAX);
+  vecx   = ((double)rand() / RAND_MAX);
+  vecy   = ((double)rand() / RAND_MAX);
+  vecz   = ((double)rand() / RAND_MAX);
   veclen = sqrt(vecx * vecx + vecy * vecy + vecz * vecz);
   vecx /= veclen;
   vecy /= veclen;
@@ -145,10 +146,10 @@ int TestIntersectionDistance(int repnum) {
 //-----------------------------------
 int main(int argc, char *argv[]) {
   //-----------------------------------
-  char msg[1000];
-  int n;
+  char  msg[1000];
+  int   n;
   char *cp;
-  int rslt = 0; // default to OK
+  int   rslt = 0; // default to OK
 
   if (getenv("SKIP_MRISHASH_TEST"))
     exit(77); // bypass

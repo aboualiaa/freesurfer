@@ -14,8 +14,8 @@
 =========================================================================*/
 #include "vtkInteractorStyleMyTrackballCamera.h"
 
-#include "vtkCamera.h"
 #include "vtkCallbackCommand.h"
+#include "vtkCamera.h"
 #include "vtkObjectFactory.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
@@ -32,7 +32,7 @@ vtkInteractorStyleMyTrackballCamera::vtkInteractorStyleMyTrackballCamera() {
 
 vtkInteractorStyleMyTrackballCamera::~vtkInteractorStyleMyTrackballCamera() {}
 
-void vtkInteractorStyleMyTrackballCamera::SetRotateByPoint(bool b,
+void vtkInteractorStyleMyTrackballCamera::SetRotateByPoint(bool    b,
                                                            double *dPos) {
   m_bRotateAroundPoint = b;
   if (dPos) {
@@ -82,7 +82,7 @@ void vtkInteractorStyleMyTrackballCamera::Rotate() {
     vtkRenderWindowInteractor *rwi = this->Interactor;
     ;
     vtkRenderer *renderer = this->CurrentRenderer;
-    vtkCamera *camera = renderer->GetActiveCamera();
+    vtkCamera *  camera   = renderer->GetActiveCamera();
 
     int dx = rwi->GetEventPosition()[0] - rwi->GetLastEventPosition()[0];
     int dy = rwi->GetEventPosition()[1] - rwi->GetLastEventPosition()[1];
@@ -90,16 +90,16 @@ void vtkInteractorStyleMyTrackballCamera::Rotate() {
     int *size = this->CurrentRenderer->GetRenderWindow()->GetSize();
 
     double delta_elevation = -20.0 / size[1];
-    double delta_azimuth = -20.0 / size[0];
+    double delta_azimuth   = -20.0 / size[0];
 
     double rxf = dx * delta_azimuth * this->MotionFactor;
     double ryf = dy * delta_elevation * this->MotionFactor;
 
     // Camera Parameters ///////////////////////////////////////////////////
     double *focalPoint = camera->GetFocalPoint();
-    double *viewUp = camera->GetViewUp();
-    double *position = camera->GetPosition();
-    double axis[3];
+    double *viewUp     = camera->GetViewUp();
+    double *position   = camera->GetPosition();
+    double  axis[3];
     axis[0] = -camera->GetViewTransformMatrix()->GetElement(0, 0);
     axis[1] = -camera->GetViewTransformMatrix()->GetElement(0, 1);
     axis[2] = -camera->GetViewTransformMatrix()->GetElement(0, 2);

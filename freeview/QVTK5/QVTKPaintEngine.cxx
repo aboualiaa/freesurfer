@@ -29,9 +29,9 @@
 #include "QVTKPaintEngine.h"
 #include "QVTKWidget.h"
 
+#include "vtkImageData.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderer.h"
-#include "vtkImageData.h"
 #include "vtkSmartPointer.h"
 
 #include <QCache>
@@ -72,7 +72,7 @@ void QVTKPaintEngine::drawPixmap(const QRectF &r, const QPixmap &pm,
   if (!this->Widget) {
     return;
   }
-  QRect ri = r.toRect();
+  QRect ri  = r.toRect();
   QRect sri = sr.toRect();
 
   QPixmap pix = pm.copy(sri);
@@ -95,7 +95,7 @@ void QVTKPaintEngine::drawPixmap(const QRectF &r, const QPixmap &pm,
 
 void QVTKPaintEngine::drawPath(const QPainterPath &path) {
   // drawPath in base class does nothing so here we make it do something
-  QRectF box = path.boundingRect();
+  QRectF  box = path.boundingRect();
   QPixmap img((int)box.width(), (int)box.height());
   img.fill(Qt::transparent);
   QPainter p(&img);

@@ -21,14 +21,15 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>bbregister</name>
-	<synopsis>bbregister --s &lt;subj&gt; --mov &lt;volid&gt; --reg &lt;regfile&gt; \
-&#09;--&lt;contrast&gt;</synopsis>
-	<description>This program performs within-subject, cross-modal registration using a boundary-based cost function. The registration is constrained to be 6 DOF (rigid). It is required that you have an anatomical scan of the subject that has been analyzed in freesurfer.</description>
+  <name>bbregister</name>
+  <synopsis>bbregister --s &lt;subj&gt; --mov &lt;volid&gt; --reg &lt;regfile&gt; \
+	--&lt;contrast&gt;</synopsis>
+  <description>This program performs within-subject, cross-modal registration using a boundary-based cost function. The registration is constrained to be 6 DOF (rigid). It is required that you have an anatomical scan of the subject that has been analyzed in freesurfer.</description>
   <arguments>
-    <positional><intro>None</intro></positional>
+    <positional>
+      <intro>None</intro>
+    </positional>
     <required-flagged>
       <argument>--s subject</argument>
       <explanation>FreeSurfer subject name as found in $SUBJECTS_DIR.</explanation>
@@ -47,7 +48,6 @@
       <explanation>Assume that the geometry information in the cross-modal and anatomical are sufficient to get a close voxel-to-voxel registration. This usually is only the case if they were acquired in the same session.</explanation>
       <argument>--init-reg initregfile</argument>
       <explanation>Supply an initial registration matrix; can be LTA.</explanation>
-
       <intro>Contrast Arguments (one required)</intro>
       <argument>--t1</argument>
       <explanation>Assume t1 contrast, ie, White Matter brighter than Grey Matter</explanation>
@@ -166,7 +166,7 @@
       <explanation>print help and exit</explanation>
     </optional-flagged>
   </arguments>
-	<example>Intialize with FLIRT, view result with tkregister2:
+  <example>Intialize with FLIRT, view result with tkregister2:
 bbregister --s bert --mov func.nii --init-fsl --reg register.dat
 tkregister2 --mov func.nii --reg register.dat --surf </example>
   <example>Intialize with SPM, view result with tkregister2:
@@ -177,4 +177,3 @@ bbregister --s bert --mov partial.nii --init-fsl --int whole.nii --reg register.
 tkregister2 --mov partial.nii --reg register.partial.dat --surf</example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
 </help>
-

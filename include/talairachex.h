@@ -1,5 +1,4 @@
 /**
- * @file  talairachex.h
  * @brief new talairach related routines with Ex
  *
  * takes lta as the talairach transform (use LTAreadEx routine)
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Y. Tosa
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:10 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -36,8 +31,8 @@ MATRIX *MtalVoxelFromVoxel(MRI *mri_src, const LTA *lta);
 MATRIX *MvoxelFromTalairach(MRI *mri_dst, const LTA *lta);
 MATRIX *MvoxelFromTalVoxel(MRI *mri_dst, const LTA *lta);
 MATRIX *MRASFromTalVoxel(MRI *mri, const LTA *lta);
-void TransformWithMatrix(const MATRIX *mat, const double x, const double y,
-                         const double z, double *px, double *py, double *pz);
+void    TransformWithMatrix(const MATRIX *mat, const double x, const double y,
+                            const double z, double *px, double *py, double *pz);
 
 int ModifyTalairachCRAS(MRI *mri_tal, const LTA *lta);
 int MRIvoxelToTalairachEx(MRI *mri_src, double xv, double yv, double zv,

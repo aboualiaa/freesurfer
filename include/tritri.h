@@ -1,7 +1,5 @@
 /**
- * @file  tritri.h
- * @brief macros and prototypes for triangle/triangle intersection and some
- * 3-vectors.
+ * @brief macros and prototypes for triangle/triangle intersection and some 3-vectors.
  *
  * the header file for tritri.c that implements the fast triangle/triangle
  * intersection detection code used by the surface deformations to prevent a
@@ -10,12 +8,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:10 $
- *    $Revision: 1.10 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -54,8 +48,8 @@ int project_point_to_plane(double point[3], double V0[3], double V1[3],
   zd = v1x * v2y - v1y * v2x;
 
 #define DOT(v1, v2) (v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2])
-#define VLEN(v) (sqrt(DOT(v, v)))
-#define VZERO(v) (FZERO(DOT(v, v)))
+#define VLEN(v)     (sqrt(DOT(v, v)))
+#define VZERO(v)    (FZERO(DOT(v, v)))
 #define SUB(dest, v1, v2)                                                      \
   dest[0] = v1[0] - v2[0];                                                     \
   dest[1] = v1[1] - v2[1];                                                     \

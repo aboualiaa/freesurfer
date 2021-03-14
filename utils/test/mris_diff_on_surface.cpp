@@ -1,17 +1,6 @@
-/**
- * @file  mris_diff_on_surface.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,48 +17,44 @@
  * equal to zero! No wonder my output file gets smaller
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
-#include "mrishash.h"
-#include "mri_identify.h"
+#include "error.h"
 #include "icosahedron.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_identify.h"
+#include "mrishash.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 
 #define MAX_DATA_NUMBERS 200
-
-static char vcid[] =
-    "$Id: mris_diff_on_surface.c,v 1.3 2011/03/02 00:04:55 nicks Exp $";
 
 int main(int argc, char *argv[]);
 
 int framesave = 0;
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
 static void print_version(void);
 
 char *srctypestring = NULL;
-int srctype = MRI_VOLUME_TYPE_UNKNOWN;
+int   srctype       = MRI_VOLUME_TYPE_UNKNOWN;
 char *trgtypestring = NULL;
-int trgtype = MRI_VOLUME_TYPE_UNKNOWN;
+int   trgtype       = MRI_VOLUME_TYPE_UNKNOWN;
 
-int negflag = 0;
+int negflag   = 0;
 int debugflag = 0;
-int debugvtx = 0;
-int pathflag = 0;
+int debugvtx  = 0;
+int pathflag  = 0;
 
 const char *Progname;
 
@@ -106,7 +91,7 @@ int main(int argc, char *argv[]) {
   if (argc != 5)
     usage_exit();
 
-  surf_name = argv[1];
+  surf_name  = argv[1];
   out_prefix = argv[argc - 1];
 
   if (srctypestring == NULL || trgtypestring == NULL) {
@@ -196,8 +181,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  maxV = -1000.0;
-  minV = 1000.0;
+  maxV  = -1000.0;
+  minV  = 1000.0;
   meanV = 0.0;
 
   for (index = 0; index < BaseSurf->nvertices; index++) {
@@ -269,7 +254,7 @@ static void print_usage(void) {
   fprintf(stdout, "   -trg_type  %%s output format\n");
   fprintf(stdout, "   -neg  take negative of data2, thus compute sum!\n");
   fprintf(stdout, "\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 
@@ -302,7 +287,7 @@ static void print_help(void) {
 
 /* --------------------------------------------- */
 static void print_version(void) {
-  fprintf(stdout, "%s\n", vcid);
+  fprintf(stdout, "%s\n", getVersion().c_str());
   exit(1);
 }
 
@@ -312,7 +297,7 @@ static void print_version(void) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -322,20 +307,20 @@ static int get_option(int argc, char *argv[]) {
     print_version();
   else if (!stricmp(option, "src_type")) {
     srctypestring = argv[2];
-    srctype = string_to_type(srctypestring);
-    nargs = 1;
+    srctype       = string_to_type(srctypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "trg_type")) {
     trgtypestring = argv[2];
-    trgtype = string_to_type(srctypestring);
-    nargs = 1;
+    trgtype       = string_to_type(srctypestring);
+    nargs         = 1;
   } else if (!stricmp(option, "abspath")) {
     pathflag = 1;
   } else if (!stricmp(option, "neg")) {
     negflag = 1;
   } else if (!stricmp(option, "debug")) {
     debugflag = 1;
-    debugvtx = atoi(argv[2]);
-    nargs = 1;
+    debugvtx  = atoi(argv[2]);
+    nargs     = 1;
   } else {
     fprintf(stderr, "unknown option %s\n", argv[1]);
     print_help();

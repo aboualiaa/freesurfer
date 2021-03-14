@@ -1,7 +1,7 @@
 #ifndef _SBL_MISC_WIDGETS_H_
 #define _SBL_MISC_WIDGETS_H_
-#include <wx/wx.h>
 #include <sbl/core/String.h>
+#include <wx/wx.h>
 namespace sbl {
 
 //-------------------------------------------

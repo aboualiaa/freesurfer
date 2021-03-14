@@ -4,8 +4,8 @@
 
 #include <cstddef>
 #define export // obsolete feature "export template" used in these header files
-#include "itkObjectFactoryBase.h"
 #include "itkImageIOBase.h"
+#include "itkObjectFactoryBase.h"
 #undef export
 
 namespace itk {
@@ -13,9 +13,9 @@ namespace itk {
 class ITK_EXPORT MGHImageIOFactory : public ObjectFactoryBase {
 public:
   /** Standard class typedefs **/
-  typedef MGHImageIOFactory Self;
-  typedef ObjectFactoryBase Superclass;
-  typedef SmartPointer<Self> Pointer;
+  typedef MGHImageIOFactory        Self;
+  typedef ObjectFactoryBase        Superclass;
+  typedef SmartPointer<Self>       Pointer;
   typedef SmartPointer<const Self> ConstPointer;
 
   /** Class methods used to interface with the registered factories **/

@@ -6,12 +6,8 @@
 # Purpose: uses the same command-line args as stxgrinder
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2015/12/10 22:51:31 $
-#    $Revision: 1.5 $
 #
-# Copyright (C) 2002-2007,
+# Copyright © 2021
 # The General Hospital Corporation (Boston, MA). 
 # All rights reserved.
 #
@@ -26,7 +22,7 @@
 
 
 set fmrianalver = `cat $FMRI_ANALYSIS_DIR/docs/version`;
-set STXGRINDER_VER = '\$Id: stxgrinder,v 1.5 2015/12/10 22:51:31 zkaufman Exp $';
+set STXGRINDER_VER = 'stxgrinder @FS_VERSION@';
 
 # Set Default Values #
 set firstslice = ();

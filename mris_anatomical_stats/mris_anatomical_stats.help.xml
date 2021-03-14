@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mris_anatomical_stats</name>
-	<synopsis>mris_anatomical_stats [options] &lt;subjectname&gt; &lt;hemi&gt; [&lt;surfacename&gt;]</synopsis>
-	<description>This program computes a number of anatomical properties.</description>
+  <name>mris_anatomical_stats</name>
+  <synopsis>mris_anatomical_stats [options] &lt;subjectname&gt; &lt;hemi&gt; [&lt;surfacename&gt;]</synopsis>
+  <description>This program computes a number of anatomical properties.</description>
   <arguments>
     <positional>
       <argument>&lt;subjectname&gt;</argument>
@@ -82,9 +81,8 @@
     <output>Intrinsic Curvature Index</output>
     <explanation>unitless, a la Van Essen</explanation>
   </outputs>
-	<example>mris_anatomical_stats -a subjid/label/lh.aparc.annot -b subjid lh</example>
-	<example>mris_anatomical_stats -l lh.cortex.label -b subjid lh</example>
+  <example>mris_anatomical_stats -a subjid/label/lh.aparc.annot -b subjid lh</example>
+  <example>mris_anatomical_stats -l lh.cortex.label -b subjid lh</example>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mris_curvature_stats</see-also>
+  <see-also>mris_curvature_stats</see-also>
 </help>
-

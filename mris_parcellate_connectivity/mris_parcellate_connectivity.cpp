@@ -1,18 +1,7 @@
 /**
- * @file  mris_parcellate_connectivity.c
- * @brief tool for parcellating a cortical model into relatively uniform
- * connectivity regions.
+ * @brief tool for parcellating a cortical model into relatively uniform connectivity regions.
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
-/*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:33 $
- *    $Revision: 1.2 $
- *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,34 +13,34 @@
  *
  */
 
-#include "mrisurf_project.h"
-#include "icosahedron.h"
 #include "diag.h"
+#include "icosahedron.h"
+#include "mrisurf_project.h"
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static int nbrs = 1;
+static int nbrs  = 1;
 static int navgs = 0;
-static int nsub = 2;
+static int nsub  = 2;
 
 static int ico_no = 2;
 
 int main(int argc, char *argv[]) {
-  char **av, *surf_fname, *parcellation_fname, *cmatrix_fname;
-  int ac, nargs;
-  int msec, minutes, seconds;
-  Timer start;
+  char **      av, *surf_fname, *parcellation_fname, *cmatrix_fname;
+  int          ac, nargs;
+  int          msec, minutes, seconds;
+  Timer        start;
   MRI_SURFACE *mris, *mris_ico;
-  MRI *mri_cmatrix;
-  char fname[STRLEN], *cp;
-  MHT *mht;
-  ICP *icp;
+  MRI *        mri_cmatrix;
+  char         fname[STRLEN], *cp;
+  MHT *        mht;
+  ICP *        icp;
 
   setRandomSeed(1L);
 
@@ -79,8 +68,8 @@ int main(int argc, char *argv[]) {
 
   icp = ICPread(ico_no, 6);
   exit(0);
-  surf_fname = argv[1];
-  cmatrix_fname = argv[2];
+  surf_fname         = argv[1];
+  cmatrix_fname      = argv[2];
   parcellation_fname = argv[3];
 
   mris = MRISread(surf_fname);
@@ -133,7 +122,7 @@ int main(int argc, char *argv[]) {
 
   // figure out which vertices are on boundary between regions
   {
-    int vno, fno, ico_down, n, bad_triangle, add_vertex, vno2;
+    int   vno, fno, ico_down, n, bad_triangle, add_vertex, vno2;
     MRIS *mris_ico_down, *mris_ico_base;
     FACE *f;
 
@@ -166,7 +155,7 @@ int main(int argc, char *argv[]) {
             if (f->v[n] == Gdiag_no)
               DiagBreak();
             VERTEX *const v = &mris_ico->vertices[f->v[n]];
-            v->marked = 2; // part of a bad triangle
+            v->marked       = 2; // part of a bad triangle
           }
       }
       for (vno = 0; vno < mris_ico->nvertices; vno++) {
@@ -188,7 +177,7 @@ int main(int argc, char *argv[]) {
 
     for (vno = 0; vno < mris_ico->nvertices; vno++) {
       VERTEX_TOPOLOGY const *const vt = &mris_ico->vertices_topology[vno];
-      VERTEX *const v = &mris_ico->vertices[vno];
+      VERTEX *const                v  = &mris_ico->vertices[vno];
       if (vno == Gdiag_no)
         DiagBreak();
 
@@ -232,7 +221,7 @@ int main(int argc, char *argv[]) {
   }
 #endif
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -249,23 +238,23 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   switch (toupper(*option)) {
   case 'V':
     Gdiag_no = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     printf("debugging vertex %d\n", Gdiag_no);
     break;
   case 'S':
-    nsub = atoi(argv[2]);
+    nsub  = atoi(argv[2]);
     nargs = 1;
     printf("setting # of subdivisions = %d (default = %d)\n", nsub, 3);
     break;
   case 'N':
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     printf("setting nbhd size to %d\n", nbrs);
     break;

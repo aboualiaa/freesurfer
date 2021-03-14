@@ -1,19 +1,14 @@
 function r = editmask(varargin)
 % r = editmask(varargin)
 % Edit a functional mask
-% '$Id: editmask.m,v 1.3 2011/03/02 00:04:03 nicks Exp $'
 
 
 %
 % editmask.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:03 $
-%    $Revision: 1.3 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,7 +19,7 @@ function r = editmask(varargin)
 % Reporting: freesurfer@nmr.mgh.harvard.edu
 %
 
-version = '$Id: editmask.m,v 1.3 2011/03/02 00:04:03 nicks Exp $';
+version = 'editmask.m @FS_VERSION@';
 r = 1;
 
 %% Print usage if there are no arguments %%

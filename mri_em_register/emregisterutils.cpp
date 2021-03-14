@@ -1,17 +1,12 @@
 /**
- * @file  emregisterutils.cpp
  * @brief linear registration to a gca atlas
  *
  * Various utilities
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2012/12/12 21:18:23 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011-2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,8 +18,8 @@
  *
  */
 
-#include "diag.h"
 #include "cma.h"
+#include "diag.h"
 
 #include "emregisterutils.h"
 
@@ -73,9 +68,9 @@ double local_GCAcomputeLogSampleProbability(GCA *gca, GCA_SAMPLE *gcas,
 int compute_tissue_modes(MRI *mri_inputs, GCA *gca, GCA_SAMPLE *gcas,
                          TRANSFORM *transform, int nsamples, double *pwm,
                          double *pgm, double *pfluid) {
-  int x, y, z, i, xp, yp, zp;
-  float vals[MAX_GCA_INPUTS];
-  int countOutside = 0, ngm, nwm, nfluid;
+  int    x, y, z, i, xp, yp, zp;
+  float  vals[MAX_GCA_INPUTS];
+  int    countOutside = 0, ngm, nwm, nfluid;
   double gm, wm, fluid;
 
   /* go through each GC in the sample and compute the probability of

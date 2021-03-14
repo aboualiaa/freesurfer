@@ -1,16 +1,11 @@
 /**
- * @file  LayerPointSet.h
  * @brief Layer data object for MRI volume.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/07/05 17:20:32 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,9 +21,9 @@
 #ifndef LayerPointSet_h
 #define LayerPointSet_h
 
+#include "FSPointSet.h"
 #include "LayerEditable.h"
 #include "vtkSmartPointer.h"
-#include "FSPointSet.h"
 
 class LayerMRI;
 class vtkActor;
@@ -120,7 +115,7 @@ signals:
 protected:
   virtual void OnSlicePositionChanged(int nPlane);
 
-  PointSet m_points;
+  PointSet  m_points;
   vtkActor *m_actorBalls;
   vtkActor *m_actorSpline;
   vtkActor *m_actorSlice[3];
@@ -128,7 +123,7 @@ protected:
 
   vtkSmartPointer<vtkPolyDataMapper> m_mapper;
 
-  LayerMRI *m_layerRef;
+  LayerMRI *      m_layerRef;
   QList<PointSet> m_bufferUndo;
   QList<PointSet> m_bufferRedo;
 

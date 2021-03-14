@@ -1,8 +1,8 @@
 #include "PanelFCD.h"
-#include "ui_PanelFCD.h"
 #include "LayerFCD.h"
 #include "LayerPropertyFCD.h"
 #include "MainWindow.h"
+#include "ui_PanelFCD.h"
 #include <QDebug>
 #include <QFileDialog>
 
@@ -71,7 +71,7 @@ void PanelFCD::UpdateLabelList(LayerFCD *layer_in) {
 
   ui->treeWidgetLabels->clear();
   if (layer && layer->GetFCDData()) {
-    FCD_DATA *fcd = layer->GetFCDData();
+    FCD_DATA *  fcd   = layer->GetFCDData();
     QList<bool> flags = layer->GetLabelVisibility();
     for (int i = 0; i < fcd->nlabels; i++) {
       //   if (fcd->labels[i]->n_points > 0)
@@ -127,7 +127,7 @@ void PanelFCD::OnSliderMinAreaChanged(int) {
 }
 
 void PanelFCD::OnTextSigmaReturned() {
-  bool ok;
+  bool   ok;
   double val = ui->lineEditSigma->text().trimmed().toDouble(&ok);
   if (ok) {
     LayerFCD *layer = GetCurrentLayer<LayerFCD *>();
@@ -137,7 +137,7 @@ void PanelFCD::OnTextSigmaReturned() {
 }
 
 void PanelFCD::OnTextThresholdReturned() {
-  bool ok;
+  bool   ok;
   double val = ui->lineEditThreshold->text().trimmed().toDouble(&ok);
   if (ok) {
     LayerFCD *layer = GetCurrentLayer<LayerFCD *>();
@@ -148,7 +148,7 @@ void PanelFCD::OnTextThresholdReturned() {
 
 void PanelFCD::OnTextMinAreaReturned() {
   bool ok;
-  int val = ui->lineEditMinArea->text().trimmed().toInt(&ok);
+  int  val = ui->lineEditMinArea->text().trimmed().toInt(&ok);
   if (ok) {
     LayerFCD *layer = GetCurrentLayer<LayerFCD *>();
     if (layer)
@@ -180,8 +180,8 @@ void PanelFCD::OnButtonRecompute() {
   if (layer) {
     layer->GetProperty()->blockSignals(true);
     double val;
-    int nval;
-    bool ok;
+    int    nval;
+    bool   ok;
     val = ui->lineEditThreshold->text().trimmed().toDouble(&ok);
     if (ok && val != layer->GetProperty()->GetThicknessThreshold())
       layer->GetProperty()->SetThicknessThreshold(val);

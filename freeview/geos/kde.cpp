@@ -4,14 +4,14 @@
 // Multivariate stuff from here:
 // http://sfb649.wiwi.hu-berlin.de/fedc_homepage/xplore/ebooks/html/spm/spmhtmlnode18.html
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <cmath>
-#include <iostream>
-#include <vector>
-#include <map>
 #include "kde.h"
 #include <QDebug>
+#include <cmath>
+#include <iostream>
+#include <map>
+#include <stdint.h>
+#include <stdlib.h>
+#include <vector>
 
 void KDE::calc_bandwidth() {
 
@@ -43,25 +43,25 @@ void KDE::set_kernel_type(int x) {
 
   kernel = x;
   if (kernel != 1) {
-    extension = 0;
+    extension          = 0;
     bandwidth_opt_type = 1;
   }
 }
 
 double KDE::pdf(double x) {
-  vector<double> tmp;
+  std::vector<double> tmp;
   tmp.push_back(x);
   return (pdf(tmp));
 }
 
 double KDE::pdf(double x, double y) {
-  vector<double> tmp;
+  std::vector<double> tmp;
   tmp.push_back(x);
   tmp.push_back(y);
   return (pdf(tmp));
 }
 
-double KDE::pdf(vector<double> &data) {
+double KDE::pdf(std::vector<double> &data) {
 
   calc_bandwidth();
   double d = 0.0;
@@ -89,19 +89,19 @@ double KDE::pdf(vector<double> &data) {
 }
 
 double KDE::cdf(double x) {
-  vector<double> tmp;
+  std::vector<double> tmp;
   tmp.push_back(x);
   return (cdf(tmp));
 }
 
 double KDE::cdf(double x, double y) {
-  vector<double> tmp;
+  std::vector<double> tmp;
   tmp.push_back(x);
   tmp.push_back(y);
   return (cdf(tmp));
 }
 
-double KDE::cdf(vector<double> &data) {
+double KDE::cdf(std::vector<double> &data) {
 
   calc_bandwidth();
   double d = 0.0;
@@ -134,10 +134,10 @@ void KDE::default_bandwidth() {
     std::cout << "No data!" << std::endl;
     exit(1);
   }
-  double x = sum_x_map[curr_var] / count_map[curr_var];
-  double x2 = sum_x2_map[curr_var] / count_map[curr_var];
+  double x     = sum_x_map[curr_var] / count_map[curr_var];
+  double x2    = sum_x2_map[curr_var] / count_map[curr_var];
   double sigma = sqrt(x2 - (x * x));
-  double b = sigma * (pow((3.0 * count_map[curr_var] / 4.0), (-1.0 / 5.0)));
+  double b     = sigma * (pow((3.0 * count_map[curr_var] / 4.0), (-1.0 / 5.0)));
 
   if (bandwidth_opt_type == 1)
     bandwidth_map[curr_var] = b;
@@ -158,7 +158,7 @@ void KDE::optimal_bandwidth(int maxiters, double eps) {
   double x = 0.8 * x0;
   double y = optimal_bandwidth_equation(x, get_min(curr_var), get_max(curr_var),
                                         data_matrix[curr_var]);
-  int i = 0;
+  int    i = 0;
 
   while (i < maxiters) {
     x -= y * (x0 - x) / (y0 - y);
@@ -173,12 +173,12 @@ void KDE::optimal_bandwidth(int maxiters, double eps) {
 }
 
 double KDE::optimal_bandwidth_equation(double w, double min, double max,
-                                       vector<double> &data) {
+                                       std::vector<double> &data) {
 
   double alpha = 1.0 / (2.0 * sqrt(M_PI));
   double sigma = 1.0;
-  double n = count_map[curr_var];
-  double q = stiffness_integral(w, min, max, data);
+  double n     = count_map[curr_var];
+  double q     = stiffness_integral(w, min, max, data);
   return w - pow(((n * q * pow(sigma, 4)) / alpha), (-1.0 / 5.0));
 }
 
@@ -187,15 +187,15 @@ double KDE::optimal_bandwidth_equation(double w, double min, double max,
 // error in the last step is less eps.
 
 double KDE::stiffness_integral(double w, double mn, double mx,
-                               vector<double> &data) {
+                               std::vector<double> &data) {
 
-  double eps = 1e-4;
-  double n = 1;
-  double dx = (mx - mn) / n;
+  double eps     = 1e-4;
+  double n       = 1;
+  double dx      = (mx - mn) / n;
   double curv_mx = curvature(mx, w, data);
   double curv_mn = curvature(mn, w, data);
-  double yy = 0.5 * ((curv_mx * curv_mx) + (curv_mn * curv_mn)) * dx;
-  double maxn = (mx - mn) / sqrt(eps);
+  double yy      = 0.5 * ((curv_mx * curv_mx) + (curv_mn * curv_mn)) * dx;
+  double maxn    = (mx - mn) / sqrt(eps);
 
   maxn = maxn > 2048 ? 2048 : maxn;
 
@@ -235,7 +235,7 @@ void KDE::optimal_bandwidth_safe(double eps) {
   }
 
   double x = 0.0, y = 0.0;
-  int i = 0;
+  int    i = 0;
 
   while (abs(x0 - x1) > eps * x1) {
     i += 1;
@@ -257,7 +257,7 @@ void KDE::optimal_bandwidth_safe(double eps) {
   bandwidth_map[curr_var] = x;
 }
 
-double KDE::curvature(double x, double w, vector<double> &data) {
+double KDE::curvature(double x, double w, std::vector<double> &data) {
 
   double y = 0.0;
   for (auto it = data.begin(); it != data.end(); it++) {
@@ -267,31 +267,31 @@ double KDE::curvature(double x, double w, vector<double> &data) {
 }
 
 void KDE::add_data(double x) {
-  vector<double> tmp;
+  std::vector<double> tmp;
   tmp.push_back(x);
   add_data(tmp);
 }
 
 void KDE::add_data(double x, double y) {
   // std::cout << x << "," << y << std::endl;
-  vector<double> tmp;
+  std::vector<double> tmp;
   tmp.push_back(x);
   tmp.push_back(y);
   add_data(tmp);
 }
 
-void KDE::add_data(vector<double> &x) {
+void KDE::add_data(std::vector<double> &x) {
 
   if (!data_matrix.size()) {
     for (size_t i = 0; i < x.size(); i++) {
-      vector<double> tmp;
+      std::vector<double> tmp;
       tmp.push_back(x[i]);
       data_matrix.push_back(tmp);
-      sum_x_map[i] = x[i];
-      sum_x2_map[i] = x[i] * x[i];
-      count_map[i] = 1;
-      min_map[i] = x[i];
-      max_map[i] = x[i];
+      sum_x_map[i]     = x[i];
+      sum_x2_map[i]    = x[i] * x[i];
+      count_map[i]     = 1;
+      min_map[i]       = x[i];
+      max_map[i]       = x[i];
       bandwidth_map[i] = -1.0;
     }
   } else {
@@ -303,8 +303,8 @@ void KDE::add_data(vector<double> &x) {
         sum_x_map[i] += x[i];
         sum_x2_map[i] += x[i] * x[i];
         count_map[i]++;
-        min_map[i] = x[i] < min_map[i] ? x[i] : min_map[i];
-        max_map[i] = x[i] > max_map[i] ? x[i] : max_map[i];
+        min_map[i]       = x[i] < min_map[i] ? x[i] : min_map[i];
+        max_map[i]       = x[i] > max_map[i] ? x[i] : max_map[i];
         bandwidth_map[i] = -1.0;
       }
     }

@@ -10,7 +10,7 @@ AsymmetricTensorVectorReaderStrategy::~AsymmetricTensorVectorReaderStrategy() {}
 AsymmetricTensorVectorReaderStrategy::TensorImageType::Pointer
 AsymmetricTensorVectorReaderStrategy::GetTensors() {
 
-  typedef itk::VectorImage<float, 4> FullTensorImageType;
+  typedef itk::VectorImage<float, 4>                FullTensorImageType;
   typedef itk::ImageFileReader<FullTensorImageType> FullTensorReaderType;
   FullTensorReaderType::Pointer tensorReader = FullTensorReaderType::New();
 
@@ -39,14 +39,14 @@ AsymmetricTensorVectorReaderStrategy::GetTensors() {
       fullTensors->GetLargestPossibleRegion();
   TensorImageType::SizeType size;
   double origin[TensorImageType::RegionType::GetImageDimension()];
-  TensorImageType::IndexType start;
+  TensorImageType::IndexType   start;
   TensorImageType::SpacingType spacing;
 
   for (unsigned int cDim = 0;
        cDim < TensorImageType::RegionType::GetImageDimension(); cDim++) {
-    size[cDim] = dtiRegion.GetSize()[cDim];
-    origin[cDim] = fullTensors->GetOrigin()[cDim];
-    start[cDim] = 0;
+    size[cDim]    = dtiRegion.GetSize()[cDim];
+    origin[cDim]  = fullTensors->GetOrigin()[cDim];
+    start[cDim]   = 0;
     spacing[cDim] = fullTensors->GetSpacing()[cDim];
   }
 
@@ -108,7 +108,7 @@ AsymmetricTensorVectorReaderStrategy::GetTensors() {
 
   // for some reason, I can't do this above, so I'm setting the cosine direction
   // here instead; it will seg fault otherwise.
-  TensorImageType::DirectionType dir;
+  TensorImageType::DirectionType            dir;
   const FullTensorImageType::DirectionType &fullDirection =
       fullTensors->GetDirection();
   for (unsigned int cDim = 0;

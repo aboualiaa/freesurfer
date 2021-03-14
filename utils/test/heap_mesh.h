@@ -1,17 +1,6 @@
-/**
- * @file  heap_mesh.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -116,33 +105,33 @@
 #endif
 
 typedef struct {
-  int elementSize;
-  int size;
+  int   elementSize;
+  int   size;
   void *data;
-  int capacity;
-  int capacityIncrement;
+  int   capacity;
+  int   capacityIncrement;
 } PGlistStruct;
 
 typedef PGlistStruct *PGlist;
 
-#define pgListIsEmpty(list) (list->size == 0 ? PG_TRUE : PG_FALSE)
-#define pgListSize(list) (list->size)
-#define pgListData(list) (list->data)
+#define pgListIsEmpty(list)     (list->size == 0 ? PG_TRUE : PG_FALSE)
+#define pgListSize(list)        (list->size)
+#define pgListData(list)        (list->data)
 #define pgListElementSize(list) (list->elementSize)
 
 PGlist pgList(int elementSize);
 PGlist pgList1(int elementSize, int capacity);
 PGlist pgList2(int elementSize, int capacity, int capacityIncrement);
 PGlist pgListOfSize(int size, int elementSize);
-void pgListDelete(PGlist list);
-void pgListAddElement(PGlist list, void *element);
-int pgListInsertElementAt(PGlist list, int index, void *element);
-int pgListSetElementAt(PGlist list, int index, void *element);
-int pgListElementAt(PGlist list, int index,
-                    /* stores the result at */ void *element);
-int pgListRemoveElementAt(PGlist list, int index);
-void pgListRemoveAllElements(PGlist list);
-void pgListTrim(PGlist list);
+void   pgListDelete(PGlist list);
+void   pgListAddElement(PGlist list, void *element);
+int    pgListInsertElementAt(PGlist list, int index, void *element);
+int    pgListSetElementAt(PGlist list, int index, void *element);
+int    pgListElementAt(PGlist list, int index,
+                       /* stores the result at */ void *element);
+int    pgListRemoveElementAt(PGlist list, int index);
+void   pgListRemoveAllElements(PGlist list);
+void   pgListTrim(PGlist list);
 
 /*============================================================================
 //                        PGutil private functions
@@ -162,12 +151,12 @@ void pgListTrim(PGlist list);
 /*--------------------------------------------------------------------------
 // Private functions
 //------------------------------------------------------------------------*/
-#define pgListCapacity(list) (list->capacity)
-#define pgListCapacityIncrement(list) (list->capacityIncrement)
-#define pgListSetElementSize(list, val) list->elementSize = val
-#define pgListSetSize(list, val) list->size = val
-#define pgListSetData(list, val) list->data = (void *)val
-#define pgListSetCapacity(list, val) list->capacity = val
+#define pgListCapacity(list)                  (list->capacity)
+#define pgListCapacityIncrement(list)         (list->capacityIncrement)
+#define pgListSetElementSize(list, val)       list->elementSize = val
+#define pgListSetSize(list, val)              list->size = val
+#define pgListSetData(list, val)              list->data = (void *)val
+#define pgListSetCapacity(list, val)          list->capacity = val
 #define pgListSetCapacityIncrement(list, val) list->capacityIncrement = val
 
 /* The following is the definition of HEAP data structure,
@@ -175,19 +164,19 @@ void pgListTrim(PGlist list);
  floating point value with an associated attribute of id */
 typedef struct {
   double value;
-  int id;
-  int *p; /* backpointer */
+  int    id;
+  int *  p; /* backpointer */
 } XheapElement;
 
 typedef PGlist Xheap;
 
-int xhSize(Xheap H);                      /* get size of heap */
+int   xhSize(Xheap H);                    /* get size of heap */
 Xheap xhInitEmpty();                      /* an empty heap */
 Xheap xhInit(XheapElement *array, int N); /* init from an array (0,N-1) */
-void xhDestroy(Xheap H); /* destroy the heap and free the memory */
-int xhUpHeap(int k, Xheap H);
-int xhDownHeap(int k, Xheap H);
-int xhInsert(double value, int id, int *p, Xheap H);
+void  xhDestroy(Xheap H); /* destroy the heap and free the memory */
+int   xhUpHeap(int k, Xheap H);
+int   xhDownHeap(int k, Xheap H);
+int   xhInsert(double value, int id, int *p, Xheap H);
 XheapElement xhRemove(Xheap H);
 XheapElement xhReplace(double value, int id, int *p, Xheap H);
 XheapElement xhDelete(int k, Xheap H);

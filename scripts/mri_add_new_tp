@@ -7,12 +7,8 @@
 # The new TP can then be run longitudinally.
 #
 # Original Author: Martin Reuter
-# CVS Revision Info:
-#    $Author: mreuter $
-#    $Date: 2011/05/04 18:01:39 $
-#    $Revision: 1.8 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,7 +21,7 @@
 #
 
 
-set VERSION = '$Id: mri_add_new_tp,v 1.8 2011/05/04 18:01:39 mreuter Exp $';
+set VERSION = 'mri_add_new_tp @FS_VERSION@';
 
 if ($#argv < 2) then
   echo

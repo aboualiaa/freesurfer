@@ -1,17 +1,6 @@
-/**
- * @file  main.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:40 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,18 +12,18 @@
  *
  */
 
-#include "mri.h"
 #include "error.h"
+#include "mri.h"
 
-#define SET_METHOD_XYZ 0
-#define SET_METHOD_RANDOM 1
+#define SET_METHOD_XYZ      0
+#define SET_METHOD_RANDOM   1
 #define SET_METHOD_CONSTANT 2
 
 char sSetMethods[][256] = {"XYZ", "Random", "Constant"};
 
 const char *Progname = "makevol";
 
-void PrintUsage(char *isError) {
+void PrintUsage(const char *isError) {
 
   if (isError) {
     printf("\nERROR: %s\n\n", isError);
@@ -73,21 +62,21 @@ void PrintUsage(char *isError) {
 
 int main(int argc, char **argv) {
 
-  MRI *mri = nullptr;
-  int zX = 256;
-  int zY = 256;
-  int zZ = 256;
-  int err = NO_ERROR;
-  int nX = 0;
-  int nY = 0;
-  int nZ = 0;
-  float sizeX = 1.0;
-  float sizeY = 1.0;
-  float sizeZ = 1.0;
-  int setMethod = SET_METHOD_XYZ;
-  int setValue = 0;
-  char fnVol[256] = "new_volume.mgz";
-  int i;
+  MRI * mri        = nullptr;
+  int   zX         = 256;
+  int   zY         = 256;
+  int   zZ         = 256;
+  int   err        = NO_ERROR;
+  int   nX         = 0;
+  int   nY         = 0;
+  int   nZ         = 0;
+  float sizeX      = 1.0;
+  float sizeY      = 1.0;
+  float sizeZ      = 1.0;
+  int   setMethod  = SET_METHOD_XYZ;
+  int   setValue   = 0;
+  char  fnVol[256] = "new_volume.mgz";
+  int   i;
   char *arg = nullptr;
 
   for (i = 1; i < argc; i++) {
@@ -189,7 +178,7 @@ int main(int argc, char **argv) {
           exit(1);
         }
         setMethod = SET_METHOD_CONSTANT;
-        setValue = atoi(argv[i + 2]);
+        setValue  = atoi(argv[i + 2]);
         i += 2;
         printf("set_method is constant, %d\n", setValue);
       } else {

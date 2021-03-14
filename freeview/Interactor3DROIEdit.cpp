@@ -1,16 +1,11 @@
 /**
- * @file  Interactor3DROIEdit.cpp
  * @brief Interactor for navigating in 3D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/12/11 16:04:03 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,22 +19,22 @@
  */
 
 #include "Interactor3DROIEdit.h"
-#include "RenderView3D.h"
-#include <QMouseEvent>
+#include "CursorFactory.h"
 #include "LayerROI.h"
 #include "LayerSurface.h"
 #include "MainWindow.h"
-#include "CursorFactory.h"
+#include "RenderView3D.h"
+#include <QMouseEvent>
 
 Interactor3DROIEdit::Interactor3DROIEdit(QObject *parent)
     : Interactor3D(parent), m_bEditing(false), m_nPrevVertex(-1) {}
 
 bool Interactor3DROIEdit::ProcessMouseDownEvent(QMouseEvent *event,
-                                                RenderView *renderview) {
+                                                RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
   if (event->button() == Qt::LeftButton &&
       !(event->modifiers() & CONTROL_MODIFIER)) {
-    m_bEditing = true;
+    m_bEditing    = true;
     m_nPrevVertex = -1;
     LayerROI *roi =
         (LayerROI *)MainWindow::GetMainWindow()->GetActiveLayer("ROI");
@@ -59,7 +54,7 @@ bool Interactor3DROIEdit::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor3DROIEdit::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                RenderView *renderview) {
+                                                RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
   if (m_bEditing) {
     LayerROI *roi =
@@ -90,9 +85,9 @@ bool Interactor3DROIEdit::ProcessMouseMoveEvent(QMouseEvent *event,
 }
 
 bool Interactor3DROIEdit::ProcessMouseUpEvent(QMouseEvent *event,
-                                              RenderView *renderview) {
+                                              RenderView * renderview) {
   m_bEditing = false;
-  bool ret = Interactor3D::ProcessMouseUpEvent(event, renderview);
+  bool ret   = Interactor3D::ProcessMouseUpEvent(event, renderview);
   renderview->setCursor(CursorFactory::CursorPencil);
   return ret;
 }

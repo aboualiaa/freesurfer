@@ -1,16 +1,11 @@
 /**
- * @file  stats.c
  * @brief utilities for manipulating statistical volumes
  *
  */
 /*
  * Original Authors: Bruce Fischl and Doug Greve
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/10/31 21:53:24 $
- *    $Revision: 1.40 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,8 +19,8 @@
 
 #define _STATS_SRC
 
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "const.h"
@@ -34,6 +29,7 @@
 #include "fsgdf.h"
 #include "machine.h"
 #include "matrix.h"
+#include "mghendian.h"
 #include "mri.h"
 #include "mri_identify.h"
 #include "mrinorm.h"
@@ -45,8 +41,8 @@
 
 extern const char *Progname;
 
-#define REG_ROWS 4
-#define REG_COLS 4
+#define REG_ROWS   4
+#define REG_COLS   4
 #define STRUCT_DIM 256
 
 MATRIX *StatLoadTalairachXFM(const char *subjid, const char *xfmfile);
@@ -55,17 +51,17 @@ MATRIX *StatLoadTalairachXFM(const char *subjid, const char *xfmfile);
 // Load output of asegstats2table or aparcstats2table.
 STAT_TABLE *LoadStatTable(const char *statfile) {
   STAT_TABLE *st;
-  FILE *fp;
-  char tmpstr[100000];
-  int r, c, n;
+  FILE *      fp;
+  char        tmpstr[100000];
+  int         r, c, n;
 
   fp = fopen(statfile, "r");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: could not open %s\n", statfile);
-    return (nullptr);
+    return (NULL);
   }
 
-  st = (STAT_TABLE *)calloc(sizeof(STAT_TABLE), 1);
+  st           = (STAT_TABLE *)calloc(sizeof(STAT_TABLE), 1);
   st->filename = strcpyalloc(statfile);
 
   // Read in the first line
@@ -73,13 +69,13 @@ STAT_TABLE *LoadStatTable(const char *statfile) {
   st->ncols = gdfCountItemsInString(tmpstr) - 1;
   if (st->ncols < 1) {
     printf("ERROR: format:  %s\n", statfile);
-    return (nullptr);
+    return (NULL);
   }
   printf("Found %d data colums\n", st->ncols);
 
   // Count the number of rows
   st->nrows = 0;
-  while (fgets(tmpstr, 100000, fp) != nullptr)
+  while (fgets(tmpstr, 100000, fp) != NULL)
     st->nrows++;
   printf("Found %d data rows\n", st->nrows);
   fclose(fp);
@@ -113,26 +109,26 @@ STAT_TABLE *LoadStatTable(const char *statfile) {
       n = fscanf(fp, "%lf", &(st->data[r][c]));
       if (n != 1) {
         printf("ERROR: format: %s at row %d, col %d\n", statfile, r, c);
-        return (nullptr);
+        return (NULL);
       }
     }
     // printf("%s %lf\n",st->rownames[r],st->data[r][st->ncols-1]);
   }
   fclose(fp);
 
-  st->mri = MRIallocSequence(st->ncols, 1, 1, MRI_FLOAT, st->nrows);
+  st->mri        = MRIallocSequence(st->ncols, 1, 1, MRI_FLOAT, st->nrows);
   st->mri->xsize = 1;
   st->mri->ysize = 1;
   st->mri->zsize = 1;
-  st->mri->x_r = 1;
-  st->mri->x_a = 0;
-  st->mri->x_s = 0;
-  st->mri->y_r = 0;
-  st->mri->y_a = 1;
-  st->mri->y_s = 0;
-  st->mri->z_r = 0;
-  st->mri->z_a = 0;
-  st->mri->z_s = 1;
+  st->mri->x_r   = 1;
+  st->mri->x_a   = 0;
+  st->mri->x_s   = 0;
+  st->mri->y_r   = 0;
+  st->mri->y_a   = 1;
+  st->mri->y_s   = 0;
+  st->mri->z_r   = 0;
+  st->mri->z_a   = 0;
+  st->mri->z_s   = 1;
 
   for (r = 0; r < st->nrows; r++)
     for (c = 0; c < st->ncols; c++)
@@ -143,11 +139,11 @@ STAT_TABLE *LoadStatTable(const char *statfile) {
 
 STAT_TABLE *AllocStatTable(int nrows, int ncols) {
   STAT_TABLE *st;
-  int r;
+  int         r;
 
-  st = (STAT_TABLE *)calloc(sizeof(STAT_TABLE), 1);
-  st->nrows = nrows;
-  st->ncols = ncols;
+  st           = (STAT_TABLE *)calloc(sizeof(STAT_TABLE), 1);
+  st->nrows    = nrows;
+  st->ncols    = ncols;
   st->colnames = (char **)calloc(st->ncols, sizeof(char *));
   st->rownames = (char **)calloc(st->nrows, sizeof(char *));
 
@@ -161,10 +157,10 @@ STAT_TABLE *AllocStatTable(int nrows, int ncols) {
 // Write output equivalant of asegstats2table or aparcstats2table.
 int WriteStatTable(const char *fname, STAT_TABLE *st) {
   FILE *fp;
-  int err;
+  int   err;
 
   fp = fopen(fname, "w");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: cannot open %s\n", fname);
     exit(1);
   }
@@ -190,28 +186,27 @@ int PrintStatTable(FILE *fp, STAT_TABLE *st) {
 
 STAT_TABLE *InitStatTableFromMRI(MRI *mri_in, const char *tablefile)
 // sets data from mri
-// also (if passed) reads in cols, rows and measure from tablefile (but not the
-// data)
+// also (if passed) reads in cols, rows and measure from tablefile (but not the data)
 {
-  int r, c, ncols, nrows;
+  int   r, c, ncols, nrows;
   FILE *fp;
-  char tmpstr[100000];
+  char  tmpstr[100000];
 
   STAT_TABLE *st = AllocStatTable(mri_in->nframes, mri_in->width);
-  st->mri = MRIcopy(mri_in, nullptr);
+  st->mri        = MRIcopy(mri_in, NULL);
 
   for (r = 0; r < st->nrows; r++)
     for (c = 0; c < st->ncols; c++)
       st->data[r][c] = MRIgetVoxVal(st->mri, c, 0, 0, r);
 
-  if (tablefile == nullptr || strcmp(tablefile, "") == 0)
+  if (tablefile == NULL || strcmp(tablefile, "") == 0)
     return st;
 
   // Process template table file:
   fp = fopen(tablefile, "r");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: could not open %s\n", tablefile);
-    return (nullptr);
+    return (NULL);
   }
   // Read in the first line
   fgets(tmpstr, 100000, fp);
@@ -219,17 +214,17 @@ STAT_TABLE *InitStatTableFromMRI(MRI *mri_in, const char *tablefile)
   printf("Found %d data colums\n", ncols);
   if (ncols != st->ncols) {
     printf("ERROR: Col numbers do not agree in MRI and:  %s\n", tablefile);
-    return (nullptr);
+    return (NULL);
   }
 
   // Count the number of rows
   nrows = 0;
-  while (fgets(tmpstr, 100000, fp) != nullptr)
+  while (fgets(tmpstr, 100000, fp) != NULL)
     nrows++;
   printf("Found %d data rows\n", nrows);
   if (nrows < st->nrows) {
     printf("ERROR: Not enough row headers for MRI in:  %s\n", tablefile);
-    return (nullptr);
+    return (NULL);
   }
   if (nrows > st->nrows) {
     printf("WARNING: Too many row headers for MRI in:  %s, will crop ...\n",
@@ -266,19 +261,23 @@ STAT_TABLE *InitStatTableFromMRI(MRI *mri_in, const char *tablefile)
 /*------------------------------------------------------------------------
   ------------------------------------------------------------------------*/
 fMRI_REG *StatReadRegistration(const char *fname) {
-  int float2int, err;
+  int       float2int, err;
   fMRI_REG *reg;
-  char *subject;
+  char *    subject;
 
   reg = (fMRI_REG *)calloc(1, sizeof(fMRI_REG));
   err = regio_read_register(fname, &subject, &reg->in_plane_res,
                             &reg->slice_thickness, &reg->brightness_scale,
                             &reg->mri2fmri, &float2int);
   if (err)
-    return (nullptr);
-  sprintf(reg->name, "%s", subject);
+    return (NULL);
+  int req = snprintf(reg->name, 100, "%s", subject);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   free(subject);
-  reg->fmri2mri = MatrixInverse(reg->mri2fmri, nullptr);
+  reg->fmri2mri = MatrixInverse(reg->mri2fmri, NULL);
   return (reg);
 }
 
@@ -291,23 +290,23 @@ int StatFreeRegistration(fMRI_REG **preg) {
   MatrixFree(&reg->fmri2mri);
   MatrixFree(&reg->mri2fmri);
   free(reg);
-  reg = nullptr; // yes, this leaks a small amount of memory
+  reg = NULL; // yes, this leaks a small amount of memory
   return (NO_ERROR);
 }
 
 /*------------------------------------------------------------------------
   ------------------------------------------------------------------------*/
 SV *StatReadVolume(const char *prefix) {
-  char path[STRLEN], fname[STRLEN], line[MAX_LINE_LEN], *cp;
+  char         path[STRLEN], fname[STRLEN], line[MAX_LINE_LEN], *cp;
   STAT_VOLUME *sv;
-  FILE *fp;
+  FILE *       fp;
   unsigned int nitems;
   int dof_mean, dof_sigma, event_number, slice_number, which_alloc, width,
       height, nframes, nslices, t, event, x, y, z;
   float *buf, fval;
-  int DatVersion, DOF;
-  float TER;
-  char *regfile = nullptr;
+  int    DatVersion, DOF;
+  float  TER;
+  char * regfile = NULL;
 
   FileNamePath(prefix, path);
   sv = (SV *)calloc(1, sizeof(SV));
@@ -316,18 +315,31 @@ SV *StatReadVolume(const char *prefix) {
               prefix);
 
   /* read in register.dat */
-  if (regfile != nullptr)
-    sprintf(fname, "%s", regfile);
-  else
-    sprintf(fname, "%s/register.dat", path);
+  if (regfile != NULL) {
+    int req = snprintf(fname, STRLEN, "%s", regfile);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  } else {
+    int req = snprintf(fname, STRLEN, "%s/register.dat", path);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  }
 
   sv->reg = StatReadRegistration(fname);
   if (!sv->reg)
-    return (nullptr);
+    return (NULL);
 
   /* read the selavg/selxavg dat file, if it exists */
-  sprintf(fname, "%s.dat", prefix);
-  fp = fopen(fname, "r");
+  int req = snprintf(fname, STRLEN, "%s.dat", prefix);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+  fp          = fopen(fname, "r");
   which_alloc = ALLOC_MEANS;
   if (fp) /* means there are time points and means and sigmas */
   {
@@ -357,9 +369,9 @@ SV *StatReadVolume(const char *prefix) {
     /*fprintf(stderr,"WARNING: %s: StatReadVolume():\n",Progname);
       fprintf(stderr,"%s does not exist\n",fname);*/
     fprintf(stderr, "INFO: detected volume %s as type raw\n", prefix);
-    sv->nevents = 1;
+    sv->nevents        = 1;
     sv->time_per_event = 0; /* will be filled in later by .hdr file */
-    sv->voltype = 0;
+    sv->voltype        = 0;
   }
 
   if (sv->nevents > MAX_EVENTS) {
@@ -374,10 +386,10 @@ SV *StatReadVolume(const char *prefix) {
     sprintf(fname, "%s_000.dof", prefix);
     fp = fopen(fname, "r");
     if (fp) {
-      while ((cp = fgetl(line, MAX_LINE_LEN - 1, fp)) != nullptr) {
+      while ((cp = fgetl(line, MAX_LINE_LEN - 1, fp)) != NULL) {
         sscanf(cp, "%d %d %d", &event_number, &dof_mean, &dof_sigma);
         sv->mean_dofs[event_number] = (float)dof_mean;
-        sv->std_dofs[event_number] = (float)dof_sigma;
+        sv->std_dofs[event_number]  = (float)dof_sigma;
       }
       fclose(fp);
     } else {
@@ -389,7 +401,7 @@ SV *StatReadVolume(const char *prefix) {
       DOF = 1; /* for raw type */
     for (event_number = 0; event_number < sv->nevents; event_number++) {
       sv->mean_dofs[event_number] = (float)DOF + 1;
-      sv->std_dofs[event_number] = (float)DOF;
+      sv->std_dofs[event_number]  = (float)DOF;
     }
   }
 
@@ -448,7 +460,7 @@ SV *StatReadVolume(const char *prefix) {
       ErrorReturn(NULL,
                   (ERROR_NOFILE, "StatReadVolume: could not open %s", fname));
     fscanf(fp, "%d %d %d", &width, &height, &nframes);
-    sv->slice_width = width;
+    sv->slice_width  = width;
     sv->slice_height = height;
     fclose(fp);
 
@@ -565,14 +577,14 @@ SV *StatReadVolume(const char *prefix) {
 /*------------------------------------------------------------------------
   ------------------------------------------------------------------------*/
 SV *StatReadVolume2(const char *prefix) {
-  char path[STRLEN], fname[STRLEN], line[MAX_LINE_LEN];
+  char         path[STRLEN], fname[STRLEN], line[MAX_LINE_LEN];
   STAT_VOLUME *sv;
-  FILE *fp;
-  int event_number, which_alloc, nframes, t;
-  int event, x, y, z, f, DatVersion, DOF;
-  float fval, TER;
-  char *regfile = nullptr, *hfile = nullptr;
-  MRI *h;
+  FILE *       fp;
+  int          event_number, which_alloc, nframes, t;
+  int          event, x, y, z, f, DatVersion, DOF;
+  float        fval, TER;
+  char *       regfile = NULL, *hfile = NULL;
+  MRI *        h;
 
   FileNamePath(prefix, path);
   sv = (SV *)calloc(1, sizeof(SV));
@@ -581,22 +593,31 @@ SV *StatReadVolume2(const char *prefix) {
               prefix);
 
   /* read in register.dat */
-  if (regfile != nullptr)
-    sprintf(fname, "%s", regfile);
-  else
-    sprintf(fname, "%s/register.dat", path);
+  if (regfile != NULL) {
+    int req = snprintf(fname, STRLEN, "%s", regfile);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  } else {
+    int req = snprintf(fname, STRLEN, "%s/register.dat", path);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+  }
 
   sv->reg = StatReadRegistration(fname);
   if (!sv->reg)
-    return (nullptr);
+    return (NULL);
 
   /* read the selavg/selxavg dat file, if it exists */
   sprintf(fname, "%s.dat", prefix);
-  fp = fopen(fname, "r");
+  fp          = fopen(fname, "r");
   which_alloc = ALLOC_MEANS | ALLOC_STDS;
   if (!fp) {
     printf("ERROR: could not open %s\n", fname);
-    return (nullptr);
+    return (NULL);
   }
   fgetl(line, MAX_LINE_LEN - 1, fp);
   sscanf(line, "%*s %f", &sv->tr);
@@ -628,15 +649,15 @@ SV *StatReadVolume2(const char *prefix) {
     DOF = 1; /* for raw type */
   for (event_number = 0; event_number < sv->nevents; event_number++) {
     sv->mean_dofs[event_number] = (float)DOF + 1;
-    sv->std_dofs[event_number] = (float)DOF;
+    sv->std_dofs[event_number]  = (float)DOF;
   }
 
   hfile = IDnameFromStem(prefix);
-  if (hfile == nullptr)
-    return (nullptr);
+  if (hfile == NULL)
+    return (NULL);
   h = MRIread(hfile);
-  if (h == nullptr)
-    return (nullptr);
+  if (h == NULL)
+    return (NULL);
 
   sv->nslices = h->depth;
 
@@ -700,11 +721,11 @@ int StatFree(SV **psv) {
   SV *sv;
   int event, width, height, nslices;
 
-  sv = *psv;
-  *psv = nullptr;
+  sv   = *psv;
+  *psv = NULL;
 
-  width = sv->slice_width;
-  height = sv->slice_height;
+  width   = sv->slice_width;
+  height  = sv->slice_height;
   nslices = sv->nslices;
   for (event = 0; event < sv->nevents; event++) {
     MRIfree(&sv->mri_avgs[event]);
@@ -750,13 +771,13 @@ STAT_VOLUME *StatAllocVolume(SV *sv, int nevents, int width, int height,
     if (!sv)
       ErrorExit(ERROR_NOMEMORY, "StatAllocVolume: could not allocate sv");
 
-    sv->reg = (fMRI_REG *)calloc(1, sizeof(fMRI_REG));
+    sv->reg               = (fMRI_REG *)calloc(1, sizeof(fMRI_REG));
     sv->reg->in_plane_res = sv->reg->slice_thickness = 1.0f;
     strcpy(sv->reg->name, "none");
-    sv->reg->fmri2mri = MatrixIdentity(4, nullptr);
-    sv->reg->mri2fmri = MatrixIdentity(4, nullptr);
+    sv->reg->fmri2mri  = MatrixIdentity(4, NULL);
+    sv->reg->mri2fmri  = MatrixIdentity(4, NULL);
     sv->time_per_event = time_points;
-    sv->nevents = nevents;
+    sv->nevents        = nevents;
   }
 
   for (event = 0; event < sv->nevents; event++) {
@@ -801,17 +822,17 @@ SV *StatAllocStructuralVolume(SV *sv, float fov, float resolution,
   int width, height, depth, event;
 
   width = height = depth = nint(fov / resolution);
-  sv_tal = StatAllocVolume(nullptr, sv->nevents, width, height, depth,
+  sv_tal = StatAllocVolume(NULL, sv->nevents, width, height, depth,
                            sv->time_per_event,
                            ALLOC_MEANS | ALLOC_STDS | ALLOC_DOFS);
 
   sv_tal->voltype = sv->voltype;
   strcpy(sv_tal->reg->name, name);
-  sv_tal->nslices = depth;
-  sv_tal->slice_width = width;
-  sv_tal->slice_height = height;
+  sv_tal->nslices              = depth;
+  sv_tal->slice_width          = width;
+  sv_tal->slice_height         = height;
   sv_tal->reg->slice_thickness = sv_tal->reg->in_plane_res = resolution;
-  sv_tal->reg->brightness_scale = 2.0f;
+  sv_tal->reg->brightness_scale                            = 2.0f;
 
   for (event = 0; event < sv->nevents; event++) {
     MRIsetResolution(sv_tal->mri_avgs[event], resolution, resolution,
@@ -831,8 +852,8 @@ SV *StatAllocStructuralVolume(SV *sv, float fov, float resolution,
   }
 
   sv_tal->timewindow = sv->timewindow;
-  sv_tal->prestim = sv->prestim;
-  sv_tal->tr = sv->tr;
+  sv_tal->prestim    = sv->prestim;
+  sv_tal->tr         = sv->tr;
   sv_tal->timewindow = sv->timewindow;
   return (sv_tal);
 }
@@ -842,23 +863,23 @@ int StatAccumulateSurfaceVolume(SV *sv_surf, SV *sv, MRI_SURFACE *mris) {
   int x, y, z, width, height, depth, event, t, xv, yv, zv, swidth, sheight,
       sdepth, vno;
   double xf, yf, zf, xr, yr, zr;
-  float mean, surf_mean, std, surf_std, surf_dof, dof, xoff, yoff, zoff, sxoff,
+  float  mean, surf_mean, std, surf_std, surf_dof, dof, xoff, yoff, zoff, sxoff,
       syoff, szoff, xs, ys, zs;
   VECTOR *v_struct, *v_func;
-  MRI *mri_avg, *mri_std, *mri_ctrl;
+  MRI *   mri_avg, *mri_std, *mri_ctrl;
   VERTEX *vertex;
 
-  v_func = VectorAlloc(4, MATRIX_REAL);
-  v_struct = VectorAlloc(4, MATRIX_REAL);
+  v_func                = VectorAlloc(4, MATRIX_REAL);
+  v_struct              = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v_func, 4) = VECTOR_ELT(v_struct, 4) = 1.0f;
 
-  width = sv_surf->mri_avgs[0]->width;
+  width  = sv_surf->mri_avgs[0]->width;
   height = sv_surf->mri_avgs[0]->height;
-  depth = sv_surf->mri_avgs[0]->depth;
+  depth  = sv_surf->mri_avgs[0]->depth;
 
-  swidth = sv->mri_avgs[0]->width;
+  swidth  = sv->mri_avgs[0]->width;
   sheight = sv->mri_avgs[0]->height;
-  sdepth = sv->mri_avgs[0]->depth;
+  sdepth  = sv->mri_avgs[0]->depth;
 
   xoff = (float)(width - 1) / 2.0f;
   yoff = (float)(height - 1) / 2.0f;
@@ -869,7 +890,7 @@ int StatAccumulateSurfaceVolume(SV *sv_surf, SV *sv, MRI_SURFACE *mris) {
   szoff = (float)(sv->nslices - 1) / 2.0f;
 
   mri_ctrl = MRIalloc(width, height, depth, MRI_UCHAR);
-  mri_avg = MRIallocSequence(width, height, depth, MRI_FLOAT, 2);
+  mri_avg  = MRIallocSequence(width, height, depth, MRI_FLOAT, 2);
   MRIcopyHeader(sv_surf->mri_avgs[0], mri_avg);
   mri_std = MRIallocSequence(width, height, depth, MRI_FLOAT, 2);
   MRIcopyHeader(sv_surf->mri_stds[0], mri_std);
@@ -952,12 +973,12 @@ int StatAccumulateSurfaceVolume(SV *sv_surf, SV *sv, MRI_SURFACE *mris) {
           */
           /* update means */
           surf_mean = MRIFseq_vox(mri_avg, x, y, z, 0);
-          surf_dof = MRIFseq_vox(mri_avg, x, y, z, 1);
-          mean = MRIFseq_vox(sv->mri_avgs[event], xv, yv, zv, t);
+          surf_dof  = MRIFseq_vox(mri_avg, x, y, z, 1);
+          mean      = MRIFseq_vox(sv->mri_avgs[event], xv, yv, zv, t);
           surf_mean = (surf_mean * surf_dof + mean) / (surf_dof + 1);
           MRIFseq_vox(mri_avg, x, y, z, 0) = surf_mean;
           MRIFseq_vox(mri_avg, x, y, z, 1) = ++surf_dof;
-          MRIvox(mri_ctrl, x, y, z) = CONTROL_MARKED;
+          MRIvox(mri_ctrl, x, y, z)        = CONTROL_MARKED;
 
 #if 0
           if (x == 15 && y == 20 && z == 3 && t == 0)
@@ -967,7 +988,7 @@ int StatAccumulateSurfaceVolume(SV *sv_surf, SV *sv, MRI_SURFACE *mris) {
           /* update stds */
           surf_std = MRIFseq_vox(mri_std, x, y, z, 0);
           surf_dof = MRIFseq_vox(mri_std, x, y, z, 1);
-          std = MRIFseq_vox(sv->mri_stds[event], xv, yv, zv, t);
+          std      = MRIFseq_vox(sv->mri_stds[event], xv, yv, zv, t);
 
           /* work with variances so things are linear */
           surf_std *= surf_std;
@@ -1001,19 +1022,19 @@ int StatAccumulateSurfaceVolume(SV *sv_surf, SV *sv, MRI_SURFACE *mris) {
 
             /* update means */
             surf_mean = MRIFseq_vox(sv_surf->mri_avgs[event], x, y, z, t);
-            surf_dof = MRIFseq_vox(sv_surf->mri_avg_dofs[event], x, y, z, t);
-            mean = MRIFvox(mri_avg, x, y, z);
-            dof = sv->mean_dofs[event];
+            surf_dof  = MRIFseq_vox(sv_surf->mri_avg_dofs[event], x, y, z, t);
+            mean      = MRIFvox(mri_avg, x, y, z);
+            dof       = sv->mean_dofs[event];
             surf_mean = (surf_mean * surf_dof + mean * dof) / (surf_dof + dof);
             surf_dof += dof;
             MRIFseq_vox(sv_surf->mri_avg_dofs[event], x, y, z, t) = surf_dof;
-            MRIFseq_vox(sv_surf->mri_avgs[event], x, y, z, t) = surf_mean;
+            MRIFseq_vox(sv_surf->mri_avgs[event], x, y, z, t)     = surf_mean;
 
             /* update stds */
             surf_std = MRIFseq_vox(sv_surf->mri_stds[event], x, y, z, t);
             surf_dof = MRIFseq_vox(sv_surf->mri_std_dofs[event], x, y, z, t);
-            std = MRIFvox(mri_std, x, y, z);
-            dof = sv->std_dofs[event];
+            std      = MRIFvox(mri_std, x, y, z);
+            dof      = sv->std_dofs[event];
 
             /* work with variances so things are linear */
             surf_std *= surf_std;
@@ -1022,7 +1043,7 @@ int StatAccumulateSurfaceVolume(SV *sv_surf, SV *sv, MRI_SURFACE *mris) {
                 sqrt((surf_std * surf_dof + std * dof) / (surf_dof + dof));
             surf_dof += dof;
             MRIFseq_vox(sv_surf->mri_std_dofs[event], x, y, z, t) = surf_dof;
-            MRIFseq_vox(sv_surf->mri_stds[event], x, y, z, t) = surf_std;
+            MRIFseq_vox(sv_surf->mri_stds[event], x, y, z, t)     = surf_std;
           }
         }
       }
@@ -1046,12 +1067,12 @@ int StatAccumulateTalairachVolume(SV *sv_tal, SV *sv) {
   // double   xf, yf, zf ;
   float mean, tal_mean, std, tal_std, tal_dof, dof, xoff, yoff, zoff, sxoff,
       syoff, szoff;
-  VECTOR *v_struct, *v_func;
-  MRI *mri_avg, *mri_std;
-  MATRIX *Tfunc, *Ttal;
-  MATRIX *Mcor2tal, *Mtal2cor, *Vtal2func;
-  MATRIX *Vtal, *Vfunc;
-  float xf2, yf2, zf2;
+  VECTOR *   v_struct, *v_func;
+  MRI *      mri_avg, *mri_std;
+  MATRIX *   Tfunc, *Ttal;
+  MATRIX *   Mcor2tal, *Mtal2cor, *Vtal2func;
+  MATRIX *   Vtal, *Vfunc;
+  float      xf2, yf2, zf2;
   extern int stats_fixxfm, statnorm_float2int;
 
   if (!sv) {
@@ -1063,17 +1084,17 @@ int StatAccumulateTalairachVolume(SV *sv_tal, SV *sv) {
 
   printf("INFO: statnorm_float2int = %d\n", statnorm_float2int);
 
-  v_func = VectorAlloc(4, MATRIX_REAL);
-  v_struct = VectorAlloc(4, MATRIX_REAL);
+  v_func                = VectorAlloc(4, MATRIX_REAL);
+  v_struct              = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v_func, 4) = VECTOR_ELT(v_struct, 4) = 1.0f;
 
-  width = sv_tal->mri_avgs[0]->width;
+  width  = sv_tal->mri_avgs[0]->width;
   height = sv_tal->mri_avgs[0]->height;
-  depth = sv_tal->mri_avgs[0]->depth;
+  depth  = sv_tal->mri_avgs[0]->depth;
 
-  swidth = sv->mri_avgs[0]->width;
+  swidth  = sv->mri_avgs[0]->width;
   sheight = sv->mri_avgs[0]->height;
-  sdepth = sv->mri_avgs[0]->depth;
+  sdepth  = sv->mri_avgs[0]->depth;
 
   xoff = (float)(sv_tal->mri_avgs[0]->width - 1) / 2.0f;
   yoff = (float)(sv_tal->mri_avgs[0]->height - 1) / 2.0f;
@@ -1094,15 +1115,15 @@ int StatAccumulateTalairachVolume(SV *sv_tal, SV *sv) {
   /* This section was added to circumvent MRItalairachVoxelToWorld
      and other functions. Instead, it allows loading of the file
      pointed to by stats_talxfm.*/
-  Tfunc = MRIxfmCRS2XYZtkreg(sv->mri_avgs[0]);
-  Ttal = MRIxfmCRS2XYZ(sv_tal->mri_avgs[0], 0);
+  Tfunc    = MRIxfmCRS2XYZtkreg(sv->mri_avgs[0]);
+  Ttal     = MRIxfmCRS2XYZ(sv_tal->mri_avgs[0], 0);
   Mcor2tal = StatLoadTalairachXFM(sv->reg->name, stats_talxfm);
   if (stats_fixxfm) {
     printf("INFO: devolving talairach.xfm\n");
     DevolveXFM(sv->reg->name, Mcor2tal, stats_talxfm);
   }
-  Mtal2cor = MatrixInverse(Mcor2tal, nullptr);
-  Vtal2func = MatrixInverse(Tfunc, nullptr);
+  Mtal2cor  = MatrixInverse(Mcor2tal, NULL);
+  Vtal2func = MatrixInverse(Tfunc, NULL);
   MatrixMultiply(Vtal2func, sv->reg->mri2fmri, Vtal2func);
   MatrixMultiply(Vtal2func, Mtal2cor, Vtal2func);
   MatrixMultiply(Vtal2func, Ttal, Vtal2func);
@@ -1118,9 +1139,9 @@ int StatAccumulateTalairachVolume(SV *sv_tal, SV *sv) {
   MatrixPrint(stdout, Vtal2func);
   printf("---------------------------------------------\n");
 
-  Vtal = MatrixAlloc(4, 1, MATRIX_REAL);
-  Vtal->rptr[4][1] = 1;
-  Vfunc = MatrixAlloc(4, 1, MATRIX_REAL);
+  Vtal              = MatrixAlloc(4, 1, MATRIX_REAL);
+  Vtal->rptr[4][1]  = 1;
+  Vfunc             = MatrixAlloc(4, 1, MATRIX_REAL);
   Vfunc->rptr[4][1] = 1;
   /*---------------------------------------------------------------*/
 
@@ -1131,8 +1152,8 @@ int StatAccumulateTalairachVolume(SV *sv_tal, SV *sv) {
     fflush(stdout);
     sv_tal->mean_dofs[event] += sv->mean_dofs[event];
     sv_tal->std_dofs[event] += sv->std_dofs[event];
-    mri_avg = sv_tal->mri_avgs[event];
-    mri_std = sv_tal->mri_stds[event];
+    mri_avg                   = sv_tal->mri_avgs[event];
+    mri_std                   = sv_tal->mri_stds[event];
     mri_avg->linear_transform = sv->mri_avgs[event]->linear_transform;
     mri_avg->inverse_linear_transform =
         sv->mri_avgs[event]->inverse_linear_transform;
@@ -1178,18 +1199,18 @@ int StatAccumulateTalairachVolume(SV *sv_tal, SV *sv) {
             for (t = 0; t < sv_tal->time_per_event; t++) {
               /* update means */
               tal_mean = MRIFseq_vox(sv_tal->mri_avgs[event], x, y, z, t);
-              mean = MRIFseq_vox(sv->mri_avgs[event], xv, yv, zv, t);
-              dof = sv->mean_dofs[event];
-              tal_dof = MRIFseq_vox(sv_tal->mri_avg_dofs[event], x, y, z, t);
+              mean     = MRIFseq_vox(sv->mri_avgs[event], xv, yv, zv, t);
+              dof      = sv->mean_dofs[event];
+              tal_dof  = MRIFseq_vox(sv_tal->mri_avg_dofs[event], x, y, z, t);
               tal_mean = (tal_mean * tal_dof + mean * dof) / (tal_dof + dof);
               tal_dof += dof;
               MRIFseq_vox(sv_tal->mri_avg_dofs[event], x, y, z, t) = tal_dof;
-              MRIFseq_vox(sv_tal->mri_avgs[event], x, y, z, t) = tal_mean;
+              MRIFseq_vox(sv_tal->mri_avgs[event], x, y, z, t)     = tal_mean;
 
               if (sv->voltype != 0) {
                 tal_std = MRIFseq_vox(sv_tal->mri_stds[event], x, y, z, t);
-                std = MRIFseq_vox(sv->mri_stds[event], xv, yv, zv, t);
-                dof = sv->std_dofs[event];
+                std     = MRIFseq_vox(sv->mri_stds[event], xv, yv, zv, t);
+                dof     = sv->std_dofs[event];
                 tal_dof = MRIFseq_vox(sv_tal->mri_std_dofs[event], x, y, z, t);
 
                 /* work with variances so things are linear */
@@ -1199,7 +1220,7 @@ int StatAccumulateTalairachVolume(SV *sv_tal, SV *sv) {
                     sqrt((tal_std * tal_dof + std * dof) / (tal_dof + dof));
                 tal_dof += dof;
                 MRIFseq_vox(sv_tal->mri_std_dofs[event], x, y, z, t) = tal_dof;
-                MRIFseq_vox(sv_tal->mri_stds[event], x, y, z, t) = tal_std;
+                MRIFseq_vox(sv_tal->mri_stds[event], x, y, z, t)     = tal_std;
               }
             }
           }
@@ -1218,23 +1239,32 @@ int StatAccumulateTalairachVolume(SV *sv_tal, SV *sv) {
 /*--------------------------------------------------------------
   ----------------------------------------------------------------*/
 int StatWriteVolume(SV *sv, const char *prefix) {
-  char path[STRLEN], fname[STRLEN];
-  FILE *fp;
+  char         path[STRLEN], fname[STRLEN];
+  FILE *       fp;
   unsigned int nitems;
-  int event_number, width, height, nslices, t, event, x, y, z, nframes;
-  float *buf, fval;
+  int          event_number, width, height, nslices, t, event, x, y, z, nframes;
+  float *      buf, fval;
 
-  width = sv->slice_width;
-  height = sv->slice_height;
+  width   = sv->slice_width;
+  height  = sv->slice_height;
   nslices = sv->nslices;
   FileNamePath(prefix, path);
-  sprintf(fname, "%s/register.dat", path);
+  int req = snprintf(fname, STRLEN, "%s/register.dat", path);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   StatWriteRegistration(sv->reg, fname);
 
   if (sv->voltype != 0) /* not a raw stats file (sel averaged) */
   {
     /* write the global header file */
-    sprintf(fname, "%s.dat", prefix);
+    int req = snprintf(fname, STRLEN, "%s.dat", prefix);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fp = fopen(fname, "w");
     if (!fp)
       ErrorReturn(
@@ -1401,7 +1431,7 @@ int StatWriteVolume(SV *sv, const char *prefix) {
   -------------------------------------------------------------------*/
 int StatWriteRegistration(fMRI_REG *reg, const char *fname) {
   FILE *fp;
-  int row, col;
+  int   row, col;
 
   fp = fopen(fname, "w");
   if (!fp)
@@ -1425,16 +1455,21 @@ int StatWriteRegistration(fMRI_REG *reg, const char *fname) {
   -------------------------------------------------------------------*/
 int StatReadTransform(STAT_VOLUME *sv, const char *name) {
   char *sd, subjects[STRLEN], fname[STRLEN];
-  int event;
+  int   event;
 
   /* read in the Talairach transform file */
   sd = getenv("SUBJECTS_DIR");
-  if (sd == nullptr) {
+  if (sd == NULL) {
     printf("ERROR: SUBJECTS_DIR not defined\n");
     exit(1);
   }
   strcpy(subjects, sd);
-  sprintf(fname, "%s/%s/mri/transforms/talairach.xfm", subjects, name);
+  int req = snprintf(fname, STRLEN, "%s/%s/mri/transforms/talairach.xfm",
+                     subjects, name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
 
   if (input_transform_file(fname, &sv->transform) != OK)
     ErrorPrintf(ERROR_NO_FILE, "%s: could not read xform file '%s'\n", Progname,
@@ -1453,10 +1488,14 @@ int StatReadTransform(STAT_VOLUME *sv, const char *name) {
 /*------------------------------------------------------------------------
   ------------------------------------------------------------------------*/
 int StatVolumeExists(const char *prefix) {
-  char fname[STRLEN];
+  char  fname[STRLEN];
   FILE *fp;
 
-  sprintf(fname, "%s_%3.3d.bfloat", prefix, 0);
+  int req = snprintf(fname, STRLEN, "%s_%3.3d.bfloat", prefix, 0);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fp = fopen(fname, "r");
   if (!fp)
     return (0);
@@ -1469,21 +1508,27 @@ int StatVolumeExists(const char *prefix) {
   assumed to exist in SUBJECTS_DIR/subjid/mri/transforms/xfmfile.
   ------------------------------------------------------------------------*/
 MATRIX *StatLoadTalairachXFM(const char *subjid, const char *xfmfile) {
-  char subjects[STRLEN], fname[STRLEN];
+  char    subjects[STRLEN], fname[STRLEN];
   MATRIX *Mcor2tal;
-  LTA *lta;
-  char *cp;
-  FILE *fp;
+  LTA *   lta;
+  char *  cp;
+  FILE *  fp;
 
   cp = getenv("SUBJECTS_DIR");
-  if (cp)
+  if (cp) {
     strcpy(subjects, cp);
-  else
+  } else {
     strcpy(subjects, "~inverse/subjects");
-  sprintf(fname, "%s/%s/mri/transforms/%s", subjects, subjid, xfmfile);
+  }
+  int req = snprintf(fname, STRLEN, "%s/%s/mri/transforms/%s", subjects, subjid,
+                     xfmfile);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
 
   fp = fopen(fname, "r");
-  if (fp == nullptr) {
+  if (fp == NULL) {
     printf("ERROR: could not open %s for reading \n", fname);
     exit(1);
   }
@@ -1499,18 +1544,18 @@ MATRIX *StatLoadTalairachXFM(const char *subjid, const char *xfmfile) {
 }
 FS_STATS *FSstatsRead(char *fname) {
   FS_STATS *stats;
-  char line[MAX_LINE_LEN], *cp, name[STRLEN];
-  FILE *fp;
-  int n;
+  char      line[MAX_LINE_LEN], *cp, name[STRLEN];
+  FILE *    fp;
+  int       n;
 
   fp = fopen(fname, "r");
-  if (fp == nullptr)
+  if (fp == NULL)
     ErrorReturn(NULL,
                 (ERROR_NOFILE, "FSstatsRead(%s): could not open file", fname));
 
   stats = (FS_STATS *)calloc(1, sizeof(FS_STATS));
 
-  while ((cp = fgetl(line, MAX_LINE_LEN, fp)) != nullptr)
+  while ((cp = fgetl(line, MAX_LINE_LEN, fp)) != NULL)
     stats->nlabels++;
   rewind(fp);
   stats->labels = (FS_STAT *)calloc(stats->nlabels, sizeof(FS_STAT));
@@ -1529,7 +1574,7 @@ FS_STATS *FSstatsRead(char *fname) {
 }
 
 int PrintSegStat(FILE *fp, SEGSTAT *segstat) {
-  int n, c;
+  int  n, c;
   char tmpstr[1000];
 
   fprintf(fp, "# TableCol  1 ColHeader Index \n");

@@ -1,17 +1,6 @@
-/**
- * @file  mkxsubjreg.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:13 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,15 +18,14 @@
    Date: 8/24/03
    Purpose: Create a new registration matrix that will map a functional
    to the orig of another subject.
-   $Id: mkxsubjreg.c,v 1.5 2011/03/02 00:04:13 nicks Exp $
 */
 
 #include "diag.h"
 #include "registerio.h"
-#include "version.h"
 #include "resample.h"
+#include "version.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -45,30 +33,29 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
+static int  singledash(char *flag);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mkxsubjreg.c,v 1.5 2011/03/02 00:04:13 nicks Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 
-char *srcregpath = nullptr;
-char *targregpath = nullptr;
-char *targsubj = nullptr;
-char *xfmrname = "talairach.xfm";
-char *subjects_dir = nullptr;
-char *fvolid = nullptr;
+char *      srcregpath   = NULL;
+char *      targregpath  = NULL;
+const char *targsubj     = NULL;
+const char *xfmrname     = "talairach.xfm";
+char *      subjects_dir = NULL;
+char *      fvolid       = NULL;
 
 MRI *SrcMRI, *TargMRI, *FuncMRI;
 
 int fixtkreg = 1;
-int debug = 0;
+int debug    = 0;
 /*---------------------------------------------------------------*/
 int main(int argc, char **argv) {
-  char *srcsubj;
-  float betplaneres, inplaneres, intensity;
+  char *  srcsubj;
+  float   betplaneres, inplaneres, intensity;
   MATRIX *R, *Xsrc, *invXsrc, *Xtarg, *Rtarg;
-  int float2int, err;
+  int     float2int, err;
 
   Progname = argv[0];
   argc--;
@@ -155,9 +142,9 @@ static void print_usage() {
 }
 /* ------------------------------------------------------------------ */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
-  int nargs;
+  int    nargs;
 
   if (argc < 1)
     usage_exit();
@@ -190,32 +177,32 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       srcregpath = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--targreg")) {
       if (nargc < 1)
         argnerr(option, 1);
       targregpath = pargv[0];
-      nargsused = 1;
+      nargsused   = 1;
     } else if (!strcmp(option, "--targsubj")) {
       if (nargc < 1)
         argnerr(option, 1);
-      targsubj = pargv[0];
+      targsubj  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--xfm")) {
       if (nargc < 1)
         argnerr(option, 1);
-      xfmrname = pargv[0];
+      xfmrname  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--fvol")) {
       if (nargc < 1)
         argnerr(option, 1);
-      fvolid = pargv[0];
+      fvolid    = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--sd")) {
       if (nargc < 1)
         argnerr(option, 1);
       subjects_dir = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (singledash(option))
@@ -274,7 +261,8 @@ static void dump_options(FILE *fp) {
   fprintf(fp, "xfm            %s\n", xfmrname);
   fprintf(fp, "subjects_dir   %s\n", subjects_dir);
   fprintf(fp, "Diag Level     %d\n", Gdiag_no);
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
+  return;
 }
 
 /*---------------------------------------------------------------*/
@@ -289,8 +277,8 @@ static int singledash(char *flag) {
   return (0);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

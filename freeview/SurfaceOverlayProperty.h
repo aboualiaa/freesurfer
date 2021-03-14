@@ -1,5 +1,4 @@
 /**
- * @file  SurfaceOverlayProperty.h
  * @brief The common properties available to MRI layers
  *
  * An interface implemented by a collection. Layers will get
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/05/05 18:53:39 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,13 +25,13 @@
 #define SurfaceOverlayProperty_h
 
 #include "vtkSmartPointer.h"
-#include <QObject>
 #include <QColor>
+#include <QObject>
 #include <QPair>
 #include <QVector>
 
 #ifndef QGradientStop
-typedef QPair<qreal, QColor> QGradientStop;
+typedef QPair<qreal, QColor>   QGradientStop;
 typedef QVector<QGradientStop> QGradientStops;
 #endif
 
@@ -63,26 +58,26 @@ public:
   void Copy(SurfaceOverlayProperty *p);
 
   double GetOpacity() const;
-  void SetOpacity(double opacity);
+  void   SetOpacity(double opacity);
 
-  int GetColorScale() const;
+  int  GetColorScale() const;
   void SetColorScale(int nScale);
 
   void SetSurfaceOverlay(SurfaceOverlay *overlay);
 
-  void SetMinPoint(double dValue);
+  void   SetMinPoint(double dValue);
   double GetMinPoint();
 
-  void SetMidPoint(double dValue);
+  void   SetMidPoint(double dValue);
   double GetMidPoint();
 
-  void SetMaxPoint(double dValue);
+  void   SetMaxPoint(double dValue);
   double GetMaxPoint();
 
-  void SetOffset(double dOffset);
+  void   SetOffset(double dOffset);
   double GetOffset();
 
-  int GetColorMethod();
+  int  GetColorMethod();
   void SetColorMethod(int n);
 
   bool GetColorInverse();
@@ -98,12 +93,12 @@ public:
   void SetClearHigher(bool bClear);
 
   QGradientStops GetCustomColorScale() { return m_customScale; }
-  void SetCustomColorScale(QGradientStops stops);
+  void           SetCustomColorScale(QGradientStops stops);
 
   bool GetSmooth() { return m_bSmooth; }
   void SetSmooth(bool bSmooth);
 
-  int GetSmoothSteps() { return m_nSmoothSteps; }
+  int  GetSmoothSteps() { return m_nSmoothSteps; }
   void SetSmoothSteps(int n);
 
   bool GetUsePercentile() { return m_bUsePercentile; }
@@ -125,8 +120,6 @@ public:
 
   void Reset();
 
-  void EmitColorMapChanged() { emit ColorMapChanged(); }
-
   void SetMask(SurfaceLabel *label);
 
   SurfaceLabel *GetMask() { return m_mask; }
@@ -135,6 +128,10 @@ public:
 
   void SetMaskInverse(bool b);
 
+  bool LoadCustomColorScale(const QString &filename);
+
+  bool SaveCustomColorScale(const QString &filename);
+
 signals:
   void ColorMapChanged();
   void SmoothChanged();
@@ -142,34 +139,35 @@ signals:
   void ComputeCorrelationChanged();
 
 public slots:
+  void EmitColorMapChanged() { emit ColorMapChanged(); }
   void OnLabelMaskDestroyed(QObject *label);
 
 private:
-  double m_dOpacity;
-  int m_nColorScale;
-  int m_nColorMethod;
-  double m_dMinPoint;
-  double m_dMidPoint;
-  double m_dMaxPoint;
-  double m_dOffset;
-  int m_colorMin[3];
-  int m_colorMid[3];
-  int m_colorMax[3];
-  bool m_bColorInverse;
-  bool m_bColorTruncate;
+  double         m_dOpacity;
+  int            m_nColorScale;
+  int            m_nColorMethod;
+  double         m_dMinPoint;
+  double         m_dMidPoint;
+  double         m_dMaxPoint;
+  double         m_dOffset;
+  int            m_colorMin[3];
+  int            m_colorMid[3];
+  int            m_colorMax[3];
+  bool           m_bColorInverse;
+  bool           m_bColorTruncate;
   QGradientStops m_customScale;
-  double m_dMinStop;
-  double m_dMaxStop;
-  bool m_bClearLower;
-  bool m_bClearHigher;
-  bool m_bSmooth;
-  int m_nSmoothSteps;
-  bool m_bUsePercentile;
-  bool m_bIgnoreZeros;
+  double         m_dMinStop;
+  double         m_dMaxStop;
+  bool           m_bClearLower;
+  bool           m_bClearHigher;
+  bool           m_bSmooth;
+  int            m_nSmoothSteps;
+  bool           m_bUsePercentile;
+  bool           m_bIgnoreZeros;
 
-  SurfaceLabel *m_mask;
+  SurfaceLabel * m_mask;
   unsigned char *m_maskData;
-  bool m_bInverseMask;
+  bool           m_bInverseMask;
 
   vtkRGBAColorTransferFunction *m_lut;
 

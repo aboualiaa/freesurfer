@@ -1,17 +1,6 @@
-/**
- * @file  tridec.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:41 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -31,12 +20,12 @@ const char *Progname = "tridec";
 int main(int argc, char *argv[]) {
 
   FILE *fp1, *fp2, *fp3;
-  char fname[STRLEN], fpref[STRLEN], pname[STRLEN];
-  int vnum1, vnum2, cnum2;
-  char line[STRLEN];
+  char  fname[STRLEN], fpref[STRLEN], pname[STRLEN];
+  int   vnum1, vnum2, cnum2;
+  char  line[STRLEN];
   char *data_dir, *mri_dir;
-  int i;
-  int nargs;
+  int   i;
+  int   nargs;
 
   nargs = handleVersionOption(argc, argv, "tridec");
   if (nargs && argc - nargs == 1)

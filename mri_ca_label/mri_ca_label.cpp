@@ -1,5 +1,4 @@
 /**
- * @file  mri_ca_label.c
  * @brief anisotropic nonstationary markov random field labeling
  *
  * Program for computing the MAP segmentation modeling the labeling as an
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2016/10/22 17:31:36 $
- *    $Revision: 1.115 $
  *
- * Copyright © 2011-2014 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,69 +20,83 @@
  *
  */
 
-#include <sys/utsname.h>
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/resource.h>
-
-#include "mri.h"
-#include "diag.h"
-#include "timer.h"
-#include "mri_conform.h"
-#include "gcamorph.h"
-#include "cma.h"
-#include "tags.h"
-#include "version.h"
-
+#include <sys/time.h>
+#include <sys/utsname.h>
+#include <unistd.h>
 #ifdef HAVE_OPENMP // mrisurf.c has numerous parallelized functions
 #include "romp_support.h"
 #endif
 
-static char *write_likelihood = nullptr;
-static double PRIOR_FACTOR = 1.0;
+#include "cma.h"
+#include "diag.h"
+#include "error.h"
+#include "fsinit.h"
+#include "gca.h"
+#include "gcamorph.h"
+#include "histo.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_conform.h"
+#include "mrinorm.h"
+#include "proto.h"
+#include "tags.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
+#include "version.h"
 
-static char *read_renorm_fname = nullptr;
-static char *write_renorm_fname = nullptr;
+static char * write_likelihood = NULL;
+static double PRIOR_FACTOR     = 1.0;
 
-static double Gvent_topo_dist = 3;
+static char *read_renorm_fname  = NULL;
+static char *write_renorm_fname = NULL;
+
+static double Gvent_topo_dist           = 3;
 static double Gvent_topo_volume_thresh1 = 50;
 static double Gvent_topo_volume_thresh2 = 100;
 
 static int remove_cerebellum = 0;
-static int remove_lh = 0;
-static int remove_rh = 0;
+static int remove_lh         = 0;
+static int remove_rh         = 0;
 
-static int GCAremoveWMSA(GCA *gca);
-static char *example_T1 = nullptr;
-static char *example_segmentation = nullptr;
-static char *save_gca_fname = nullptr;
+static int   GCAremoveWMSA(GCA *gca);
+static char *example_T1           = NULL;
+static char *example_segmentation = NULL;
+static char *save_gca_fname       = NULL;
 
-static char *surf_name = nullptr;
-static char *surf_dir = nullptr;
-static int rescale = 0;
+static char *surf_name = NULL;
+static char *surf_dir  = NULL;
+static int   rescale   = 0;
 static float Glabel_scales[MAX_CMA_LABELS];
 static float Glabel_offsets[MAX_CMA_LABELS];
 
 static float gsmooth_sigma = -1;
 #define MAX_READS 100
-static int nreads = 0;
+static int   nreads = 0;
 static char *read_intensity_fname[MAX_READS];
-static float regularize = 0;
+static float regularize      = 0;
 static float regularize_mean = 0;
-static int avgs = 0;
-static int norm_PD = 0;
-static int map_to_flash = 0;
+static int   avgs            = 0;
+static int   norm_PD         = 0;
+static int   map_to_flash    = 0;
 
-static int reclassify_unlikely = 0;
+static int    reclassify_unlikely   = 0;
 static double unlikely_prior_thresh = 0.3;
-static int unlikely_wsize = 9;
+static int    unlikely_wsize        = 9;
 #if 0
 static float unlikely_sigma = .5 ;
 // more than this many sigmas from mean means unlikely:
 static float unlikely_mah_dist_thresh = 4 ;
 #endif
 
-static int wmsa = 0;   // apply wmsa postprocessing (using T2/PD data)
+static int wmsa   = 0; // apply wmsa postprocessing (using T2/PD data)
 static int nowmsa = 0; // remove all wmsa labels from the atlas
-static int fcd = 0;    // don't check for focal cortical dysplasias
+static int fcd    = 0; // don't check for focal cortical dysplasias
 
 static int handle_expanded_ventricles = 0;
 
@@ -99,7 +108,7 @@ static double TEs[MAX_GCA_INPUTS];
 
 static MRI *GCArelabelUnlikely(GCA *gca, MRI *mri_inputs, TRANSFORM *transform,
                                MRI *mri_src_labeled, MRI *mri_dst_labeled,
-                               MRI *mri_independent_posterior,
+                               MRI *  mri_independent_posterior,
                                double prior_thresh, int whalf);
 static MRI *fix_putamen(GCA *gca, MRI *mri_inputs, MRI *mri_imp,
                         TRANSFORM *transform, MRI *mri_src_labeled,
@@ -115,9 +124,9 @@ static double compute_conditional_density(MATRIX *m_inv_cov,
     VECTOR *v_vals) ;
 #endif
 
-static MRI *replace_cortex_far_from_surface_with_wmsa(MRI *mri_inputs,
-                                                      MRI *mri_src,
-                                                      MRI *mri_dst,
+static MRI *replace_cortex_far_from_surface_with_wmsa(MRI *        mri_inputs,
+                                                      MRI *        mri_src,
+                                                      MRI *        mri_dst,
                                                       MRI_SURFACE *mris_lh,
                                                       MRI_SURFACE *mris_rh);
 static MRI *MRIexpandVentricles(MRI *mri_labeled_src, MRI *mri_labeled,
@@ -142,85 +151,83 @@ int edit_amygdala(MRI *mri_in, MRI *mri_labeled, GCA *gca, TRANSFORM *transform,
 
 int MRIcountNbhdLabels(MRI *mri, int x, int y, int z, int label);
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
-static char *tl_gca_fname = nullptr;
-static double TR = -1;
-static double alpha = -1;
-static double TE = -1;
-static char *tissue_parms_fname = nullptr;
-static char *mask_volume_fname = nullptr;
-static int histo_norm = 0;
+static char * tl_gca_fname       = NULL;
+static double TR                 = -1;
+static double alpha              = -1;
+static double TE                 = -1;
+static char * tissue_parms_fname = NULL;
+static char * mask_volume_fname  = NULL;
+static int    histo_norm         = 0;
 
 const char *Progname;
 static void usage_exit(int code);
 
-static int novar = 0;
-static char *renormalization_fname = nullptr;
-static int renormalize_wsize = 0;
-static int renormalize_iter = 0;
-static int renormalize_new = 0;
-static int renormalize_align = 0;
-static int no_old_renormalize = 1;
-static int filter = 0;
-static float pthresh = .7;
+static int   novar                 = 0;
+static char *renormalization_fname = NULL;
+static int   renormalize_wsize     = 0;
+static int   renormalize_iter      = 0;
+static int   renormalize_new       = 0;
+static int   renormalize_align     = 0;
+static int   no_old_renormalize    = 1;
+static int   filter                = 0;
+static float pthresh               = .7;
 #if 0
 static float thresh = 0.5 ;
 #endif
-static char *reg_fname = nullptr;
-static char *read_fname = nullptr;
+static char *reg_fname  = NULL;
+static char *read_fname = NULL;
 
-static char *wm_fname = nullptr;
-static int fixed_flag = 0;
-static char *heq_fname = nullptr;
-static int max_iter = 200;
-static int mle_niter = 2;
-static int no_gibbs = 0;
-static int anneal = 0;
-static char *mri_fname = nullptr;
-static int hippocampus_flag = 1;
-static char *wmsa_probs = nullptr;
+static char *wm_fname         = NULL;
+static int   fixed_flag       = 0;
+static char *heq_fname        = NULL;
+static int   max_iter         = 200;
+static int   mle_niter        = 2;
+static int   no_gibbs         = 0;
+static int   anneal           = 0;
+static char *mri_fname        = NULL;
+static int   hippocampus_flag = 1;
+static char *wmsa_probs       = NULL;
 
 #define CMA_PARCELLATION 0
 static int parcellation_type = CMA_PARCELLATION;
 
-MRI *insert_wm_segmentation(MRI *mri_labeled, MRI *mri_wm,
-                            int parcellation_type, int fixed_flag, GCA *gca,
-                            TRANSFORM *transform);
-int MRItoUCHAR(MRI **pmri);
+MRI *        insert_wm_segmentation(MRI *mri_labeled, MRI *mri_wm,
+                                    int parcellation_type, int fixed_flag, GCA *gca,
+                                    TRANSFORM *transform);
+int          MRItoUCHAR(MRI **pmri);
 extern char *gca_write_fname;
-extern int gca_write_iterations;
+extern int   gca_write_iterations;
 
-// static int expand_flag = TRUE ;
-static int expand_flag = FALSE;
-static int expand_ventricle_flag = FALSE;
-static int conform_flag = FALSE;
+//static int expand_flag = TRUE ;
+static int     expand_flag           = FALSE;
+static int     expand_ventricle_flag = FALSE;
+static int     conform_flag          = FALSE;
 struct utsname uts;
-char *cmdline2, cwd[2000];
-char *rusage_file=NULL;
-char *PreGibbsFile=NULL;
-int n_omp_threads;
+char *         cmdline2, cwd[2000];
+char *         rusage_file  = NULL;
+char *         PreGibbsFile = NULL;
+int            n_omp_threads;
 
-int main(int argc, char *argv[])
-{
-  char         **av ;
-  int          ac, nargs, extra ;
-  char         *in_fname, *out_fname,  *gca_fname, *xform_fname;
-  MRI          *mri_inputs, *mri_labeled, *mri_fixed = NULL, *mri_tmp, *mri_independent_posterior = NULL ;
-  int          msec, minutes, seconds, ninputs, input ;
-  Timer start ;
-  GCA          *gca ;
-  TRANSFORM     *transform ;
+int main(int argc, char *argv[]) {
+  char **av;
+  int    ac, nargs, extra;
+  char * in_fname, *out_fname, *gca_fname, *xform_fname;
+  MRI *  mri_inputs, *mri_labeled, *mri_fixed = NULL, *mri_tmp,
+                                 *mri_independent_posterior = NULL;
+  int        msec, minutes, seconds, ninputs, input;
+  Timer      start;
+  GCA *      gca;
+  TRANSFORM *transform;
 
-
-  FSinit() ;
+  FSinit();
   std::string cmdline = getAllInfo(argc, argv, "mri_ca_label");
 
   nargs = handleVersionOption(argc, argv, "mri_ca_label");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
   cmdline2 = argv2cmdline(argc, argv);
@@ -239,11 +246,10 @@ int main(int argc, char *argv[])
 
   Progname = argv[0];
 
-
   setRandomSeed(-1L);
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
@@ -257,15 +263,15 @@ int main(int argc, char *argv[])
 
 #ifdef HAVE_OPENMP
   n_omp_threads = omp_get_max_threads();
-  printf("\n== Number of threads available to for OpenMP = %d == \n",n_omp_threads);
+  printf("\n== Number of threads available to for OpenMP = %d == \n",
+         n_omp_threads);
 #else
   printf("Do not have OpenMP\n");
   n_omp_threads = 1;
 #endif
 
-  if (getenv("BUILD_GCA_HISTO") != NULL)
-  {
-    int *counts, i, max_i ;
+  if (getenv("BUILD_GCA_HISTO") != NULL) {
+    int *counts, i, max_i;
 
     fprintf(stderr, "reading gca from %s\n", argv[1]);
     gca = GCAread(argv[1]);
@@ -295,11 +301,11 @@ int main(int argc, char *argv[])
     usage_exit(1);
   }
 
-  in_fname = argv[1];
+  in_fname    = argv[1];
   xform_fname = argv[argc - 3];
-  gca_fname = argv[argc - 2];
-  out_fname = argv[argc - 1];
-  ninputs = argc - 4;
+  gca_fname   = argv[argc - 2];
+  out_fname   = argv[argc - 1];
+  ninputs     = argc - 4;
 
   printf("reading %d input volumes\n", ninputs);
 
@@ -385,7 +391,7 @@ int main(int argc, char *argv[])
       MRI *mri_tmp2;
 
       mri_tmp2 = MRIconform(mri_tmp);
-      mri_tmp = mri_tmp2;
+      mri_tmp  = mri_tmp2;
     }
 
     if (input == 0) {
@@ -403,7 +409,7 @@ int main(int argc, char *argv[])
       MRI *mri_dir, /**mri_grad,*/ *mri_kernel, *mri_smooth;
 
       mri_kernel = MRIgaussian1d(1, 15);
-      mri_smooth = MRIconvolveGaussian(mri_tmp, nullptr, mri_kernel);
+      mri_smooth = MRIconvolveGaussian(mri_tmp, NULL, mri_kernel);
       MRIfree(&mri_kernel);
 #if 0
       mri_grad = MRIsobel(mri_smooth, NULL, NULL) ;
@@ -411,7 +417,7 @@ int main(int argc, char *argv[])
       MRIfree(&mri_grad) ;
       MRIwrite(mri_dir, "dir.mgz") ;
 #else
-      mri_dir = MRIgradientDir2ndDerivative(mri_tmp, nullptr, 5);
+      mri_dir = MRIgradientDir2ndDerivative(mri_tmp, NULL, 5);
       MRIscaleAndMultiply(mri_tmp, 128.0, mri_dir, mri_tmp);
       MRIwrite(mri_dir, "lap.mgz");
       MRIwrite(mri_tmp, "filtered.mgz");
@@ -465,8 +471,8 @@ int main(int argc, char *argv[])
   //
   if (gca->type == GCA_FLASH) {
     GCA *gca_tmp;
-    int need_map_flag = 0;
-    int n;
+    int  need_map_flag = 0;
+    int  n;
 
     if (gca->ninputs != mri_inputs->nframes) {
       need_map_flag = 1;
@@ -521,11 +527,11 @@ int main(int argc, char *argv[])
   }
 
   if (gca->flags & GCA_GRAD) {
-    int i, start = ninputs;
+    int  i, start = ninputs;
     MRI *mri_kernel, *mri_smooth, *mri_grad, *mri_tmp;
 
     mri_kernel = MRIgaussian1d(1.0, 30);
-    mri_smooth = MRIconvolveGaussian(mri_inputs, nullptr, mri_kernel);
+    mri_smooth = MRIconvolveGaussian(mri_inputs, NULL, mri_kernel);
 
     if (mri_inputs->type != MRI_FLOAT) {
       mri_tmp = MRISeqchangeType(mri_inputs, MRI_FLOAT, 0, 0, 1);
@@ -535,7 +541,7 @@ int main(int argc, char *argv[])
     start = ninputs;
     if (gca->flags & GCA_XGRAD) {
       for (i = 0; i < ninputs; i++) {
-        mri_grad = MRIxSobel(mri_smooth, nullptr, i);
+        mri_grad = MRIxSobel(mri_smooth, NULL, i);
         MRIcopyFrame(mri_grad, mri_inputs, 0, start + i);
         MRIfree(&mri_grad);
       }
@@ -543,7 +549,7 @@ int main(int argc, char *argv[])
     }
     if (gca->flags & GCA_YGRAD) {
       for (i = 0; i < ninputs; i++) {
-        mri_grad = MRIySobel(mri_smooth, nullptr, i);
+        mri_grad = MRIySobel(mri_smooth, NULL, i);
         MRIcopyFrame(mri_grad, mri_inputs, 0, start + i);
         MRIfree(&mri_grad);
       }
@@ -551,7 +557,7 @@ int main(int argc, char *argv[])
     }
     if (gca->flags & GCA_ZGRAD) {
       for (i = 0; i < ninputs; i++) {
-        mri_grad = MRIzSobel(mri_smooth, nullptr, i);
+        mri_grad = MRIzSobel(mri_smooth, NULL, i);
         MRIcopyFrame(mri_grad, mri_inputs, 0, start + i);
         MRIfree(&mri_grad);
       }
@@ -585,7 +591,7 @@ int main(int argc, char *argv[])
 
     TransformInvert(transform, mri_inputs);
   } else {
-    transform = TransformAlloc(LINEAR_VOX_TO_VOX, nullptr);
+    transform = TransformAlloc(LINEAR_VOX_TO_VOX, NULL);
   }
 
   if (Ggca_x >= 0 && Gx < 0) {
@@ -596,17 +602,17 @@ int main(int argc, char *argv[])
     GCAdump(gca, mri_inputs, Ggca_x, Ggca_y, Ggca_z, transform, stdout, 0);
   }
   if (renormalization_fname) {
-    FILE *fp;
-    int *labels, nlines, i;
+    FILE * fp;
+    int *  labels, nlines, i;
     float *intensities, f1, f2;
-    char *cp, line[STRLEN];
+    char * cp, line[STRLEN];
 
     fp = fopen(renormalization_fname, "r");
     if (!fp)
       ErrorExit(ERROR_NOFILE, "%s: could not read %s", Progname,
                 renormalization_fname);
 
-    cp = fgetl(line, 199, fp);
+    cp     = fgetl(line, 199, fp);
     nlines = 0;
     while (cp) {
       nlines++;
@@ -614,12 +620,12 @@ int main(int argc, char *argv[])
     }
     rewind(fp);
     printf("reading %d labels from %s\n", nlines, renormalization_fname);
-    labels = (int *)calloc(nlines, sizeof(int));
+    labels      = (int *)calloc(nlines, sizeof(int));
     intensities = (float *)calloc(nlines, sizeof(float));
-    cp = fgetl(line, 199, fp);
+    cp          = fgetl(line, 199, fp);
     for (i = 0; i < nlines; i++) {
       sscanf(cp, "%e  %e", &f1, &f2);
-      labels[i] = (int)f1;
+      labels[i]      = (int)f1;
       intensities[i] = f2;
       if (labels[i] == Left_Cerebral_White_Matter) {
         DiagBreak();
@@ -639,7 +645,7 @@ int main(int argc, char *argv[])
     float label_scales_total[MAX_CMA_LABELS],
         label_offsets_total[MAX_CMA_LABELS];
     char *fname;
-    int i, l;
+    int   i, l;
 
     memset(label_scales_total, 0, sizeof(label_scales_total));
     memset(label_offsets_total, 0, sizeof(label_offsets_total));
@@ -680,14 +686,12 @@ int main(int argc, char *argv[])
 
   GCAfixSingularCovarianceMatrices(gca);
   if (renorm_with_histos) {
-    GCAmapRenormalizeWithHistograms(gca, mri_inputs, transform, nullptr,
-                                    "ca_label", nullptr, nullptr, nullptr,
-                                    nullptr);
+    GCAmapRenormalizeWithHistograms(gca, mri_inputs, transform, NULL,
+                                    "ca_label", NULL, NULL, NULL, NULL);
   }
-  if (read_fname != nullptr &&
-      reg_fname == nullptr) /* use given segmentation */
+  if (read_fname != NULL && reg_fname == NULL) /* use given segmentation */
   {
-    // read in initial segmentation from file read_fname
+    //read in initial segmentation from file read_fname
     mri_labeled = MRIread(read_fname);
     if (!mri_labeled)
       ErrorExit(ERROR_NOFILE, "%s: could not read segmentation from %s",
@@ -706,16 +710,16 @@ int main(int argc, char *argv[])
       GCAdump(gca, mri_inputs, Ggca_x, Ggca_y, Ggca_z, transform, stdout, 0);
     }
     GCAreclassifyUsingGibbsPriors(mri_inputs, gca, mri_labeled, transform,
-                                  max_iter, mri_fixed, 0, nullptr, PRIOR_FACTOR,
+                                  max_iter, mri_fixed, 0, NULL, PRIOR_FACTOR,
                                   PRIOR_FACTOR);
   } else // don't read old one in - create new labeling
   {
-    if (reg_fname == nullptr) // so read_fname must be NULL too
+    if (reg_fname == NULL) //so read_fname must be NULL too
     {
       printf("labeling volume...\n");
       // create labeled volume by MAP rule
-      mri_labeled = GCAlabel(mri_inputs, gca, nullptr, transform);
-      mri_independent_posterior = MRIcopy(mri_labeled, nullptr);
+      mri_labeled               = GCAlabel(mri_inputs, gca, NULL, transform);
+      mri_independent_posterior = MRIcopy(mri_labeled, NULL);
       // -wm fname option
       if (wm_fname) {
         MRI *mri_wm;
@@ -732,11 +736,11 @@ int main(int argc, char *argv[])
           MRIwrite(mri_labeled, out_fname);
         }
         MRIfree(&mri_wm);
-      } // if (wm_fname)
+      } //if (wm_fname)
       else
       // just clone the labeled one
       {
-        mri_fixed = MRIclone(mri_labeled, nullptr);
+        mri_fixed = MRIclone(mri_labeled, NULL);
       }
 
       if (gca_write_iterations != 0) {
@@ -748,9 +752,9 @@ int main(int argc, char *argv[])
       // renormalize iteration
       if (renormalize_align) {
         FILE *logfp;
-        char base_name[STRLEN];
+        char  base_name[STRLEN];
 
-        // FileNameOnly(out_fname, base_name) ;
+        //FileNameOnly(out_fname, base_name) ;
         FileNameRemoveExtension(out_fname, base_name);
         if (Gdiag & DIAG_WRITE) {
           char fname[STRLEN];
@@ -758,7 +762,7 @@ int main(int argc, char *argv[])
           strcat(fname, ".log");
           logfp = fopen(fname, "w");
         } else {
-          logfp = nullptr;
+          logfp = NULL;
         }
         if (!no_old_renormalize) {
           GCAmapRenormalize(gca, mri_inputs, transform);
@@ -776,13 +780,13 @@ int main(int argc, char *argv[])
         } else {
           // initial call (returning the label_* infos)
           GCAcomputeRenormalizationWithAlignment(
-              gca, mri_inputs, transform, logfp, base_name, nullptr,
+              gca, mri_inputs, transform, logfp, base_name, NULL,
               handle_expanded_ventricles, label_scales, label_offsets,
               label_peaks, label_computed);
           // sequential call gets passed the results from first call
           // will overwrite the intensity.txt file with combinded results
           GCAseqRenormalizeWithAlignment(
-              gca, mri_inputs, transform, logfp, base_name, nullptr,
+              gca, mri_inputs, transform, logfp, base_name, NULL,
               handle_expanded_ventricles, label_scales, label_offsets,
               label_peaks, label_computed);
           if (Ggca_x >= 0)
@@ -804,17 +808,17 @@ int main(int argc, char *argv[])
           GCAwrite(gca, save_gca_fname);
         }
         if (renormalization_fname) {
-          FILE *fp;
-          int *labels, nlines, i;
+          FILE * fp;
+          int *  labels, nlines, i;
           float *intensities, f1, f2;
-          char *cp, line[STRLEN];
+          char * cp, line[STRLEN];
 
           fp = fopen(renormalization_fname, "r");
           if (!fp)
             ErrorExit(ERROR_NOFILE, "%s: could not read %s", Progname,
                       renormalization_fname);
 
-          cp = fgetl(line, 199, fp);
+          cp     = fgetl(line, 199, fp);
           nlines = 0;
           while (cp) {
             nlines++;
@@ -822,12 +826,12 @@ int main(int argc, char *argv[])
           }
           rewind(fp);
           printf("reading %d labels from %s\n", nlines, renormalization_fname);
-          labels = (int *)calloc(nlines, sizeof(int));
+          labels      = (int *)calloc(nlines, sizeof(int));
           intensities = (float *)calloc(nlines, sizeof(float));
-          cp = fgetl(line, 199, fp);
+          cp          = fgetl(line, 199, fp);
           for (i = 0; i < nlines; i++) {
             sscanf(cp, "%e  %e", &f1, &f2);
-            labels[i] = (int)f1;
+            labels[i]      = (int)f1;
             intensities[i] = f2;
             if (labels[i] == Left_Cerebral_White_Matter) {
               DiagBreak();
@@ -843,10 +847,10 @@ int main(int argc, char *argv[])
         GCAlabel(mri_inputs, gca, mri_labeled, transform);
 
         /*
-          try to create a better starting labeling by relabeling regions
-          of a label that disagree with the atlas label all at once
+          try to create a better starting labeling by relabeling regions 
+          of a label that disagree with the atlas label all at once 
           (the MRF stuff is prone to local minima where flipping one
-          label increases the energy, but flipping a bunch all at
+          label increases the energy, but flipping a bunch all at 
           once lowers it)
         */
         if (reclassify_unlikely) {
@@ -856,7 +860,7 @@ int main(int argc, char *argv[])
         }
         {
           MRI *mri_imp;
-          mri_imp = GCAmarkImpossible(gca, mri_labeled, nullptr, transform);
+          mri_imp = GCAmarkImpossible(gca, mri_labeled, NULL, transform);
           fix_putamen(gca, mri_inputs, mri_imp, transform, mri_labeled,
                       mri_labeled, -.1);
           if (Gdiag & DIAG_WRITE) {
@@ -885,7 +889,7 @@ int main(int argc, char *argv[])
       if (fixed_flag == 0) {
         MRIfree(&mri_fixed);
       }
-    }    // if(reg_fname == NULL)
+    }    //if(reg_fname == NULL)
     else /* processing longitudinal data (old version) */
     {
       ErrorExit(ERROR_BADPARM,
@@ -896,8 +900,8 @@ int main(int argc, char *argv[])
       // suppose the seg is from tp1 and
       // transform is to align tp1 to current tp
       TRANSFORM *transform_long;
-      MRI *mri_tmp;
-      VOL_GEOM vgm_in;
+      MRI *      mri_tmp;
+      VOL_GEOM   vgm_in;
       mri_labeled = MRIread(read_fname);
       if (!mri_labeled)
         ErrorExit(ERROR_NOFILE, "%s: could not read segmentation from %s",
@@ -906,17 +910,17 @@ int main(int argc, char *argv[])
              "computed segmentation %s\n",
              reg_fname, read_fname);
       transform_long = TransformRead(reg_fname);
-      if (transform_long == nullptr)
+      if (transform_long == NULL)
         ErrorExit(ERROR_NOFILE, "%s: could not open registration file %s",
                   Progname, reg_fname);
 
       {
         LTA *lta = (LTA *)transform_long->xform;
         if (lta->xforms[0].src.valid == 0) {
-          LTAmodifySrcDstGeom(lta, mri_labeled, nullptr); // add src info
+          LTAmodifySrcDstGeom(lta, mri_labeled, NULL); //add src info
         }
         if (lta->xforms[0].dst.valid == 0) {
-          LTAmodifySrcDstGeom(lta, nullptr, mri_inputs); // add dst information
+          LTAmodifySrcDstGeom(lta, NULL, mri_inputs); //add dst information
         }
         LTAchangeType(lta, LINEAR_VOX_TO_VOX);
 
@@ -974,7 +978,7 @@ int main(int argc, char *argv[])
 
       if (renormalize_align) {
         FILE *logfp;
-        char base_name[STRLEN];
+        char  base_name[STRLEN];
 
         FileNameOnly(out_fname, base_name);
         FileNameRemoveExtension(base_name, base_name);
@@ -984,16 +988,16 @@ int main(int argc, char *argv[])
           strcat(fname, ".log");
           logfp = fopen(fname, "w");
         } else {
-          logfp = nullptr;
+          logfp = NULL;
         }
         GCAmapRenormalizeWithAlignment(gca, mri_inputs, transform, logfp,
-                                       base_name, nullptr,
+                                       base_name, NULL,
                                        handle_expanded_ventricles);
       }
       if (save_gca_fname) {
         GCAwrite(gca, save_gca_fname);
       }
-      // This normalization seems to bias WM to gets larger
+      //This normalization seems to bias WM to gets larger
 #if 0
       if (ninputs == 1)
       {
@@ -1016,60 +1020,54 @@ int main(int argc, char *argv[])
 
 #endif
 
-    } // else /* processing long data */
+    } //else /* processing long data */
 
-    if(PreGibbsFile){
-      printf("Saving pre-gibbs to %s\n",PreGibbsFile);
+    if (PreGibbsFile) {
+      printf("Saving pre-gibbs to %s\n", PreGibbsFile);
       int err;
-      err = MRIwrite(mri_labeled,PreGibbsFile);
-      if(err) exit(1);
+      err = MRIwrite(mri_labeled, PreGibbsFile);
+      if (err)
+        exit(1);
     }
 
-    if (!no_gibbs)
-    {
-      if (anneal)
-      {
-        GCAanneal(mri_inputs, gca, mri_labeled, 
-                  transform, max_iter, PRIOR_FACTOR) ;
-      }
-      else
-      {
-        if (Ggca_x >= 0)
-        {
-          GCAdump(gca, mri_inputs, Ggca_x, Ggca_y, Ggca_z,
-                  transform, stdout, 0) ;
+    if (!no_gibbs) {
+      if (anneal) {
+        GCAanneal(mri_inputs, gca, mri_labeled, transform, max_iter,
+                  PRIOR_FACTOR);
+      } else {
+        if (Ggca_x >= 0) {
+          GCAdump(gca, mri_inputs, Ggca_x, Ggca_y, Ggca_z, transform, stdout,
+                  0);
         }
-	printf("Reclassifying using Gibbs Priors\n");
-        GCAreclassifyUsingGibbsPriors
-        (mri_inputs, gca, mri_labeled, transform, max_iter,
-         mri_fixed, 0, NULL, PRIOR_FACTOR, PRIOR_FACTOR);
-        if (reclassify_unlikely)
-        {
-	  int w ;
+        printf("Reclassifying using Gibbs Priors\n");
+        GCAreclassifyUsingGibbsPriors(mri_inputs, gca, mri_labeled, transform,
+                                      max_iter, mri_fixed, 0, NULL,
+                                      PRIOR_FACTOR, PRIOR_FACTOR);
+        if (reclassify_unlikely) {
+          int w;
 
-	  for (w = (unlikely_wsize-1)/2 ; w >= 1 ; w--)
-	  {
-	    GCArelabelUnlikely(gca, mri_inputs, transform, 
-			       mri_labeled, mri_labeled, mri_independent_posterior,
-			       unlikely_prior_thresh, w) ;
-	    if (gca_write_iterations != 0)
-	    {
-	      char fname[STRLEN] ;
-	      sprintf(fname, "%s_un.w%d.mgz", gca_write_fname, w) ;
-	      printf("writing snapshot to %s\n", fname) ;
-	      MRIwrite(mri_labeled, fname) ;
-	    }
-	  }
+          for (w = (unlikely_wsize - 1) / 2; w >= 1; w--) {
+            GCArelabelUnlikely(gca, mri_inputs, transform, mri_labeled,
+                               mri_labeled, mri_independent_posterior,
+                               unlikely_prior_thresh, w);
+            if (gca_write_iterations != 0) {
+              char fname[STRLEN];
+              sprintf(fname, "%s_un.w%d.mgz", gca_write_fname, w);
+              printf("writing snapshot to %s\n", fname);
+              MRIwrite(mri_labeled, fname);
+            }
+          }
         }
       }
     }
   }
-
-  //  if (read_fname == NULL && 0)
-  //  {
-  //    GCAmaxLikelihoodBorders(gca, mri_inputs, mri_labeled, mri_labeled,
-  //                            transform,mle_niter, 5.0);
-  //  }
+  // TODO(aboualiaa): this condition is always false, is this code at all necessary
+#if 0
+  if (read_fname == NULL && 0) {
+    GCAmaxLikelihoodBorders(gca, mri_inputs, mri_labeled, mri_labeled,
+                            transform, mle_niter, 5.0);
+  }
+#endif
   if (expand_ventricle_flag) {
     GCAexpandVentricle(gca, mri_inputs, mri_labeled, mri_labeled, transform,
                        Left_Lateral_Ventricle);
@@ -1109,13 +1107,13 @@ int main(int argc, char *argv[])
     MRIwrite(mri_labeled, fname);
   }
 
-  if (false && reclassify_unlikely) {
+  if (0 && reclassify_unlikely) {
     MRI *mri_sigma;
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
       MRIwrite(mri_labeled, "aseg_before.mgz");
     }
     mri_sigma =
-        GCAcomputeOptimalScale(gca, transform, mri_inputs, mri_labeled, nullptr,
+        GCAcomputeOptimalScale(gca, transform, mri_inputs, mri_labeled, NULL,
                                2 * (gca->node_spacing + 1), 0.5, 2, .5);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
       MRIwrite(mri_sigma, "sigma.mgz");
@@ -1134,7 +1132,7 @@ int main(int argc, char *argv[])
     }
     MRIfree(&mri_sigma);
   }
-  if (read_fname == nullptr) {
+  if (read_fname == NULL) {
     GCAconstrainLabelTopology(
         gca, mri_inputs, mri_labeled, mri_labeled, transform, Gvent_topo_dist,
         Gvent_topo_volume_thresh1, Gvent_topo_volume_thresh2);
@@ -1142,38 +1140,37 @@ int main(int argc, char *argv[])
   if (wmsa) {
     MRI *mri_tmp;
     if (surf_name) {
-      char fname[STRLEN];
+      char         fname[STRLEN];
       MRI_SURFACE *mris_lh, *mris_rh;
       sprintf(fname, "%s/lh.%s", surf_dir, surf_name);
       mris_lh = MRISread(fname);
-      if (mris_lh == nullptr) {
+      if (mris_lh == NULL) {
         ErrorExit(ERROR_NOFILE, "%s: could not read lh from %s", Progname,
                   fname);
       }
       sprintf(fname, "%s/rh.%s", surf_dir, surf_name);
       mris_rh = MRISread(fname);
-      if (mris_rh == nullptr) {
+      if (mris_rh == NULL) {
         ErrorExit(ERROR_NOFILE, "%s: could not read rh from %s", Progname,
                   fname);
       }
       replace_cortex_far_from_surface_with_wmsa(mri_inputs, mri_labeled,
                                                 mri_labeled, mris_lh, mris_rh);
     }
-    mri_tmp =
-        GCAlabelWMandWMSAs(gca, mri_inputs, mri_labeled, nullptr, transform);
+    mri_tmp = GCAlabelWMandWMSAs(gca, mri_inputs, mri_labeled, NULL, transform);
     MRIfree(&mri_labeled);
     mri_labeled = mri_tmp;
   }
-  if (wmsa_probs != nullptr)
-  // if (wmsa_probs)
+  if (wmsa_probs != NULL)
+  //if (wmsa_probs)
   {
     MRI *probs_tmp;
     char fname[STRLEN];
     printf("working on WMSA probs now...\n");
     sprintf(fname, "%s.mgz", wmsa_probs);
-    probs_tmp = GCAsampleToVolWMSAprob(mri_inputs, gca, transform, nullptr);
+    probs_tmp = GCAsampleToVolWMSAprob(mri_inputs, gca, transform, NULL);
     printf("writing WMSA probability volume to %s....\n", fname);
-    // MRIwrite(probs_tmp,fname);
+    //MRIwrite(probs_tmp,fname);
     if (MRIwrite(probs_tmp, fname) != NO_ERROR) {
       ErrorExit(Gerror, "%s: MRIwrite(%s) failed", Progname, fname);
     }
@@ -1200,35 +1197,33 @@ int main(int argc, char *argv[])
   if (fcd)
     gcaCheckForFCDs(mri_labeled, mri_labeled, gca, transform, mri_inputs);
 
-  printf("writing labeled volume to %s\n", out_fname) ;
-  if (MRIwrite(mri_labeled, out_fname) != NO_ERROR)
-  {
-    ErrorExit(Gerror, "%s: MRIwrite(%s) failed", Progname, out_fname) ;
+  printf("writing labeled volume to %s\n", out_fname);
+  if (MRIwrite(mri_labeled, out_fname) != NO_ERROR) {
+    ErrorExit(Gerror, "%s: MRIwrite(%s) failed", Progname, out_fname);
   }
 
-  if (G_write_probs != NULL)
-  {
-    MRI *mri_probs ;
-    char fname[STRLEN] ;
+  if (G_write_probs != NULL) {
+    MRI *mri_probs;
+    char fname[STRLEN];
 
-    mri_probs = GCAcomputeTopNProbabilities(mri_inputs,gca,mri_labeled,NULL,transform,3);
-    sprintf(fname, "%s.mgz", G_write_probs) ;
-    printf("writing ordered labels and  probabilities to %s\n", fname) ;
-    MRIwrite(mri_probs, fname) ;
-    MRIfree(&mri_probs) ;
+    mri_probs = GCAcomputeTopNProbabilities(mri_inputs, gca, mri_labeled, NULL,
+                                            transform, 3);
+    sprintf(fname, "%s.mgz", G_write_probs);
+    printf("writing ordered labels and  probabilities to %s\n", fname);
+    MRIwrite(mri_probs, fname);
+    MRIfree(&mri_probs);
   }
-  if (write_likelihood != NULL)
-  {
-    MRI *mri_probs ;
-    char fname[STRLEN] ;
+  if (write_likelihood != NULL) {
+    MRI *mri_probs;
+    char fname[STRLEN];
 
-    mri_probs = GCAcomputeLikelihoodImage(gca, mri_inputs, mri_labeled, transform);
-    sprintf(fname, "%s", write_likelihood) ;
-    if (mask_volume_fname)
-    {
-      MRI *mri_mask ;
-      printf("reading volume %s for masking...\n", mask_volume_fname) ;
-      mri_mask = MRIread(mask_volume_fname) ;
+    mri_probs =
+        GCAcomputeLikelihoodImage(gca, mri_inputs, mri_labeled, transform);
+    sprintf(fname, "%s", write_likelihood);
+    if (mask_volume_fname) {
+      MRI *mri_mask;
+      printf("reading volume %s for masking...\n", mask_volume_fname);
+      mri_mask = MRIread(mask_volume_fname);
       if (!mri_mask)
         ErrorExit(ERROR_NOFILE, "%s: could not read mask volume from %s",
                   Progname, mask_volume_fname);
@@ -1248,7 +1243,7 @@ int main(int argc, char *argv[])
   if (rusage_file)
     WriteRUsage(RUSAGE_SELF, "", rusage_file);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -1260,106 +1255,83 @@ int main(int argc, char *argv[])
 
   Description:
   ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[])
-{
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int   nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
-  if (!stricmp(option, "NOGIBBS"))
-  {
-    no_gibbs = 1 ;
-    printf("disabling gibbs priors...\n") ;
-  }
-  else if (!stricmp(option, "THREADS"))
-  {
-    sscanf(argv[2],"%d",&n_omp_threads);
-    #ifdef HAVE_OPENMP
+  option = argv[1] + 1; /* past '-' */
+  if (!stricmp(option, "NOGIBBS")) {
+    no_gibbs = 1;
+    printf("disabling gibbs priors...\n");
+  } else if (!stricmp(option, "THREADS")) {
+    sscanf(argv[2], "%d", &n_omp_threads);
+#ifdef HAVE_OPENMP
     omp_set_num_threads(n_omp_threads);
-    printf("Setting threads to %d\n",n_omp_threads);
-    #else
+    printf("Setting threads to %d\n", n_omp_threads);
+#else
     printf("dont have openmp \n");
-    #endif
-    nargs = 1 ;
-  }
-  else if (!stricmp(option, "PREGIBBS"))
-  {
+#endif
+    nargs = 1;
+  } else if (!stricmp(option, "PREGIBBS")) {
     PreGibbsFile = argv[2];
-    printf("Saving pre-gibbs to %s\n",PreGibbsFile);
-    nargs = 1 ;
-  }
-  else if (!stricmp(option, "LH"))
-  {
-    remove_rh = 1  ;
-    printf("removing right hemisphere labels\n") ;
-  }
-  else if (!stricmp(option, "vent_topo_dist"))
-  {
-    Gvent_topo_dist = atof(argv[2]) ;
-    printf("setting ventricle topology distance threshold to %2.1fmm (default=3)\n", Gvent_topo_dist) ;
-    nargs = 1 ;
-  }
-  else if (!stricmp(option, "vent_topo_volume_thresh1"))
-  {
-    Gvent_topo_volume_thresh1 = atof(argv[2]) ;
-    printf("setting ventricle topology volume1 threshold to %2.1fmm^3 (default=50)\n", Gvent_topo_volume_thresh1) ;
-    nargs = 1 ;
-  }
-  else if (!stricmp(option, "vent_topo_volume_thresh2"))
-  {
-    Gvent_topo_volume_thresh2 = atof(argv[2]) ;
-    printf("setting ventricle topology volume2 threshold to %2.1fmm^3 (default=100)\n", Gvent_topo_volume_thresh2) ;
-    nargs = 1 ;
-  }
-  else if (!stricmp(option, "RH"))
-  {
-    remove_lh = 1  ;
-    printf("removing left hemisphere labels\n") ;
-  }
-  else if (!stricmp(option, "PRIOR"))
-  {
-    PRIOR_FACTOR = atof(argv[2]) ;
-    nargs = 1 ;
-    printf("using Gibbs prior factor = %2.3f\n", PRIOR_FACTOR) ;
-  }
-  else if (!stricmp(option, "NOCEREBELLUM"))
-  {
-    remove_cerebellum = 1 ;
-    printf("removing cerebellum from atlas\n") ;
-  }
-  else if (!stricmp(option, "nowmsa"))
-  {
-    nowmsa = 1 ;
-    printf("disabling WMSA labels\n") ;
-  }
-  else if (!stricmp(option, "fcd"))
-  {
-    fcd = 1 ;
-//    reclassify_unlikely = 0 ;
-    printf("checking for focal cortical dysplasias\n") ;
-  }
-  else if (!stricmp(option, "read_intensities") || !stricmp(option, "ri"))
-  {
-    read_intensity_fname[nreads] = argv[2] ;
-    nargs = 1 ;
-    printf("reading intensity scaling from %s\n",
-           read_intensity_fname[nreads]) ;
-    nreads++ ;
-    if (nreads > MAX_READS)
-    {
-      ErrorExit(ERROR_UNSUPPORTED, 
-                "%s: too many intensity files specified (max %d)",
-                Progname, MAX_READS);
+    printf("Saving pre-gibbs to %s\n", PreGibbsFile);
+    nargs = 1;
+  } else if (!stricmp(option, "LH")) {
+    remove_rh = 1;
+    printf("removing right hemisphere labels\n");
+  } else if (!stricmp(option, "vent_topo_dist")) {
+    Gvent_topo_dist = atof(argv[2]);
+    printf("setting ventricle topology distance threshold to %2.1fmm "
+           "(default=3)\n",
+           Gvent_topo_dist);
+    nargs = 1;
+  } else if (!stricmp(option, "vent_topo_volume_thresh1")) {
+    Gvent_topo_volume_thresh1 = atof(argv[2]);
+    printf("setting ventricle topology volume1 threshold to %2.1fmm^3 "
+           "(default=50)\n",
+           Gvent_topo_volume_thresh1);
+    nargs = 1;
+  } else if (!stricmp(option, "vent_topo_volume_thresh2")) {
+    Gvent_topo_volume_thresh2 = atof(argv[2]);
+    printf("setting ventricle topology volume2 threshold to %2.1fmm^3 "
+           "(default=100)\n",
+           Gvent_topo_volume_thresh2);
+    nargs = 1;
+  } else if (!stricmp(option, "RH")) {
+    remove_lh = 1;
+    printf("removing left hemisphere labels\n");
+  } else if (!stricmp(option, "PRIOR")) {
+    PRIOR_FACTOR = atof(argv[2]);
+    nargs        = 1;
+    printf("using Gibbs prior factor = %2.3f\n", PRIOR_FACTOR);
+  } else if (!stricmp(option, "NOCEREBELLUM")) {
+    remove_cerebellum = 1;
+    printf("removing cerebellum from atlas\n");
+  } else if (!stricmp(option, "nowmsa")) {
+    nowmsa = 1;
+    printf("disabling WMSA labels\n");
+  } else if (!stricmp(option, "fcd")) {
+    fcd = 1;
+    //    reclassify_unlikely = 0 ;
+    printf("checking for focal cortical dysplasias\n");
+  } else if (!stricmp(option, "read_intensities") || !stricmp(option, "ri")) {
+    read_intensity_fname[nreads] = argv[2];
+    nargs                        = 1;
+    printf("reading intensity scaling from %s\n", read_intensity_fname[nreads]);
+    nreads++;
+    if (nreads > MAX_READS) {
+      ErrorExit(ERROR_UNSUPPORTED,
+                "%s: too many intensity files specified (max %d)", Progname,
+                MAX_READS);
     }
   } else if (!stricmp(option, "WM")) {
     wm_fname = argv[2];
-    nargs = 1;
+    nargs    = 1;
     printf("inserting white matter segmentation from %s\n", wm_fname);
   } else if (!stricmp(option, "SURF")) {
-    surf_dir = argv[2];
+    surf_dir  = argv[2];
     surf_name = argv[3];
-    nargs = 2;
+    nargs     = 2;
     printf("using surfaces ?h.%s in directory %s\n", surf_name, surf_dir);
   } else if (!stricmp(option, "SD")) {
     setenv("SUBJECTS_DIR", argv[2], 1);
@@ -1367,7 +1339,7 @@ get_option(int argc, char *argv[])
   } else if (!stricmp(option, "rusage")) {
     // resource usage
     rusage_file = argv[2];
-    nargs = 1;
+    nargs       = 1;
   } else if (!stricmp(option, "-HELP") || !stricmp(option, "-USAGE")) {
     usage_exit(0);
   } else if (!stricmp(option, "histo-norm")) {
@@ -1375,7 +1347,7 @@ get_option(int argc, char *argv[])
     renorm_with_histos = 1;
   } else if (!stricmp(option, "SAVE_GCA")) {
     save_gca_fname = argv[2];
-    nargs = 1;
+    nargs          = 1;
     printf("saving renormalized gca to %s\n", save_gca_fname);
   } else if (!stricmp(option, "RELABEL_UNLIKELY")) {
 #if 0
@@ -1393,121 +1365,87 @@ get_option(int argc, char *argv[])
     }
     nargs = 4 ;
 #else
-    reclassify_unlikely = 1;
-    unlikely_wsize = atoi(argv[2]);
+    reclassify_unlikely   = 1;
+    unlikely_wsize        = atoi(argv[2]);
     unlikely_prior_thresh = atof(argv[3]);
     printf("relabeling unlikely voxels with "
            "window_size = %d and prior threshold %2.2f\n",
            unlikely_wsize, unlikely_prior_thresh);
     nargs = 2;
 #endif
-  }
-  else if (!stricmp(option, "CONFORM"))
-  {
-    conform_flag = TRUE ;
-    printf("resampling input volume(s) to be 256^3 and 1mm^3\n") ;
-  }
-  else if (!stricmp(option, "WMSA"))
-  {
-    wmsa = 1 ;
-    printf("relabeling wm and wmsa in postprocessing\n") ;
-  }
-  else if (!stricmp(option, "NORMPD"))
-  {
-    norm_PD = TRUE ;
-    printf("normalizing PD image (2nd input) to GCA means[1]\n") ;
-  }
-  else if (!stricmp(option, "bigventricles"))
-  {
-    handle_expanded_ventricles = 1 ;
-    printf("handling expanded ventricles...\n") ;
-  }
-  else if (!stricmp(option, "nobigventricles"))
-  {
-    handle_expanded_ventricles = 0 ;
-    printf("not handling expanded ventricles...\n") ;
-  }
-  else if (!stricmp(option, "write_probs"))
-  {
-    G_write_probs = argv[2] ;
-    nargs = 1 ;
-    printf("writing label probabilities to %s\n", G_write_probs) ;
-  }
-  else if (!stricmp(option, "write_likelihood"))
-  {
-    write_likelihood = argv[2] ;
-    nargs = 1 ;
-    printf("writing image likelihoods unders labeling to %s\n", 
-	   write_likelihood) ;
-  }
-  else if (!stricmp(option, "wmsa_probs"))
-  {
-    wmsa_probs = argv[2] ;
+  } else if (!stricmp(option, "CONFORM")) {
+    conform_flag = TRUE;
+    printf("resampling input volume(s) to be 256^3 and 1mm^3\n");
+  } else if (!stricmp(option, "WMSA")) {
+    wmsa = 1;
+    printf("relabeling wm and wmsa in postprocessing\n");
+  } else if (!stricmp(option, "NORMPD")) {
+    norm_PD = TRUE;
+    printf("normalizing PD image (2nd input) to GCA means[1]\n");
+  } else if (!stricmp(option, "bigventricles")) {
+    handle_expanded_ventricles = 1;
+    printf("handling expanded ventricles...\n");
+  } else if (!stricmp(option, "nobigventricles")) {
+    handle_expanded_ventricles = 0;
+    printf("not handling expanded ventricles...\n");
+  } else if (!stricmp(option, "write_probs")) {
+    G_write_probs = argv[2];
+    nargs         = 1;
+    printf("writing label probabilities to %s\n", G_write_probs);
+  } else if (!stricmp(option, "write_likelihood")) {
+    write_likelihood = argv[2];
+    nargs            = 1;
+    printf("writing image likelihoods unders labeling to %s\n",
+           write_likelihood);
+  } else if (!stricmp(option, "wmsa_probs")) {
+    wmsa_probs = argv[2];
     //wmsa_probs = 1;
-    printf("Writing WMSA probabilities to file %s\n", wmsa_probs) ;
-    nargs =1 ;
+    printf("Writing WMSA probabilities to file %s\n", wmsa_probs);
+    nargs = 1;
     //sprintf(wmsaprob_fname,"%s.mgz",wmsa_probs);
-  }
-  else if (!stricmp(option, "TL"))
-  {
-    tl_gca_fname = argv[2] ;
-    nargs = 1 ;
-    printf("using gca %s to label thin temporal lobe...\n", tl_gca_fname) ;
-  }
-  else if (!stricmp(option, "DEBUG_VOXEL"))
-  {
-    Ggca_x = atoi(argv[2]) ;
-    Ggca_y = atoi(argv[3]) ;
-    Ggca_z = atoi(argv[4]) ;
-    nargs = 3 ;
-    printf("debugging voxel (%d, %d, %d)\n", Ggca_x,Ggca_y,Ggca_z) ;
-  }
-  else if (!stricmp(option, "DEBUG_NODE"))
-  {
-    Gx = atoi(argv[2]) ;
-    Gy = atoi(argv[3]) ;
-    Gz = atoi(argv[4]) ;
-    nargs = 3 ;
-    printf("debugging node (%d, %d, %d)\n", Gx,Gy,Gz) ;
-  }
-  else if (!stricmp(option, "DEBUG_PRIOR"))
-  {
-    Gxp = atoi(argv[2]) ;
-    Gyp = atoi(argv[3]) ;
-    Gzp = atoi(argv[4]) ;
-    nargs = 3 ;
-    printf("debugging prior (%d, %d, %d)\n", Gxp,Gyp,Gzp) ;
-  }
-  else if (!stricmp(option, "DEBUG_LABEL"))
-  {
-    Ggca_label = atoi(argv[2]) ;
-    nargs = 1 ;
-    printf("debugging label %d\n", Ggca_label) ;
-  }
-  else if (!stricmp(option, "DEBUG"))
-  {
+  } else if (!stricmp(option, "TL")) {
+    tl_gca_fname = argv[2];
+    nargs        = 1;
+    printf("using gca %s to label thin temporal lobe...\n", tl_gca_fname);
+  } else if (!stricmp(option, "DEBUG_VOXEL")) {
+    Ggca_x = atoi(argv[2]);
+    Ggca_y = atoi(argv[3]);
+    Ggca_z = atoi(argv[4]);
+    nargs  = 3;
+    printf("debugging voxel (%d, %d, %d)\n", Ggca_x, Ggca_y, Ggca_z);
+  } else if (!stricmp(option, "DEBUG_NODE")) {
+    Gx    = atoi(argv[2]);
+    Gy    = atoi(argv[3]);
+    Gz    = atoi(argv[4]);
+    nargs = 3;
+    printf("debugging node (%d, %d, %d)\n", Gx, Gy, Gz);
+  } else if (!stricmp(option, "DEBUG_PRIOR")) {
+    Gxp   = atoi(argv[2]);
+    Gyp   = atoi(argv[3]);
+    Gzp   = atoi(argv[4]);
+    nargs = 3;
+    printf("debugging prior (%d, %d, %d)\n", Gxp, Gyp, Gzp);
+  } else if (!stricmp(option, "DEBUG_LABEL")) {
+    Ggca_label = atoi(argv[2]);
+    nargs      = 1;
+    printf("debugging label %d\n", Ggca_label);
+  } else if (!stricmp(option, "DEBUG")) {
     Gdiag = DIAG_WRITE | DIAG_VERBOSE_ON;
-  }
-  else if (!stricmp(option, "TR"))
-  {
-    TR = atof(argv[2]) ;
-    nargs = 1 ;
-    printf("using TR=%2.1f msec\n", TR) ;
-  }
-  else if (!stricmp(option, "expand"))
-  {
-    expand_ventricle_flag = TRUE ;
-    printf("expanding ventricles in postprocessing...\n") ;
-  }
-  else if (!stricmp(option, "EXAMPLE"))
-  {
-    example_T1 = argv[2] ;
-    example_segmentation = argv[3] ;
+  } else if (!stricmp(option, "TR")) {
+    TR    = atof(argv[2]);
+    nargs = 1;
+    printf("using TR=%2.1f msec\n", TR);
+  } else if (!stricmp(option, "expand")) {
+    expand_ventricle_flag = TRUE;
+    printf("expanding ventricles in postprocessing...\n");
+  } else if (!stricmp(option, "EXAMPLE")) {
+    example_T1           = argv[2];
+    example_segmentation = argv[3];
     printf("using %s and %s as example T1 and segmentations respectively.\n",
            example_T1, example_segmentation);
     nargs = 2;
   } else if (!stricmp(option, "TE")) {
-    TE = atof(argv[2]);
+    TE    = atof(argv[2]);
     nargs = 1;
     printf("using TE=%2.1f msec\n", TE);
   } else if (!stricmp(option, "ALPHA")) {
@@ -1515,12 +1453,12 @@ get_option(int argc, char *argv[])
     alpha = RADIANS(atof(argv[2]));
     printf("using alpha=%2.0f degrees\n", DEGREES(alpha));
   } else if (!stricmp(option, "PTHRESH")) {
-    nargs = 1;
+    nargs   = 1;
     pthresh = atof(argv[2]);
     printf("using p threshold %2.2f for adaptive renormalization\n", pthresh);
   } else if (!stricmp(option, "NITER")) {
     mle_niter = atoi(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     printf("applying max likelihood for %d iterations...\n", mle_niter);
   } else if (!stricmp(option, "NOVAR")) {
     novar = 1;
@@ -1532,10 +1470,10 @@ get_option(int argc, char *argv[])
     nargs = 1;
   } else if (!stricmp(option, "LSCALE")) {
     int l;
-    l = atoi(argv[2]);
-    rescale = 1;
+    l                = atoi(argv[2]);
+    rescale          = 1;
     Glabel_scales[l] = atof(argv[3]);
-    nargs = 2;
+    nargs            = 2;
     printf("scaling label %s by %2.2f\n", cma_label_to_name(l),
            Glabel_scales[l]);
     for (l = 0; l < MAX_CMA_LABELS; l++)
@@ -1554,9 +1492,9 @@ get_option(int argc, char *argv[])
     nargs = 1;
   } else if (!stricmp(option, "align-cross-sequence") ||
              !stricmp(option, "align") || !stricmp(option, "align-after")) {
-    regularize = .5;
-    regularize_mean = 0.5;
-    avgs = 2;
+    regularize        = .5;
+    regularize_mean   = 0.5;
+    avgs              = 2;
     renormalize_align = 1;
     printf("renormalizing sequences with structure alignment, "
            "equivalent to:\n");
@@ -1564,7 +1502,7 @@ get_option(int argc, char *argv[])
            "%2.3f\n\t-regularize %2.3f\n",
            regularize_mean, regularize);
   } else if (!stricmp(option, "no_old_renormalize")) {
-    no_old_renormalize = 1; // this option turns off
+    no_old_renormalize = 1; //this option turns off
     // the initial GCAmapRenormalize() when -align option is used
   } else if (!stricmp(option, "cross-sequence") ||
              !stricmp(option, "cross_sequence") ||
@@ -1575,10 +1513,10 @@ get_option(int argc, char *argv[])
       renormalize_new = 1;
     }
 
-    regularize = .5;
-    renormalize_iter = 1;
+    regularize        = .5;
+    renormalize_iter  = 1;
     renormalize_wsize = 9;
-    avgs = 2;
+    avgs              = 2;
     printf("labeling across sequences, equivalent to:\n");
     printf("\t-renormalize %d %d\n\t-a %d\n\t-regularize %2.3f\n",
            renormalize_iter, renormalize_wsize, avgs, regularize);
@@ -1587,43 +1525,43 @@ get_option(int argc, char *argv[])
     printf("disabling auto-editting of hippocampus\n");
   } else if (!stricmp(option, "FWM")) {
     fixed_flag = 1;
-    wm_fname = argv[2];
-    nargs = 1;
+    wm_fname   = argv[2];
+    nargs      = 1;
     printf("inserting fixed white matter segmentation from %s\n", wm_fname);
   } else if (!stricmp(option, "MRI")) {
     mri_fname = argv[2];
-    nargs = 1;
+    nargs     = 1;
     printf("building most likely MR volume and writing to %s\n", mri_fname);
   } else if (!stricmp(option, "HEQ")) {
     heq_fname = argv[2];
-    nargs = 1;
+    nargs     = 1;
     printf("reading template for histogram equalization from %s\n", heq_fname);
   } else if (!strcmp(option, "RENORM") || !stricmp(option, "RENORMALIZE")) {
     renormalization_fname = argv[2];
-    nargs = 1;
+    nargs                 = 1;
     printf("renormalizing using predicted intensity values in %s\n",
            renormalization_fname);
   } else if (!stricmp(option, "WRITE_RENORM")) {
     write_renorm_fname = argv[2];
-    nargs = 1;
+    nargs              = 1;
     printf("writing renormalized GCA to in %s\n", write_renorm_fname);
   } else if (!stricmp(option, "READ_RENORM")) {
     read_renorm_fname = argv[2];
-    nargs = 1;
+    nargs             = 1;
     printf("reading renormalized GCA from %s\n", read_renorm_fname);
   } else if (!stricmp(option, "FLASH")) {
     map_to_flash = 1;
     printf("using FLASH forward model to predict intensity values...\n");
   } else if (!stricmp(option, "FLASH_PARMS")) {
     tissue_parms_fname = argv[2];
-    nargs = 1;
+    nargs              = 1;
     printf("using FLASH forward model and tissue parms in %s to predict"
            " intensity values...\n",
            tissue_parms_fname);
   } else if (!stricmp(option, "renormalize_iter")) {
     renormalize_wsize = atoi(argv[2]);
-    renormalize_iter = atoi(argv[3]);
-    nargs = 2;
+    renormalize_iter  = atoi(argv[3]);
+    nargs             = 2;
     printf("renormalizing class means %d times after "
            "initial labeling using %d window size\n",
            renormalize_iter, renormalize_wsize);
@@ -1631,15 +1569,15 @@ get_option(int argc, char *argv[])
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
-    case 'L': // longitudinal option
-      // option for longitudinal processing
-      // read_fname is the label for tp1
-      // reg_fname is the linear transform from tp1 to current study
+    case 'L': //longitudinal option
+      //option for longitudinal processing
+      //read_fname is the label for tp1
+      //reg_fname is the linear transform from tp1 to current study
       read_fname = argv[2];
-      reg_fname = argv[3];
-      nargs = 2;
+      reg_fname  = argv[3];
+      nargs      = 2;
       break;
     case 'R':
       read_fname = argv[2];
@@ -1651,7 +1589,7 @@ get_option(int argc, char *argv[])
       printf("using GCA to histogram normalize input image...\n");
       break;
     case 'A':
-      avgs = atoi(argv[2]);
+      avgs  = atoi(argv[2]);
       nargs = 1;
       fprintf(stderr,
               "applying mean filter %d times to conditional densities...\n",
@@ -1659,24 +1597,24 @@ get_option(int argc, char *argv[])
       break;
     case 'W':
       gca_write_iterations = atoi(argv[2]);
-      gca_write_fname = argv[3];
-      nargs = 2;
+      gca_write_fname      = argv[3];
+      nargs                = 2;
       printf("writing out snapshots of gibbs process "
              "every %d iterations to %s\n",
              gca_write_iterations, gca_write_fname);
       break;
     case 'M':
       mask_volume_fname = argv[2];
-      nargs = 1;
+      nargs             = 1;
       printf("using %s to mask final labeling...\n", mask_volume_fname);
       break;
     case 'E':
       expand_flag = atoi(argv[2]);
-      nargs = 1;
+      nargs       = 1;
       break;
     case 'N':
       max_iter = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       printf("setting max iterations to %d...\n", max_iter);
       break;
     case 'F':
@@ -1732,19 +1670,19 @@ MRI *insert_wm_segmentation(MRI *mri_labeled, MRI *mri_wm,
                             TRANSFORM *transform) {
   int x, y, z, width, depth, height, change_label[1000], n, label, nchanged, rh,
       lh, xn, yn, zn;
-  MRI *mri_fixed;
-  double wm_prior;
+  MRI *      mri_fixed;
+  double     wm_prior;
   GCA_PRIOR *gcap;
 
-  mri_fixed = MRIclone(mri_wm, nullptr);
+  mri_fixed = MRIclone(mri_wm, NULL);
 
   memset(change_label, 0, sizeof(change_label));
   for (n = 0; n < NEDITABLE_LABELS; n++) {
     change_label[cma_editable_labels[n]] = 1;
   }
-  width = mri_wm->width;
+  width  = mri_wm->width;
   height = mri_wm->height;
-  depth = mri_wm->depth;
+  depth  = mri_wm->depth;
 
   for (nchanged = z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
@@ -1763,7 +1701,7 @@ MRI *insert_wm_segmentation(MRI *mri_labeled, MRI *mri_wm,
 
         if (!GCAsourceVoxelToNode(gca, mri_labeled, transform, x, y, z, &xn,
                                   &yn, &zn)) {
-          gcap = getGCAP(gca, mri_labeled, transform, x, y, z);
+          gcap     = getGCAP(gca, mri_labeled, transform, x, y, z);
           wm_prior = 0.0;
           for (n = 0; n < gcap->nlabels; n++)
             if (gcap->labels[n] == Right_Cerebral_White_Matter ||
@@ -1771,7 +1709,7 @@ MRI *insert_wm_segmentation(MRI *mri_labeled, MRI *mri_wm,
               wm_prior = gcap->priors[n];
             }
 #define PRIOR_THRESH 0.1
-#define FIXED_PRIOR 0.5
+#define FIXED_PRIOR  0.5
           if (wm_prior < PRIOR_THRESH) {
             continue;
           }
@@ -1863,7 +1801,7 @@ int preprocess(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
                 Progname, tl_gca_fname);
 
     if (renormalize_wsize > 0) /* gca was renormalized -
-                                  update gca_tl to new means */
+                                   update gca_tl to new means */
     {
       GCArenormalizeFromAtlas(gca_tl, gca);
     }
@@ -1934,15 +1872,15 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
       dpos, dant, dup, ddown, dup_hippo, ddown_gray, i, left, ddown_ventricle,
       yi, found_wm, found_hippo, was_wm, was_hippo, was_unknown, total_changed,
       xn, yn, zn;
-  MRI *mri_tmp;
+  MRI * mri_tmp;
   float phippo, pwm;
   GC1D *gc;
 
-  mri_tmp = MRIcopy(mri_labeled, nullptr);
+  mri_tmp = MRIcopy(mri_labeled, NULL);
 
-  width = mri_inputs->width;
+  width  = mri_inputs->width;
   height = mri_inputs->height;
-  depth = mri_inputs->depth;
+  depth  = mri_inputs->depth;
 
   total_changed = 0;
   for (nchanged = z = 0; z < depth; z++) {
@@ -1970,7 +1908,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
             */
           case Left_Lateral_Ventricle:
           case Left_Inf_Lat_Vent: /* medial is in negative
-                                     x direction */
+                                        x direction */
           {
             int xi;
 
@@ -1995,7 +1933,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
           }
           case Right_Lateral_Ventricle:
           case Right_Inf_Lat_Vent: /* medial is in positive
-                                      x direction */
+                                        x direction */
           {
             int xi;
 
@@ -2019,7 +1957,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
             break;
           }
           case Left_Hippocampus:
-            pwm = GCAlabelProbability(mri_inputs, gca, transform, (float)x,
+            pwm    = GCAlabelProbability(mri_inputs, gca, transform, (float)x,
                                       (float)y, (float)z,
                                       Left_Cerebral_White_Matter);
             phippo = GCAlabelProbability(mri_inputs, gca, transform, (float)x,
@@ -2028,13 +1966,13 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
               continue; /* don't let it change */
             }
 
-            dleft = distance_to_label(mri_labeled, Left_Cerebral_White_Matter,
+            dleft  = distance_to_label(mri_labeled, Left_Cerebral_White_Matter,
                                       x, y, z, -1, 0, 0, 3);
             dright = distance_to_label(mri_labeled, Left_Cerebral_White_Matter,
                                        x, y, z, 1, 0, 0, 3);
-            ddown = distance_to_label(mri_labeled, Left_Cerebral_White_Matter,
+            ddown  = distance_to_label(mri_labeled, Left_Cerebral_White_Matter,
                                       x, y, z, 0, 1, 0, 2);
-            dup = distance_to_label(mri_labeled, Left_Cerebral_White_Matter, x,
+            dup  = distance_to_label(mri_labeled, Left_Cerebral_White_Matter, x,
                                     y, z, 0, -1, 0, 2);
             dpos = distance_to_label(mri_labeled, Left_Cerebral_White_Matter, x,
                                      y, z, 0, 0, -1, 3);
@@ -2053,7 +1991,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
             }
             break;
           case Right_Hippocampus:
-            pwm = GCAlabelProbability(mri_inputs, gca, transform, (float)x,
+            pwm    = GCAlabelProbability(mri_inputs, gca, transform, (float)x,
                                       (float)y, (float)z,
                                       Right_Cerebral_White_Matter);
             phippo = GCAlabelProbability(mri_inputs, gca, transform, (float)x,
@@ -2062,11 +2000,11 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
               continue; /* don't let it change */
             }
 
-            dleft = distance_to_label(mri_labeled, Right_Cerebral_White_Matter,
+            dleft  = distance_to_label(mri_labeled, Right_Cerebral_White_Matter,
                                       x, y, z, -1, 0, 0, 3);
             dright = distance_to_label(mri_labeled, Right_Cerebral_White_Matter,
                                        x, y, z, 1, 0, 0, 3);
-            ddown = distance_to_label(mri_labeled, Right_Cerebral_White_Matter,
+            ddown  = distance_to_label(mri_labeled, Right_Cerebral_White_Matter,
                                       x, y, z, 0, 1, 0, 2);
             dup = distance_to_label(mri_labeled, Right_Cerebral_White_Matter, x,
                                     y, z, 0, -1, 0, 2);
@@ -2088,7 +2026,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
           default:
             break;
           }
-        } //! GCA
+        } //!GCA
       }
     }
   }
@@ -2108,7 +2046,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
           case Left_Hippocampus:
             ddown = distance_to_label(mri_tmp, Left_Cerebral_White_Matter, x, y,
                                       z, 0, 1, 0, 2);
-            dup = distance_to_label(mri_tmp, Left_Cerebral_White_Matter, x, y,
+            dup   = distance_to_label(mri_tmp, Left_Cerebral_White_Matter, x, y,
                                     z, 0, -1, 0, 3);
 
             ddown_gray = distance_to_label(mri_tmp, Left_Cerebral_Cortex, x, y,
@@ -2125,7 +2063,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
             if (ddown_ventricle < ddown_gray) {
               continue;
             } /* gray should never be
-                 superior to ventricle */
+                  superior to ventricle */
 
             /* closer to superior white matter
                than hp and gray below */
@@ -2147,7 +2085,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
 
             ddown_gray = distance_to_label(mri_tmp, Right_Cerebral_Cortex, x, y,
                                            z, 0, 1, 0, 3);
-            dup_hippo = distance_to_label(mri_tmp, Right_Hippocampus, x, y, z,
+            dup_hippo  = distance_to_label(mri_tmp, Right_Hippocampus, x, y, z,
                                           0, -1, 0, 3);
 
             ddown_ventricle =
@@ -2159,7 +2097,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
             if (ddown_ventricle < ddown_gray) {
               continue;
             } /* gray should never be
-                 superior to ventricle */
+                  superior to ventricle */
 
             /* closer to superior white matter
                than hp and gray below */
@@ -2195,6 +2133,9 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
           switch (label) {
           case Left_Cerebral_Cortex:
             left = 1;
+#if __GNUC__ >= 8
+            [[gnu::fallthrough]];
+#endif
           case Right_Cerebral_Cortex:
             /*
               if the current label is gray,
@@ -2205,7 +2146,7 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
                                       left ? Left_Cerebral_White_Matter
                                            : Right_Cerebral_White_Matter,
                                       x, y, z, 0, 1, 0, 3);
-            dup = distance_to_label(mri_labeled,
+            dup   = distance_to_label(mri_labeled,
                                     left ? Left_Hippocampus : Right_Hippocampus,
                                     x, y, z, 0, -1, 0, 2);
             if (dup <= 2 && ddown <= 3) {
@@ -2240,15 +2181,18 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
         }
         label = MRIgetVoxVal(mri_tmp, x, y, z, 0);
 
-        left = 0;
+        left        = 0;
         was_unknown = 0;
         switch (label) {
         case Left_Hippocampus:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Hippocampus:
 #define MIN_UNKNOWN 5
           for (i = 1; i <= MIN_UNKNOWN + 3; i++) {
-            yi = mri_tmp->yi[y + i];
+            yi     = mri_tmp->yi[y + i];
             olabel = MRIgetVoxVal(mri_tmp, x, yi, z, 0);
             if (olabel == Left_Hippocampus || olabel == Right_Hippocampus) {
               was_unknown = 0;
@@ -2300,14 +2244,17 @@ int edit_hippocampus(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
         }
         label = MRIgetVoxVal(mri_tmp, x, y, z, 0);
 
-        left = 0;
+        left     = 0;
         found_wm = found_hippo = was_wm = was_hippo = 0;
         switch (label) {
         case Left_Hippocampus:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Hippocampus:
           for (i = 1; i <= 10; i++) {
-            yi = mri_tmp->yi[y - i];
+            yi     = mri_tmp->yi[y - i];
             olabel = MRIgetVoxVal(mri_tmp, x, yi, z, 0);
             if (found_wm) /* check for hippo */
             {
@@ -2500,11 +2447,11 @@ int edit_amygdala(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
       found_wm, found_amygdala, was_wm, was_amygdala;
   MRI *mri_tmp;
 
-  mri_tmp = MRIcopy(mri_labeled, nullptr);
+  mri_tmp = MRIcopy(mri_labeled, NULL);
 
-  width = mri_inputs->width;
+  width  = mri_inputs->width;
   height = mri_inputs->height;
-  depth = mri_inputs->depth;
+  depth  = mri_inputs->depth;
 
   nchanged = 0;
   /* change amygdala voxels that have a run of wm superior to them
@@ -2518,14 +2465,17 @@ int edit_amygdala(MRI *mri_inputs, MRI *mri_labeled, GCA *gca,
         }
         label = MRIgetVoxVal(mri_tmp, x, y, z, 0);
 
-        left = 0;
+        left     = 0;
         found_wm = found_amygdala = was_wm = was_amygdala = 0;
         switch (label) {
         case Left_Amygdala:
           left = 1;
+#if __GNUC__ >= 8
+          [[gnu::fallthrough]];
+#endif
         case Right_Amygdala:
           for (i = 1; i <= 10; i++) {
-            yi = mri_tmp->yi[y - i];
+            yi     = mri_tmp->yi[y - i];
             olabel = MRIgetVoxVal(mri_tmp, x, yi, z, 0);
             if (found_wm) /* check for amygdala */
             {
@@ -2579,20 +2529,20 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
                                       GCA *gca, TRANSFORM *transform,
                                       GCA *gca_all) {
   MRI *mri_tmp, *mri_probs, *mri_tmp_labels;
-  int width, height, depth, x, y, z, n, nsamples, i, xp, yp, zp;
-  int xmin, xmax, ymin, ymax, zmin, zmax, yi, zi, yimax, ximax, zimax, **added,
+  int  width, height, depth, x, y, z, n, nsamples, i, xp, yp, zp;
+  int  xmin, xmax, ymin, ymax, zmin, zmax, yi, zi, yimax, ximax, zimax, **added,
       nchanged, label, r, c, v;
-  GCA_PRIOR *gcap;
-  GC1D *gc;
+  GCA_PRIOR * gcap;
+  GC1D *      gc;
   GCA_SAMPLE *gcas;
-  double p, pmax;
+  double      p, pmax;
 
-  mri_tmp = MRIclone(mri_inputs, nullptr);
-  mri_tmp_labels = MRIclone(mri_labeled, nullptr);
+  mri_tmp        = MRIclone(mri_inputs, NULL);
+  mri_tmp_labels = MRIclone(mri_labeled, NULL);
 
-  width = mri_tmp->width;
-  height = mri_tmp->height;
-  depth = mri_tmp->depth;
+  width     = mri_tmp->width;
+  height    = mri_tmp->height;
+  depth     = mri_tmp->depth;
   mri_probs = MRIalloc(width, height, depth, MRI_UCHAR);
 
   xmin = width;
@@ -2651,13 +2601,13 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
           gcap = &gca->priors[xp][yp][zp];
           for (n = 0; n < gcap->nlabels; n++) {
             if (!IS_UNKNOWN(gcap->labels[n])) {
-              gc = GCAfindPriorGC(gca, xp, yp, zp, gcap->labels[n]);
-              gcas[i].x = x;
-              gcas[i].y = y;
-              gcas[i].z = z;
-              gcas[i].xp = xp;
-              gcas[i].yp = yp;
-              gcas[i].zp = zp;
+              gc            = GCAfindPriorGC(gca, xp, yp, zp, gcap->labels[n]);
+              gcas[i].x     = x;
+              gcas[i].y     = y;
+              gcas[i].z     = z;
+              gcas[i].xp    = xp;
+              gcas[i].yp    = yp;
+              gcas[i].zp    = zp;
               gcas[i].label = gcap->labels[n];
               gcas_setPrior(gcas[i], getPrior(gcap, gcap->labels[n]));
               for (r = v = 0; r < gca->ninputs; r++) {
@@ -2706,7 +2656,7 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
   /* find highest probability pair over whole temporal lobe,
      and use them to bootstrap process.
   */
-  pmax = 0.0;
+  pmax  = 0.0;
   ximax = yimax = zimax = 0;
   for (i = 0, x = xmin; x <= xmax; x++) {
     for (z = zmin; z <= zmax; z++) {
@@ -2716,10 +2666,10 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
           continue;
         }
         yi = mri_probs->yi[y + 1];
-        p = MRIgetVoxVal(mri_probs, x, y, z, 0) +
+        p  = MRIgetVoxVal(mri_probs, x, y, z, 0) +
             MRIgetVoxVal(mri_probs, x, yi, z, 0);
         if (p > pmax) {
-          pmax = p;
+          pmax  = p;
           ximax = x;
           yimax = y;
           zimax = z;
@@ -2733,12 +2683,12 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
   /* put the seed point back in */
   MRIsetVoxVal(mri_tmp, ximax, yimax, zimax, 0, 255);
   MRIsetVoxVal(mri_tmp, ximax, yimax + 1, zimax, 0, 255);
-  xmin = MAX(0, ximax - 1);
-  xmax = MIN(ximax + 1, width - 1);
-  ymin = MAX(0, yimax - 1);
-  ymax = MIN(yimax + 2, height - 1);
-  zmin = MAX(0, zimax - 1);
-  zmax = MIN(zimax + 1, depth - 1);
+  xmin                = MAX(0, ximax - 1);
+  xmax                = MIN(ximax + 1, width - 1);
+  ymin                = MAX(0, yimax - 1);
+  ymax                = MIN(yimax + 2, height - 1);
+  zmin                = MAX(0, zimax - 1);
+  zmax                = MIN(zimax + 1, depth - 1);
   added[ximax][zimax] = 1; /* already added to this plane */
   do {
     nchanged = 0;
@@ -2748,7 +2698,7 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
         if (added[x][z]) {
           continue;
         }
-        pmax = 0.0;
+        pmax  = 0.0;
         yimax = -1;
         for (y = ymin; y <= ymax; y++) {
           if (MRIgetVoxVal(mri_tmp, x, y, z, 0)) {
@@ -2765,10 +2715,10 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
           }
 #endif
           yi = mri_probs->yi[y + 1];
-          p = MRIgetVoxVal(mri_probs, x, y, z, 0) +
+          p  = MRIgetVoxVal(mri_probs, x, y, z, 0) +
               MRIgetVoxVal(mri_probs, x, yi, z, 0);
           if (p > pmax) {
-            pmax = p;
+            pmax  = p;
             yimax = y;
           }
         }
@@ -2844,7 +2794,7 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
   /* find highest probability pair over whole temporal lobe,
      and use them to bootstrap process.
   */
-  pmax = 0.0;
+  pmax  = 0.0;
   ximax = yimax = zimax = 0;
   for (i = 0, x = xmin; x <= xmax; x++) {
     for (z = zmin; z <= zmax; z++) {
@@ -2854,10 +2804,10 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
           continue;
         }
         yi = mri_probs->yi[y + 1];
-        p = MRIgetVoxVal(mri_probs, x, y, z, 0) +
+        p  = MRIgetVoxVal(mri_probs, x, y, z, 0) +
             MRIgetVoxVal(mri_probs, x, yi, z, 0);
         if (p > pmax) {
-          pmax = p;
+          pmax  = p;
           ximax = x;
           yimax = y;
           zimax = z;
@@ -2871,12 +2821,12 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
   /* put the seed point back in */
   MRIsetVoxVal(mri_tmp, ximax, yimax, zimax, 0, 255);
   MRIsetVoxVal(mri_tmp, ximax, yimax + 1, zimax, 0, 255);
-  xmin = MAX(0, ximax - 1);
-  xmax = MIN(ximax + 1, width - 1);
-  ymin = MAX(0, yimax - 1);
-  ymax = MIN(yimax + 2, height - 1);
-  zmin = MAX(0, zimax - 1);
-  zmax = MIN(zimax + 1, depth - 1);
+  xmin                = MAX(0, ximax - 1);
+  xmax                = MIN(ximax + 1, width - 1);
+  ymin                = MAX(0, yimax - 1);
+  ymax                = MIN(yimax + 2, height - 1);
+  zmin                = MAX(0, zimax - 1);
+  zmax                = MIN(zimax + 1, depth - 1);
   added[ximax][zimax] = 1; /* already added to this plane */
   do {
     nchanged = 0;
@@ -2886,7 +2836,7 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
         if (added[x][z]) {
           continue;
         }
-        pmax = 0.0;
+        pmax  = 0.0;
         yimax = -1;
         for (y = ymin; y <= ymax; y++) {
           if (MRIgetVoxVal(mri_tmp, x, y, z, 0)) {
@@ -2903,10 +2853,10 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
           }
 #endif
           yi = mri_probs->yi[y + 1];
-          p = MRIgetVoxVal(mri_probs, x, y, z, 0) +
+          p  = MRIgetVoxVal(mri_probs, x, y, z, 0) +
               MRIgetVoxVal(mri_probs, x, yi, z, 0);
           if (p > pmax) {
-            pmax = p;
+            pmax  = p;
             yimax = y;
           }
         }
@@ -3095,7 +3045,7 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
      wm and hence not bound the hippocampus.
   */
   for (i = 0; i < 3; i++) {
-    int labels[MAX_CMA_LABEL + 1], nlabels, max_label, n;
+    int    labels[MAX_CMA_LABEL + 1], nlabels, max_label, n;
     double probs[MAX_CMA_LABEL + 1], max_p;
 
     for (x = xmin; x <= xmax; x++) {
@@ -3117,7 +3067,7 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
                                                transform, labels, probs);
           for (max_p = 0, max_label = -1, n = 0; n < nlabels; n++) {
             if (probs[n] > max_p) {
-              max_p = probs[n];
+              max_p     = probs[n];
               max_label = labels[n];
             }
           }
@@ -3165,7 +3115,7 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
         */
         for (i = 1; i < 10; i++) {
           /* check for hippocampus inferior */
-          yi = mri_tmp->yi[y - i];
+          yi    = mri_tmp->yi[y - i];
           label = MRIgetVoxVal(mri_labeled, x, yi, z, 0);
 #if 0
           if (label == Left_Cerebral_Cortex ||
@@ -3193,7 +3143,7 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
                 label == Right_Cerebral_Cortex) {
               int left;
 
-              left = (label == Left_Cerebral_Cortex);
+              left  = (label == Left_Cerebral_Cortex);
               label = left ? Left_Hippocampus : Right_Hippocampus;
               for (n = 0; n < gcap->nlabels; n++) {
                 if (gcap->labels[n] == label) /* it's possible */
@@ -3210,10 +3160,10 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
                 }
               }
             }
-          } //! GCA
+          } //!GCA
 #endif
           /* check for hippocampus inferior */
-          yi = mri_tmp->yi[y + i];
+          yi    = mri_tmp->yi[y + i];
           label = MRIgetVoxVal(mri_labeled, x, yi, z, 0);
           if (IS_HIPPO(label) || IS_LAT_VENT(label)) {
             int left;
@@ -3281,7 +3231,7 @@ int insert_thin_temporal_white_matter(MRI *mri_inputs, MRI *mri_labeled,
 int is_possible(GCA *gca, MRI *mri, TRANSFORM *transform, int x, int y, int z,
                 int label) {
   GCA_PRIOR *gcap;
-  int n;
+  int        n;
 
   gcap = getGCAP(gca, mri, transform, x, y, z);
   for (n = 0; n < gcap->nlabels; n++)
@@ -3404,7 +3354,7 @@ GCAlabelWMandWMSAs( GCA *gca,
               continue ;
             }
           }
-          else if (nwm+nwmsa < .9*WSIZE*WSIZE*WSIZE)
+          else if (nwm+nwmsa < .9*WSIZE*WSIZE*WSIZE) 
           {// somewhat arbitrary - the bulk of the nbhd
             continue ;
           }
@@ -3449,11 +3399,11 @@ GCAlabelWMandWMSAs( GCA *gca,
               VectorSubtract(v_vals, v_mean_wm, v_dif_label) ;
               VectorSubtract(v_vals, v_mean_wmsa, v_dif_wmsa) ;
               if (
-                ((fabs(VECTOR_ELT(v_dif_wmsa,1)) <
+                ((fabs(VECTOR_ELT(v_dif_wmsa,1)) < 
                   fabs(VECTOR_ELT(v_dif_label,1))) &&
-                 (fabs(VECTOR_ELT(v_dif_wmsa,2)) <
+                 (fabs(VECTOR_ELT(v_dif_wmsa,2)) < 
                   fabs(VECTOR_ELT(v_dif_label,2))) &&
-                 (fabs(VECTOR_ELT(v_dif_wmsa,3)) <
+                 (fabs(VECTOR_ELT(v_dif_wmsa,3)) < 
                   fabs(VECTOR_ELT(v_dif_label,3)))) ||
                 ((2*wmsa_dist < wm_dist) && (2*wmsa_mdist < wm_mdist)))
               {
@@ -3522,7 +3472,7 @@ GCAlabelWMandWMSAs( GCA *gca,
             ncaudate = MRIlabelsInNbhd(mri_tmp, x, y, z,WHALF, caudate_label) ;
             ngm = MRIlabelsInNbhd(mri_tmp, x, y, z,WHALF, gm_label) ;
 
-            if (ngm+ncaudate+nwm+nwmsa+nunknown < .9*WSIZE*WSIZE*WSIZE)
+            if (ngm+ncaudate+nwm+nwmsa+nunknown < .9*WSIZE*WSIZE*WSIZE)  
             {// somewhat arbitrary - the bulk of the nbhd
               continue ;
             }
@@ -3544,11 +3494,11 @@ GCAlabelWMandWMSAs( GCA *gca,
               if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
                 printf("         - wm_dist = %2.0f, wmsa_dist = %2.0f\n",
                        wm_dist, wmsa_dist) ;
-              if ((fabs(VECTOR_ELT(v_dif_wmsa,1)) <
+              if ((fabs(VECTOR_ELT(v_dif_wmsa,1)) < 
                    fabs(VECTOR_ELT(v_dif_label,1))) &&
-                  (fabs(VECTOR_ELT(v_dif_wmsa,2)) <
+                  (fabs(VECTOR_ELT(v_dif_wmsa,2)) < 
                    fabs(VECTOR_ELT(v_dif_label,2))) &&
-                  (fabs(VECTOR_ELT(v_dif_wmsa,3)) <
+                  (fabs(VECTOR_ELT(v_dif_wmsa,3)) < 
                    fabs(VECTOR_ELT(v_dif_label,3))))
               {
                 if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
@@ -3564,11 +3514,11 @@ GCAlabelWMandWMSAs( GCA *gca,
               if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
                 printf("         - wm_dist = %2.0f, wmsa_dist = %2.0f\n",
                        wm_dist, wmsa_dist) ;
-              if (((fabs(VECTOR_ELT(v_dif_wmsa,1)) <
+              if (((fabs(VECTOR_ELT(v_dif_wmsa,1)) < 
                     fabs(VECTOR_ELT(v_dif_label,1))) &&
-                   (fabs(VECTOR_ELT(v_dif_wmsa,2)) <
+                   (fabs(VECTOR_ELT(v_dif_wmsa,2)) < 
                     fabs(VECTOR_ELT(v_dif_label,2))) &&
-                   (fabs(VECTOR_ELT(v_dif_wmsa,3)) <
+                   (fabs(VECTOR_ELT(v_dif_wmsa,3)) < 
                     fabs(VECTOR_ELT(v_dif_label,3)))) ||
                   (wmsa_dist*3 < wm_dist))
               {
@@ -3589,11 +3539,11 @@ GCAlabelWMandWMSAs( GCA *gca,
               if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
                 printf("         - wm_dist = %2.0f, wmsa_dist = %2.0f\n",
                        wm_dist, wmsa_dist) ;
-              if ((fabs(VECTOR_ELT(v_dif_wmsa,1)) <
+              if ((fabs(VECTOR_ELT(v_dif_wmsa,1)) < 
                    fabs(VECTOR_ELT(v_dif_label,1))) &&
-                  (fabs(VECTOR_ELT(v_dif_wmsa,2)) <
+                  (fabs(VECTOR_ELT(v_dif_wmsa,2)) < 
                    fabs(VECTOR_ELT(v_dif_label,2))) &&
-                  (fabs(VECTOR_ELT(v_dif_wmsa,3)) <
+                  (fabs(VECTOR_ELT(v_dif_wmsa,3)) < 
                    fabs(VECTOR_ELT(v_dif_label,3))))
               {
                 if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
@@ -3664,22 +3614,22 @@ load_val_vector( VECTOR *v_means,
 #endif
 
 int GCAremoveWMSA(GCA *gca) {
-  int x, y, z, n, found, i;
+  int        x, y, z, n, found, i;
   GCA_PRIOR *gcap;
-  GCA_NODE *gcan;
-  double ptotal;
+  GCA_NODE * gcan;
+  double     ptotal;
 
   for (x = 0; x < gca->prior_width; x++) {
     for (y = 0; y < gca->prior_height; y++) {
       for (z = 0; z < gca->prior_depth; z++) {
         gcap = &gca->priors[x][y][z];
-        if (gcap == nullptr) {
+        if (gcap == NULL) {
           continue;
         }
         found = 0;
         for (n = 0; n < gcap->nlabels; n++) {
           if (IS_HYPO(gcap->labels[n])) {
-            found = 1;
+            found           = 1;
             gcap->priors[n] = 1e-10;
             break;
           }
@@ -3703,7 +3653,7 @@ int GCAremoveWMSA(GCA *gca) {
     for (y = 0; y < gca->node_height; y++) {
       for (z = 0; z < gca->node_depth; z++) {
         gcan = &gca->nodes[x][y][z];
-        if (gcan == nullptr) {
+        if (gcan == NULL) {
           continue;
         }
         for (n = 0; n < gcan->nlabels; n++) {
@@ -3726,16 +3676,16 @@ int GCAremoveWMSA(GCA *gca) {
   (((l) == Unknown) || ((l) == CSF) || ((l) == Third_Ventricle))
 static MRI *MRIexpandVentricles(MRI *mri_labeled_src, MRI *mri_labeled,
                                 GCA *gca, MRI *mri_inputs, int num_expansions) {
-  MRI *mri_vent, *mri_vent_orig;
-  double mean, std, thresh;
-  VOXLIST *vl = nullptr;
-  int nadded, x, y, z, label, i, n;
-  MRI *mri_dilated = nullptr, *mri_border = nullptr;
+  MRI *    mri_vent, *mri_vent_orig;
+  double   mean, std, thresh;
+  VOXLIST *vl = NULL;
+  int      nadded, x, y, z, label, i, n;
+  MRI *    mri_dilated = NULL, *mri_border = NULL;
   float label_means[MAX_CMA_LABELS], label_stds[MAX_CMA_LABELS], vdist, ldist,
       val;
 
-  if (mri_labeled == nullptr) {
-    mri_labeled = MRIcopy(mri_labeled_src, nullptr);
+  if (mri_labeled == NULL) {
+    mri_labeled = MRIcopy(mri_labeled_src, NULL);
   }
 
   for (label = 0; label <= MAX_CMA_LABEL; label++) {
@@ -3744,25 +3694,25 @@ static MRI *MRIexpandVentricles(MRI *mri_labeled_src, MRI *mri_labeled,
     label_stds[label] = sqrt(label_stds[label]);
   }
 
-  mri_vent = MRIclone(mri_labeled_src, nullptr);
+  mri_vent = MRIclone(mri_labeled_src, NULL);
   MRIcopyLabel(mri_labeled_src, mri_vent, Left_Lateral_Ventricle);
   MRIcopyLabel(mri_labeled_src, mri_vent, Right_Lateral_Ventricle);
   MRIcopyLabel(mri_labeled_src, mri_vent, Left_Inf_Lat_Vent);
   MRIcopyLabel(mri_labeled_src, mri_vent, Right_Inf_Lat_Vent);
   //  MRIcopyLabel(mri_labeled_src, mri_vent, Third_Ventricle) ;
   MRIbinarize(mri_vent, mri_vent, 1, 0, 1);
-  mean = MRImeanAndStdInLabel(mri_inputs, mri_vent, 1, &std);
-  mri_vent_orig = MRIcopy(mri_vent, nullptr);
-  thresh = mean + .5 * std;
+  mean          = MRImeanAndStdInLabel(mri_inputs, mri_vent, 1, &std);
+  mri_vent_orig = MRIcopy(mri_vent, NULL);
+  thresh        = mean + .5 * std;
   printf(
       "expanding ventricles using %2.1f + 0.5 * %2.1f = %2.1f as threshold\n",
       mean, std, thresh);
 
   for (n = 0; n < num_expansions; n++) {
     mri_dilated = MRIdilate(mri_vent, mri_dilated);
-    mri_border = MRIsubtract(mri_dilated, mri_vent, mri_border);
-    vl = VLSTcreate(mri_border, 1, 1, nullptr, 0, 0);
-    nadded = 0;
+    mri_border  = MRIsubtract(mri_dilated, mri_vent, mri_border);
+    vl          = VLSTcreate(mri_border, 1, 1, NULL, 0, 0);
+    nadded      = 0;
     for (i = 0; i < vl->nvox; i++) {
       x = vl->xi[i];
       y = vl->yi[i];
@@ -3774,7 +3724,7 @@ static MRI *MRIexpandVentricles(MRI *mri_labeled_src, MRI *mri_labeled,
       if (EXCLUDED(label))
         continue;
 
-      val = MRIgetVoxVal(mri_inputs, x, y, z, 0);
+      val   = MRIgetVoxVal(mri_inputs, x, y, z, 0);
       vdist = sqrt(SQR((val - mean) / std));
       ldist = sqrt(SQR((val - label_means[label]) / label_stds[label]));
       if (vdist < 0.5 * ldist) {
@@ -3800,13 +3750,13 @@ static MRI *MRIexpandVentricles(MRI *mri_labeled_src, MRI *mri_labeled,
             MRIgetVoxVal(mri_vent_orig, x, y, z, 0) ==
                 0) { // new ventricle label
           int lh, rh, third, lhi, rhi;
-          lh = MRIlabelsInNbhd(mri_labeled_src, x, y, z, num_expansions,
+          lh    = MRIlabelsInNbhd(mri_labeled_src, x, y, z, num_expansions,
                                Left_Lateral_Ventricle);
-          lhi = MRIlabelsInNbhd(mri_labeled_src, x, y, z, num_expansions,
+          lhi   = MRIlabelsInNbhd(mri_labeled_src, x, y, z, num_expansions,
                                 Left_Inf_Lat_Vent);
-          rh = MRIlabelsInNbhd(mri_labeled_src, x, y, z, num_expansions,
+          rh    = MRIlabelsInNbhd(mri_labeled_src, x, y, z, num_expansions,
                                Right_Lateral_Ventricle);
-          rhi = MRIlabelsInNbhd(mri_labeled_src, x, y, z, num_expansions,
+          rhi   = MRIlabelsInNbhd(mri_labeled_src, x, y, z, num_expansions,
                                 Right_Inf_Lat_Vent);
           third = MRIlabelsInNbhd(mri_labeled_src, x, y, z, num_expansions,
                                   Third_Ventricle);
@@ -3830,15 +3780,15 @@ static MRI *MRIexpandVentricles(MRI *mri_labeled_src, MRI *mri_labeled,
   return (mri_labeled);
 }
 
-static MRI *replace_cortex_far_from_surface_with_wmsa(MRI *mri_inputs,
-                                                      MRI *mri_src,
-                                                      MRI *mri_dst,
+static MRI *replace_cortex_far_from_surface_with_wmsa(MRI *        mri_inputs,
+                                                      MRI *        mri_src,
+                                                      MRI *        mri_dst,
                                                       MRI_SURFACE *mris_lh,
                                                       MRI_SURFACE *mris_rh) {
-  MRI *mri_lh_dist, *mri_rh_dist;
-  int x, y, z, label, f, nchanged = 0;
+  MRI *   mri_lh_dist, *mri_rh_dist;
+  int     x, y, z, label, f, nchanged = 0;
   VECTOR *v_wm_mean, *v_wmsa_mean, *v_gm_mean, *v_tmp;
-  float wm_dist, wmsa_dist, gm_dist;
+  float   wm_dist, wmsa_dist, gm_dist;
 
   mri_dst = MRIcopy(mri_src, mri_dst);
 
@@ -3855,7 +3805,7 @@ static MRI *replace_cortex_far_from_surface_with_wmsa(MRI *mri_inputs,
   VectorScalarMul(v_gm_mean, 0.5, v_gm_mean);
   VectorFree(&v_tmp);
 
-  v_tmp = MRImeanInLabelMultispectral(mri_inputs, mri_dst,
+  v_tmp     = MRImeanInLabelMultispectral(mri_inputs, mri_dst,
                                       Left_Cerebral_White_Matter);
   v_wm_mean = MRImeanInLabelMultispectral(mri_inputs, mri_dst,
                                           Right_Cerebral_White_Matter);
@@ -3887,9 +3837,9 @@ static MRI *replace_cortex_far_from_surface_with_wmsa(MRI *mri_inputs,
             VECTOR_ELT(v_tmp, f + 1) = MRIgetVoxVal(mri_inputs, x, y, z, f);
           }
 
-          wm_dist = VectorDistance(v_wm_mean, v_tmp);
+          wm_dist   = VectorDistance(v_wm_mean, v_tmp);
           wmsa_dist = VectorDistance(v_wmsa_mean, v_tmp);
-          gm_dist = VectorDistance(v_gm_mean, v_tmp);
+          gm_dist   = VectorDistance(v_gm_mean, v_tmp);
           if (wmsa_dist < gm_dist && wmsa_dist < wm_dist) {
             nchanged++;
             if (label == Left_Cerebral_Cortex) {
@@ -3936,8 +3886,8 @@ static MRI *replace_cortex_far_from_surface_with_wmsa(MRI *mri_inputs,
   aseg output will be uchar and so not break anything downstream.
  */
 int MRItoUCHAR(MRI **pmri) {
-  MRI *mri, *mri2;
-  int c, r, s, f;
+  MRI *  mri, *mri2;
+  int    c, r, s, f;
   double v, vmin, vmax;
 
   mri = *pmri;
@@ -3993,13 +3943,13 @@ int MRItoUCHAR(MRI **pmri) {
 static MRI *fix_putamen(GCA *gca, MRI *mri_inputs, MRI *mri_imp,
                         TRANSFORM *transform, MRI *mri_src_labeled,
                         MRI *mri_dst_labeled, double prior_thresh) {
-  int x, y, z, nchanged, label, n, left, right, above, below;
-  int gm, wm, iter, total_changed;
-  double pwm, pgm;
+  int        x, y, z, nchanged, label, n, left, right, above, below;
+  int        gm, wm, iter, total_changed;
+  double     pwm, pgm;
   GCA_PRIOR *gcap;
 
-  if (mri_dst_labeled == nullptr) {
-    mri_dst_labeled = MRIcopy(mri_src_labeled, nullptr);
+  if (mri_dst_labeled == NULL) {
+    mri_dst_labeled = MRIcopy(mri_src_labeled, NULL);
   }
   if (prior_thresh < 0) {
     return (mri_dst_labeled);
@@ -4022,7 +3972,7 @@ static MRI *fix_putamen(GCA *gca, MRI *mri_inputs, MRI *mri_imp,
             {
               label = MRIgetVoxVal(mri_src_labeled, x, y, z, 0);
               if (IS_PUTAMEN(label) && gcap->priors[n] < prior_thresh) {
-                left = MRIgetVoxVal(mri_src_labeled, x + 1, y, z, 0);
+                left  = MRIgetVoxVal(mri_src_labeled, x + 1, y, z, 0);
                 right = MRIgetVoxVal(mri_src_labeled, x - 1, y, z, 0);
                 above = MRIgetVoxVal(mri_src_labeled, x, y - 1, z, 0);
                 below = MRIgetVoxVal(mri_src_labeled, x, y + 1, z, 0);
@@ -4075,9 +4025,9 @@ static MRI *fix_putamen(GCA *gca, MRI *mri_inputs, MRI *mri_imp,
 VOXEL_LIST *find_unlikely_voxels_in_region(
     GCA *gca, TRANSFORM *transform, MRI *mri_labeled, double prior_thresh,
     MRI *mri_prior_labels, MRI *mri_priors, int x, int y, int z, int whalf) {
-  int xi, yi, zi, xk, yk, zk, nvox, label, prior_label;
-  double prior;
-  GCA_PRIOR *gcap;
+  int         xi, yi, zi, xk, yk, zk, nvox, label, prior_label;
+  double      prior;
+  GCA_PRIOR * gcap;
   VOXEL_LIST *vl;
 
   for (nvox = 0, xk = -whalf; xk <= whalf; xk++) {
@@ -4085,7 +4035,7 @@ VOXEL_LIST *find_unlikely_voxels_in_region(
     for (yk = -whalf; yk <= whalf; yk++) {
       yi = mri_labeled->yi[y + yk];
       for (zk = -whalf; zk <= whalf; zk++) {
-        zi = mri_labeled->zi[z + zk];
+        zi    = mri_labeled->zi[z + zk];
         label = MRIgetVoxVal(mri_labeled, xi, yi, zi, 0);
         if (IS_WMSA(label)) // applying spatial priors to WMSAs doesn't work
           continue;
@@ -4093,7 +4043,7 @@ VOXEL_LIST *find_unlikely_voxels_in_region(
         if (label == prior_label) {
           continue;
         }
-        gcap = getGCAP(gca, mri_labeled, transform, xi, yi, zi);
+        gcap  = getGCAP(gca, mri_labeled, transform, xi, yi, zi);
         prior = getPrior(gcap, label);
         if (prior < prior_thresh) {
           nvox++;
@@ -4102,11 +4052,11 @@ VOXEL_LIST *find_unlikely_voxels_in_region(
     }
   }
   if (nvox == 0) {
-    return (nullptr);
+    return (NULL);
   }
-  vl = VLSTalloc(nvox);
+  vl       = VLSTalloc(nvox);
   vl->nvox = 0;
-  vl->mri = mri_labeled;
+  vl->mri  = mri_labeled;
 
   for (xk = -whalf; xk <= whalf; xk++) {
     xi = mri_labeled->xi[x + xk];
@@ -4124,7 +4074,7 @@ VOXEL_LIST *find_unlikely_voxels_in_region(
         if (label == prior_label) {
           continue;
         }
-        gcap = getGCAP(gca, mri_labeled, transform, xi, yi, zi);
+        gcap  = getGCAP(gca, mri_labeled, transform, xi, yi, zi);
         prior = getPrior(gcap, label);
         if (prior < prior_thresh) {
           VLSTadd(vl, xi, yi, zi, xi, yi, zi);
@@ -4152,19 +4102,19 @@ static int change_unlikely_voxels(GCA *gca, MRI *mri_dst_label, MRI *mri_inputs,
       continue;
     }
     nchanged++;
-    x = vl->xi[i];
-    y = vl->yi[i];
-    z = vl->zi[i];
+    x         = vl->xi[i];
+    y         = vl->yi[i];
+    z         = vl->zi[i];
     max_label = MRIgetVoxVal(mri_prior_labels, x, y, z, 0);
     MRIsetVoxVal(mri_dst_label, x, y, z, 0, max_label); // use prior label
-    if (false && x == Ggca_x && y == Ggca_y && z == Ggca_z) {
+    if (0 && x == Ggca_x && y == Ggca_y && z == Ggca_z) {
       printf("change_unlikely_voxels 1: changing label at (%d, %d, %d) from %s "
              "to %s\n",
              Ggca_x, Ggca_y, Ggca_z, cma_label_to_name(label_to_change),
              cma_label_to_name(max_label));
     }
 #if 0
-    gcap = getGCAP(gca, mri_inputs, transform,
+    gcap = getGCAP(gca, mri_inputs, transform, 
                    vl->xi[i], vl->yi[i], vl->zi[i]) ;
     max_p = 0.0 ;
     max_label = 0 ;
@@ -4174,11 +4124,11 @@ static int change_unlikely_voxels(GCA *gca, MRI *mri_dst_label, MRI *mri_inputs,
       {
         DiagBreak() ;
       }
-      if (gcap->labels[n] == label_to_change)
+      if (gcap->labels[n] == label_to_change)   
       {// don't let it be the one we are changing
         continue ;
       }
-      p = GCAlabelProbability(mri_inputs, gca, transform,
+      p = GCAlabelProbability(mri_inputs, gca, transform, 
                               (float)x, (float)y, (float)z, gcap->labels[n]) ;
       if (p > max_p)
       {
@@ -4202,20 +4152,20 @@ static int change_unlikely_voxels(GCA *gca, MRI *mri_dst_label, MRI *mri_inputs,
 
 static MRI *GCArelabelUnlikely(GCA *gca, MRI *mri_inputs, TRANSFORM *transform,
                                MRI *mri_src_labeled, MRI *mri_dst_labeled,
-                               MRI *mri_independent_posterior,
+                               MRI *  mri_independent_posterior,
                                double prior_thresh, int whalf) {
-  int x, y, z, nchanged, total_changed, i, nindices, label, index, w;
+  int    x, y, z, nchanged, total_changed, i, nindices, label, index, w;
   short *x_indices, *y_indices, *z_indices;
-  MRI *mri_prior_labels, *mri_priors, *mri_unchanged, *mri_tmp;
+  MRI *  mri_prior_labels, *mri_priors, *mri_unchanged, *mri_tmp;
   double prior;
 
-  mri_prior_labels = MRIclone(mri_dst_labeled, nullptr);
-  mri_priors = MRIcloneDifferentType(mri_dst_labeled, MRI_FLOAT);
-  mri_unchanged = MRIcloneDifferentType(mri_dst_labeled, MRI_UCHAR);
-  mri_tmp = MRIclone(mri_unchanged, nullptr);
+  mri_prior_labels = MRIclone(mri_dst_labeled, NULL);
+  mri_priors       = MRIcloneDifferentType(mri_dst_labeled, MRI_FLOAT);
+  mri_unchanged    = MRIcloneDifferentType(mri_dst_labeled, MRI_UCHAR);
+  mri_tmp          = MRIclone(mri_unchanged, NULL);
 
-  if (mri_dst_labeled == nullptr) {
-    mri_dst_labeled = MRIcopy(mri_src_labeled, nullptr);
+  if (mri_dst_labeled == NULL) {
+    mri_dst_labeled = MRIcopy(mri_src_labeled, NULL);
   }
 
   for (x = 0; x < mri_inputs->width; x++)
@@ -4230,19 +4180,19 @@ static MRI *GCArelabelUnlikely(GCA *gca, MRI *mri_inputs, TRANSFORM *transform,
         MRIsetVoxVal(mri_priors, x, y, z, 0, prior);
       }
 
-  nindices = mri_inputs->width * mri_inputs->height * mri_inputs->depth;
+  nindices  = mri_inputs->width * mri_inputs->height * mri_inputs->depth;
   x_indices = (short *)calloc(nindices, sizeof(short));
   y_indices = (short *)calloc(nindices, sizeof(short));
   z_indices = (short *)calloc(nindices, sizeof(short));
   for (i = total_changed = 0; i < 5; i++) {
     nchanged = 0;
     MRIcomputeVoxelPermutation(mri_inputs, x_indices, y_indices, z_indices);
-#if 0 // def HAVE_OPENMP   doesn't work
+#if 0 //def HAVE_OPENMP   doesn't work
 #pragma omp parallel for if_ROMP(experimental) firstprivate(mri_independent_posterior, mri_inputs, gca, mri_prior_labels, whalf, prior_thresh, Ggca_x, Ggca_y, Ggca_z) shared(mri_unchanged, mri_priors,transform, x_indices,y_indices,z_indices, mri_dst_labeled) reduction(+:nchanged)
 #endif
     for (index = 0; index < nindices; index++) {
-      double posterior_before, posterior_after;
-      int label, x, y, z, nchanged_tmp, old_label = 0;
+      double      posterior_before, posterior_after;
+      int         label, x, y, z, nchanged_tmp, old_label = 0;
       VOXEL_LIST *vl;
 
       x = x_indices[index];
@@ -4287,14 +4237,14 @@ static MRI *GCArelabelUnlikely(GCA *gca, MRI *mri_inputs, TRANSFORM *transform,
                                           prior_thresh, mri_prior_labels,
                                           mri_priors, x, y, z, whalf);
 
-      if (vl == nullptr)
+      if (vl == NULL)
         continue;
       if (Ggca_x >= 0)
         old_label = MRIgetVoxVal(mri_src_labeled, Ggca_x, Ggca_y, Ggca_z, 0);
 
       if (Ggca_x >= 0 && VLSTinList(vl, Ggca_x, Ggca_y, Ggca_z)) {
         MRI *mri;
-        mri = VLSTtoMri(vl, nullptr);
+        mri = VLSTtoMri(vl, NULL);
         MRIwrite(mri, "vl.mgz");
         MRIfree(&mri);
         DiagBreak();
@@ -4347,7 +4297,7 @@ static MRI *GCArelabelUnlikely(GCA *gca, MRI *mri_inputs, TRANSFORM *transform,
 
 static MRI *gcaCheckForFCDs(MRI *mri_src, MRI *mri_dst, GCA *gca,
                             TRANSFORM *transform, MRI *mri_inputs) {
-  int x, y, z, label, out_label, nchanged, iter = 0;
+  int   x, y, z, label, out_label, nchanged, iter = 0;
   float left_means[2], right_means[2], global_gm_mean, global_wm_mean;
 
   GCAlabelMean(gca, Left_Cerebral_Cortex, left_means);
@@ -4375,8 +4325,8 @@ static MRI *gcaCheckForFCDs(MRI *mri_src, MRI *mri_dst, GCA *gca,
                                                 : Right_non_WM_hypointensities;
           } else if (IS_WM(label)) {
             GCA_PRIOR *gcap;
-            GC1D *gm_gc, *wm_gc;
-            float wm_prior, gm_prior, gm_dist, wm_dist, val, thresh;
+            GC1D *     gm_gc, *wm_gc;
+            float      wm_prior, gm_prior, gm_dist, wm_dist, val, thresh;
 
             if (MRIcountNbhdLabels(mri_src, x, y, z, Left_WM_hypointensities) >
                     0 ||
@@ -4390,19 +4340,19 @@ static MRI *gcaCheckForFCDs(MRI *mri_src, MRI *mri_dst, GCA *gca,
 
               thresh = 1.3;
 
-            val = MRIgetVoxVal(mri_inputs, x, y, z, 0);
-            gcap = getGCAP(gca, mri_src, transform, x, y, z);
+            val      = MRIgetVoxVal(mri_inputs, x, y, z, 0);
+            gcap     = getGCAP(gca, mri_src, transform, x, y, z);
             wm_prior = getPrior(gcap, label);
             if (label == Left_Cerebral_White_Matter) {
               gm_prior = getPrior(gcap, Left_Cerebral_Cortex);
-              gm_gc = GCAfindSourceGC(gca, mri_src, transform, x, y, z,
+              gm_gc    = GCAfindSourceGC(gca, mri_src, transform, x, y, z,
                                       Left_Cerebral_Cortex);
             } else {
               gm_prior = getPrior(gcap, Right_Cerebral_Cortex);
-              gm_gc = GCAfindSourceGC(gca, mri_src, transform, x, y, z,
+              gm_gc    = GCAfindSourceGC(gca, mri_src, transform, x, y, z,
                                       Left_Cerebral_Cortex);
             }
-            wm_gc = GCAfindSourceGC(gca, mri_src, transform, x, y, z,
+            wm_gc   = GCAfindSourceGC(gca, mri_src, transform, x, y, z,
                                     Left_Cerebral_Cortex);
             gm_dist = gm_gc ? fabs(val - gm_gc->means[0])
                             : fabs(val - global_gm_mean);

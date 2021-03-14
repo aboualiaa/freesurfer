@@ -1,6 +1,6 @@
 #include "DialogSelectSplines.h"
-#include "ui_DialogSelectSplines.h"
 #include "LayerPointSet.h"
+#include "ui_DialogSelectSplines.h"
 #include <QListWidgetItem>
 #include <QMessageBox>
 

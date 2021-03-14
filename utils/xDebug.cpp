@@ -1,16 +1,11 @@
 /**
- * @file  xDebug.c
  * @brief X debugging routines: creates .xdebug_tkmedit and .xdebug_tksurfer
  *
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,30 +18,30 @@
  */
 
 #include "xDebug.h"
-#include <csignal>
-#include <cstdarg>
-#include <cstdlib>
-#include <cstring>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 
-tBoolean xDbg_gbOutput = FALSE;
-tBoolean xDbg_gbSegfaulted = FALSE;
-FILE *xDbg_gStream = nullptr;
-int xDbg_gType = xDebug_Nothing;
-char *xDbg_gsRequest = nullptr;
-char xDbg_sStackDesc[xDbg_knMaxDescLength] = "";
-char xDbg_sCurNoteDesc[xDbg_knMaxDescLength] = "";
-int xDbg_gLineNumberOfError = 0;
+tBoolean xDbg_gbOutput                           = FALSE;
+tBoolean xDbg_gbSegfaulted                       = FALSE;
+FILE *   xDbg_gStream                            = NULL;
+int      xDbg_gType                              = xDebug_Nothing;
+char *   xDbg_gsRequest                          = NULL;
+char     xDbg_sStackDesc[xDbg_knMaxDescLength]   = "";
+char     xDbg_sCurNoteDesc[xDbg_knMaxDescLength] = "";
+int      xDbg_gLineNumberOfError                 = 0;
 
 static char masStackTitle[xDbg_knMaxStackDepth][xDbg_knMaxDescLength] = {};
-static char masStackNote[xDbg_knMaxStackDepth][xDbg_knMaxDescLength] = {};
-static int mCurrentStackDepth = 0;
-static void (*mSegfaultFunction)(int) = nullptr;
+static char masStackNote[xDbg_knMaxStackDepth][xDbg_knMaxDescLength]  = {};
+static int  mCurrentStackDepth                                        = 0;
+static void (*mSegfaultFunction)(int)                                 = NULL;
 
 void xDbg_Init(char *isFileName) {
   char sFileName[256] = "";
 
-  if (isFileName == nullptr) {
+  if (isFileName == NULL) {
     strcpy(sFileName, ".xdebug");
   } else {
 #ifdef IRIX
@@ -60,7 +55,7 @@ void xDbg_Init(char *isFileName) {
      requested. do file if nothing is recognizable. otherwise try to do
      file. */
   xDbg_gsRequest = getenv("XDEBUG");
-  if (nullptr == xDbg_gsRequest) {
+  if (NULL == xDbg_gsRequest) {
     xDbg_gType = xDebug_File;
   } else {
     if (strcmp("file", xDbg_gsRequest) == 0)
@@ -74,7 +69,7 @@ void xDbg_Init(char *isFileName) {
   }
   if (xDebug_File == xDbg_gType) {
     xDbg_gStream = fopen(sFileName, "w");
-    if (nullptr == xDbg_gStream) {
+    if (NULL == xDbg_gStream) {
       fprintf(stdout, "Couldn't create output file %s", sFileName);
       fflush(stdout);
       xDbg_gType = xDebug_Nothing;
@@ -91,7 +86,7 @@ void xDbg_Init(char *isFileName) {
   }
 
   mCurrentStackDepth = 0;
-  mSegfaultFunction = nullptr;
+  mSegfaultFunction  = NULL;
   signal(SIGSEGV, xDbg_SegfaultHandler);
 }
 
@@ -101,23 +96,22 @@ void xDbg_RegisterSegfaultHandler(void (*iFunction)(int)) {
 
 void xDbg_ShutDown() {
   /* close file if we opened it */
-  if (xDebug_File == xDbg_gType && nullptr != xDbg_gStream)
+  if (xDebug_File == xDbg_gType && NULL != xDbg_gStream)
     fclose(xDbg_gStream);
 }
 
 void xDbg_PrintStatus() {
   fprintf(stderr, "output = %d\n", (int)xDbg_gbOutput);
   fprintf(stderr, "type = %s\n",
-          (xDbg_gType == xDebug_Nothing)
-              ? "nothing"
-              : (xDbg_gType == xDebug_Print)
-                    ? "print"
-                    : (xDbg_gType == xDebug_File) ? "file" : "");
+          (xDbg_gType == xDebug_Nothing) ? "nothing"
+          : (xDbg_gType == xDebug_Print) ? "print"
+          : (xDbg_gType == xDebug_File)  ? "file"
+                                         : "");
   fprintf(stderr, "env var = %s\n",
-          (xDbg_gsRequest != nullptr) ? xDbg_gsRequest : "undefined");
+          (xDbg_gsRequest != NULL) ? xDbg_gsRequest : "undefined");
   if (xDbg_gStream == stderr)
     fprintf(stderr, "stream = stderr\n");
-  else if (nullptr != xDbg_gStream)
+  else if (NULL != xDbg_gStream)
     fprintf(stderr, "stream = probably a file\n");
   else
     fprintf(stderr, "stream = NULL\n");
@@ -139,9 +133,9 @@ void xDbg_PopStack() {
     --mCurrentStackDepth;
 
     strncpy(xDbg_sStackDesc, masStackTitle[mCurrentStackDepth],
-            xDbg_knMaxDescLength);
+            xDbg_knMaxDescLength - 1);
     strncpy(xDbg_sCurNoteDesc, masStackNote[mCurrentStackDepth],
-            xDbg_knMaxDescLength);
+            xDbg_knMaxDescLength - 1);
   } else {
     DebugPrint(("ERROR: xDbg_PopStack call when stack is empty.\n"));
   }
@@ -157,7 +151,7 @@ const char *xDbg_GetCurrentFunction() {
 
 void xDbg_PrintStack() {
   int nCurDesc = 0;
-  int nSpace = 0;
+  int nSpace   = 0;
 
   DebugPrint(("xDebug stack (length: %d)\n", mCurrentStackDepth + 1));
 
@@ -187,13 +181,13 @@ void xDbg_SegfaultHandler(int inSignal) {
 
   xDbg_PrintStack();
 
-  if (nullptr != mSegfaultFunction)
+  if (NULL != mSegfaultFunction)
     mSegfaultFunction(inSignal);
 }
 
 void xDbg_Segfault() {
-  char *pBadPtr = nullptr;
-  *pBadPtr = 1;
+  char *pBadPtr = 0x0;
+  *pBadPtr      = 1;
 }
 
 void xDbg_Printf(const char *iFormat, ...) {

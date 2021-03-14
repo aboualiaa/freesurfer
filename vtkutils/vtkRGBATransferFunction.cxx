@@ -1,7 +1,5 @@
 /**
- * @file  vtkRGBATransferFunction.cxx
- * @brief Defines transfer function for mapping a property to an RGBA color
- * value
+ * @brief Defines transfer function for mapping a property to an RGBA color value
  *
  * This code is based on vtkColorTransferFunction. It was modified to
  * add an alpha element to all color output. This required adding a
@@ -11,12 +9,8 @@
  */
 /*
  * Original Author: Kitware, Inc, modified by Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -49,7 +43,6 @@
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
 
-// vtkCxxRevisionMacro(vtkRGBATransferFunction, "$Revision: 1.4 $");
 vtkStandardNewMacro(vtkRGBATransferFunction);
 
 //----------------------------------------------------------------------------
@@ -63,15 +56,15 @@ vtkRGBATransferFunction::vtkRGBATransferFunction() {
   this->Range[0] = 0;
   this->Range[1] = 0;
 
-  this->Clamping = 1;
+  this->Clamping   = 1;
   this->ColorSpace = VTK_CTF_RGB;
-  this->HSVWrap = 1; // By default HSV will be wrap
+  this->HSVWrap    = 1; // By default HSV will be wrap
 
-  this->Function = nullptr;
-  this->FunctionSize = 0;
+  this->Function       = nullptr;
+  this->FunctionSize   = 0;
   this->NumberOfPoints = 0;
 
-  this->Table = nullptr;
+  this->Table     = nullptr;
   this->TableSize = 0;
 }
 
@@ -87,7 +80,7 @@ vtkRGBATransferFunction::~vtkRGBATransferFunction() {
 int vtkRGBATransferFunction::AddRGBAPoint(double x, double r, double g,
                                           double b, double a) {
   double *fptr = this->Function;
-  int i;
+  int     i;
 
   for (i = 0; i < this->NumberOfPoints; i++, fptr += 5) {
     if (x <= *fptr) {
@@ -132,7 +125,7 @@ int vtkRGBATransferFunction::AddRGBAPoint(double x, double r, double g,
     this->Function = tmp;
   } else {
     for (int j = this->NumberOfPoints - 1; j >= i; j--) {
-      this->Function[5 * (j + 1)] = this->Function[5 * j];
+      this->Function[5 * (j + 1)]     = this->Function[5 * j];
       this->Function[5 * (j + 1) + 1] = this->Function[5 * j + 1];
       this->Function[5 * (j + 1) + 2] = this->Function[5 * j + 2];
       this->Function[5 * (j + 1) + 3] = this->Function[5 * j + 3];
@@ -140,7 +133,7 @@ int vtkRGBATransferFunction::AddRGBAPoint(double x, double r, double g,
     }
   }
 
-  this->Function[i * 5] = x;
+  this->Function[i * 5]     = x;
   this->Function[i * 5 + 1] = r;
   this->Function[i * 5 + 2] = g;
   this->Function[i * 5 + 3] = b;
@@ -170,7 +163,7 @@ int vtkRGBATransferFunction::AddHSVAPoint(double x, double h, double s,
 // Remove a point
 int vtkRGBATransferFunction::RemovePoint(double x) {
   double *fptr = this->Function;
-  int i;
+  int     i;
 
   // find the point to remove
   for (i = 0; i < this->NumberOfPoints; i++, fptr += 5) {
@@ -183,7 +176,7 @@ int vtkRGBATransferFunction::RemovePoint(double x) {
     this->NumberOfPoints--;
 
     for (int j = i; j < this->NumberOfPoints; j++) {
-      this->Function[5 * j] = this->Function[5 * (j + 1)];
+      this->Function[5 * j]     = this->Function[5 * (j + 1)];
       this->Function[5 * j + 1] = this->Function[5 * (j + 1) + 1];
       this->Function[5 * j + 2] = this->Function[5 * (j + 1) + 2];
       this->Function[5 * j + 3] = this->Function[5 * (j + 1) + 3];
@@ -231,12 +224,12 @@ void vtkRGBATransferFunction::AddRGBASegment(double x1, double r1, double g1,
   this->AddRGBAPoint(x1, r1, g1, b1, a1);
   this->AddRGBAPoint(x2, r2, g2, b2, a2);
 
-  int i, j;
+  int     i, j;
   double *fptr = this->Function;
 
   // swap them if necessary
   if (x1 > x2) {
-    x = x1;
+    x  = x1;
     x1 = x2;
     x2 = x;
   }
@@ -260,7 +253,7 @@ void vtkRGBATransferFunction::AddRGBASegment(double x1, double r1, double g1,
   if (j < this->NumberOfPoints && d) {
     this->NumberOfPoints -= d;
     for (int k = i + 1; k < this->NumberOfPoints; k++) {
-      this->Function[5 * k] = this->Function[5 * (k + d)];
+      this->Function[5 * k]     = this->Function[5 * (k + d)];
       this->Function[5 * k + 1] = this->Function[5 * (k + d) + 1];
       this->Function[5 * k + 2] = this->Function[5 * (k + d) + 2];
       this->Function[5 * k + 3] = this->Function[5 * (k + d) + 3];
@@ -351,12 +344,12 @@ double vtkRGBATransferFunction::GetAlphaValue(double x) {
 // Returns a table of RGBA colors at regular intervals along the function
 void vtkRGBATransferFunction::GetTable(double x1, double x2, int size,
                                        double *table) {
-  double x, xinc = 0;
+  double  x, xinc = 0;
   double *tptr = table;
   double *fptr = this->Function;
-  int loc;
-  int i;
-  double weight;
+  int     loc;
+  int     i;
+  double  weight;
 
   if (this->NumberOfPoints == 0) {
     vtkErrorMacro(
@@ -464,12 +457,12 @@ void vtkRGBATransferFunction::GetTable(double x1, double x2, int size,
 //----------------------------------------------------------------------------
 void vtkRGBATransferFunction::GetTable(double x1, double x2, int size,
                                        float *table) {
-  double x, xinc = 0;
-  float *tptr = table;
+  double  x, xinc = 0;
+  float * tptr = table;
   double *fptr = this->Function;
-  int loc;
-  int i;
-  double weight;
+  int     loc;
+  int     i;
+  double  weight;
 
   if (this->NumberOfPoints == 0) {
     vtkErrorMacro(
@@ -582,11 +575,11 @@ void vtkRGBATransferFunction::GetTable(double x1, double x2, int size,
 //----------------------------------------------------------------------------
 const unsigned char *vtkRGBATransferFunction::GetTable(double x1, double x2,
                                                        int size) {
-  double x, xinc = 0;
+  double  x, xinc = 0;
   double *fptr = this->Function;
-  int loc;
-  int i;
-  double weight;
+  int     loc;
+  int     i;
+  double  weight;
 
   if (this->GetMTime() <= this->BuildTime && this->TableSize == size) {
     return this->Table;
@@ -600,7 +593,7 @@ const unsigned char *vtkRGBATransferFunction::GetTable(double x1, double x2,
 
   if (this->TableSize != size) {
     delete[] this->Table;
-    this->Table = new unsigned char[size * 4];
+    this->Table     = new unsigned char[size * 4];
     this->TableSize = size;
   }
   unsigned char *tptr = this->Table;
@@ -717,8 +710,8 @@ void vtkRGBATransferFunction::BuildFunctionFromTable(double x1, double x2,
 
   double *fptr;
   double *tptr = table;
-  double x, xinc;
-  int i;
+  double  x, xinc;
+  int     i;
 
   xinc = (x2 - x1) / (double)(size - 1);
 
@@ -728,7 +721,7 @@ void vtkRGBATransferFunction::BuildFunctionFromTable(double x1, double x2,
   if (this->FunctionSize < size) {
     delete[] this->Function;
     this->FunctionSize = size * 2;
-    this->Function = new double[5 * this->FunctionSize];
+    this->Function     = new double[5 * this->FunctionSize];
   }
 
   fptr = this->Function;
@@ -751,7 +744,7 @@ void vtkRGBATransferFunction::BuildFunctionFromTable(double x1, double x2,
 void vtkRGBATransferFunction::PrintSelf(ostream &os, vtkIndent indent) {
   this->Superclass::PrintSelf(os, indent);
 
-  os << indent << "Size: " << this->NumberOfPoints << endl;
+  os << indent << "Size: " << this->NumberOfPoints << std::endl;
   if (this->Clamping) {
     os << indent << "Clamping: On\n";
   } else {
@@ -767,14 +760,14 @@ void vtkRGBATransferFunction::PrintSelf(ostream &os, vtkIndent indent) {
   }
 
   os << indent << "Range: " << this->Range[0] << " to " << this->Range[1]
-     << endl;
+     << std::endl;
 
   if (this->NumberOfPoints < 100) {
     for (int i = 0; i < this->NumberOfPoints; i++) {
       os << indent << "  Point " << i << ": " << this->Function[i * 5]
          << " maps to " << this->Function[i * 5 + 1] << " "
          << this->Function[i * 5 + 2] << " " << this->Function[i * 5 + 3]
-         << " a " << this->Function[i * 5 + 4] << endl;
+         << " a " << this->Function[i * 5 + 4] << std::endl;
     }
   }
 
@@ -794,12 +787,12 @@ void vtkRGBATransferFunction::DeepCopy(vtkRGBATransferFunction *f) {
   delete[] this->Table;
   this->TableSize = 0;
 
-  this->Clamping = f->Clamping;
-  this->ColorSpace = f->ColorSpace;
-  this->FunctionSize = f->FunctionSize;
+  this->Clamping       = f->Clamping;
+  this->ColorSpace     = f->ColorSpace;
+  this->FunctionSize   = f->FunctionSize;
   this->NumberOfPoints = f->NumberOfPoints;
-  this->Range[0] = f->Range[0];
-  this->Range[1] = f->Range[1];
+  this->Range[0]       = f->Range[0];
+  this->Range[1]       = f->Range[1];
 
   if (this->FunctionSize > 0) {
     this->Function = new double[5 * this->FunctionSize];
@@ -821,11 +814,11 @@ template <class T>
 void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self, T *input,
                                     unsigned char *output, int length,
                                     int inIncr, int outFormat, long) {
-  double x;
-  int i = length;
-  double rgba[4];
+  double         x;
+  int            i = length;
+  double         rgba[4];
   unsigned char *optr = output;
-  T *iptr = input;
+  T *            iptr = input;
 
   if (self->GetSize() == 0) {
     vtkGenericWarningMacro("Transfer Function Has No Points!");
@@ -859,8 +852,8 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
                                     unsigned char *input, unsigned char *output,
                                     int length, int inIncr, int outFormat,
                                     int) {
-  int x;
-  int i = length;
+  int            x;
+  int            i    = length;
   unsigned char *optr = output;
   unsigned char *iptr = input;
 
@@ -873,7 +866,7 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
   switch (outFormat) {
   case VTK_RGB:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 1];
       *(optr++) = table[x + 2];
@@ -882,7 +875,7 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
     break;
   case VTK_RGBA:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 1];
       *(optr++) = table[x + 2];
@@ -892,7 +885,7 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
     break;
   case VTK_LUMINANCE_ALPHA:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 3];
       iptr += inIncr;
@@ -900,7 +893,7 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
     break;
   case VTK_LUMINANCE:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       iptr += inIncr;
     }
@@ -911,12 +904,12 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
 //----------------------------------------------------------------------------
 // Special implementation for unsigned short input.
 void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
-                                    unsigned short *input,
+                                    unsigned short *         input,
                                     unsigned char *output, int length,
                                     int inIncr, int outFormat, int) {
-  int x;
-  int i = length;
-  unsigned char *optr = output;
+  int             x;
+  int             i    = length;
+  unsigned char * optr = output;
   unsigned short *iptr = input;
 
   if (self->GetSize() == 0) {
@@ -928,7 +921,7 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
   switch (outFormat) {
   case VTK_RGB:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 1];
       *(optr++) = table[x + 2];
@@ -937,7 +930,7 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
     break;
   case VTK_RGBA:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 1];
       *(optr++) = table[x + 2];
@@ -947,7 +940,7 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
     break;
   case VTK_LUMINANCE_ALPHA:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       *(optr++) = table[x + 3];
       iptr += inIncr;
@@ -955,7 +948,7 @@ void vtkRGBATransferFunctionMapData(vtkRGBATransferFunction *self,
     break;
   case VTK_LUMINANCE:
     while (--i >= 0) {
-      x = *iptr * 4;
+      x         = *iptr * 4;
       *(optr++) = table[x];
       iptr += inIncr;
     }
@@ -1021,8 +1014,8 @@ int vtkRGBATransferFunction::AdjustRange(double range[2]) {
 
   // Remove all points out-of-range
 
-  int func_size = this->GetSize();
-  double *func_ptr = this->GetDataPointer();
+  int     func_size = this->GetSize();
+  double *func_ptr  = this->GetDataPointer();
 
   int i;
   for (i = func_size - 1; i >= 0; i--) {

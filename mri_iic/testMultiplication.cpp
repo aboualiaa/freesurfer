@@ -1,5 +1,4 @@
 /**
- * @file  testMultiplication.cpp
  * @brief test program
  *
  * A test file to establish the best method for multiplication
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Benjamin Lewin
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2014/09/03 20:31:32 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2014 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,22 +19,22 @@
  *
  */
 
-#include <iostream>
-#include <vnl/vnl_matrix.h>
 #include <iomanip>
+#include <iostream>
 #include <time.h>
+#include <vnl/vnl_matrix.h>
 
 #include "matrix3d.h"
 
-const int ROWS = 400;
-const int COLS = 400;
-const int SLICES = 400;
+const int ROWS      = 400;
+const int COLS      = 400;
+const int SLICES    = 400;
 const int NUM_BASIS = 15;
 
 const int TEST_ITERATIONS = 1;
 
 int main() {
-  Matrix3d data(ROWS, COLS, SLICES);
+  Matrix3d          data(ROWS, COLS, SLICES);
   vnl_matrix<float> Bxt(NUM_BASIS, ROWS);
   vnl_matrix<float> result(NUM_BASIS, COLS * SLICES);
   vnl_matrix<float> result2(NUM_BASIS, COLS * SLICES);
@@ -59,7 +54,7 @@ int main() {
 
   // create 2d matrix to contain all elements then multiply
   std::cout << "Begin test with full reshape:\n";
-  clock_t begin1 = clock();
+  clock_t           begin1 = clock();
   vnl_matrix<float> reshaped(ROWS, COLS * SLICES);
   for (int j = 0; j < TEST_ITERATIONS; j++) {
     for (int i = 0; i < SLICES; i++) {
@@ -67,8 +62,8 @@ int main() {
     }
     result2 = Bxt * reshaped;
   }
-  clock_t end1 = clock();
-  double time1 = difftime(end1, begin1);
+  clock_t end1  = clock();
+  double  time1 = difftime(end1, begin1);
   std::cout << "Time elapsed: " << time1 << " ms\n\n";
 
   // multiply each slice into the result matrix seperately
@@ -78,8 +73,8 @@ int main() {
     for (int i = 0; i < SLICES; i++) {
       result.set_columns(i * COLS, Bxt * data.getSlice(i));
     }
-  clock_t end2 = clock();
-  double time2 = difftime(end2, begin2);
+  clock_t end2  = clock();
+  double  time2 = difftime(end2, begin2);
   std::cout << "Time elapsed: " << time2 << " ms\n\n";
 
   std::cout << "Full reshape took " << time1 / time2 << " times longer\n";

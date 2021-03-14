@@ -23,7 +23,7 @@ public:
   explicit ArrayItem(T *obj) {
     assertDebug(obj != NULL);
     m_refCount = 1;
-    m_object = obj;
+    m_object   = obj;
   }
 
   /// the pointer object should not be deleted until there are no references to
@@ -50,7 +50,7 @@ public:
   inline int refCount() const { return m_refCount; }
 
   /// the item being referenced
-  inline T &ref() { return *m_object; }
+  inline T &      ref() { return *m_object; }
   inline const T &ref() const { return *m_object; }
 
 private:
@@ -75,9 +75,9 @@ template <typename T> class Array {
 public:
   /// create empty array
   Array() {
-    m_count = 0;
+    m_count      = 0;
     m_allocCount = 0;
-    m_set = NULL;
+    m_set        = NULL;
   }
 
   /// shallow copy constructor
@@ -102,9 +102,9 @@ public:
   }
 
   /// reference an item in the set
-  inline T &ref(int index) { return operator[](index); }
+  inline T &      ref(int index) { return operator[](index); }
   inline const T &ref(int index) const { return operator[](index); }
-  inline T &operator[](int index) {
+  inline T &      operator[](int index) {
     assertDebug(0 <= index && index < m_count);
     assertDebug(m_set[index]);
     return m_set[index]->ref();
@@ -154,9 +154,9 @@ private:
 
 /// shallow copy constructor
 template <typename T> Array<T>::Array(const Array<T> &arr) {
-  m_count = 0;
+  m_count      = 0;
   m_allocCount = 0;
-  m_set = NULL;
+  m_set        = NULL;
   extend(arr.m_count);
   for (int i = 0; i < m_count; i++) {
     m_set[i] = arr.m_set[i];
@@ -231,7 +231,7 @@ template <typename T> void Array<T>::extend(int newLength) {
     m_set = new ArrayItem<T> *[newLength];
     for (int i = 0; i < newLength; i++)
       m_set[i] = NULL;
-    m_count = newLength;
+    m_count      = newLength;
     m_allocCount = newLength;
   }
 }
@@ -288,9 +288,9 @@ template <typename T> void Array<T>::reset() {
   }
 
   // re-initialize
-  m_count = 0;
+  m_count      = 0;
   m_allocCount = 0;
-  m_set = NULL;
+  m_set        = NULL;
 }
 
 //-------------------------------------------
@@ -303,9 +303,9 @@ template <typename T> class PtrArray {
 public:
   /// create empty array
   PtrArray() {
-    m_count = 0;
+    m_count      = 0;
     m_allocCount = 0;
-    m_set = NULL;
+    m_set        = NULL;
   }
 
   /// shallow copy constructor
@@ -325,9 +325,9 @@ public:
   }
 
   /// reference an item in the set
-  inline T &ref(int index) { return operator[](index); }
+  inline T &      ref(int index) { return operator[](index); }
   inline const T &ref(int index) const { return operator[](index); }
-  inline T &operator[](int index) {
+  inline T &      operator[](int index) {
     assertDebug(0 <= index && index < m_count);
     assertDebug(m_set[index]);
     return *m_set[index];
@@ -373,9 +373,9 @@ private:
 
 /// copy constructor (shallow; does not copy objects, just pointers)
 template <typename T> PtrArray<T>::PtrArray(const PtrArray<T> &arr) {
-  m_count = 0;
+  m_count      = 0;
   m_allocCount = 0;
-  m_set = NULL;
+  m_set        = NULL;
   extend(arr.m_count);
   for (int i = 0; i < m_count; i++)
     m_set[i] = arr.m_set[i];
@@ -430,7 +430,7 @@ template <typename T> void PtrArray<T>::extend(int newLength) {
     m_set = new T *[newLength];
     for (int i = 0; i < newLength; i++)
       m_set[i] = NULL;
-    m_count = newLength;
+    m_count      = newLength;
     m_allocCount = newLength;
   }
 }
@@ -470,9 +470,9 @@ template <typename T> void PtrArray<T>::reset() {
     delete[] m_set;
 
   // re-initialize
-  m_count = 0;
+  m_count      = 0;
   m_allocCount = 0;
-  m_set = NULL;
+  m_set        = NULL;
 }
 
 } // end namespace sbl

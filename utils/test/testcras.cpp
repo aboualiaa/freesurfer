@@ -1,16 +1,11 @@
 /**
- * @file  testcras.cpp
  * @brief testing sampled volume cras calculation
  *
  */
 /*
  * Original Author: Y. Tosa
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,19 +17,14 @@
  *
  */
 
-#include <iostream>
-#include <iomanip>
 #include <cstdlib>
-
-extern "C" {
+#include <iomanip>
+#include <iostream>
 
 #include "error.h"
 #include "mri.h"
 
 const char *Progname = "testcras";
-}
-
-using namespace std;
 
 int PrettyMatrixPrint(MATRIX *mat) {
   int row;
@@ -64,20 +54,14 @@ void printInfo(MRI *mri) {
   printf("   voxel sizes: %6.4f, %6.4f, %6.4f\n", mri->xsize, mri->ysize,
          mri->zsize);
   printf("          type: %s (%d)\n",
-         mri->type == MRI_UCHAR
-             ? "UCHAR"
-             : mri->type == MRI_SHORT
-                   ? "SHORT"
-                   : mri->type == MRI_INT
-                         ? "INT"
-                         : mri->type == MRI_LONG
-                               ? "LONG"
-                               : mri->type == MRI_BITMAP
-                                     ? "BITMAP"
-                                     : mri->type == MRI_TENSOR
-                                           ? "TENSOR"
-                                           : mri->type == MRI_FLOAT ? "FLOAT"
-                                                                    : "UNKNOWN",
+         mri->type == MRI_UCHAR    ? "UCHAR"
+         : mri->type == MRI_SHORT  ? "SHORT"
+         : mri->type == MRI_INT    ? "INT"
+         : mri->type == MRI_LONG   ? "LONG"
+         : mri->type == MRI_BITMAP ? "BITMAP"
+         : mri->type == MRI_TENSOR ? "TENSOR"
+         : mri->type == MRI_FLOAT  ? "FLOAT"
+                                   : "UNKNOWN",
          mri->type);
   printf("           fov: %2.3f\n", mri->fov);
   printf("        xstart: %2.1f, xend: %2.1f\n", mri->xstart * mri->xsize,
@@ -102,31 +86,33 @@ void printInfo(MRI *mri) {
       mri->x_s, mri->y_s, mri->z_s, mri->c_s);
 
   printf("\nvoxel to ras transform:\n");
-  PrettyMatrixPrint(mri->i_to_r__);
+
+  /// TODO: uncomment
+  //  PrettyMatrixPrint(mri->i_to_r__);
   printf("\nras to voxel transform:\n");
   PrettyMatrixPrint(mri->r_to_i__);
 }
 
 int main(int argc, char *argv[]) {
   if (argc <= 1) {
-    cout << "Usage: testcras srcvolname" << endl;
+    std::cout << "Usage: testcras srcvolname" << std::endl;
     return -1;
   }
   MRI *src = MRIread(argv[1]);
   if (!src) {
-    cerr << "could not load the volume" << endl;
+    std::cerr << "could not load the volume" << std::endl;
     return -1;
   }
 
   MRI *dst = MRIreduce(src, 0);
 
-  cout << "Src volume info: " << endl;
+  std::cout << "Src volume info: " << std::endl;
   printInfo(src);
-  cout << "\nDst volume info: " << endl;
+  std::cout << "\nDst volume info: " << std::endl;
   printInfo(dst);
 
   if (argc == 3) {
-    cout << "writing dst volume as " << argv[2] << endl;
+    std::cout << "writing dst volume as " << argv[2] << std::endl;
     MRIwrite(dst, argv[2]);
   }
   MRIfree(&src);

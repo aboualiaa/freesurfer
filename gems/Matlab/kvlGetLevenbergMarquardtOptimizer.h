@@ -1,6 +1,6 @@
-#include "kvlMatlabRunner.h"
-#include "kvlMatlabObjectArray.h"
 #include "kvlAtlasMeshDeformationLevenbergMarquardtOptimizer.h"
+#include "kvlMatlabObjectArray.h"
+#include "kvlMatlabRunner.h"
 
 namespace kvl {
 
@@ -8,9 +8,9 @@ class GetLevenbergMarquardtOptimizer : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
   typedef GetLevenbergMarquardtOptimizer Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
-  typedef itk::SmartPointer<const Self> ConstPointer;
+  typedef itk::Object                    Superclass;
+  typedef itk::SmartPointer<Self>        Pointer;
+  typedef itk::SmartPointer<const Self>  ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -19,7 +19,7 @@ public:
   itkTypeMacro(GetLevenbergMarquardtOptimizer, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // optimizer = kvlGetLevenbergMarquardtOptimizer( mesh, image, transform )
@@ -49,9 +49,9 @@ public:
     typedef AtlasMeshDeformationLevenbergMarquardtOptimizer::ImageType
         ImageType;
 
-    const int N = mxGetN(prhs[1]);
-    const int M = mxGetM(prhs[1]);
-    int numberOfImages = 0;
+    const int N              = mxGetN(prhs[1]);
+    const int M              = mxGetM(prhs[1]);
+    int       numberOfImages = 0;
 
     if (N < M) {
       numberOfImages = M;
@@ -98,9 +98,9 @@ public:
         const_cast<TransformType *>(constTransform.GetPointer());
 
     // Show what we have so far
-    // std::cout << "mesh: " << mesh.GetPointer() << std::endl;
-    // std::cout << "image: " << image.GetPointer() << std::endl;
-    // std::cout << "transform: " << transform.GetPointer() << std::endl;
+    //std::cout << "mesh: " << mesh.GetPointer() << std::endl;
+    //std::cout << "image: " << image.GetPointer() << std::endl;
+    //std::cout << "transform: " << transform.GetPointer() << std::endl;
 
     // Set up the optimizer accordingly
     AtlasMeshDeformationLevenbergMarquardtOptimizer::Pointer optimizer =
@@ -124,8 +124,8 @@ protected:
   GetLevenbergMarquardtOptimizer(){};
   virtual ~GetLevenbergMarquardtOptimizer(){};
 
-  GetLevenbergMarquardtOptimizer(const Self &); // purposely not implemented
-  void operator=(const Self &);                 // purposely not implemented
+  GetLevenbergMarquardtOptimizer(const Self &); //purposely not implemented
+  void operator=(const Self &);                 //purposely not implemented
 
 private:
 };

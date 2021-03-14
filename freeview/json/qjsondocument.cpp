@@ -39,16 +39,16 @@
 **
 ****************************************************************************/
 
+#include "qjson_p.h"
+#include "qjsonparser_p.h"
+#include "qjsonwriter_p.h"
+#include <qdebug.h>
+#include <qjsonarray.h>
 #include <qjsondocument.h>
 #include <qjsonobject.h>
 #include <qjsonvalue.h>
-#include <qjsonarray.h>
 #include <qstringlist.h>
 #include <qvariant.h>
-#include <qdebug.h>
-#include "qjsonwriter_p.h"
-#include "qjsonparser_p.h"
-#include "qjson_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -181,7 +181,7 @@ QJsonDocument QJsonDocument::fromRawData(const char *data, int size,
   }
 
   QJsonPrivate::Data *d = new QJsonPrivate::Data((char *)data, size);
-  d->ownsData = false;
+  d->ownsData           = false;
 
   if (validation != BypassValidation && !d->valid()) {
     delete d;
@@ -217,7 +217,7 @@ const char *QJsonDocument::rawData(int *size) const {
  \sa toBinaryData(), fromRawData(), isNull(), DataValidation
  */
 QJsonDocument QJsonDocument::fromBinaryData(const QByteArray &data,
-                                            DataValidation validation) {
+                                            DataValidation    validation) {
   if (data.size() <
       (int)(sizeof(QJsonPrivate::Header) + sizeof(QJsonPrivate::Base)))
     return QJsonDocument();
@@ -234,7 +234,7 @@ QJsonDocument QJsonDocument::fromBinaryData(const QByteArray &data,
     return QJsonDocument();
 
   const uint size = sizeof(QJsonPrivate::Header) + root.size;
-  char *raw = (char *)malloc(size);
+  char *     raw  = (char *)malloc(size);
   if (!raw)
     return QJsonDocument();
 
@@ -364,7 +364,7 @@ QByteArray QJsonDocument::toJson(JsonFormat format) const {
  \sa toJson(), QJsonParseError
  */
 QJsonDocument QJsonDocument::fromJson(const QByteArray &json,
-                                      QJsonParseError *error) {
+                                      QJsonParseError * error) {
   QJsonPrivate::Parser parser(json.constData(), json.length());
   return parser.parse(error);
 }

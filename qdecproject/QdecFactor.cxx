@@ -1,5 +1,4 @@
 /**
- * @file  QdecFactor.cpp
  * @brief Stores a factor, which can be either discrete, continuous or ignore
  *
  * An example of a discrete factor is gender (male or female) or
@@ -9,12 +8,8 @@
  */
 /*
  * Original Author: Nick Schmansky
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:35 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -34,48 +29,48 @@
 
 QdecFactor::QdecFactor(const char *isName, int iType) {
   msName = isName;
-  mType = iType;
+  mType  = iType;
   assert((mType == qdecDiscreteFactorType) ||
          (mType == qdecContinuousFactorType) || (mType == qdecIgnoreType));
   mHaveDotLevelsFile = false;
-  mOrdinal = false;
+  mOrdinal           = false;
 }
 
 QdecFactor::QdecFactor(const char *isName, int iType, const char *iValue,
-                       vector<string> iLevelNames) {
+                       std::vector<std::string> iLevelNames) {
   msName = isName;
-  mType = iType;
+  mType  = iType;
   assert(mType == qdecDiscreteFactorType);
-  msDiscreteValue = iValue;
-  mLevelNames = iLevelNames;
+  msDiscreteValue    = iValue;
+  mLevelNames        = iLevelNames;
   mHaveDotLevelsFile = false;
 }
 
 QdecFactor::QdecFactor(const char *isName, int iType, double iValue) {
   msName = isName;
-  mType = iType;
+  mType  = iType;
   assert(mType == qdecContinuousFactorType);
-  mContinuousValue = iValue;
+  mContinuousValue   = iValue;
   mHaveDotLevelsFile = false;
-  mOrdinal = false;
+  mOrdinal           = false;
 }
 
 QdecFactor::QdecFactor(const char *isName, int iType, const char *iValue) {
   msName = isName;
-  mType = iType;
+  mType  = iType;
   assert(mType == qdecIgnoreType);
   msIgnoreValue = iValue;
 }
 
 // Copy constructor
 QdecFactor::QdecFactor(const QdecFactor *iFactor) {
-  msName = iFactor->msName;
-  mType = iFactor->mType;
-  mLevelNames = iFactor->mLevelNames;
-  mContinuousValue = iFactor->mContinuousValue;
-  msDiscreteValue = iFactor->msDiscreteValue;
+  msName             = iFactor->msName;
+  mType              = iFactor->mType;
+  mLevelNames        = iFactor->mLevelNames;
+  mContinuousValue   = iFactor->mContinuousValue;
+  msDiscreteValue    = iFactor->msDiscreteValue;
   mHaveDotLevelsFile = iFactor->mHaveDotLevelsFile;
-  mOrdinal = false;
+  mOrdinal           = false;
 }
 
 QdecFactor::~QdecFactor() {}
@@ -89,7 +84,7 @@ QdecFactor::~QdecFactor() {}
  * type of the given factor: 'continuous' or 'discrete'
  * @return string
  */
-string QdecFactor::GetFactorTypeName() {
+std::string QdecFactor::GetFactorTypeName() {
   if (this->IsContinuous())
     return ("continuous");
   if (this->IsDiscrete())
@@ -103,7 +98,7 @@ string QdecFactor::GetFactorTypeName() {
  * @return int
  * @param  isLevelName
  */
-void QdecFactor::AddLevelName(string isLevelName) {
+void QdecFactor::AddLevelName(std::string isLevelName) {
   assert(mType == 1);
 
   // check if already in our list:
@@ -139,7 +134,7 @@ double QdecFactor::GetContinuousValue() {
     if (msDiscreteValue == mLevelNames[i])
       return i + 1;
   }
-  throw runtime_error("ERROR: QdecFactor::GetContinuousValue failure\n");
+  throw std::runtime_error("ERROR: QdecFactor::GetContinuousValue failure\n");
   return -1.0;
 }
 
@@ -155,6 +150,6 @@ double QdecFactor::GetContinuousValue(const char *isDiscreteValue) {
     if (isDiscreteValue == mLevelNames[i])
       return i + 1;
   }
-  throw runtime_error("ERROR: QdecFactor::GetContinuousValue failure\n");
+  throw std::runtime_error("ERROR: QdecFactor::GetContinuousValue failure\n");
   return -1.0;
 }

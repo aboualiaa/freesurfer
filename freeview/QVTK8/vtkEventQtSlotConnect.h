@@ -44,11 +44,11 @@
 #ifndef vtkEventQtSlotConnect_h
 #define vtkEventQtSlotConnect_h
 
+#include "QVTKWin32Header.h"       // for export define
+#include "vtkCommand.h"            // for event defines
 #include "vtkGUISupportQtModule.h" // For export macro
 #include "vtkObject.h"
-#include "vtkCommand.h"      // for event defines
-#include "QVTKWin32Header.h" // for export define
-#include <QtCore/QObject>    // for version info
+#include <QtCore/QObject> // for version info
 
 class QObject;
 class vtkQtConnections;
@@ -82,11 +82,11 @@ public:
    * the vtk object and event.
    * Passing all information in will match all information.
    */
-  virtual void Disconnect(vtkObject *vtk_obj = nullptr,
-                          unsigned long event = vtkCommand::NoEvent,
-                          const QObject *qt_obj = nullptr,
-                          const char *slot = nullptr,
-                          void *client_data = nullptr);
+  virtual void Disconnect(vtkObject *    vtk_obj     = nullptr,
+                          unsigned long  event       = vtkCommand::NoEvent,
+                          const QObject *qt_obj      = nullptr,
+                          const char *   slot        = nullptr,
+                          void *         client_data = nullptr);
 
   /**
    * Allow to query vtkEventQtSlotConnect to know if some Connect() have been

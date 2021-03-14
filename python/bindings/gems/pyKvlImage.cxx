@@ -1,14 +1,14 @@
 #include "pyKvlImage.h"
 #include "itkCastImageFilter.h"
+#include "itkDiscreteGaussianImageFilter.h"
 #include "itkMGHImageIOFactory.h"
 #include "pyKvlNumpy.h"
 #include "pyKvlTransform.h"
-#include <pybind11/numpy.h>
 #include <itkImageFileWriter.h>
-#include "itkDiscreteGaussianImageFilter.h"
+#include <pybind11/numpy.h>
 
 static bool mgh_factory_is_loaded;
-void load_mgh_factory() {
+void        load_mgh_factory() {
   if (!mgh_factory_is_loaded) {
     mgh_factory_is_loaded = true;
     // Add support for MGH file format to ITK. An alternative way to add this by
@@ -19,12 +19,12 @@ void load_mgh_factory() {
 }
 
 py::array_t<float> KvlImage::image_to_numpy(ImagePointer image) {
-  auto region = image->GetLargestPossibleRegion();
-  auto shape = region.GetSize();
+  auto        region = image->GetLargestPossibleRegion();
+  auto        shape  = region.GetSize();
   auto *const buffer = new float[region.GetNumberOfPixels()];
 
   itk::ImageRegionConstIterator<ImageType> it(image, region);
-  float *buffer_p = buffer;
+  float *                                  buffer_p = buffer;
   for (; !it.IsAtEnd(); ++it, ++buffer_p) {
     *buffer_p = it.Value();
   }
@@ -48,7 +48,7 @@ ImagePointer KvlImage::numpy_to_image(const py::array_t<float> &buffer) {
 
   // Loop over all voxels and copy contents
   itk::ImageRegionIterator<ImageType> it(image, image->GetBufferedRegion());
-  const float *bufferPointer = buffer.data(0);
+  const float *                       bufferPointer = buffer.data(0);
   for (; !it.IsAtEnd(); ++it, ++bufferPointer) {
     it.Value() = *bufferPointer;
   }
@@ -70,7 +70,7 @@ KvlImage::KvlImage(const std::string &imageFileName) {
   caster->Update();
 
   // Store the image and transform in persistent memory
-  m_image = caster->GetOutput();
+  m_image     = caster->GetOutput();
   m_transform = TransformType::New();
   reader->GetWorldToImageTransform()->GetInverse(m_transform);
   std::cout << "Read image: " << imageFileName << std::endl;
@@ -95,7 +95,7 @@ KvlImage::KvlImage(const std::string &imageFileName,
   caster->Update();
 
   // Store the image and transform in persistent memory
-  m_image = caster->GetOutput();
+  m_image     = caster->GetOutput();
   m_transform = reader->GetTransform()->Clone();
 
   for (int index = 0; index < 3; index++) {
@@ -111,7 +111,7 @@ KvlImage::KvlImage(const std::string &imageFileName,
 }
 
 KvlImage::KvlImage(const py::array_t<float> &buffer) {
-  m_image = numpy_to_image(buffer);
+  m_image     = numpy_to_image(buffer);
   m_transform = TransformType::New();
 }
 
@@ -139,15 +139,15 @@ void KvlImage::Write(std::string fileName, KvlTransform &transform) {
     // proper way of doing this would be to only copy the header information and
     // of course not the pixel intensities, but I'm too lazy now to figure out
     // how to do it in ITK
-    using CasterType = itk::CastImageFilter<ImageType, ImageType>;
+    using CasterType           = itk::CastImageFilter<ImageType, ImageType>;
     CasterType::Pointer caster = CasterType::New();
     caster->SetInput(m_image);
     caster->Update();
     image = caster->GetOutput();
 
     // Apply the transform
-    ImageType::PointType newOrigin;
-    ImageType::SpacingType newSpacing;
+    ImageType::PointType     newOrigin;
+    ImageType::SpacingType   newSpacing;
     ImageType::DirectionType newDirection;
     for (int i = 0; i < 3; i++) {
       // Offset part
@@ -159,7 +159,7 @@ void KvlImage::Write(std::string fileName, KvlTransform &transform) {
       for (int j = 0; j < 3; j++) {
         normOfColumn += pow(transform.m_transform->GetMatrix()[j][i], 2);
       }
-      normOfColumn = sqrt(normOfColumn);
+      normOfColumn  = sqrt(normOfColumn);
       newSpacing[i] = normOfColumn;
       for (int j = 0; j < 3; j++) {
         newDirection[j][i] =
@@ -173,7 +173,7 @@ void KvlImage::Write(std::string fileName, KvlTransform &transform) {
   } // End test if transform is given
 
   // Write it out
-  using WriterType = itk::ImageFileWriter<ImageType>;
+  using WriterType           = itk::ImageFileWriter<ImageType>;
   WriterType::Pointer writer = WriterType::New();
   writer->SetFileName(fileName.c_str());
   writer->SetInput(image);
@@ -183,12 +183,12 @@ void KvlImage::Write(std::string fileName, KvlTransform &transform) {
 
 py::array_t<float>
 KvlImage::smoothImageBuffer(const py::array_t<float> &imageBuffer,
-                            std::vector<double> sigmas) {
+                            std::vector<double>       sigmas) {
   ImagePointer image = numpy_to_image(imageBuffer);
 
   // Do the actual work in ITK
   using InternalImageType = itk::Image<float, 3>;
-  using CasterType = itk::CastImageFilter<ImageType, InternalImageType>;
+  using CasterType        = itk::CastImageFilter<ImageType, InternalImageType>;
   using SmootherType =
       itk::DiscreteGaussianImageFilter<InternalImageType, InternalImageType>;
   using BackCasterType = itk::CastImageFilter<InternalImageType, ImageType>;

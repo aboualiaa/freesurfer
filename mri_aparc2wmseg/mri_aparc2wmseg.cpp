@@ -1,17 +1,6 @@
-/**
- * @file  mri_aparc2wmseg.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:13 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,16 +17,16 @@
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
 #include "annotation.h"
+#include "diag.h"
+#include "fio.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "version.h"
 
 #undef X
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -45,39 +34,38 @@ static void print_help();
 static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int singledash(char *flag);
+static int  singledash(char *flag);
 
 int main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_aparc2wmseg.c,v 1.6 2011/03/02 00:04:13 nicks Exp $";
-const char *Progname = nullptr;
-char *SUBJECTS_DIR = nullptr;
-char *subject = nullptr;
-char *WMSegFile = nullptr;
-MRI *ASeg, *mritmp;
-MRI *WMSeg;
-MRIS *lhwhite, *rhwhite;
-MHT *lhwhite_hash, *rhwhite_hash;
-MHT *lhpial_hash, *rhpial_hash;
+const char *Progname     = NULL;
+char *      SUBJECTS_DIR = NULL;
+char *      subject      = NULL;
+char *      WMSegFile    = NULL;
+MRI *       ASeg, *mritmp;
+MRI *       WMSeg;
+MRIS *      lhwhite, *rhwhite;
+MHT *       lhwhite_hash, *rhwhite_hash;
+MHT *       lhpial_hash, *rhpial_hash;
 static struct { float x, y, z; } vtx;
-int lhwvtx, rhwvtx;
+int     lhwvtx, rhwvtx;
 MATRIX *Vox2RAS, *CRS, *RAS;
-float dlhw, drhw;
-char annotfile[1000];
+float   dlhw, drhw;
+char    annotfile[1000];
 
-int debug = 0;
+int  debug = 0;
 char tmpstr[2000];
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, err, asegid, c, r, s, annot, hemioffset;
-  int annotid;
+  int            nargs, err, asegid, c, r, s, annot, hemioffset;
+  int            annotid;
   struct utsname uts;
-  char *cmdline, cwd[2000];
+  char *         cmdline, cwd[2000];
 
   nargs = handleVersionOption(argc, argv, "mri_aparc2wmseg");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -97,7 +85,7 @@ int main(int argc, char **argv) {
   dump_options(stdout);
 
   printf("\n");
-  printf("%s\n", vcid);
+  printf("%s\n", getVersion().c_str());
   printf("cwd %s\n", cwd);
   printf("cmdline %s\n", cmdline);
   printf("sysname  %s\n", uts.sysname);
@@ -183,7 +171,7 @@ int main(int argc, char **argv) {
   }
   mritmp = MRIchangeType(ASeg, MRI_INT, 0, 0, 0);
   MRIfree(&ASeg);
-  ASeg = mritmp;
+  ASeg  = mritmp;
   WMSeg = MRIclone(ASeg, nullptr);
 
   Vox2RAS = MRIxfmCRS2XYZtkreg(ASeg);
@@ -192,9 +180,9 @@ int main(int argc, char **argv) {
     MatrixPrint(stdout, Vox2RAS);
     printf("-------------------------\n");
   }
-  CRS = MatrixAlloc(4, 1, MATRIX_REAL);
+  CRS             = MatrixAlloc(4, 1, MATRIX_REAL);
   CRS->rptr[4][1] = 1;
-  RAS = MatrixAlloc(4, 1, MATRIX_REAL);
+  RAS             = MatrixAlloc(4, 1, MATRIX_REAL);
   RAS->rptr[4][1] = 1;
 
   // Go through each voxel in the aseg
@@ -220,10 +208,10 @@ int main(int argc, char **argv) {
         CRS->rptr[1][1] = c;
         CRS->rptr[2][1] = r;
         CRS->rptr[3][1] = s;
-        RAS = MatrixMultiply(Vox2RAS, CRS, RAS);
-        vtx.x = RAS->rptr[1][1];
-        vtx.y = RAS->rptr[2][1];
-        vtx.z = RAS->rptr[3][1];
+        RAS             = MatrixMultiply(Vox2RAS, CRS, RAS);
+        vtx.x           = RAS->rptr[1][1];
+        vtx.y           = RAS->rptr[2][1];
+        vtx.z           = RAS->rptr[3][1];
 
         // Get the index of the closest vertex in the
         // lh.white, rh.white
@@ -246,7 +234,7 @@ int main(int argc, char **argv) {
 
         if (dlhw < drhw) {
           // Left hemi is closer than the right
-          annot = lhwhite->vertices[lhwvtx].annotation;
+          annot      = lhwhite->vertices[lhwvtx].annotation;
           hemioffset = 1000;
           if (lhwhite->ct)
             CTABfindAnnotation(lhwhite->ct, annot, &annotid);
@@ -254,7 +242,7 @@ int main(int argc, char **argv) {
             annotid = annotation_to_index(annot);
         } else {
           // Right hemi is closer than the left
-          annot = rhwhite->vertices[rhwvtx].annotation;
+          annot      = rhwhite->vertices[rhwvtx].annotation;
           hemioffset = 2000;
           if (rhwhite->ct)
             CTABfindAnnotation(lhwhite->ct, annot, &annotid);
@@ -279,7 +267,7 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -306,7 +294,7 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcmp(option, "--s")) {
       if (nargc < 1)
         argnerr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--wmseg")) {
       if (nargc < 1)
@@ -339,7 +327,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /* --------------------------------------------- */
@@ -349,8 +337,8 @@ static void print_help() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */

@@ -1,16 +1,11 @@
 /**
- * @file  vtkSimpleLabelEdgeFilter3D.h
  * @brief A simple label edge filter ONLY for 2D label image (2D vtkImageData).
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2013/06/25 20:32:36 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -38,36 +33,40 @@
 #if VTK_MAJOR_VERSION > 5
 #include "vtkImagingGeneralModule.h" // For export macro
 
-class VTKIMAGINGGENERAL_EXPORT vtkSimpleLabelEdgeFilter3D : public vtkSimpleImageToImageFilter
-{
+class VTKIMAGINGGENERAL_EXPORT vtkSimpleLabelEdgeFilter3D
+    : public vtkSimpleImageToImageFilter {
 public:
   static vtkSimpleLabelEdgeFilter3D *New();
-  vtkTypeMacro(vtkSimpleLabelEdgeFilter3D,vtkSimpleImageToImageFilter);
+  vtkTypeMacro(vtkSimpleLabelEdgeFilter3D, vtkSimpleImageToImageFilter);
 
 protected:
-  vtkSimpleLabelEdgeFilter3D() {};
-  ~vtkSimpleLabelEdgeFilter3D() override {};
+  vtkSimpleLabelEdgeFilter3D(){};
+  ~vtkSimpleLabelEdgeFilter3D() override{};
 
-  void SimpleExecute(vtkImageData* input, vtkImageData* output) override;
+  void SimpleExecute(vtkImageData *input, vtkImageData *output) override;
+
 private:
-  vtkSimpleLabelEdgeFilter3D(const vtkSimpleLabelEdgeFilter3D&) = delete;  // Not implemented.
-  void operator=(const vtkSimpleLabelEdgeFilter3D&) = delete;  // Not implemented.
+  vtkSimpleLabelEdgeFilter3D(const vtkSimpleLabelEdgeFilter3D &) =
+      delete; // Not implemented.
+  void
+  operator=(const vtkSimpleLabelEdgeFilter3D &) = delete; // Not implemented.
 };
 #else
-class vtkSimpleLabelEdgeFilter3D : public vtkSimpleImageToImageFilter
-{
+class vtkSimpleLabelEdgeFilter3D : public vtkSimpleImageToImageFilter {
 public:
   static vtkSimpleLabelEdgeFilter3D *New();
-  vtkTypeMacro(vtkSimpleLabelEdgeFilter3D,vtkSimpleImageToImageFilter);
+  vtkTypeMacro(vtkSimpleLabelEdgeFilter3D, vtkSimpleImageToImageFilter);
 
 protected:
-  vtkSimpleLabelEdgeFilter3D() {};
-  ~vtkSimpleLabelEdgeFilter3D() {};
+  vtkSimpleLabelEdgeFilter3D(){};
+  ~vtkSimpleLabelEdgeFilter3D(){};
 
-  virtual void SimpleExecute(vtkImageData* input, vtkImageData* output);
+  virtual void SimpleExecute(vtkImageData *input, vtkImageData *output);
+
 private:
-  vtkSimpleLabelEdgeFilter3D(const vtkSimpleLabelEdgeFilter3D&);  // Not implemented.
-  void operator=(const vtkSimpleLabelEdgeFilter3D&);  // Not implemented.
+  vtkSimpleLabelEdgeFilter3D(
+      const vtkSimpleLabelEdgeFilter3D &);            // Not implemented.
+  void operator=(const vtkSimpleLabelEdgeFilter3D &); // Not implemented.
 };
 #endif
 

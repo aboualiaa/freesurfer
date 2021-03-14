@@ -1,16 +1,11 @@
 /**
- * @file  Interactor2DVolumeCrop.cpp
  * @brief Interactor for volume cropping in 2D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:47 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,11 +19,11 @@
  */
 
 #include "Interactor2DVolumeCrop.h"
-#include "RenderView2D.h"
 #include "Cursor2D.h"
-#include "MainWindow.h"
-#include "VolumeCropper.h"
 #include "CursorFactory.h"
+#include "MainWindow.h"
+#include "RenderView2D.h"
+#include "VolumeCropper.h"
 #include <vtkRenderer.h>
 
 Interactor2DVolumeCrop::Interactor2DVolumeCrop(QObject *parent)
@@ -37,7 +32,7 @@ Interactor2DVolumeCrop::Interactor2DVolumeCrop(QObject *parent)
 Interactor2DVolumeCrop::~Interactor2DVolumeCrop() {}
 
 bool Interactor2DVolumeCrop::ProcessMouseDownEvent(QMouseEvent *event,
-                                                   RenderView *renderview) {
+                                                   RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   if (event->button() == Qt::LeftButton &&
@@ -53,7 +48,7 @@ bool Interactor2DVolumeCrop::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor2DVolumeCrop::ProcessMouseUpEvent(QMouseEvent *event,
-                                                 RenderView *renderview) {
+                                                 RenderView * renderview) {
   if (m_bSelected) {
     MainWindow::GetMainWindow()->GetVolumeCropper()->ReleaseActiveBound();
     MainWindow::GetMainWindow()->GetRenderView(3)->RequestRedraw();
@@ -65,7 +60,7 @@ bool Interactor2DVolumeCrop::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor2DVolumeCrop::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                   RenderView *renderview) {
+                                                   RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   if (m_bSelected) {

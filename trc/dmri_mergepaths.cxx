@@ -1,17 +1,12 @@
 /**
- * @file  dmri_mergepaths.cxx
  * @brief Merge posterior distributions from multiple paths into a 4D file
  *
  * Merge posterior distributions from multiple paths into a 4D file
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
- *    $Author: ayendiki $
- *    $Date: 2013/02/12 01:48:33 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,51 +18,70 @@
  *
  */
 
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <float.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
+#include <vector>
 
 #include "cma.h"
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
 #include "fio.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
 using namespace std;
 
-static int parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static int  parse_commandline(int argc, char **argv);
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options(FILE *fp);
 
 int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "";
 const char *Progname = "dmri_mergepaths";
 
-int nframe = 0;
-float dispThresh = 0;
-char *inDir = nullptr, *inFile[100], *outFile = nullptr, *ctabFile = nullptr;
+int                      nframe     = 0;
+float                    dispThresh = 0;
+std::string              inDir, outFile, ctabFile;
+std::vector<std::string> inFile;
 
 struct utsname uts;
-char *cmdline, cwd[2000];
+char *         cmdline, cwd[2000];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
-  int cputime;
-  char fname[PATH_MAX];
-  MRI *invol = 0;
-  MRI *outvol = 0;
+  int         nargs, cputime;
+  std::string fname;
+  MRI *       invol = 0, *outvol = 0;
 
   nargs = handleVersionOption(argc, argv, "dmri_mergepaths");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -77,17 +91,15 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  if (argc == 0) {
+  if (argc == 0)
     usage_exit();
-  }
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly != 0) {
+  if (checkoptsonly)
     return (0);
-  }
 
   dump_options(stdout);
 
@@ -100,28 +112,27 @@ int main(int argc, char **argv) {
          << endl;
 
     // Read input volume
-    if (inDir != nullptr) {
-      sprintf(fname, "%s/%s", inDir, inFile[iframe]);
+    if (!inDir.empty()) {
+      fname = inDir + "/" + inFile.at(iframe);
     } else {
-      strcpy(fname, inFile[iframe]);
+      fname = inFile.at(iframe);
     }
 
-    invol = MRIread(fname);
+    invol = MRIread(fname.c_str());
 
-    if (invol != nullptr) {
-      if (outvol == nullptr) {
+    if (invol) {
+      if (!outvol) {
         // Allocate output 4D volume
         outvol = MRIcloneBySpace(invol, invol->type, nframe);
 
         // Read color table
-        outvol->ct = CTABreadASCII(ctabFile);
+        outvol->ct = CTABreadASCII(ctabFile.c_str());
       }
 
       MRIcopyFrame(invol, outvol, 0, iframe);
 
       if (dispThresh > 0) {
-        inmax =
-            static_cast<float>(MRIfindPercentile(invol, .99, 0)); // Robust max
+        inmax = (float)MRIfindPercentile(invol, .99, 0); // Robust max
       }
     }
 
@@ -132,7 +143,7 @@ int main(int argc, char **argv) {
     for (int ict = outvol->ct->nentries; ict > 0; ict--) {
       CTE *cte = outvol->ct->entries[ict];
 
-      if (cte != nullptr && (strstr(inFile[iframe], cte->name) != nullptr)) {
+      if (cte != NULL && strstr(inFile.at(iframe).c_str(), cte->name)) {
         outvol->frames[iframe].label = ict;
         strcpy(outvol->frames[iframe].name, cma_label_to_name(ict));
 
@@ -145,8 +156,8 @@ int main(int argc, char **argv) {
   }
 
   // Write output file
-  if (outvol != nullptr) {
-    MRIwrite(outvol, outFile);
+  if (outvol) {
+    MRIwrite(outvol, outFile.c_str());
   } else {
     cout << "ERROR: could not open any of the input files" << endl;
     exit(1);
@@ -162,76 +173,66 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc;
-  int nargsused;
-  char **pargv;
-  char *option;
+  int    nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) {
+  if (argc < 1)
     usage_exit();
-  }
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug != 0) {
+    if (debug)
       printf("%d %s\n", nargc, option);
-    }
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (strcasecmp(option, "--help") == 0) {
+    if (!strcasecmp(option, "--help"))
       print_help();
-    } else if (strcasecmp(option, "--version") == 0) {
+    else if (!strcasecmp(option, "--version"))
       print_version();
-    } else if (strcasecmp(option, "--debug") == 0) {
+    else if (!strcasecmp(option, "--debug"))
       debug = 1;
-    } else if (strcasecmp(option, "--checkopts") == 0) {
+    else if (!strcasecmp(option, "--checkopts"))
       checkoptsonly = 1;
-    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+    else if (!strcasecmp(option, "--nocheckopts"))
       checkoptsonly = 0;
-    } else if (strcmp(option, "--indir") == 0) {
-      if (nargc < 1) {
+    else if (!strcmp(option, "--indir")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      inDir = fio_fullpath(pargv[0]);
+      inDir     = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--in") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--in")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       nargsused = 0;
-      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
-        inFile[nframe] = pargv[nargsused];
+      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
+        inFile.push_back(std::string(pargv[nargsused]));
         nargsused++;
         nframe++;
       }
-    } else if (strcmp(option, "--out") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--out")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      outFile = fio_fullpath(pargv[0]);
+      outFile   = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--ctab") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--ctab")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
-      ctabFile = fio_fullpath(pargv[0]);
+      ctabFile  = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } else if (strcmp(option, "--thresh") == 0) {
-      if (nargc < 1) {
+    } else if (!strcmp(option, "--thresh")) {
+      if (nargc < 1)
         CMDargNErr(option, 1);
-      }
       sscanf(pargv[0], "%f", &dispThresh);
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
-      if (CMDsingleDash(option) != 0) {
+      if (CMDsingleDash(option))
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -241,7 +242,7 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("\n");
   printf("USAGE: ./dmri_mergepaths\n");
   printf("\n");
@@ -267,7 +268,7 @@ static void print_usage() {
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("\n");
   printf("...\n");
@@ -276,28 +277,28 @@ static void print_help() {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void check_options() {
+static void check_options(void) {
   if (nframe == 0) {
     printf("ERROR: must specify input volume(s)\n");
     exit(1);
   }
-  if (outFile == nullptr) {
+  if (outFile.empty()) {
     printf("ERROR: must specify output volume\n");
     exit(1);
   }
-  if (ctabFile == nullptr) {
+  if (ctabFile.empty()) {
     printf("ERROR: must specify color table file\n");
     exit(1);
   }
@@ -305,12 +306,13 @@ static void check_options() {
     printf("ERROR: display threshold must a number between 0 and 1\n");
     exit(1);
   }
+  return;
 }
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);
@@ -318,15 +320,17 @@ static void dump_options(FILE *fp) {
   fprintf(fp, "machine  %s\n", uts.machine);
   fprintf(fp, "user     %s\n", VERuser());
 
-  if (inDir != nullptr) {
-    fprintf(fp, "Input directory: %s\n", inDir);
+  if (!inDir.empty()) {
+    fprintf(fp, "Input directory: %s\n", inDir.c_str());
   }
   fprintf(fp, "Input files:");
   for (int k = 0; k < nframe; k++) {
-    fprintf(fp, " %s", inFile[k]);
+    fprintf(fp, " %s", inFile[k].c_str());
   }
   fprintf(fp, "\n");
-  fprintf(fp, "Output file: %s\n", outFile);
-  fprintf(fp, "Color table file: %s\n", ctabFile);
+  fprintf(fp, "Output file: %s\n", outFile.c_str());
+  fprintf(fp, "Color table file: %s\n", ctabFile.c_str());
   fprintf(fp, "Lower threshold for display: %f\n", dispThresh);
+
+  return;
 }

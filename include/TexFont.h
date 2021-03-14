@@ -1,17 +1,6 @@
-/**
- * @file  TexFont.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:09 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -34,19 +23,19 @@
 
 #include <GL/gl.h>
 
-#define TXF_FORMAT_BYTE 0
+#define TXF_FORMAT_BYTE   0
 #define TXF_FORMAT_BITMAP 1
 
 typedef struct {
   unsigned short c; /* Potentially support 16-bit glyphs. */
-  unsigned char width;
-  unsigned char height;
-  signed char xoffset;
-  signed char yoffset;
-  signed char advance;
-  char dummy; /* Space holder for alignment reasons. */
-  short x;
-  short y;
+  unsigned char  width;
+  unsigned char  height;
+  signed char    xoffset;
+  signed char    yoffset;
+  signed char    advance;
+  char           dummy; /* Space holder for alignment reasons. */
+  short          x;
+  short          y;
 } TexGlyphInfo;
 
 typedef struct {
@@ -62,23 +51,23 @@ typedef struct {
 } TexGlyphVertexInfo;
 
 typedef struct {
-  GLuint texobj;
-  int tex_width;
-  int tex_height;
-  int max_ascent;
-  int max_descent;
-  int num_glyphs;
-  int min_glyph;
-  int range;
-  unsigned char *teximage;
-  TexGlyphInfo *tgi;
-  TexGlyphVertexInfo *tgvi;
+  GLuint               texobj;
+  int                  tex_width;
+  int                  tex_height;
+  int                  max_ascent;
+  int                  max_descent;
+  int                  num_glyphs;
+  int                  min_glyph;
+  int                  range;
+  unsigned char *      teximage;
+  TexGlyphInfo *       tgi;
+  TexGlyphVertexInfo * tgvi;
   TexGlyphVertexInfo **lut;
 } TexFont;
 
-extern char *txfErrorString();
+extern const char *txfErrorString(void);
 
-extern TexFont *txfLoadFont(char *filename);
+extern TexFont *txfLoadFont(const char *filename);
 
 extern void txfUnloadFont(TexFont *txf);
 

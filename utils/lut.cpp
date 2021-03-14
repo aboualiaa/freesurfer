@@ -7,17 +7,17 @@ LookupTable::LookupTable(std::string filename) { importFromFile(filename); }
 
 void LookupTable::add(int label, std::string labelname) {
   LabelInfo labelinfo = {true, labelname};
-  labelmap[label] = labelinfo;
+  labelmap[label]     = labelinfo;
 }
 
 bool LookupTable::importFromFile(std::string filename) {
   std::ifstream infile(filename);
-  std::string line;
+  std::string   line;
 
   while (std::getline(infile, line)) {
     std::istringstream ss(line);
-    LabelInfo labelinfo;
-    int label;
+    LabelInfo          labelinfo;
+    int                label;
     if (!(ss >> label))
       continue;
     ss >> labelinfo.name;

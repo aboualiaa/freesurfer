@@ -1,9 +1,7 @@
 /*
- * Original Author: David MacDonald, modified to compile within freesurfer/utils
- * by Bevin Brett CVS Revision Info: $Author: Brett $ $Date: 2017/11/08 12:46:00
- * $ $Revision: 1.00 $
+ * Original Author: David MacDonald, modified to compile within freesurfer/utils by Bevin Brett
  *
- * Copyright © 2017 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained

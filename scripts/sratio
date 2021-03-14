@@ -2,7 +2,6 @@
 # sratio - signed ratio
 #   +A/B if A>B
 #   -B/A if B>A
-# $Id: sratio,v 1.9 2016/02/16 17:17:20 zkaufman Exp $
 
 #
 # sratio
@@ -11,12 +10,8 @@
 # Used to use fslmaths, but does not anymore
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/16 17:17:20 $
-#    $Revision: 1.9 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,7 +25,7 @@
 
 setenv FSLOUTPUTTYPE NIFTI
 set tmpdir = ();
-set VERSION = '$Id: sratio,v 1.9 2016/02/16 17:17:20 zkaufman Exp $';
+set VERSION = 'sratio @FS_VERSION@';
 set cleanup = 1;
 set LF = ();
 set A = ();
@@ -76,8 +71,7 @@ set outdir = `pwd`;
 popd > /dev/null
 
 if($#tmpdir == 0) then
-  if(-dw /scratch)   set tmpdir = /scratch/tmpdir.sratio.$$
-  if(! -dw /scratch) set tmpdir = $outdir/tmpdir.sratio.$$
+  set tmpdir = `fs_temp_dir --scratch`
 endif
 mkdir -p $tmpdir
 

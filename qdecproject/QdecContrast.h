@@ -1,5 +1,4 @@
 /**
- * @file  QdecContrast.h
  * @brief Stores a GLM contrast vector
  *
  * Stores a GLM contrast vector associated with a particular design (being
@@ -10,12 +9,8 @@
  */
 /*
  * Original Author: Nick Schmansky
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:35 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -33,31 +28,30 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 class QdecContrast {
 public:
   // Constructors/Destructors
   //
 
-  QdecContrast(vector<double> iaVector, string isName, string isQuestion);
+  QdecContrast(std::vector<double> iaVector, std::string isName,
+               std::string isQuestion);
 
   virtual ~QdecContrast();
 
   /**
    * @return string
    */
-  string GetName();
+  std::string GetName();
 
   /**
    * @return string
    */
-  string GetQuestion();
+  std::string GetQuestion();
 
   /**
    * @return string
    */
-  string GetContrastStr();
+  std::string GetContrastStr();
 
   /**
    * Writes the contrast vector to a .mat file, which is readable by matlab,
@@ -65,21 +59,21 @@ public:
    * @return int
    * @param string ifnWorkingDir
    */
-  int WriteDotMatFile(string ifnWorkingDir);
+  int WriteDotMatFile(std::string ifnWorkingDir);
 
   /**
    * @return string
    */
-  string GetDotMatFileName();
+  std::string GetDotMatFileName();
 
 private:
   // private attributes
   //
 
-  vector<double> maVector;
-  string msName;
-  string msQuestion;
-  string mfnDotMatFileName;
+  std::vector<double> maVector;
+  std::string         msName;
+  std::string         msQuestion;
+  std::string         mfnDotMatFileName;
 };
 
 #endif // QDECCONTRAST_H

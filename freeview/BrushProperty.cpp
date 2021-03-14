@@ -1,5 +1,4 @@
 /**
- * @file  BrushProperty.cpp
  * @brief Class to hold brush properties for voxel editing
  *
  * Simple mix-in class for use with the Listener class so text
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/08 21:01:00 $
- *    $Revision: 1.20 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -35,12 +30,12 @@ BrushProperty::BrushProperty(QObject *parent)
       m_bDrawConnectedOnly(false), m_bEnableEraseRange(false),
       m_bEnableEraseExcludeRange(false), m_bFill3D(false), m_layerRef(NULL),
       m_dFillValue(1.0), m_dEraseValue(0.0), m_bIsCloning(false) {
-  m_dDrawRange[0] = 0;
-  m_dDrawRange[1] = 1000000;
-  m_dExcludeRange[0] = 0;
-  m_dExcludeRange[1] = 0;
-  m_dEraseRange[0] = 0;
-  m_dEraseRange[1] = 1000000;
+  m_dDrawRange[0]         = 0;
+  m_dDrawRange[1]         = 1000000;
+  m_dExcludeRange[0]      = 0;
+  m_dExcludeRange[1]      = 0;
+  m_dEraseRange[0]        = 0;
+  m_dEraseRange[1]        = 1000000;
   m_dEraseExcludeRange[0] = 0;
   m_dEraseExcludeRange[1] = 0;
   QSettings settings;

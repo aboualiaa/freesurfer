@@ -14,10 +14,10 @@
 //
 //  Children's Hospital Boston
 //
-#include <cfloat>
-#include <iostream>
-#include <cstring>
 #include "oclDijkstraKernel.h"
+#include <cfloat>
+#include <cstring>
+#include <iostream>
 
 ///
 //  Macro Options
@@ -32,7 +32,6 @@ bool maskArrayEmpty(int *maskArray, int count);
 ///
 //  Namespaces
 //
-using namespace std;
 
 #ifdef FS_OPENCL
 #include "oclCommon.h"
@@ -93,17 +92,17 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 cl_program loadAndBuildProgram(cl_context gpuContext, const char *fileName) {
   pthread_mutex_lock(&mutex);
 
-  size_t programLength;
-  cl_int errNum;
+  size_t     programLength;
+  cl_int     errNum;
   cl_program program;
 
   // Load the OpenCL source code from the .cl file
 #ifndef KERNEL_AS_HEADER
   const char *sourcePath = "dijkstra.cl";
-  const char *source = oclLoadProgSource(sourcePath, "", &programLength);
+  const char *source     = oclLoadProgSource(sourcePath, "", &programLength);
 #else
   const char *source = dijkstraStr;
-  programLength = strlen(source) + 1;
+  programLength      = strlen(source) + 1;
 #endif
 
   oclCheckError(source != NULL, true);
@@ -120,7 +119,7 @@ cl_program loadAndBuildProgram(cl_context gpuContext, const char *fileName) {
                           CL_PROGRAM_BUILD_LOG, sizeof(cBuildLog), cBuildLog,
                           NULL);
 
-    cerr << cBuildLog << endl;
+    std::cerr << cBuildLog << std::endl;
     oclCheckError(errNum, CL_SUCCESS);
   }
 
@@ -136,7 +135,7 @@ void allocateOCLBuffers(cl_context gpuContext, cl_command_queue commandQueue,
                         cl_mem *edgeArrayDevice, cl_mem *weightArrayDevice,
                         cl_mem *maskArrayDevice, cl_mem *costArrayDevice,
                         cl_mem *updatingCostArrayDevice,
-                        size_t globalWorkSize) {
+                        size_t  globalWorkSize) {
   cl_int errNum;
   cl_mem hostVertexArrayBuffer;
   cl_mem hostEdgeArrayBuffer;
@@ -214,7 +213,7 @@ void initializeOCLBuffers(cl_command_queue commandQueue,
                           size_t maxWorkGroupSize) {
   cl_int errNum;
   // Set # of work items in work group and total in 1 dimensional range
-  size_t localWorkSize = maxWorkGroupSize;
+  size_t localWorkSize  = maxWorkGroupSize;
   size_t globalWorkSize = oclRoundWorkSizeUp(localWorkSize, graph->vertexCount);
 
   errNum =
@@ -259,7 +258,7 @@ void dijkstraThread(DevicePlan *plan) {
 void runDijkstraOpenCL(GraphData *graph, int *sourceVertices,
                        float *outResultCosts, int numResults) {
   // See what kind of devices are available
-  cl_int errNum;
+  cl_int     errNum;
   cl_context cpuContext;
   cl_context gpuContext;
 
@@ -272,18 +271,20 @@ void runDijkstraOpenCL(GraphData *graph, int *sourceVertices,
       clCreateContextFromType(0, CL_DEVICE_TYPE_CPU, NULL, NULL, &errNum);
 
   if (cpuContext == 0 && gpuContext == 0) {
-    cerr << "ERROR: could not create any OpenCL context on CPU or GPU" << endl;
+    std::cerr << "ERROR: could not create any OpenCL context on CPU or GPU"
+              << std::endl;
     return;
   }
 
   // For just a single result, just use multi-threaded CPU or single GPU
   if (numResults == 1) {
     if (gpuContext != 0) {
-      cout << "Dijkstra OpenCL: Running single GPU version." << endl;
+      std::cout << "Dijkstra OpenCL: Running single GPU version." << std::endl;
       runDijkstra(gpuContext, oclGetMaxFlopsDev(gpuContext), graph,
                   sourceVertices, outResultCosts, numResults);
     } else {
-      cout << "Dijkstra OpenCL: Running multithreaded CPU version." << endl;
+      std::cout << "Dijkstra OpenCL: Running multithreaded CPU version."
+                << std::endl;
       runDijkstra(cpuContext, oclGetMaxFlopsDev(cpuContext), graph,
                   sourceVertices, outResultCosts, numResults);
     }
@@ -292,7 +293,7 @@ void runDijkstraOpenCL(GraphData *graph, int *sourceVertices,
   else {
     // Prefer Multi-GPU if multiple GPUs are available
     if (gpuContext != 0) {
-      cout << "Dijkstra OpenCL: Running multi-GPU version." << endl;
+      std::cout << "Dijkstra OpenCL: Running multi-GPU version." << std::endl;
       runDijkstraMultiGPU(gpuContext, graph, sourceVertices, outResultCosts,
                           numResults);
     }
@@ -300,7 +301,8 @@ void runDijkstraOpenCL(GraphData *graph, int *sourceVertices,
     // but it does not seem to perform well because of the CPU overhead of
     // running the GPU version slows down the CPU version.
     else {
-      cout << "Dijkstra OpenCL: Running multithreaded CPU version." << endl;
+      std::cout << "Dijkstra OpenCL: Running multithreaded CPU version."
+                << std::endl;
       runDijkstra(cpuContext, oclGetMaxFlopsDev(cpuContext), graph,
                   sourceVertices, outResultCosts, numResults);
     }
@@ -334,7 +336,7 @@ void runDijkstraOpenCL(GraphData *graph, int *sourceVertices,
 void runDijkstra(cl_context gpuContext, cl_device_id deviceId, GraphData *graph,
                  int *sourceVertices, float *outResultCosts, int numResults) {
   // Create command queue
-  cl_int errNum;
+  cl_int           errNum;
   cl_command_queue commandQueue;
   commandQueue = clCreateCommandQueue(gpuContext, deviceId, 0, &errNum);
   oclCheckError(errNum, CL_SUCCESS);
@@ -350,10 +352,10 @@ void runDijkstra(cl_context gpuContext, cl_device_id deviceId, GraphData *graph,
   clGetDeviceInfo(deviceId, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(size_t),
                   &maxWorkGroupSize, NULL);
   oclCheckError(errNum, CL_SUCCESS);
-  cout << "MAX_WORKGROUP_SIZE: " << maxWorkGroupSize << endl;
+  std::cout << "MAX_WORKGROUP_SIZE: " << maxWorkGroupSize << std::endl;
 
   // Set # of work items in work group and total in 1 dimensional range
-  size_t localWorkSize = maxWorkGroupSize;
+  size_t localWorkSize  = maxWorkGroupSize;
   size_t globalWorkSize = oclRoundWorkSizeUp(localWorkSize, graph->vertexCount);
 
   cl_mem vertexArrayDevice;
@@ -514,8 +516,8 @@ void runDijkstraMultiGPU(cl_context gpuContext, GraphData *graph,
                          int numResults) {
 
   // Find out how many GPU's to compute on all available GPUs
-  cl_int errNum;
-  size_t deviceBytes;
+  cl_int  errNum;
+  size_t  deviceBytes;
   cl_uint deviceCount;
 
   errNum =
@@ -524,7 +526,7 @@ void runDijkstraMultiGPU(cl_context gpuContext, GraphData *graph,
   deviceCount = (cl_uint)deviceBytes / sizeof(cl_device_id);
 
   if (deviceCount == 0) {
-    cerr << "ERROR: no GPUs present!" << endl;
+    std::cerr << "ERROR: no GPUs present!" << std::endl;
     return;
   }
 
@@ -538,10 +540,10 @@ void runDijkstraMultiGPU(cl_context gpuContext, GraphData *graph,
   int offset = 0;
 
   for (unsigned int i = 0; i < deviceCount; i++) {
-    devicePlans[i].context = gpuContext;
+    devicePlans[i].context  = gpuContext;
     devicePlans[i].deviceId = oclGetDev(gpuContext, i);
     ;
-    devicePlans[i].graph = graph;
+    devicePlans[i].graph          = graph;
     devicePlans[i].sourceVertices = &sourceVertices[offset];
     devicePlans[i].outResultCosts =
         &outResultCosts[offset * graph->vertexCount];
@@ -598,8 +600,8 @@ void runDijkstraMultiGPUandCPU(cl_context gpuContext, cl_context cpuContext,
   float ratioCPUtoGPU = 0.65; // CPU seems to run it at 2.26X on GT120 GPU
 
   // Find out how many GPU's to compute on all available GPUs
-  cl_int errNum;
-  size_t deviceBytes;
+  cl_int  errNum;
+  size_t  deviceBytes;
   cl_uint gpuDeviceCount;
   cl_uint cpuDeviceCount;
 
@@ -609,7 +611,7 @@ void runDijkstraMultiGPUandCPU(cl_context gpuContext, cl_context cpuContext,
   gpuDeviceCount = (cl_uint)deviceBytes / sizeof(cl_device_id);
 
   if (gpuDeviceCount == 0) {
-    cerr << "ERROR: no GPUs present!" << endl;
+    std::cerr << "ERROR: no GPUs present!" << std::endl;
     return;
   }
 
@@ -619,7 +621,7 @@ void runDijkstraMultiGPUandCPU(cl_context gpuContext, cl_context cpuContext,
   cpuDeviceCount = (cl_uint)deviceBytes / sizeof(cl_device_id);
 
   if (cpuDeviceCount == 0) {
-    cerr << "ERROR: no CPUs present!" << endl;
+    std::cerr << "ERROR: no CPUs present!" << std::endl;
     return;
   }
 
@@ -640,10 +642,10 @@ void runDijkstraMultiGPUandCPU(cl_context gpuContext, cl_context cpuContext,
 
   int curDevice = 0;
   for (unsigned int i = 0; i < gpuDeviceCount; i++) {
-    devicePlans[curDevice].context = gpuContext;
+    devicePlans[curDevice].context  = gpuContext;
     devicePlans[curDevice].deviceId = oclGetDev(gpuContext, i);
     ;
-    devicePlans[curDevice].graph = graph;
+    devicePlans[curDevice].graph          = graph;
     devicePlans[curDevice].sourceVertices = &sourceVertices[offset];
     devicePlans[curDevice].outResultCosts =
         &outResultCosts[offset * graph->vertexCount];
@@ -657,10 +659,10 @@ void runDijkstraMultiGPUandCPU(cl_context gpuContext, cl_context cpuContext,
   int resultsPerCPU = cpuResults;
 
   for (unsigned int i = 0; i < cpuDeviceCount; i++) {
-    devicePlans[curDevice].context = cpuContext;
+    devicePlans[curDevice].context  = cpuContext;
     devicePlans[curDevice].deviceId = oclGetDev(cpuContext, i);
     ;
-    devicePlans[curDevice].graph = graph;
+    devicePlans[curDevice].graph          = graph;
     devicePlans[curDevice].sourceVertices = &sourceVertices[offset];
     devicePlans[curDevice].outResultCosts =
         &outResultCosts[offset * graph->vertexCount];
@@ -728,20 +730,20 @@ void runDijkstraRef(GraphData *graph, int *sourceVertices,
                     float *outResultCosts, int numResults) {
 
   // Create the arrays needed for processing the algorithm
-  float *costArray = new float[graph->vertexCount];
+  float *costArray         = new float[graph->vertexCount];
   float *updatingCostArray = new float[graph->vertexCount];
-  int *maskArray = new int[graph->vertexCount];
+  int *  maskArray         = new int[graph->vertexCount];
 
   for (int i = 0; i < numResults; i++) {
     // Initialize the buffer for this run
     for (int v = 0; v < graph->vertexCount; v++) {
       if (v == sourceVertices[i]) {
-        maskArray[v] = 1;
-        costArray[v] = 0.0;
+        maskArray[v]         = 1;
+        costArray[v]         = 0.0;
         updatingCostArray[v] = 0.0;
       } else {
-        maskArray[v] = 0;
-        costArray[v] = FLT_MAX;
+        maskArray[v]         = 0;
+        costArray[v]         = FLT_MAX;
         updatingCostArray[v] = FLT_MAX;
       }
     }

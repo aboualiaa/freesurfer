@@ -6,12 +6,8 @@
 # Use FSL's prelude and fugue to do B0 dewarping of EPI images
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/12 21:43:14 $
-#    $Revision: 1.46 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,7 +22,7 @@
 # epidewarp.fsl
 #
 
-set VERSION = '$Id: epidewarp.fsl,v 1.46 2016/02/12 21:43:14 zkaufman Exp $'
+set VERSION = 'epidewarp.fsl @FS_VERSION@';
 set inputargs = ($argv);
 
 set KeepMean = 0;
@@ -102,19 +98,11 @@ if($FSLVerMaj == 3) then
   set DilFlag = -dil
   set FSLToFloat = avwmaths_32R
   set FSLToFloatFlag = ()
-else if($FSLVerMaj == 4) then
+else 
   set FSLPre = fsl
   set DilFlag = -dilM
   set FSLToFloat = (fslmaths)
   set FSLToFloatFlag = (-odt float)
-else if($FSLVerMaj == 5) then
-  set FSLPre = fsl
-  set DilFlag = -dilM
-  set FSLToFloat = (fslmaths)
-  set FSLToFloatFlag = (-odt float)
-else
-  echo "FSL Version is $FSLVersion, must be 3.X or 4.X or 5.X"
-  exit 1;
 endif
 
 # Create a log file
@@ -423,7 +411,7 @@ if($#epimat) cp $epimat `dirname $magfw`/`basename $magfw .$ext`.mat
 # Register magfw to example func. There are some parameters here
 # that may need to be tweeked. Should probably strip the mag.
 if($DoMagExfReg) then
-  set cmd = (flirt.fsl -in $magfw -ref $exf \
+  set cmd = (flirt -in $magfw -ref $exf \
     -out $tmpdir/magfw-in-exf.$ext \
     -omat $tmpdir/magfw-in-exf.fsl.mat \
     -bins 256 -cost corratio \
@@ -446,7 +434,7 @@ endif
 
 # Now resample VSM into epi space. This will take care of any
 # differences in in-plane voxel size.
-set cmd = (flirt.fsl -in $vsmmag -ref $exf -out $vsm \
+set cmd = (flirt -in $vsmmag -ref $exf -out $vsm \
   -init $tmpdir/magfw-in-exf.fsl.mat -applyxfm)
 echo $cmd |& tee -a $LF
 $cmd |& tee -a $LF
@@ -467,7 +455,7 @@ endif
 # Now resample brain mask into epi space. This will take care of any
 # differences in in-plane voxel size.
 set maskexf = $tmpdir/maskexf.$ext
-set cmd = (flirt.fsl -in $mask -ref $exf -out $maskexf \
+set cmd = (flirt -in $mask -ref $exf -out $maskexf \
   -init $tmpdir/magfw-in-exf.fsl.mat -applyxfm)
 echo $cmd |& tee -a $LF
 $cmd |& tee -a $LF

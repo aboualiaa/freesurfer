@@ -32,7 +32,7 @@ public slots:
 
 private:
   double m_dSplineRadius;
-  int m_nNumberOfSides;
+  int    m_nNumberOfSides;
   double m_dFromLabelOpacity;
   double m_dToLabelOpacity;
   QColor m_colorSpline;

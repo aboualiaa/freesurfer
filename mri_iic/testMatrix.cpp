@@ -1,16 +1,11 @@
 /**
- * @file  testMatrix.cpp
  * @brief A test file for the class Matrix3d
  *
  */
 /*
  * Original Author: Benjamin Lewin
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2014/09/03 20:31:32 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2014 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,12 +17,12 @@
  *
  */
 
-#include <iostream>
 #include "matrix3d.h"
+#include <iostream>
 
 int main() {
-  int rows = 0;
-  int cols = 0;
+  int rows   = 0;
+  int cols   = 0;
   int slices = 0;
   std::cout << "Enter matrix dimensions:\n"
             << "Rows: ";

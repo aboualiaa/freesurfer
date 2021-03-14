@@ -51,6 +51,8 @@ inline auto get_typed_semi_new_vox_getter_chunked(MRI *mri)
   switch (mri->type) {
   case MRI_UCHAR:
     return char_func;
+  case MRI_RGB:
+    [[fallthrough]];
   case MRI_INT:
     return int_func;
   case MRI_LONG:
@@ -59,6 +61,8 @@ inline auto get_typed_semi_new_vox_getter_chunked(MRI *mri)
     return float_func;
   case MRI_SHORT:
     return short_func;
+  default:
+    exit(1);
   }
 }
 
@@ -74,6 +78,8 @@ inline auto get_typed_new_vox_getter_chunked(MRI *mri) -> new_vox_getter {
   switch (mri->type) {
   case MRI_UCHAR:
     return char_func;
+  case MRI_RGB:
+    [[fallthrough]];
   case MRI_INT:
     return int_func;
   case MRI_LONG:
@@ -82,6 +88,8 @@ inline auto get_typed_new_vox_getter_chunked(MRI *mri) -> new_vox_getter {
     return float_func;
   case MRI_SHORT:
     return short_func;
+  default:
+    exit(1);
   }
 }
 
@@ -107,7 +115,7 @@ FS_ALWAYS_INLINE auto semi_new_vox_setter_chunked(MRI *mri, int column, int row,
   *((T *)mri->chunk + column + row * mri->vox_per_row +
     slice * mri->vox_per_slice + frame * mri->vox_per_vol) = nint(voxval);
 
-  return (0);
+  return 0;
 }
 
 template <typename T>
@@ -121,7 +129,7 @@ FS_ALWAYS_INLINE auto new_vox_setter_chunked(MRI *mri, size_t index,
   }
 
   *((T *)mri->chunk + index) = nint(voxval);
-  return (0);
+  return 0;
 }
 
 template <typename T>
@@ -137,28 +145,10 @@ FS_ALWAYS_INLINE auto semi_new_vox_setter_non_chunked(MRI *mri, int column,
     voxval = std::numeric_limits<T>::max();
   }
 
-  switch (mri->type) {
-  case MRI_UCHAR:
-    MRIseq_vox(mri, column, row, slice, frame) = nint(voxval);
-    break;
-  case MRI_SHORT:
-    MRISseq_vox(mri, column, row, slice, frame) = nint(voxval);
-    break;
-  case MRI_RGB:
-  case MRI_INT:
-    MRIIseq_vox(mri, column, row, slice, frame) = nint(voxval);
-    break;
-  case MRI_LONG:
-    MRILseq_vox(mri, column, row, slice, frame) = nint(voxval);
-    break;
-  case MRI_FLOAT:
-    MRIFseq_vox(mri, column, row, slice, frame) = voxval;
-    break;
-  default:
-    return (1);
-    break;
-  }
-  return (0);
+  // TODO: do not forget the issue with floats, do you need a specialization?
+  (((T *)mri->slices[slice + (frame)*mri->depth][row])[column]) = nint(voxval);
+
+  return 0;
 }
 
 inline auto get_typed_semi_new_vox_setter_chunked(MRI *mri)
@@ -178,6 +168,8 @@ inline auto get_typed_semi_new_vox_setter_chunked(MRI *mri)
   switch (mri->type) {
   case MRI_UCHAR:
     return char_func;
+  case MRI_RGB:
+    [[fallthrough]];
   case MRI_INT:
     return int_func;
   case MRI_LONG:
@@ -186,6 +178,8 @@ inline auto get_typed_semi_new_vox_setter_chunked(MRI *mri)
     return float_func;
   case MRI_SHORT:
     return short_func;
+  default:
+    exit(1);
   }
 }
 
@@ -201,6 +195,8 @@ inline auto get_typed_new_vox_setter_chunked(MRI *mri) -> new_vox_setter {
   switch (mri->type) {
   case MRI_UCHAR:
     return char_func;
+  case MRI_RGB:
+    [[fallthrough]];
   case MRI_INT:
     return int_func;
   case MRI_LONG:
@@ -209,6 +205,8 @@ inline auto get_typed_new_vox_setter_chunked(MRI *mri) -> new_vox_setter {
     return float_func;
   case MRI_SHORT:
     return short_func;
+  default:
+    exit(1);
   }
 }
 

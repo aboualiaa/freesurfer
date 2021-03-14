@@ -1,5 +1,4 @@
 /**
- * @file  vtkKWProgressDialog.h
  * @brief A KWWidgets progress dialog
  *
  * A simple KWWidgets dialog box with a progress bar tht listens to
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,8 +22,8 @@
 #ifndef vtkKWProgressDialog_h
 #define vtkKWProgressDialog_h
 
-#include "vtkSetGet.h"
 #include "vtkCommand.h"
+#include "vtkSetGet.h"
 
 class vtkObject;
 class vtkKWDialog;
@@ -50,8 +45,8 @@ protected:
   vtkKWProgressDialog();
   virtual ~vtkKWProgressDialog();
 
-  vtkKWApplication *mApplication;
-  vtkKWDialog *mDialog;
+  vtkKWApplication *  mApplication;
+  vtkKWDialog *       mDialog;
   vtkKWProgressGauge *mProgressGauge;
 
   char msWindowTitle[1024];

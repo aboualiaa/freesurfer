@@ -7,9 +7,9 @@ namespace kvl {
 class SetKOfMeshCollection : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef SetKOfMeshCollection Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef SetKOfMeshCollection          Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -18,8 +18,8 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SetKOfMeshCollection, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlSetKOfMeshCollection( meshCollection, K )
@@ -47,18 +47,18 @@ public:
             constMeshCollection.GetPointer());
 
     // Retrieve K
-    const auto K = static_cast<float>(*(mxGetPr(prhs[1])));
+    const float K = static_cast<float>(*(mxGetPr(prhs[1])));
 
     //
     meshCollection->SetK(K);
   }
 
 protected:
-  SetKOfMeshCollection()= default;;
-  ~SetKOfMeshCollection() override= default;;
+  SetKOfMeshCollection(){};
+  virtual ~SetKOfMeshCollection(){};
 
-  SetKOfMeshCollection(const Self &); // purposely not implemented
-  void operator=(const Self &);       // purposely not implemented
+  SetKOfMeshCollection(const Self &); //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
 private:
 };

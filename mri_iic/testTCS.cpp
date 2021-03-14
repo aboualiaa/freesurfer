@@ -1,16 +1,11 @@
 /**
- * @file  testTCS.cpp
  * @brief test program of the TensorCubicSmoothing class
  *
  */
 /*
  * Original Author: Benjamin Lewin
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2014/09/03 20:31:32 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2014 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,11 +19,11 @@
 
 #include <vnl/vnl_matrix.h>
 
-#include "tensorCubicSmoothing.h"
 #include "matrix3d.h"
+#include "tensorCubicSmoothing.h"
 
-const int ROWS = 400;
-const int COLS = 400;
+const int ROWS   = 400;
+const int COLS   = 400;
 const int SLICES = 400;
 const int NUM_BX = 15;
 const int NUM_BY = 15;

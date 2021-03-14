@@ -1,12 +1,11 @@
 #pragma once
 /*
- * @file utilities common to mrisurf*.c but not used outside them
  *
  */
 /*
  * surfaces Author: Bruce Fischl, extracted from mrisurf.c by Bevin Brett
  *
- * $ © copyright-2014,2018 The General Hospital Corporation (Boston, MA) "MGH"
+ * $ Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,8 +27,8 @@
 #include "mrisurf_vals.h"
 
 #define VERTEX_INTERIOR 1
-#define VERTEX_BORDER 2
-#define VERTEX_CHULL 3
+#define VERTEX_BORDER   2
+#define VERTEX_CHULL    3
 
 int mrisStoreVtotalInV3num(MRI_SURFACE *mris);
 

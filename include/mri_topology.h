@@ -1,17 +1,6 @@
-/**
- * @file  mri_topology.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:10 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,8 +12,8 @@
  *
  */
 
-#include "mri.h"
 #include "gca.h"
+#include "mri.h"
 
 #ifndef TOPO_INCLUDED
 #define TOPO_INCLUDED
@@ -46,26 +35,26 @@ Nbh *N_6_3(Nbh *nbh_src, Nbh *nbh_dst);
 Nbh *N_18_1(Nbh *nbh_src, Nbh *nbh_dst);
 Nbh *N_18_2(Nbh *nbh_src, Nbh *nbh_dst);
 Nbh *N_26_1(Nbh *nbh_src, Nbh *nbh_dst);
-int checkTn(Nbh *nbh_src, Nbh *nbh_dst, int connectivity);
-int checkSimple(Nbh *nbh, int connectivity);
-int checkSC(MRI *mri, int i0, int j0, int k0, int i1, int j1, int k1,
-            int inside_label, int outside_label, int connectivity);
-int checkWC(MRI *mri, int i0, int j0, int k0, int i1, int j1, int k1,
-            int inside_label, int outside_label, int connectivity);
-int checkNbh(MRI *mri, int i, int j, int k, int label, int connectivity);
-int checkSNbh(MRI *mri, int i, int j, int k, int label, int connectivity);
+int  checkTn(Nbh *nbh_src, Nbh *nbh_dst, int connectivity);
+int  checkSimple(Nbh *nbh, int connectivity);
+int  checkSC(MRI *mri, int i0, int j0, int k0, int i1, int j1, int k1,
+             int inside_label, int outside_label, int connectivity);
+int  checkWC(MRI *mri, int i0, int j0, int k0, int i1, int j1, int k1,
+             int inside_label, int outside_label, int connectivity);
+int  checkNbh(MRI *mri, int i, int j, int k, int label, int connectivity);
+int  checkSNbh(MRI *mri, int i, int j, int k, int label, int connectivity);
 Nbh *Nnk(Nbh *nbh_src, Nbh *nbh_dst, int connectivity);
-int checkSP(Nbh *fgnbh_src, Nbh *fgnbh_dst, int *fgtp, Nbh *bgnbh_src,
-            Nbh *bgnbh_dst, int *bgtp, int connectivity);
+int  checkSP(Nbh *fgnbh_src, Nbh *fgnbh_dst, int *fgtp, Nbh *bgnbh_src,
+             Nbh *bgnbh_dst, int *bgtp, int connectivity);
 
 #define MAX_NUMBER_OF_LABELS 50
 
 // different mode of corrections
-#define NORMAL_MODE 0
-#define VOXEL_MODE 1
-#define PROB_MODE 2
+#define NORMAL_MODE   0
+#define VOXEL_MODE    1
+#define PROB_MODE     2
 #define PROB_MAP_MODE 3
-#define MAP_MODE 4
+#define MAP_MODE      4
 
 typedef struct MRI_TOPOLOGY_PARMS {
   // connectivity type (1, 2, 3 or 4)
@@ -75,23 +64,23 @@ typedef struct MRI_TOPOLOGY_PARMS {
   int labels[MAX_NUMBER_OF_LABELS];
 
   // correction mode (VOXEL, PRIORS, ...)
-  int mode;
-  int background_priority;
-  int only;
-  int using_gca_maps;
+  int   mode;
+  int   background_priority;
+  int   only;
+  int   using_gca_maps;
   char *transform_fname, *gca_fname;
   char *prior_map_file;
   float alpha, beta;
-  int guess_initial_segmentation;
+  int   guess_initial_segmentation;
   // just in case, they are already allocated...
-  GCA *gca;
+  GCA *      gca;
   TRANSFORM *transform;
 
   // surfaces information
-  int generate_surface;
+  int   generate_surface;
   char *initial_surface_file, *final_surface_file;
-  int tesselation_mode;
-  int MarchingCubes;
+  int   tesselation_mode;
+  int   MarchingCubes;
 
   // debugging information
   char *debugging_map_folder;

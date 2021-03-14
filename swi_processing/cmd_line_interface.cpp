@@ -1,26 +1,15 @@
 /**
- * @file  cmd_line_interface.cpp
  * @brief automate the parsing of the command-line
  *
  * this class is meant to automate the parsing of the command-line
- * its main purpose is to minimize new code being written when a new program is
- * written
+ * its main purpose is to minimize new code being written when a new program is written
  *
  *  as such, the data it holds have 2 purposes:
- *    1. will process the options, as well as the input and output files the
- * user enters
- *    2. will help automate the print_help command, which otherwise would not be
- * centralized
- */
-/*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2013/02/21 19:17:23 $
- *    $Revision: 1.1 $
+ *    1. will process the options, as well as the input and output files the user enters
+ *    2. will help automate the print_help command, which otherwise would not be centralized
  *
- * Copyright (C) 2002-2007,
- * The General Hospital Corporation (Boston, MA).
+ * Copyright © 2021
+ * The General Hospital Corporation (Boston, MA). 
  * All rights reserved.
  *
  * Distribution, usage and copying of this software is covered under the
@@ -33,8 +22,12 @@
  *
  */
 
+#include <list>
+#include <string.h>
+#include <string>
+#include <vector>
+
 #include "cmd_line_interface.h"
-#include <cstring>
 
 using namespace std;
 // this sucks a little - cannot make generic code here
@@ -118,7 +111,7 @@ void CCmdLineInterface::AddOptionBool(const char *i_cstrName, bool *pbVal,
 
 bool CCmdLineInterface::Parse(int argc, char *argv[]) {
 
-  int iTotalArgs = 1;
+  int   iTotalArgs = 1;
   char *cpOption;
 
   argc--; // one arguments too many
@@ -127,11 +120,11 @@ bool CCmdLineInterface::Parse(int argc, char *argv[]) {
   for (; argc > 0 && std::string(argv[1]).substr(0, 2) == "--";
        argc--, argv++) {
     int nargs = 0;
-    cpOption = argv[1] + 2;
+    cpOption  = argv[1] + 2;
 
-    list<CCmdLineOptionInt>::iterator cit_int = m_lstIntOption.begin();
-    list<CCmdLineOptionFloat>::iterator cit_float = m_lstFloatOption.begin();
-    list<CCmdLineOptionBool>::iterator cit_bool = m_lstBoolOption.begin();
+    list<CCmdLineOptionInt>::iterator    cit_int    = m_lstIntOption.begin();
+    list<CCmdLineOptionFloat>::iterator  cit_float  = m_lstFloatOption.begin();
+    list<CCmdLineOptionBool>::iterator   cit_bool   = m_lstBoolOption.begin();
     list<CCmdLineOptionString>::iterator cit_string = m_lstStringOption.begin();
 
     bool bFound = false;
@@ -194,8 +187,7 @@ bool CCmdLineInterface::Parse(int argc, char *argv[]) {
       cout << " \n ---- \n this application will now exit\n";
       exit(1);
     }
-    // do some incrementing depending on the number of parameters that were
-    // parsed
+    // do some incrementing depending on the number of parameters that were parsed
     argv += nargs;
     argc -= nargs;
   }
@@ -204,8 +196,8 @@ bool CCmdLineInterface::Parse(int argc, char *argv[]) {
   if (m_lstIo.empty())
     return true;
 
-  bool bOk = true;
-  list<CCmdLineIo>::iterator it = m_lstIo.begin();
+  bool                       bOk = true;
+  list<CCmdLineIo>::iterator it  = m_lstIo.begin();
   while (argc > 0 && it != m_lstIo.end()) {
     cpOption = argv[1];
     it->Set(cpOption);
@@ -226,8 +218,7 @@ void CCmdLineInterface::PrintHelp() const {
        << std::endl;
 
   cout << " \n Options : \n";
-  // start by printing the help messages that were entered for each of the
-  // options
+  // start by printing the help messages that were entered for each of the options
   for (std::list<CCmdLineOptionFloat>::const_iterator cit =
            m_lstFloatOption.begin();
        cit != m_lstFloatOption.end(); cit++) {

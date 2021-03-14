@@ -1,5 +1,4 @@
 /**
- * @file  resample.c
  * @brief code to perform resapling from one space to another
  *
  * Purpose: code to perform resapling from one space to another,
@@ -39,12 +38,8 @@
  **/
 /*
  * Original Author: Douglas N. Greve
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2016/02/20 22:43:17 $
- *    $Revision: 1.52 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -58,14 +53,16 @@
 
 #define RESAMPLE_SOURCE_CODE_FILE
 
-#include <math.h>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include "timer.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "romp_support.h"
 
+#include "bfileio.h"
+#include "corio.h"
 #include "diag.h"
 #include "label.h"
 #include "matrix.h"
@@ -102,7 +99,7 @@ static int MostHitsInVolVox(ASEGVOLINDEX *avindsorted, int N, int *segidmost,
   interpolation from a string. Returns -1 if the string is
   unrecoginzed.
   ---------------------------------------------------------*/
-int interpolation_code(char *interpolation_string) {
+int interpolation_code(const char *interpolation_string) {
   return (MRIinterpCode(interpolation_string));
 }
 /*---------------------------------------------------------
@@ -110,7 +107,7 @@ int interpolation_code(char *interpolation_string) {
   point to integer conversion method from a string. Returns
   -1 if the string is unrecoginzed.
   ---------------------------------------------------------*/
-int float2int_code(char *float2int_string) {
+int float2int_code(const char *float2int_string) {
   if (!strcasecmp(float2int_string, "round") ||
       !strcasecmp(float2int_string, "rint"))
     return (FLT2INT_ROUND);
@@ -150,7 +147,7 @@ int XYZAnat2CRSFunc_TkReg(int *col, int *row, int *slc, int npixels,
   QfR = MatrixMultiply(Qf, Reg, NULL);
 
   /* load xyz into a vector */
-  xyz = MatrixAlloc(4, 1, MATRIX_REAL);
+  xyz                     = MatrixAlloc(4, 1, MATRIX_REAL);
   xyz->rptr[0 + 1][0 + 1] = xanat;
   xyz->rptr[1 + 1][0 + 1] = yanat;
   xyz->rptr[2 + 1][0 + 1] = zanat;
@@ -246,7 +243,7 @@ MATRIX *FOVQuantMatrix(int ncols, int nrows, int nslcs, float colres,
   MATRIX *deQ, *Q;
 
   deQ = FOVDeQuantMatrix(ncols, nrows, nslcs, colres, rowres, slcres);
-  Q = MatrixInverse(deQ, nullptr);
+  Q   = MatrixInverse(deQ, NULL);
   MatrixFree(&deQ);
 
   return (Q);
@@ -258,20 +255,20 @@ MATRIX *FOVQuantMatrix(int ncols, int nrows, int nslcs, float colres,
 MATRIX *ComputeQFWD(MATRIX *Q, MATRIX *F, MATRIX *W, MATRIX *D, MATRIX *QFWD) {
   MATRIX *QFWDtmp;
 
-  if (QFWD == nullptr)
+  if (QFWD == NULL)
     QFWDtmp = MatrixAlloc(4, 4, MATRIX_REAL);
   else
     QFWDtmp = QFWD;
 
   MatrixIdentity(4, QFWDtmp);
 
-  if (Q != nullptr)
+  if (Q != NULL)
     MatrixMultiply(QFWDtmp, Q, QFWDtmp);
-  if (F != nullptr)
+  if (F != NULL)
     MatrixMultiply(QFWDtmp, F, QFWDtmp);
-  if (W != nullptr)
+  if (W != NULL)
     MatrixMultiply(QFWDtmp, W, QFWDtmp);
-  if (D != nullptr)
+  if (D != NULL)
     MatrixMultiply(QFWDtmp, D, QFWDtmp);
 
   return (QFWDtmp);
@@ -293,43 +290,43 @@ MRI *vol2vol_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
   MATRIX *QFWDsrc, *QFWDtrg, *invQFWDtrg;
   MATRIX *Tcrs2Scrs, *invMsrc2trg;
   MATRIX *Scrs, *Tcrs, *Txyz;
-  MRI *TrgVol;
-  int irow_trg, icol_trg, islc_trg; /* integer row, col, slc in target */
-  int irow_src, icol_src, islc_src; /* integer row, col, slc in source */
-  float srcval;
-  int frm;
+  MRI *   TrgVol;
+  int     irow_trg, icol_trg, islc_trg; /* integer row, col, slc in target */
+  int     irow_src, icol_src, islc_src; /* integer row, col, slc in source */
+  float   srcval;
+  int     frm;
 
   if (InterpMethod != INTERP_NEAREST) {
     fprintf(stderr,
             "vol2vol_linear(): only support for nearest interpolation\n");
-    return (nullptr);
+    return (NULL);
   }
 
   /* compute the transforms */
-  QFWDsrc = ComputeQFWD(Qsrc, Fsrc, Wsrc, Dsrc, nullptr);
-  QFWDtrg = ComputeQFWD(Qtrg, Ftrg, Wtrg, Dtrg, nullptr);
-  invQFWDtrg = MatrixInverse(QFWDtrg, nullptr);
-  if (Msrc2trg != nullptr)
-    invMsrc2trg = MatrixInverse(Msrc2trg, nullptr);
+  QFWDsrc    = ComputeQFWD(Qsrc, Fsrc, Wsrc, Dsrc, NULL);
+  QFWDtrg    = ComputeQFWD(Qtrg, Ftrg, Wtrg, Dtrg, NULL);
+  invQFWDtrg = MatrixInverse(QFWDtrg, NULL);
+  if (Msrc2trg != NULL)
+    invMsrc2trg = MatrixInverse(Msrc2trg, NULL);
   else
-    invMsrc2trg = MatrixIdentity(4, nullptr);
+    invMsrc2trg = MatrixIdentity(4, NULL);
   Tcrs2Scrs = MatrixMultiply(QFWDsrc, invMsrc2trg, NULL);
   MatrixMultiply(Tcrs2Scrs, invQFWDtrg, Tcrs2Scrs);
 
   /* Tcrs2Scrs - maps Target ColRowSlice to that of the Source */
 
   /* preallocate the row-col-slc vectors */
-  Tcrs = MatrixAlloc(4, 1, MATRIX_REAL);
+  Tcrs                     = MatrixAlloc(4, 1, MATRIX_REAL);
   Tcrs->rptr[3 + 1][0 + 1] = 1.0;
-  Scrs = MatrixAlloc(4, 1, MATRIX_REAL);
-  Txyz = MatrixAlloc(4, 1, MATRIX_REAL);
+  Scrs                     = MatrixAlloc(4, 1, MATRIX_REAL);
+  Txyz                     = MatrixAlloc(4, 1, MATRIX_REAL);
   Txyz->rptr[3 + 1][0 + 1] = 1.0;
 
   /* allocate a volume to hold the output */
   TrgVol = MRIallocSequence(ncols_trg, nrows_trg, nslcs_trg, MRI_FLOAT,
                             SrcVol->nframes);
-  if (TrgVol == nullptr)
-    return (nullptr);
+  if (TrgVol == NULL)
+    return (NULL);
 
   /* Go through each target voxel and compute the location of
      the closest source voxel */
@@ -365,7 +362,7 @@ MRI *vol2vol_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
           fprintf(stderr, "vol2vol_linear(): unrecoginized float2int code %d\n",
                   float2int);
           MRIfree(&TrgVol);
-          return (nullptr);
+          return (NULL);
           break;
         }
 
@@ -418,29 +415,29 @@ MRI *label2mask_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
   MATRIX *QFWDsrc;
   MATRIX *Lxyz2Scrs;
   MATRIX *Scrs, *Lxyz, *Mlbl2src;
-  MRI *FinalMskVol;
-  int irow_src, icol_src, islc_src; /* integer row, col, slc in source */
-  float mskval, voxsize;
-  int vlbl;
-  int c, r, s, nfinalmask;
+  MRI *   FinalMskVol;
+  int     irow_src, icol_src, islc_src; /* integer row, col, slc in source */
+  float   mskval, voxsize;
+  int     vlbl;
+  int     c, r, s, nfinalmask;
 
   if (SrcMskVol) {
     if (MRIdimMismatch(SrcVol, SrcMskVol, 0)) {
       printf("ERROR: label2mask_linear: dimension mismatch\n");
-      return (nullptr);
+      return (NULL);
     }
   }
 
   /* compute the transforms */
-  QFWDsrc = ComputeQFWD(Qsrc, Fsrc, Wsrc, Dsrc, nullptr);
-  if (Msrc2lbl != nullptr)
-    Mlbl2src = MatrixInverse(Msrc2lbl, nullptr);
+  QFWDsrc = ComputeQFWD(Qsrc, Fsrc, Wsrc, Dsrc, NULL);
+  if (Msrc2lbl != NULL)
+    Mlbl2src = MatrixInverse(Msrc2lbl, NULL);
   else
-    Mlbl2src = nullptr;
-  if (Mlbl2src != nullptr)
+    Mlbl2src = NULL;
+  if (Mlbl2src != NULL)
     Lxyz2Scrs = MatrixMultiply(QFWDsrc, Mlbl2src, NULL);
   else
-    Lxyz2Scrs = MatrixCopy(QFWDsrc, nullptr);
+    Lxyz2Scrs = MatrixCopy(QFWDsrc, NULL);
 
   printf("\n");
   printf("Lxyz2Scrs:\n");
@@ -448,15 +445,15 @@ MRI *label2mask_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
   printf("\n");
 
   /* preallocate the row-col-slc vectors */
-  Lxyz = MatrixAlloc(4, 1, MATRIX_REAL);
+  Lxyz                     = MatrixAlloc(4, 1, MATRIX_REAL);
   Lxyz->rptr[3 + 1][0 + 1] = 1.0;
-  Scrs = MatrixAlloc(4, 1, MATRIX_REAL);
+  Scrs                     = MatrixAlloc(4, 1, MATRIX_REAL);
 
   /* allocate an output volume -- same size as source*/
   FinalMskVol = MRIallocSequence(SrcVol->width, SrcVol->height, SrcVol->depth,
                                  MRI_FLOAT, 1);
-  if (FinalMskVol == nullptr)
-    return (nullptr);
+  if (FinalMskVol == NULL)
+    return (NULL);
   MRIcopyHeader(SrcVol, FinalMskVol);
 
   *nlabelhits = 0;
@@ -493,7 +490,7 @@ MRI *label2mask_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
       fprintf(stderr, "label2mask_linear(): unrecoginized float2int code %d\n",
               float2int);
       MRIfree(&FinalMskVol);
-      return (nullptr);
+      return (NULL);
       break;
     }
 
@@ -504,7 +501,7 @@ MRI *label2mask_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
     (*nlabelhits)++;
 
     /* check that the point is within the input mask */
-    if (SrcMskVol != nullptr) {
+    if (SrcMskVol != NULL) {
       mskval = MRIFseq_vox(SrcMskVol, icol_src, irow_src, islc_src, 0);
       if (mskval < 0.5)
         continue;
@@ -545,7 +542,7 @@ MRI *label2mask_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
   MatrixFree(&Lxyz2Scrs);
   MatrixFree(&Scrs);
   MatrixFree(&Lxyz);
-  if (Mlbl2src != nullptr)
+  if (Mlbl2src != NULL)
     MatrixFree(&Mlbl2src);
 
   printf("label2mask_linear: done\n");
@@ -560,8 +557,8 @@ MRI *label2mask_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
   found in SrcVol.  Returns an MRI "volume" of dimension 1X1X1Xnframes.
   -----------------------------------------------------------------------*/
 MRI *vol2maskavg(MRI *SrcVol, MRI *SrcMskVol, int *nhits) {
-  int r, c, s, f;
-  MRI *MskAvg;
+  int   r, c, s, f;
+  MRI * MskAvg;
   float mskval, val;
 
   /* make sure that SrcVol and SrcMskVol are the same dimension */
@@ -570,13 +567,13 @@ MRI *vol2maskavg(MRI *SrcVol, MRI *SrcMskVol, int *nhits) {
       SrcVol->depth != SrcMskVol->depth) {
     fprintf(stderr, "ERROR: vol2maskavg: SrcVol and SrcMskVol do "
                     "not have the same dimension\n");
-    return (nullptr);
+    return (NULL);
   }
 
   /* allocate an output "volume" */
   MskAvg = MRIallocSequence(1, 1, 1, MRI_FLOAT, SrcVol->nframes);
-  if (MskAvg == nullptr)
-    return (nullptr);
+  if (MskAvg == NULL)
+    return (NULL);
 
   /* go through each voxel */
   *nhits = 0;
@@ -601,7 +598,7 @@ MRI *vol2maskavg(MRI *SrcVol, MRI *SrcMskVol, int *nhits) {
   if (*nhits != 0) {
     /* divide by the number of hits to get the average*/
     for (f = 0; f < SrcVol->nframes; f++) {
-      val = MRIFseq_vox(MskAvg, 0, 0, 0, f);
+      val                             = MRIFseq_vox(MskAvg, 0, 0, 0, f);
       MRIFseq_vox(MskAvg, 0, 0, 0, f) = val / (*nhits);
       // printf("%2d %g %g\n",f,val,MRIFseq_vox(MskAvg,0,0,0,f));
     }
@@ -619,7 +616,7 @@ MRI *vol2maskavg(MRI *SrcVol, MRI *SrcMskVol, int *nhits) {
 int ProjNormFracThick(float *x, float *y, float *z, const MRI_SURFACE *surf,
                       int vtx, float frac) {
   float r;
-  r = frac * surf->vertices[vtx].curv;
+  r  = frac * surf->vertices[vtx].curv;
   *x = surf->vertices[vtx].x + r * surf->vertices[vtx].nx;
   *y = surf->vertices[vtx].y + r * surf->vertices[vtx].ny;
   *z = surf->vertices[vtx].z + r * surf->vertices[vtx].nz;
@@ -633,16 +630,16 @@ int ProjNormFracThick(float *x, float *y, float *z, const MRI_SURFACE *surf,
 int ProjNormFracThickNbr(float *x, float *y, float *z, MRI_SURFACE *surf,
                          int vtxno, float frac, int nthNbr) {
   float r, nx, ny, nz;
-  int nbrvtxno;
+  int   nbrvtxno;
 
   nbrvtxno = surf->vertices_topology[vtxno].v[nthNbr];
-  nx = (surf->vertices[vtxno].nx + surf->vertices[nbrvtxno].nx) / 2.0;
-  ny = (surf->vertices[vtxno].ny + surf->vertices[nbrvtxno].ny) / 2.0;
-  nz = (surf->vertices[vtxno].nz + surf->vertices[nbrvtxno].nz) / 2.0;
-  r = frac * surf->vertices[vtxno].curv;
-  *x = surf->vertices[vtxno].x + r * nx;
-  *y = surf->vertices[vtxno].y + r * ny;
-  *z = surf->vertices[vtxno].z + r * nz;
+  nx       = (surf->vertices[vtxno].nx + surf->vertices[nbrvtxno].nx) / 2.0;
+  ny       = (surf->vertices[vtxno].ny + surf->vertices[nbrvtxno].ny) / 2.0;
+  nz       = (surf->vertices[vtxno].nz + surf->vertices[nbrvtxno].nz) / 2.0;
+  r        = frac * surf->vertices[vtxno].curv;
+  *x       = surf->vertices[vtxno].x + r * nx;
+  *y       = surf->vertices[vtxno].y + r * ny;
+  *z       = surf->vertices[vtxno].z + r * nz;
   return (0);
 }
 /*----------------------------------------------------------------
@@ -664,15 +661,15 @@ int ProjNormDist(float *x, float *y, float *z, const MRI_SURFACE *surf, int vtx,
 int ProjNormDistNbr(float *x, float *y, float *z, MRI_SURFACE *surf, int vtxno,
                     float dist, int nthNbr) {
   float nx, ny, nz;
-  int nbrvtxno;
+  int   nbrvtxno;
 
   nbrvtxno = surf->vertices_topology[vtxno].v[nthNbr];
-  nx = (surf->vertices[vtxno].nx + surf->vertices[nbrvtxno].nx) / 2.0;
-  ny = (surf->vertices[vtxno].ny + surf->vertices[nbrvtxno].ny) / 2.0;
-  nz = (surf->vertices[vtxno].nz + surf->vertices[nbrvtxno].nz) / 2.0;
-  *x = surf->vertices[vtxno].x + dist * nx;
-  *y = surf->vertices[vtxno].y + dist * ny;
-  *z = surf->vertices[vtxno].z + dist * nz;
+  nx       = (surf->vertices[vtxno].nx + surf->vertices[nbrvtxno].nx) / 2.0;
+  ny       = (surf->vertices[vtxno].ny + surf->vertices[nbrvtxno].ny) / 2.0;
+  nz       = (surf->vertices[vtxno].nz + surf->vertices[nbrvtxno].nz) / 2.0;
+  *x       = surf->vertices[vtxno].x + dist * nx;
+  *y       = surf->vertices[vtxno].y + dist * ny;
+  *z       = surf->vertices[vtxno].z + dist * nz;
   return (0);
 }
 /*------------------------------------------------------------
@@ -693,23 +690,23 @@ MRI *vol2surf_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
                      int ProjDistFlag, int nskip) {
   MATRIX *QFWDsrc;
   MATRIX *Scrs, *Txyz;
-  MRI *TrgVol;
-  int irow_src, icol_src, islc_src;   /* integer row, col, slc in source */
-  float frow_src, fcol_src, fslc_src; /* float row, col, slc in source */
-  float srcval, Tx, Ty, Tz;
-  int frm, FreeQsrc = 0;
-  int vtx, nhits;
-  float *valvect;
-  double rval;
+  MRI *   TrgVol;
+  int     irow_src, icol_src, islc_src; /* integer row, col, slc in source */
+  float   frow_src, fcol_src, fslc_src; /* float row, col, slc in source */
+  float   srcval, Tx, Ty, Tz;
+  int     frm, FreeQsrc = 0;
+  int     vtx, nhits;
+  float * valvect;
+  double  rval;
 
-  if (Qsrc == nullptr) {
-    Qsrc = MRIxfmCRS2XYZtkreg(SrcVol);
-    Qsrc = MatrixInverse(Qsrc, Qsrc);
+  if (Qsrc == NULL) {
+    Qsrc     = MRIxfmCRS2XYZtkreg(SrcVol);
+    Qsrc     = MatrixInverse(Qsrc, Qsrc);
     FreeQsrc = 1;
   }
 
   /* compute the transforms */
-  QFWDsrc = ComputeQFWD(Qsrc, Fsrc, Wsrc, Dsrc, nullptr);
+  QFWDsrc = ComputeQFWD(Qsrc, Fsrc, Wsrc, Dsrc, NULL);
   if (Gdiag_no >= 0) {
     printf("QFWDsrc: vol2surf: ------------------------------\n");
     MatrixPrint(stdout, QFWDsrc);
@@ -717,15 +714,15 @@ MRI *vol2surf_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
   }
 
   /* preallocate the row-col-slc vectors */
-  Scrs = MatrixAlloc(4, 1, MATRIX_REAL);
-  Txyz = MatrixAlloc(4, 1, MATRIX_REAL);
+  Scrs                     = MatrixAlloc(4, 1, MATRIX_REAL);
+  Txyz                     = MatrixAlloc(4, 1, MATRIX_REAL);
   Txyz->rptr[3 + 1][0 + 1] = 1.0;
 
   /* allocate a "volume" to hold the output */
   TrgVol =
       MRIallocSequence(TrgSurf->nvertices, 1, 1, MRI_FLOAT, SrcVol->nframes);
-  if (TrgVol == nullptr)
-    return (nullptr);
+  if (TrgVol == NULL)
+    return (NULL);
   MRIcopyHeader(SrcVol, TrgVol);
   // Dims here are meaningless, but setting to 1 means "volume" will be
   // number of vertices.
@@ -734,14 +731,14 @@ MRI *vol2surf_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
   TrgVol->zsize = 1;
 
   /* Zero the source hit volume */
-  if (SrcHitVol != nullptr) {
+  if (SrcHitVol != NULL) {
     MRIconst(SrcHitVol->width, SrcHitVol->height, SrcHitVol->depth, 1, 0,
              SrcHitVol);
   }
 
-  srcval = 0;
+  srcval  = 0;
   valvect = (float *)calloc(sizeof(float), SrcVol->nframes);
-  nhits = 0;
+  nhits   = 0;
   /*--- loop through each vertex ---*/
   for (vtx = 0; vtx < TrgSurf->nvertices; vtx += nskip) {
     if (ProjFrac != 0.0)
@@ -787,7 +784,7 @@ MRI *vol2surf_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
       fprintf(stderr, "vol2surf_linear(): unrecoginized float2int code %d\n",
               float2int);
       MRIfree(&TrgVol);
-      return (nullptr);
+      return (NULL);
       break;
     }
 
@@ -833,7 +830,7 @@ MRI *vol2surf_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
           printf("val[%d] = %f\n", frm, srcval);
       } // for
     }   // else
-    if (SrcHitVol != nullptr)
+    if (SrcHitVol != NULL)
       MRIFseq_vox(SrcHitVol, icol_src, irow_src, islc_src, 0)++;
   }
 
@@ -852,31 +849,33 @@ MRI *vol2surf_linear(MRI *SrcVol, MATRIX *Qsrc, MATRIX *Fsrc, MATRIX *Wsrc,
 /*!
 \fn MRI *MRISapplyReg(MRI *SrcSurfVals, MRI_SURFACE **SurfReg, int nsurfs,
                   int ReverseMapFlag, int DoJac, int UseHash)
-\brief Applies one or more surface registrations with or without jacobian
-correction. This should be used as a replacement for surf2surf_nnfr and
-surf2surf_nnfr_jac (it gives identical results). \param MRI *SrcSurfVals -
-Inputs \param MRIS **SurfReg - array of surface reg pairs,
-src1-trg1:src2-trg2:... where trg1 and src2 are from the same anatomy. \param
-int nsurfs - total number of surfs in SurfReg \param int ReverseMapFlag -
-perform reverse mapping \param int DoJac - perform jacobian correction
-(conserves sum(SrcVals)) \param int UseHash - use hash table (no reason not to,
-much faster).
+\brief Applies one or more surface registrations with or without jacobian correction.
+This should be used as a replacement for surf2surf_nnfr and surf2surf_nnfr_jac
+(it gives identical results).
+\param MRI *SrcSurfVals - Inputs
+\param MRIS **SurfReg - array of surface reg pairs, src1-trg1:src2-trg2:... where
+trg1 and src2 are from the same anatomy.
+\param int nsurfs - total number of surfs in SurfReg
+\param int ReverseMapFlag - perform reverse mapping
+\param int DoJac - perform jacobian correction (conserves sum(SrcVals))
+\param int UseHash - use hash table (no reason not to, much faster).
 */
 MRI *MRISapplyReg(MRI *SrcSurfVals, MRI_SURFACE **SurfReg, int nsurfs,
                   int ReverseMapFlag, int DoJac, int UseHash) {
-  MRI *TrgSurfVals = nullptr;
+  MRI *        TrgSurfVals = NULL;
   MRI_SURFACE *SrcSurfReg, *TrgSurfReg;
-  int svtx = 0, tvtx, tvtxN, svtxN = 0, f, n, nrevhits, nSrcLost;
-  int npairs, kS, kT, nhits;
+  int          svtx = 0, tvtx, tvtxN, svtxN = 0, f, n, nrevhits, nSrcLost;
+  int          npairs, kS, kT, nhits;
   // int nunmapped;
   VERTEX *v;
-  float dmin;
-  MHT **Hash = nullptr;
-  MRI *SrcHits, *TrgHits;
+  float   dmin;
+  MHT **  Hash = NULL;
+  MRI *   SrcHits, *TrgHits;
 
   npairs = nsurfs / 2;
-  printf("MRISapplyReg: nsurfs = %d, revmap=%d, jac=%d,  hash=%d\n", nsurfs,
+  printf("MRISapplyReg(): nsurfs = %d, revmap=%d, jac=%d,  hash=%d\n", nsurfs,
          ReverseMapFlag, DoJac, UseHash);
+  printf("  Skipping ripped vertices\n");
 
   SrcSurfReg = SurfReg[0];
   TrgSurfReg = SurfReg[nsurfs - 1];
@@ -885,7 +884,7 @@ MRI *MRISapplyReg(MRI *SrcSurfVals, MRI_SURFACE **SurfReg, int nsurfs,
   if (SrcSurfVals->width != SrcSurfReg->nvertices) {
     printf("MRISapplyReg: Vals and Reg dimension mismatch\n");
     printf("nVals = %d, nReg %d\n", SrcSurfVals->width, SrcSurfReg->nvertices);
-    return (nullptr);
+    return (NULL);
   }
   for (n = 0; n < npairs - 1; n++) {
     kS = 2 * n + 1;
@@ -894,27 +893,27 @@ MRI *MRISapplyReg(MRI *SrcSurfVals, MRI_SURFACE **SurfReg, int nsurfs,
       printf("MRISapplyReg: Reg dimension mismatch %d, %d\n", kT, kS);
       printf("targ = %d, next source = %d\n", SurfReg[kT]->nvertices,
              SurfReg[kS]->nvertices);
-      return (nullptr);
+      return (NULL);
     }
   }
 
   /* allocate a "volume" to hold the output */
   TrgSurfVals = MRIallocSequence(TrgSurfReg->nvertices, 1, 1, MRI_FLOAT,
                                  SrcSurfVals->nframes);
-  if (TrgSurfVals == nullptr)
-    return (nullptr);
+  if (TrgSurfVals == NULL)
+    return (NULL);
   MRIcopyHeader(SrcSurfVals, TrgSurfVals);
 
   /* number of source vertices mapped to each target vertex */
   TrgHits = MRIallocSequence(TrgSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (TrgHits == nullptr)
-    return (nullptr);
+  if (TrgHits == NULL)
+    return (NULL);
   MRIcopyHeader(SrcSurfVals, TrgHits);
 
   /* number of target vertices mapped to by each source vertex */
   SrcHits = MRIallocSequence(SrcSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (SrcHits == nullptr)
-    return (nullptr);
+  if (SrcHits == NULL)
+    return (NULL);
   MRIcopyHeader(SrcSurfVals, SrcHits);
 
   if (UseHash) {
@@ -935,7 +934,7 @@ MRI *MRISapplyReg(MRI *SrcSurfVals, MRI_SURFACE **SurfReg, int nsurfs,
       for (n = npairs - 1; n >= 0; n--) {
         kS = 2 * n;
         kT = kS + 1;
-        v = &(SurfReg[kT]->vertices[tvtxN]);
+        v  = &(SurfReg[kT]->vertices[tvtxN]);
         /* find closest source vertex */
         if (UseHash)
           svtx = MHTfindClosestVertexNo2(Hash[kS], SurfReg[kS], SurfReg[kT], v,
@@ -961,6 +960,8 @@ MRI *MRISapplyReg(MRI *SrcSurfVals, MRI_SURFACE **SurfReg, int nsurfs,
   printf("MRISapplyReg: Forward Loop (%d)\n", TrgSurfReg->nvertices);
   // nunmapped = 0;
   for (tvtx = 0; tvtx < TrgSurfReg->nvertices; tvtx++) {
+    if (TrgSurfReg->vertices[tvtx].ripflag)
+      continue;
     if (!UseHash) {
       if (tvtx % 100 == 0) {
         printf("%5d ", tvtx);
@@ -973,12 +974,17 @@ MRI *MRISapplyReg(MRI *SrcSurfVals, MRI_SURFACE **SurfReg, int nsurfs,
     }
 
     // Compute the source vertex that corresponds to this target vertex
-    tvtxN = tvtx;
+    tvtxN    = tvtx;
+    int skip = 0;
     for (n = npairs - 1; n >= 0; n--) {
       kS = 2 * n;
       kT = kS + 1;
       // printf("%5d %5d %d %d %d\n",tvtx,tvtxN,n,kS,kT);
       v = &(SurfReg[kT]->vertices[tvtxN]);
+      if (v->ripflag) {
+        skip = 1;
+        break;
+      }
       /* find closest source vertex */
       if (UseHash)
         svtx = MHTfindClosestVertexNo2(Hash[kS], SurfReg[kS], SurfReg[kT], v,
@@ -991,8 +997,20 @@ MRI *MRISapplyReg(MRI *SrcSurfVals, MRI_SURFACE **SurfReg, int nsurfs,
         svtx = MRISfindClosestVertex(SurfReg[kS], v->x, v->y, v->z, &dmin,
                                      CURRENT_VERTICES);
       }
+      if (SurfReg[kS]->vertices[svtx].ripflag) {
+        skip = 1;
+        break;
+      }
+      // DNG added these lines on Dec 9, 2020 (without checking it in),
+      // but now can't remember why, so commented them out
+      //if(dmin > 2.0){
+      //skip = 1;
+      //break;
+      //}
       tvtxN = svtx;
     }
+    if (skip)
+      continue;
 
     if (!DoJac) {
       /* update the number of hits */
@@ -1114,51 +1132,51 @@ MRI *surf2surf_nnfr(MRI *SrcSurfVals, MRI_SURFACE *SrcSurfReg,
                     MRI_SURFACE *TrgSurfReg, MRI **SrcHits, MRI **SrcDist,
                     MRI **TrgHits, MRI **TrgDist, int ReverseMapFlag,
                     int UseHash) {
-  MRI *TrgSurfVals = nullptr;
-  int svtx, tvtx, f, n, nrevhits, nSrcLost;
-  VERTEX *v;
-  MHT *SrcHash, *TrgHash;
-  float dmin;
+  MRI *        TrgSurfVals = NULL;
+  int          svtx, tvtx, f, n, nrevhits, nSrcLost;
+  VERTEX *     v;
+  MHT *        SrcHash, *TrgHash;
+  float        dmin;
   extern char *ResampleVtxMapFile;
-  FILE *fp = nullptr;
+  FILE *       fp = NULL;
 
   /* check dimension consistency */
   if (SrcSurfVals->width != SrcSurfReg->nvertices) {
     fprintf(stderr, "surf2surf_nnfr(): Vals and Reg dimension mismatch\n");
     fprintf(stderr, "nVals = %d, nReg %d\n", SrcSurfVals->width,
             SrcSurfReg->nvertices);
-    return (nullptr);
+    return (NULL);
   }
 
   /* allocate a "volume" to hold the output */
   TrgSurfVals = MRIallocSequence(TrgSurfReg->nvertices, 1, 1, MRI_FLOAT,
                                  SrcSurfVals->nframes);
-  if (TrgSurfVals == nullptr)
-    return (nullptr);
+  if (TrgSurfVals == NULL)
+    return (NULL);
   MRIcopyHeader(SrcSurfVals, TrgSurfVals);
 
   /* number of source vertices mapped to each target vertex */
   *TrgHits = MRIallocSequence(TrgSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (*TrgHits == nullptr)
-    return (nullptr);
+  if (*TrgHits == NULL)
+    return (NULL);
   MRIcopyHeader(SrcSurfVals, *TrgHits);
 
   /* Average distance of a target vertex from its source vertices  */
   *TrgDist = MRIallocSequence(TrgSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (*TrgDist == nullptr)
-    return (nullptr);
+  if (*TrgDist == NULL)
+    return (NULL);
   MRIcopyHeader(SrcSurfVals, *TrgDist);
 
   /* number of target vertices mapped to by each source vertex */
   *SrcHits = MRIallocSequence(SrcSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (*SrcHits == nullptr)
-    return (nullptr);
+  if (*SrcHits == NULL)
+    return (NULL);
   MRIcopyHeader(SrcSurfVals, *SrcHits);
 
   /* Average distance of a source vertex from its target vertices  */
   *SrcDist = MRIallocSequence(SrcSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (*SrcDist == nullptr)
-    return (nullptr);
+  if (*SrcDist == NULL)
+    return (NULL);
   MRIcopyHeader(SrcSurfVals, *SrcDist);
 
   /* build hash tables */
@@ -1168,9 +1186,9 @@ MRI *surf2surf_nnfr(MRI *SrcSurfVals, MRI_SURFACE *SrcSurfReg,
   }
 
   /* Open vertex map file */
-  if (ResampleVtxMapFile != nullptr) {
+  if (ResampleVtxMapFile != NULL) {
     fp = fopen(ResampleVtxMapFile, "w");
-    if (fp == nullptr) {
+    if (fp == NULL) {
       printf("ERROR: could not open %s\n", ResampleVtxMapFile);
       exit(1);
     }
@@ -1215,7 +1233,7 @@ MRI *surf2surf_nnfr(MRI *SrcSurfVals, MRI_SURFACE *SrcSurfReg,
       MRIFseq_vox(TrgSurfVals, tvtx, 0, 0, f) +=
           MRIFseq_vox(SrcSurfVals, svtx, 0, 0, f);
 
-    if (ResampleVtxMapFile != nullptr) {
+    if (ResampleVtxMapFile != NULL) {
       fprintf(fp, "%6d  (%6.1f,%6.1f,%6.1f)   ", tvtx, v->x, v->y, v->z);
       v = &(SrcSurfReg->vertices[svtx]);
       fprintf(fp, "%6d  (%6.1f,%6.1f,%6.1f)    %5.4f\n", svtx, v->x, v->y, v->z,
@@ -1227,7 +1245,7 @@ MRI *surf2surf_nnfr(MRI *SrcSurfVals, MRI_SURFACE *SrcSurfReg,
   if (UseHash)
     MHTfree(&SrcHash);
 
-  if (ResampleVtxMapFile != nullptr)
+  if (ResampleVtxMapFile != NULL)
     fclose(fp);
 
   /*---------------------------------------------------------------
@@ -1319,47 +1337,47 @@ MRI *surf2surf_nnfr_jac(MRI *SrcSurfVals, MRI_SURFACE *SrcSurfReg,
                         MRI_SURFACE *TrgSurfReg, MRI **SrcHits, MRI **SrcDist,
                         MRI **TrgHits, MRI **TrgDist, int ReverseMapFlag,
                         int UseHash) {
-  MRI *TrgSurfVals = nullptr;
-  int svtx, tvtx, f, n, nrevhits, nSrcLost, nhits;
+  MRI *TrgSurfVals = NULL;
+  int  svtx, tvtx, f, n, nrevhits, nSrcLost, nhits;
   // int nunmapped;
   VERTEX *v;
-  MHT *SrcHash, *TrgHash;
-  float dmin, srcval;
+  MHT *   SrcHash, *TrgHash;
+  float   dmin, srcval;
 
   /* check dimension consistency */
   if (SrcSurfVals->width != SrcSurfReg->nvertices) {
     fprintf(stderr, "surf2surf_nnfr(): Vals and Reg dimension mismatch\n");
     fprintf(stderr, "nVals = %d, nReg %d\n", SrcSurfVals->width,
             SrcSurfReg->nvertices);
-    return (nullptr);
+    return (NULL);
   }
 
   /* allocate a "volume" to hold the output */
   TrgSurfVals = MRIallocSequence(TrgSurfReg->nvertices, 1, 1, MRI_FLOAT,
                                  SrcSurfVals->nframes);
-  if (TrgSurfVals == nullptr)
-    return (nullptr);
+  if (TrgSurfVals == NULL)
+    return (NULL);
   MRIcopyHeader(SrcSurfVals, TrgSurfVals);
 
   /* number of source vertices mapped to each target vertex */
   *TrgHits = MRIallocSequence(TrgSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (*TrgHits == nullptr)
-    return (nullptr);
+  if (*TrgHits == NULL)
+    return (NULL);
 
   /* Average distance of a target vertex from its source vertices  */
   *TrgDist = MRIallocSequence(TrgSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (*TrgDist == nullptr)
-    return (nullptr);
+  if (*TrgDist == NULL)
+    return (NULL);
 
   /* number of target vertices mapped to by each source vertex */
   *SrcHits = MRIallocSequence(SrcSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (*SrcHits == nullptr)
-    return (nullptr);
+  if (*SrcHits == NULL)
+    return (NULL);
 
   /* Average distance of a source vertex from its target vertices  */
   *SrcDist = MRIallocSequence(SrcSurfReg->nvertices, 1, 1, MRI_FLOAT, 1);
-  if (*SrcDist == nullptr)
-    return (nullptr);
+  if (*SrcDist == NULL)
+    return (NULL);
 
   /* build hash tables */
   if (UseHash) {
@@ -1511,17 +1529,17 @@ int ind2crs(int *c, int *r, int *s, int ind, int ncols, int nrows, int nslcs) {
   int i = ind, ntot, nrowcols;
 
   nrowcols = nrows * ncols;
-  ntot = nrowcols * nslcs;
+  ntot     = nrowcols * nslcs;
   if (i < 0 || i >= ntot) {
     fprintf(stderr, "ind2crs: index %d out of bounds (0,%d)\n", i, ntot - 1);
     return (1);
   }
 
   *s = (int)(i / nrowcols);
-  i = i - *s * (nrowcols);
+  i  = i - *s * (nrowcols);
 
   *r = (int)(i / ncols);
-  i = i - *r * ncols;
+  i  = i - *r * ncols;
 
   *c = (int)i;
 
@@ -1556,63 +1574,63 @@ int ind2crs(int *c, int *r, int *s, int ind, int ncols, int nrows, int nslcs) {
  */
 MRI *MRIsurf2VolOpt(MRI *ribbon, MRIS **surfs, MRI **overlays, int nsurfs,
                     LTA *Q, MRI *volsurf) {
-  int n, c, r, s, f, nmin, vtxno, vtxnomin = 0, nframes, ribval, cR, rR, sR;
-  MHT **hash = nullptr;
-  int UseHash = 1;
-  MATRIX *T, *invR, *M, *surfRAS = nullptr, *crs, *R, *crsRibbon;
+  int     n, c, r, s, f, nmin, vtxno, vtxnomin = 0, nframes, ribval, cR, rR, sR;
+  MHT **  hash    = NULL;
+  int     UseHash = 1;
+  MATRIX *T, *invR, *M, *surfRAS = NULL, *crs, *R, *crsRibbon;
 
   float dmin, d, val;
-  LTA *V = nullptr, *Q2;
+  LTA * V = NULL, *Q2;
 
   // Make sure that each overlay has the same number of frames
   for (n = 0; n < nsurfs; n++) {
     if (overlays[n]->nframes != overlays[0]->nframes) {
       printf("ERROR: MRIsurf2VolOpt(): overlay dim mismatch %d\n", n);
-      return (nullptr);
+      return (NULL);
     }
   }
 
   if (Q && !LTAmriIsSource(Q, ribbon) && !LTAmriIsTarget(Q, ribbon)) {
     printf("ERROR: MRIsurf2VolOpt(): ribbon is neither source nor target\n");
-    return (nullptr);
+    return (NULL);
   }
 
-  if (Q == nullptr)
-    Q2 = TransformRegDat2LTA(
-        ribbon, ribbon, nullptr); // regdat unrelated, just a way to get LTA
+  if (Q == NULL)
+    Q2 = TransformRegDat2LTA(ribbon, ribbon,
+                             NULL); // regdat unrelated, just a way to get LTA
   else {
     if (LTAmriIsSource(Q, ribbon)) {
       printf("MRIsurf2VolOpt(): ribbon is source\n");
-      Q2 = LTAcopy(Q, nullptr);
+      Q2 = LTAcopy(Q, NULL);
     } else {
       printf("MRIsurf2VolOpt(): inverting LTA\n");
-      Q2 = LTAinvert(Q, nullptr);
+      Q2 = LTAinvert(Q, NULL);
     }
   }
   // Now Q2 goes from output volume to ribbon
 
   nframes = overlays[0]->nframes;
-  if (volsurf == nullptr) {
+  if (volsurf == NULL) {
     volsurf = MRIallocFromVolGeom(&(Q2->xforms[0].dst), MRI_FLOAT, nframes, 0);
-    if (volsurf == nullptr) {
+    if (volsurf == NULL) {
       printf("ERROR: MRIsurf2VolOpt(): could not alloc\n");
-      return (nullptr);
+      return (NULL);
     }
     MRIcopyPulseParameters(overlays[0], volsurf);
   }
   // else should make sure that Q2->xforms[0]->src is consistent with volsurf
 
   // Get outputCRS to ribbonCRS
-  V = LTAcopy(Q2, nullptr);
+  V = LTAcopy(Q2, NULL);
   V = LTAchangeType(V, LINEAR_VOX_TO_VOX);
   LTAfillInverse(V);
 
   // M converts output CRS to surface RAS
   R = TransformLTA2RegDat(Q2); // As a regdat, it maps from ribbonRAS to outRAS
-  R = MatrixInverse(R, nullptr);
+  R = MatrixInverse(R, NULL);
   T = MRIxfmCRS2XYZtkreg(volsurf);
-  invR = MatrixInverse(R, nullptr);
-  M = MatrixMultiply(invR, T, NULL);
+  invR = MatrixInverse(R, NULL);
+  M    = MatrixMultiply(invR, T, NULL);
 
   if (UseHash) {
     hash = (MHT **)calloc(sizeof(MHT *), nsurfs);
@@ -1621,10 +1639,10 @@ MRI *MRIsurf2VolOpt(MRI *ribbon, MRIS **surfs, MRI **overlays, int nsurfs,
     }
   }
 
-  crs = MatrixAlloc(4, 1, MATRIX_REAL);
+  crs             = MatrixAlloc(4, 1, MATRIX_REAL);
   crs->rptr[4][1] = 1;
-  crsRibbon = MatrixAlloc(4, 1, MATRIX_REAL);
-  surfRAS = MatrixAlloc(4, 1, MATRIX_REAL);
+  crsRibbon       = MatrixAlloc(4, 1, MATRIX_REAL);
+  surfRAS         = MatrixAlloc(4, 1, MATRIX_REAL);
   for (c = 0; c < volsurf->width; c++) {
     for (r = 0; r < volsurf->height; r++) {
       for (s = 0; s < volsurf->depth; s++) {
@@ -1632,10 +1650,10 @@ MRI *MRIsurf2VolOpt(MRI *ribbon, MRIS **surfs, MRI **overlays, int nsurfs,
         crs->rptr[1][1] = c;
         crs->rptr[2][1] = r;
         crs->rptr[3][1] = s;
-        crsRibbon = MatrixMultiply(V->inv_xforms[0].m_L, crs, crsRibbon);
-        cR = nint(crsRibbon->rptr[1][1]);
-        rR = nint(crsRibbon->rptr[1][2]);
-        sR = nint(crsRibbon->rptr[1][3]);
+        crsRibbon       = MatrixMultiply(V->inv_xforms[0].m_L, crs, crsRibbon);
+        cR              = nint(crsRibbon->rptr[1][1]);
+        rR              = nint(crsRibbon->rptr[1][2]);
+        sR              = nint(crsRibbon->rptr[1][3]);
         if (cR < 0 || cR >= ribbon->width)
           continue;
         if (rR < 0 || rR >= ribbon->height)
@@ -1649,14 +1667,14 @@ MRI *MRIsurf2VolOpt(MRI *ribbon, MRIS **surfs, MRI **overlays, int nsurfs,
           continue;
         }
         // Compute the surface location of this point
-        surfRAS = MatrixMultiply(M, crs, surfRAS);
+        surfRAS       = MatrixMultiply(M, crs, surfRAS);
         float const x = surfRAS->rptr[1][1];
         float const y = surfRAS->rptr[2][1];
         float const z = surfRAS->rptr[3][1];
         // Find surface vertex with closest location
-        dmin = 1000;
-        nmin = -1;
-        d = 999;
+        dmin     = 1000;
+        nmin     = -1;
+        d        = 999;
         vtxnomin = -1;
         for (n = 0; n < nsurfs; n++) {
           if (surfs[n]->hemisphere == LEFT_HEMISPHERE && ribval != 3)
@@ -1688,16 +1706,15 @@ MRI *MRIsurf2VolOpt(MRI *ribbon, MRIS **surfs, MRI **overlays, int nsurfs,
             printf("M = [\n");
             MatrixPrint(stdout, M);
             fflush(stdout);
-            return (nullptr);
+            return (NULL);
           }
           if (d < dmin) {
-            dmin = d;
-            nmin = n; // index of surface with closest vertex
+            dmin     = d;
+            nmin     = n; // index of surface with closest vertex
             vtxnomin = vtxno;
           }
         } // surfs
-        // This can happen if only one hemi is specified but the voxel is in the
-        // other
+        // This can happen if only one hemi is specified but the voxel is in the other
         if (nmin == -1)
           continue;
         // Assign value from vertex to voxel
@@ -1739,7 +1756,7 @@ MRI *MRIsurf2VolOpt(MRI *ribbon, MRIS **surfs, MRI **overlays, int nsurfs,
   construction). Filling by projection can leave holes.
   ----------------------------------------------------------------*/
 int MRIsurf2Vol(MRI *surfvals, MRI *vol, MRI *map) {
-  int vtx, c, r, s, f, nhits;
+  int   vtx, c, r, s, f, nhits;
   float val;
 
   if (vol->width != map->width || vol->height != map->height ||
@@ -1809,26 +1826,26 @@ int MRIsurf2Vol(MRI *surfvals, MRI *vol, MRI *map) {
   thickness must have been loaded into the surface at this point.
   ------------------------------------------------------------------*/
 MRI *MRImapSurf2VolClosest(MRIS *surf, MRI *vol, MATRIX *Qa2v, float projfrac) {
-  MRI *map, *dist2;
-  int vtx, vtxmin, c, r, s;
-  float xvtx, yvtx, zvtx;
-  float d2, d2min;
+  MRI *   map, *dist2;
+  int     vtx, vtxmin, c, r, s;
+  float   xvtx, yvtx, zvtx;
+  float   d2, d2min;
   MATRIX *xyzvtx, *icrs, *fcrs, *xyzcrs;
   // MATRIX *Tvol;
 
   /* Alloc map - for a given voxel, holds the number of the
      closest vertex */
   map = MRIalloc(vol->width, vol->height, vol->depth, MRI_INT);
-  if (map == nullptr) {
+  if (map == NULL) {
     printf("ERROR: MRImapSurf2VolClosest: could not alloc vtx map\n");
-    return (nullptr);
+    return (NULL);
   }
   /* Alloc dist - for a given voxel, holds the distance of the
      closest vertex to the voxel. */
   dist2 = MRIalloc(vol->width, vol->height, vol->depth, MRI_FLOAT);
-  if (dist2 == nullptr) {
+  if (dist2 == NULL) {
     printf("ERROR: MRImapSurf2VolClosest: could not alloc dist map\n");
-    return (nullptr);
+    return (NULL);
   }
 
   /* Initially set all the voxels in the map to -1 to mark that
@@ -1838,14 +1855,14 @@ MRI *MRImapSurf2VolClosest(MRIS *surf, MRI *vol, MATRIX *Qa2v, float projfrac) {
   /* Intialize matrix stuff */
   // Tvol = MRIxfmCRS2XYZ(vol, 0); /* converts crs to xyz in vol */
   xyzvtx = MatrixAlloc(4, 1, MATRIX_REAL);
-  fcrs = MatrixAlloc(4, 1, MATRIX_REAL);   /* vertex row, col, slice */
-  icrs = MatrixAlloc(4, 1, MATRIX_REAL);   /* voxel row, col, slice */
+  fcrs   = MatrixAlloc(4, 1, MATRIX_REAL); /* vertex row, col, slice */
+  icrs   = MatrixAlloc(4, 1, MATRIX_REAL); /* voxel row, col, slice */
   xyzcrs = MatrixAlloc(4, 1, MATRIX_REAL); /* voxel xyz */
 
   /* Set the 4th item to 1 */
   xyzvtx->rptr[4][1] = 1.0;
-  fcrs->rptr[4][1] = 1.0;
-  icrs->rptr[4][1] = 1.0;
+  fcrs->rptr[4][1]   = 1.0;
+  icrs->rptr[4][1]   = 1.0;
   xyzcrs->rptr[4][1] = 1.0;
 
   /*----------- Loop through vertices --------------*/
@@ -1913,7 +1930,7 @@ MRI *MRImapSurf2VolClosest(MRIS *surf, MRI *vol, MATRIX *Qa2v, float projfrac) {
        just set its map vertex and dist to current. */
     vtxmin = MRIIseq_vox(map, c, r, s, 0);
     if (vtxmin < 0) {
-      MRIIseq_vox(map, c, r, s, 0) = vtx;
+      MRIIseq_vox(map, c, r, s, 0)   = vtx;
       MRIFseq_vox(dist2, c, r, s, 0) = d2;
       continue;
     }
@@ -1921,7 +1938,7 @@ MRI *MRImapSurf2VolClosest(MRIS *surf, MRI *vol, MATRIX *Qa2v, float projfrac) {
     /* Check whether this vertex is closer */
     d2min = MRIFseq_vox(dist2, c, r, s, 0);
     if (d2min > d2) {
-      MRIIseq_vox(map, c, r, s, 0) = vtx;
+      MRIIseq_vox(map, c, r, s, 0)   = vtx;
       MRIFseq_vox(dist2, c, r, s, 0) = d2;
     }
 
@@ -1936,11 +1953,12 @@ MRI *MRImapSurf2VolClosest(MRIS *surf, MRI *vol, MATRIX *Qa2v, float projfrac) {
   return (map);
 }
 /*
-  \fn MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
-  int nsegs, MRI *mask, int ReInit, MRI *out) \brief Computes the partial volume
-  fraction (PVF:0->1) for each segmentation. The output geometry is derived from
-  the dst in seg2vol (seg2vol can go the other direction, it figures it out).
-  The number of frames in the output equals the number of segmentations
+  \fn MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist, int nsegs, MRI *mask, int ReInit, MRI
+  *out)
+  \brief Computes the partial volume fraction (PVF:0->1) for each
+  segmentation. The output geometry is derived from the dst in seg2vol
+  (seg2vol can go the other direction, it figures it out). The number
+  of frames in the output equals the number of segmentations
   (excluding 0).  Each frame is a map where the voxel value is the
   fraction of that voxel that contains the seg corresonding to that
   frame. The algorithm works by sampling each output voxel over a
@@ -1971,15 +1989,15 @@ MRI *MRImapSurf2VolClosest(MRIS *surf, MRI *vol, MATRIX *Qa2v, float projfrac) {
 MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
                    int nsegs, MRI *mask, int ReInit, COLOR_TABLE *ct,
                    MRI *out) {
-  LTA *lta;
-  VOL_GEOM *vg;
-  double m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34;
-  double dc, dr, ds, dcstart, drstart, dsstart;
-  float **nperfth, npervox; // need float for nperf for consistency
-  int nhits, segidmax, nthvox, ndc, ndr, nds, nthreads;
-  int c, r, s, f, nframesout = 0, outtype = 0, DoSeg;
-  static int InitNeeded = 1, nvox = 0, *clist = nullptr, *rlist = nullptr,
-             *slist = nullptr, *seg2frame, nthcall = 0;
+  LTA *      lta;
+  VOL_GEOM * vg;
+  double     m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34;
+  double     dc, dr, ds, dcstart, drstart, dsstart;
+  float **   nperfth, npervox; // need float for nperf for consistency
+  int        nhits, segidmax, nthvox, ndc, ndr, nds, nthreads;
+  int        c, r, s, f, nframesout = 0, outtype = 0, DoSeg;
+  static int InitNeeded = 1, nvox = 0, *clist = NULL, *rlist = NULL,
+             *slist = NULL, *seg2frame, nthcall = 0;
 
   if (ReInit < 0) {
     // This allows the static memory to be freed
@@ -1992,8 +2010,8 @@ MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
     if (seg2frame)
       free(seg2frame);
     InitNeeded = 1;
-    nthcall = 0;
-    return (nullptr);
+    nthcall    = 0;
+    return (NULL);
   }
 
   Timer timer;
@@ -2010,9 +2028,9 @@ MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
 #endif
 
   if (LTAmriIsSource(seg2vol, seg))
-    lta = LTAinvert(seg2vol, nullptr);
+    lta = LTAinvert(seg2vol, NULL);
   else
-    lta = LTAcopy(seg2vol, nullptr);
+    lta = LTAcopy(seg2vol, NULL);
   if (lta->type != LINEAR_VOX_TO_VOX)
     LTAchangeType(lta, LINEAR_VOX_TO_VOX);
   vg = &(lta->xforms[0].src);
@@ -2037,11 +2055,11 @@ MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
     ndc = ndr = nds = round(abs(resmm));
 
   // this assures that the volume is sampled unformly in each dim
-  dc = 1.0 / ndc;
+  dc      = 1.0 / ndc;
   dcstart = -0.5 + dc / 2.0;
-  dr = 1.0 / ndr;
+  dr      = 1.0 / ndr;
   drstart = -0.5 + dr / 2.0;
-  ds = 1.0 / nds;
+  ds      = 1.0 / nds;
   dsstart = -0.5 + ds / 2.0;
   npervox = ndc * ndr * nds; // number of samples in each voxel
 
@@ -2092,9 +2110,9 @@ MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
     /* Precompute arrays that map voxel index to col,row,slice in
        output. If the mask changes, then the cache should be
        re-initialized.*/
-    clist = (int *)calloc(sizeof(int), nvox);
-    rlist = (int *)calloc(sizeof(int), nvox);
-    slist = (int *)calloc(sizeof(int), nvox);
+    clist  = (int *)calloc(sizeof(int), nvox);
+    rlist  = (int *)calloc(sizeof(int), nvox);
+    slist  = (int *)calloc(sizeof(int), nvox);
     nthvox = 0;
     for (c = 0; c < vg->width; c++) {
       for (r = 0; r < vg->height; r++) {
@@ -2114,17 +2132,17 @@ MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
   // Alloc output and check dimensions
   if (DoSeg) {
     nframesout = 1;
-    outtype = MRI_INT;
+    outtype    = MRI_INT;
   } else {
     nframesout = nsegs;
-    outtype = MRI_FLOAT;
+    outtype    = MRI_FLOAT;
   }
-  if (out == nullptr) {
+  if (out == NULL) {
     out =
         MRIallocSequence(vg->width, vg->height, vg->depth, outtype, nframesout);
-    if (out == nullptr) {
+    if (out == NULL) {
       printf("ERROR: MRIseg2SegPVF(): could not alloc\n");
-      return (nullptr);
+      return (NULL);
     }
     useVolGeomToMRI(vg, out);
     MRIcopyPulseParameters(seg, out);
@@ -2132,11 +2150,11 @@ MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
   if (out->width != vg->width || out->height != vg->height ||
       out->depth != vg->depth || out->nframes != nframesout) {
     printf("ERROR: MRIseg2SegPVF(): dimension mismatch\n");
-    return (nullptr);
+    return (NULL);
   }
   if (mask && MRIdimMismatch(out, mask, 0)) {
     printf("ERROR: MRIseg2SegPVF() output/mask dim mismatch\n");
-    return (nullptr);
+    return (NULL);
   }
 
   // For speed, put matrix values in their own variables
@@ -2202,12 +2220,12 @@ MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
     s = slist[nthvox];
     // Uniformly sample ndc-by-ndr-by-nds points in each voxel
     for (i = 0; i < ndc; i++) {
-      cf = c + dcstart + dc * i;
+      cf    = c + dcstart + dc * i;
       m11cf = m11 * cf + m14;
       m21cf = m21 * cf + m24;
       m31cf = m31 * cf + m34;
       for (j = 0; j < ndr; j++) {
-        rf = r + drstart + dr * j;
+        rf    = r + drstart + dr * j;
         m12rf = m12 * rf + m11cf;
         m22rf = m22 * rf + m21cf;
         m32rf = m32 * rf + m31cf;
@@ -2269,9 +2287,9 @@ MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
   return (out);
 }
 /*
-  \fn MRI *MRIsegPVF2Seg(MRI *segpvf, int *segidlist, int nsegs, COLOR_TABLE
-  *ct, MRI *mask, MRI *seg) \brief Converts a segmentation-wise PVF created by
-  MRIseg2SegPVF() into a segmentation by selecting the segmentation that has the
+  \fn MRI *MRIsegPVF2Seg(MRI *segpvf, int *segidlist, int nsegs, COLOR_TABLE *ct, MRI *mask, MRI *seg)
+  \brief Converts a segmentation-wise PVF created by MRIseg2SegPVF()
+  into a segmentation by selecting the segmentation that has the
   largest PVF. If the sum of PVFs at a voxel is less than 0.5, then
   the seg is set to 0.  If no seg has PVF>.5 and ct is non-NULL, then
   the PVFs within each tissue type are computed, and the seg with the
@@ -2280,10 +2298,10 @@ MRI *MRIseg2SegPVF(MRI *seg, LTA *seg2vol, double resmm, int *segidlist,
  */
 MRI *MRIsegPVF2Seg(MRI *segpvf, int *segidlist, int nsegs, COLOR_TABLE *ct,
                    MRI *mask, MRI *seg) {
-  int c, r, s, f, segid;
+  int    c, r, s, f, segid;
   float *vlist;
 
-  if (seg == nullptr) {
+  if (seg == NULL) {
     seg = MRIallocSequence(segpvf->width, segpvf->height, segpvf->depth,
                            MRI_INT, 1);
     MRIcopyHeader(segpvf, seg);
@@ -2312,9 +2330,9 @@ MRI *MRIsegPVF2Seg(MRI *segpvf, int *segidlist, int nsegs, COLOR_TABLE *ct,
 }
 
 /*
-  \fn int VOXsegPVF2Seg(double *segpvfvox, int *segidlist, int nsegs,
-  COLOR_TABLE *ct) \brief Selects the seg with the greatest PVF.  If the sum of
-  PVFs at a voxel is less than 0.5, then the seg is set to 0.  If no seg has
+  \fn int VOXsegPVF2Seg(double *segpvfvox, int *segidlist, int nsegs, COLOR_TABLE *ct)
+  \brief Selects the seg with the greatest PVF.  If the sum of PVFs at
+  a voxel is less than 0.5, then the seg is set to 0.  If no seg has
   PVF>.5 and ct is non-NULL, then the PVFs within each tissue type are
   computed, and the seg with the max PVF within the tissue type with
   the max PVF is selected. segpvfvox is a vector of length nsegs with
@@ -2323,7 +2341,7 @@ MRI *MRIsegPVF2Seg(MRI *segpvf, int *segidlist, int nsegs, COLOR_TABLE *ct,
 */
 int VOXsegPVF2Seg(float *segpvfvox, int *segidlist, int nsegs,
                   COLOR_TABLE *ct) {
-  int segid, f, fmax, tt, ttmax, nTT;
+  int   segid, f, fmax, tt, ttmax, nTT;
   float v, vsum, vmax, vtt[100], vttmax;
 
   vsum = 0;
@@ -2348,16 +2366,16 @@ int VOXsegPVF2Seg(float *segpvfvox, int *segidlist, int nsegs,
       vtt[tt] = 0;
     for (f = 0; f < nsegs; f++) {
       segid = segidlist[f];
-      tt = ct->entries[segid]->TissueType - 1;
+      tt    = ct->entries[segid]->TissueType - 1;
       vtt[tt] += segpvfvox[f];
     }
     // find tissue type that has largest pvf
     vttmax = 0;
-    ttmax = 0;
+    ttmax  = 0;
     for (tt = 0; tt < nTT; tt++) {
       if (vttmax < vtt[tt]) {
         vttmax = vtt[tt];
-        ttmax = tt;
+        ttmax  = tt;
       }
     }
     // select the seg with the largest pvf from within the best TT
@@ -2366,7 +2384,7 @@ int VOXsegPVF2Seg(float *segpvfvox, int *segidlist, int nsegs,
     fmax = 0;
     for (f = 0; f < nsegs; f++) {
       segid = segidlist[f];
-      tt = ct->entries[segid]->TissueType - 1;
+      tt    = ct->entries[segid]->TissueType - 1;
       if (tt != ttmax)
         continue;
       v = segpvfvox[f];
@@ -2382,24 +2400,24 @@ int VOXsegPVF2Seg(float *segpvfvox, int *segidlist, int nsegs,
 }
 
 /*
-  \fn MRI *MRIsegPVF2TissueTypePVF(MRI *segpvf, int *segidlist, int nsegs,
-  COLOR_TABLE *ct, MRI *mask, MRI *pvf) \brief Converts a SegPVF (as computed by
-  MRIseg2SegPVF()) to tissue type PVF, where the conversion from seg to TT is
-  given in the ct. It may be more efficient to convert a highres seg to a tissue
-  type seg using MRIseg2TissueType(), then run MRIseg2SegPVF() to generate the
+  \fn MRI *MRIsegPVF2TissueTypePVF(MRI *segpvf, int *segidlist, int nsegs, COLOR_TABLE *ct, MRI *mask, MRI *pvf)
+  \brief Converts a SegPVF (as computed by MRIseg2SegPVF()) to tissue
+  type PVF, where the conversion from seg to TT is given in the ct. It
+  may be more efficient to convert a highres seg to a tissue type seg
+  using MRIseg2TissueType(), then run MRIseg2SegPVF() to generate the
   TT PVF directly.  */
 MRI *MRIsegPVF2TissueTypePVF(MRI *segpvf, int *segidlist, int nsegs,
                              COLOR_TABLE *ct, MRI *mask, MRI *pvf) {
-  int nTT, c, r, s, f, tt, segid;
+  int    nTT, c, r, s, f, tt, segid;
   double vtt[100];
   nTT = ct->ctabTissueType->nentries - 1;
 
-  if (pvf == nullptr) {
+  if (pvf == NULL) {
     pvf = MRIallocSequence(segpvf->width, segpvf->height, segpvf->depth,
                            MRI_FLOAT, nTT);
-    if (pvf == nullptr) {
+    if (pvf == NULL) {
       printf("ERROR: MRIsegPVF2TissueTypePVF(): could not alloc\n");
-      return (nullptr);
+      return (NULL);
     }
     MRIcopyHeader(segpvf, pvf);
     MRIcopyPulseParameters(segpvf, pvf);
@@ -2415,7 +2433,7 @@ MRI *MRIsegPVF2TissueTypePVF(MRI *segpvf, int *segidlist, int nsegs,
           vtt[tt] = 0;
         for (f = 0; f < nsegs; f++) {
           segid = segidlist[f];
-          tt = ct->entries[segid]->TissueType - 1;
+          tt    = ct->entries[segid]->TissueType - 1;
           vtt[tt] += MRIgetVoxVal(segpvf, c, r, s, f);
         }
         for (tt = 0; tt < nTT; tt++)
@@ -2453,34 +2471,34 @@ MRI *MRIsegPVF2TissueTypePVF(MRI *segpvf, int *segidlist, int nsegs,
   -------------------------------------------------------------*/
 MRI *MRIaseg2vol(MRI *aseg, MATRIX *tkR, MRI *voltemp, double fthresh,
                  MRI **pvolhit, COLOR_TABLE *ct) {
-  int Na, inda, sa, ra, ca, cv, rv, sv, indv, n, segid, nhits, nhitsmost;
-  int nmisses, nfilled;
+  int     Na, inda, sa, ra, ca, cv, rv, sv, indv, n, segid, nhits, nhitsmost;
+  int     nmisses, nfilled;
   MATRIX *Va2v, *Ka, *Kv, *invKv, *Vv2a, *Pa, *Pv;
   ASEGVOLINDEX *avind;
-  MRI *volaseg, *volhit;
+  MRI *         volaseg, *volhit;
 
-  if (ct != nullptr) {
-    if (ct->ctabTissueType == nullptr) {
+  if (ct != NULL) {
+    if (ct->ctabTissueType == NULL) {
       printf(
           "ERROR: MRIaeg2vol: if passing a ct it must have tissue type info\n");
-      return (nullptr);
+      return (NULL);
     }
   }
   segid = 0;
 
   // Compute matrix to map from aseg CRS to vol CRS
   // Va2v = inv(Kv) * tkR * Ka
-  Ka = MRIxfmCRS2XYZtkreg(aseg);
-  Kv = MRIxfmCRS2XYZtkreg(voltemp);
-  invKv = MatrixInverse(Kv, nullptr);
-  Va2v = MatrixMultiply(invKv, tkR, NULL);
-  Va2v = MatrixMultiply(Va2v, Ka, Va2v);
-  Vv2a = MatrixInverse(Va2v, nullptr);
+  Ka    = MRIxfmCRS2XYZtkreg(aseg);
+  Kv    = MRIxfmCRS2XYZtkreg(voltemp);
+  invKv = MatrixInverse(Kv, NULL);
+  Va2v  = MatrixMultiply(invKv, tkR, NULL);
+  Va2v  = MatrixMultiply(Va2v, Ka, Va2v);
+  Vv2a  = MatrixInverse(Va2v, NULL);
   MatrixFree(&Ka);
   MatrixFree(&Kv);
   MatrixFree(&invKv);
 
-  Na = aseg->width * aseg->height * aseg->depth;
+  Na    = aseg->width * aseg->height * aseg->depth;
   avind = (ASEGVOLINDEX *)calloc(Na, sizeof(ASEGVOLINDEX));
 
   // Build an LUT that maps from aseg voxel to the closest
@@ -2488,15 +2506,15 @@ MRI *MRIaseg2vol(MRI *aseg, MATRIX *tkR, MRI *voltemp, double fthresh,
   if (Gdiag_no > 0)
     printf("ASeg2Vol: Building LUT\n");
   fflush(stdout);
-  Pa = MatrixConstVal(0, 4, 1, nullptr);
+  Pa             = MatrixConstVal(0, 4, 1, NULL);
   Pa->rptr[4][1] = 1;
-  Pv = MatrixConstVal(0, 4, 1, nullptr);
-  inda = 0;
+  Pv             = MatrixConstVal(0, 4, 1, NULL);
+  inda           = 0;
   for (sa = 0; sa < aseg->depth; sa++) {
     for (ra = 0; ra < aseg->height; ra++) {
       for (ca = 0; ca < aseg->width; ca++) {
         avind[inda].asegindex = inda;
-        avind[inda].segid = MRIgetVoxVal(aseg, ca, ra, sa, 0);
+        avind[inda].segid     = MRIgetVoxVal(aseg, ca, ra, sa, 0);
         // map each aseg vox into the volume
         Pa->rptr[1][1] = ca;
         Pa->rptr[2][1] = ra;
@@ -2510,16 +2528,16 @@ MRI *MRIaseg2vol(MRI *aseg, MATRIX *tkR, MRI *voltemp, double fthresh,
             sv < 0 || sv >= voltemp->depth) {
           // check for out-of-FOV
           avind[inda].volindex = -1;
-          avind[inda].cv = -1;
-          avind[inda].rv = -1;
-          avind[inda].sv = -1;
+          avind[inda].cv       = -1;
+          avind[inda].rv       = -1;
+          avind[inda].sv       = -1;
         } else {
           // save the volume crs and index
           indv = cv + (rv * voltemp->width) +
                  (sv * voltemp->width * voltemp->height);
-          avind[inda].cv = cv;
-          avind[inda].rv = rv;
-          avind[inda].sv = sv;
+          avind[inda].cv       = cv;
+          avind[inda].rv       = rv;
+          avind[inda].sv       = sv;
           avind[inda].volindex = indv;
         }
         inda++;
@@ -2636,33 +2654,33 @@ MRI *MRIaseg2vol(MRI *aseg, MATRIX *tkR, MRI *voltemp, double fthresh,
   return (volaseg);
 }
 /*
-  \fn MRI *MRIaseg2volMU(MRI *aseg, LTA *aseg2vol, double fthresh, MRI
-  **pvolhit, int USF, COLOR_TABLE *ct) \brief Frontend for MRIaseg2vol(). This
-  version takes a LTA and USF. It will reduce the FoV of the aseg to the
-  smallest bounding box. This will then be upsampled by USF. The result (and a
-  proper matrix) is handed off to MRIaseg2vol(). The aseg2vol LTA can point in
-  either direction.
+  \fn MRI *MRIaseg2volMU(MRI *aseg, LTA *aseg2vol, double fthresh, MRI **pvolhit, int USF, COLOR_TABLE *ct)
+  \brief Frontend for MRIaseg2vol(). This version takes a LTA and
+  USF. It will reduce the FoV of the aseg to the smallest bounding
+  box. This will then be upsampled by USF. The result (and a proper
+  matrix) is handed off to MRIaseg2vol(). The aseg2vol LTA can point
+  in either direction.
 */
 MRI *MRIaseg2volMU(MRI *aseg, LTA *aseg2vol, double fthresh, MRI **pvolhit,
                    int USF, COLOR_TABLE *ct) {
-  MRI *asegmu, *OutVol, *TempVol;
-  LTA *aseg2asegmu, *asegmu2aseg, *asegmu2vol, *ltaArray[2];
-  int nPad = 2;
+  MRI *     asegmu, *OutVol, *TempVol;
+  LTA *     aseg2asegmu, *asegmu2aseg, *asegmu2vol, *ltaArray[2];
+  int       nPad = 2;
   VOL_GEOM *vg;
 
   if (USF != -1) {
-    asegmu = MRImaskAndUpsample(aseg, nullptr, USF, nPad, 0, &aseg2asegmu);
-    asegmu2aseg = LTAinvert(aseg2asegmu, nullptr);
+    asegmu      = MRImaskAndUpsample(aseg, NULL, USF, nPad, 0, &aseg2asegmu);
+    asegmu2aseg = LTAinvert(aseg2asegmu, NULL);
     ltaArray[0] = asegmu2aseg;
     ltaArray[1] = aseg2vol;
-    asegmu2vol = LTAconcat(ltaArray, 2, 1); // figures out inversions
+    asegmu2vol  = LTAconcat(ltaArray, 2, 1); // figures out inversions
     LTAfree(&aseg2asegmu);
   } else {
     asegmu = aseg;
     if (LTAmriIsSource(aseg2vol, aseg))
-      asegmu2vol = LTAcopy(aseg2vol, nullptr);
+      asegmu2vol = LTAcopy(aseg2vol, NULL);
     else
-      asegmu2vol = LTAinvert(aseg2vol, nullptr);
+      asegmu2vol = LTAinvert(aseg2vol, NULL);
   }
 
   // MRIaseg2vol() requires a register.dat matrix
@@ -2694,9 +2712,9 @@ MRI *MRIaseg2volMU(MRI *aseg, LTA *aseg2vol, double fthresh, MRI **pvolhit,
   return (OutVol);
 }
 /*
-  \fn MRI *MRIchangeSegRes(MRI *seg, double xsize, double ysize, double zsize,
-  COLOR_TABLE *ct, LTA **seg2new) \brief Changes the resolution of the
-  segmentation to {x,y,z}size. I'm not sure how the results will differ from
+  \fn MRI *MRIchangeSegRes(MRI *seg, double xsize, double ysize, double zsize, COLOR_TABLE *ct, LTA **seg2new)
+  \brief Changes the resolution of the segmentation to
+  {x,y,z}size. I'm not sure how the results will differ from
   MRIaseg2volMU() or MRIaseg2vol(). This uses MRIseg2SegPVF() and MRIaseg2vol()
   uses a voting scheme. I would guess that they are close.
  */
@@ -2707,12 +2725,12 @@ MRI *MRIchangeSegRes(MRI *seg, double xsize, double ysize, double zsize,
 
   segidlist = MRIsegIdListNot0(seg, &nsegs, 0);
 
-  mritmp = MRIresize(seg, xsize, ysize, zsize, 0);
-  *seg2new = TransformRegDat2LTA(mritmp, seg, nullptr);
-  newseg = MRIseg2SegPVF(seg, *seg2new, ReGridFactor, segidlist, nsegs, nullptr,
-                         ReInitCache, ct, nullptr);
-  if (newseg == nullptr)
-    return (nullptr);
+  mritmp   = MRIresize(seg, xsize, ysize, zsize, 0);
+  *seg2new = TransformRegDat2LTA(mritmp, seg, NULL);
+  newseg   = MRIseg2SegPVF(seg, *seg2new, ReGridFactor, segidlist, nsegs, NULL,
+                         ReInitCache, ct, NULL);
+  if (newseg == NULL)
+    return (NULL);
 
   MRIfree(&mritmp);
   free(segidlist);
@@ -2726,13 +2744,13 @@ MRI *MRIchangeSegRes(MRI *seg, double xsize, double ysize, double zsize,
   -----------------------------------------------------------------------*/
 static int MostHitsInVolVox(ASEGVOLINDEX *avindsorted, int N, int *segidmost,
                             COLOR_TABLE *ct) {
-  int n, nhits = 0, nmost = 0, segid, nsegs;
+  int        n, nhits = 0, nmost = 0, segid, nsegs;
   static int segidlist[1000], ttypelist[1000], nhitslist[1000];
   static int nPerTType[100], nPerTTypeMax, TTypeMax;
 
   bzero(nPerTType, sizeof(int) * 100);
 
-  n = 0;
+  n     = 0;
   nsegs = 0;
   while (n < N) {
     segid = avindsorted[n].segid;
@@ -2743,12 +2761,12 @@ static int MostHitsInVolVox(ASEGVOLINDEX *avindsorted, int N, int *segidmost,
     if (n == 0) {
       // first segid
       *segidmost = segid;
-      nmost = nhits;
+      nmost      = nhits;
     }
     if (nmost < nhits) {
       // update if needed
       *segidmost = segid;
-      nmost = nhits;
+      nmost      = nhits;
     }
     n += nhits;
     if (ct) {
@@ -2771,17 +2789,17 @@ static int MostHitsInVolVox(ASEGVOLINDEX *avindsorted, int N, int *segidmost,
     for (n = 0; n < ct->ctabTissueType->nentries; n++) {
       if (nPerTTypeMax < nPerTType[n]) {
         nPerTTypeMax = nPerTType[n];
-        TTypeMax = n;
+        TTypeMax     = n;
       }
     }
     *segidmost = segidlist[0];
-    nmost = 0;
+    nmost      = 0;
     for (n = 0; n < nsegs; n++) {
       if (ttypelist[n] != TTypeMax)
         continue;
       if (nmost > nhitslist[n])
         continue;
-      nmost = nhitslist[n];
+      nmost      = nhitslist[n];
       *segidmost = segidlist[n];
     }
   }
@@ -2798,7 +2816,7 @@ static int MostHitsInVolVox(ASEGVOLINDEX *avindsorted, int N, int *segidmost,
   all entries with the same seg id will be contiguous.
   -----------------------------------------------------------------------*/
 static int CompareAVIndices(const void *i1, const void *i2) {
-  ASEGVOLINDEX *avind1 = nullptr, *avind2 = nullptr;
+  ASEGVOLINDEX *avind1 = NULL, *avind2 = NULL;
 
   avind1 = (ASEGVOLINDEX *)i1;
   avind2 = (ASEGVOLINDEX *)i2;
@@ -2821,34 +2839,35 @@ static int CompareAVIndices(const void *i1, const void *i2) {
 }
 
 /*!
-  \fn MRI *MRIapplySpmWarp(MRI *vol, LTA *srclta, MRI *warp, int LRRev, int
-  interp, MRI *out) \brief Applies a warp field computed from SPM, eg, with
-  DNG's run-vbm (which uses DARTEL).  The input vol is anything that shares the
-  scanner space with the input to vbm.  The warp field is y_rinput.nii.
-  LRRev=0,1 indicates that the pixels in the anatomical were left-right reversed
-  before the warp was computed. I thought thiwas good for asym studies, but it
-  turns out it is not needed. This will only work when the column of the warp
-  input is in the left-right direction. Interp: SAMPLE_NEAREST=0 or
+  \fn MRI *MRIapplySpmWarp(MRI *vol, LTA *srclta, MRI *warp, int LRRev, int interp, MRI *out)
+  \brief Applies a warp field computed from SPM, eg, with DNG's
+  run-vbm (which uses DARTEL).  The input vol is anything that shares
+  the scanner space with the input to vbm.  The warp field is
+  y_rinput.nii. LRRev=0,1 indicates that the pixels in the anatomical
+  were left-right reversed before the warp was computed. I thought
+  thiwas good for asym studies, but it turns out it is not
+  needed. This will only work when the column of the warp input is in
+  the left-right direction. Interp: SAMPLE_NEAREST=0 or
   SAMPLE_TRILINEAR=1.  Handles multiple frames.  The output will be in
   the warp space.
  */
 MRI *MRIapplySpmWarp(MRI *vol, LTA *srclta, MRI *warp, int LRRev, int interp,
                      MRI *out) {
-  int c, r, s, k, f, ncols;
-  double cc, rr, ss, val;
-  MATRIX *Q = nullptr;
+  int     c, r, s, k, f, ncols;
+  double  cc, rr, ss, val;
+  MATRIX *Q = NULL;
 
   if (interp != SAMPLE_NEAREST && interp != SAMPLE_TRILINEAR) {
     printf("ERROR: MRIapplySpmWarp():  sample type = %d, must be %d or %d\n",
            interp, SAMPLE_NEAREST, SAMPLE_TRILINEAR);
-    return (nullptr);
+    return (NULL);
   }
 
-  if (out == nullptr) {
+  if (out == NULL) {
     out = MRIallocSequence(warp->width, warp->height, warp->depth, MRI_FLOAT,
                            vol->nframes);
-    if (out == nullptr)
-      return (nullptr);
+    if (out == NULL)
+      return (NULL);
     MRIcopyHeader(warp, out);
     MRIcopyPulseParameters(vol, out);
   }
@@ -2867,37 +2886,37 @@ MRI *MRIapplySpmWarp(MRI *vol, LTA *srclta, MRI *warp, int LRRev, int interp,
     // the vbm input. srclta must map between the vol and the vbm
     // input space. Set the vbm input vox2ras1 from the approp vol geom
     if (LTAmriIsSource(srclta, vol)) {
-      vox2ras1 = VGgetVoxelToRasXform(&(srclta->xforms[0].dst), nullptr,
+      vox2ras1 = VGgetVoxelToRasXform(&(srclta->xforms[0].dst), NULL,
                                       1); // spm crs base=1
       printf("MRIapplySpmWarp(): inverting Source LTA\n");
-      Vsrc = MatrixInverse(srclta->xforms[0].m_L, nullptr);
+      Vsrc  = MatrixInverse(srclta->xforms[0].m_L, NULL);
       ncols = srclta->xforms[0].dst.width;
     } else {
-      Vsrc = MatrixCopy(srclta->xforms[0].m_L, nullptr);
-      vox2ras1 = VGgetVoxelToRasXform(&(srclta->xforms[0].src), nullptr,
+      Vsrc     = MatrixCopy(srclta->xforms[0].m_L, NULL);
+      vox2ras1 = VGgetVoxelToRasXform(&(srclta->xforms[0].src), NULL,
                                       1); // spm crs base=1
-      ncols = srclta->xforms[0].src.width;
+      ncols    = srclta->xforms[0].src.width;
     }
   } else {
     vox2ras1 = MRIxfmCRS2XYZ(vol, 1); // spm crs base=1
-    Vsrc = MatrixIdentity(4, nullptr);
-    ncols = vol->width;
+    Vsrc     = MatrixIdentity(4, NULL);
+    ncols    = vol->width;
   }
-  MATRIX *ras2vox1 = MatrixInverse(vox2ras1, nullptr);
+  MATRIX *ras2vox1 = MatrixInverse(vox2ras1, NULL);
 
   if (LRRev) {
     // This is the matrix that realizes the left-right pixel reversal
     // used in mri_convert --left-right-reverse-pix. Only works properly
     // if the column is in the LR direction
-    Q = MatrixIdentity(4, nullptr);
+    Q             = MatrixIdentity(4, NULL);
     Q->rptr[1][1] = -1;
     Q->rptr[1][4] = ncols - 1;
   }
 
-  MATRIX *vbmiRAS = MatrixAlloc(4, 1, MATRIX_REAL);
+  MATRIX *vbmiRAS     = MatrixAlloc(4, 1, MATRIX_REAL);
   vbmiRAS->rptr[4][1] = 1;
-  MATRIX *CRS = MatrixAlloc(4, 1, MATRIX_REAL);
-  CRS->rptr[4][1] = 1;
+  MATRIX *CRS         = MatrixAlloc(4, 1, MATRIX_REAL);
+  CRS->rptr[4][1]     = 1;
   // use 1 to N-1 instead of 1 to N because edge voxels are invalid in the warp
   for (c = 1; c < warp->width - 1; c++) {
     for (r = 1; r < warp->height - 1; r++) {
@@ -2905,8 +2924,7 @@ MRI *MRIapplySpmWarp(MRI *vol, LTA *srclta, MRI *warp, int LRRev, int interp,
         // Get the RAS in the vbm input space
         for (k = 0; k < 3; k++)
           vbmiRAS->rptr[k + 1][1] = MRIgetVoxVal(warp, c, r, s, k);
-        // Get the 1-based CRS in the vbm-input space (usually a conformed
-        // space)
+        // Get the 1-based CRS in the vbm-input space (usually a conformed space)
         CRS = MatrixMultiplyD(ras2vox1, vbmiRAS, CRS);
         // Subtract 1 to make 0-based (could do this in ras2vox1)
         CRS->rptr[1][1] -= 1;
@@ -2915,7 +2933,7 @@ MRI *MRIapplySpmWarp(MRI *vol, LTA *srclta, MRI *warp, int LRRev, int interp,
         // If left-right rev is needed, do it here
         if (LRRev)
           CRS = MatrixMultiplyD(Q, CRS, CRS);
-        if (srclta != nullptr) {
+        if (srclta != NULL) {
           // Now compute the CRS in the vol space
           // Could be combined with ras2vox1 if the conversion from 1-to-0-based
           // is figured out.

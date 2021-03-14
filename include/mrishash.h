@@ -1,6 +1,5 @@
 #pragma once
 /**
- * @file  mrishash.h
  * @brief Implements a hash table mechanism to speed comparing vertices
  *
  * The purpose of MRI hash tables is to vastly accelerate algorithms which
@@ -9,12 +8,8 @@
  */
 /*
  * Original Author: Graham Wideman, based on code by Bruce Fischl
- * CVS Revision Info:
- *    $Author: zkaufman $
- *    $Date: 2015/03/18 17:04:00 $
- *    $Revision: 1.26 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,8 +21,8 @@
  *
  */
 
-#include "mrisurf_aaa.h"
 #include "error.h"
+#include "mrisurf_aaa.h"
 
 // define the following to get a single inclusion of non-renamed functions
 // Bevin thinks this is no longer used anywhere
@@ -43,7 +38,7 @@ typedef enum { MHTFNO_FACE = 0, MHTFNO_VERTEX = 1 } MHTFNO_t;
 struct MRIS_HASH_TABLE_NoSurface;
 struct MRIS_HASH_TABLE {
 
-  int which() const { return m_which_vertices; }
+  int      which() const { return m_which_vertices; }
   MHTFNO_t fno_usage() const {
     return m_fno_usage;
   } // To enforce consistent use of fno:  face number or vertex number
@@ -73,9 +68,9 @@ struct MRIS_HASH_TABLE {
   // becomes a template class
   //
 #define MHT_ONLY_VIRTUAL
-#define MHT_VIRTUAL virtual
-#define MHT_ABSTRACT = 0
-#define MHT_STATIC_MEMBER static
+#define MHT_VIRTUAL        virtual
+#define MHT_ABSTRACT       = 0
+#define MHT_STATIC_MEMBER  static
 #define MHT_FUNCTION(NAME) NAME
 #define MHT_FUNCTION(NAME) NAME
 #define MHT_CONST_THIS_PARAMETER
@@ -88,9 +83,9 @@ struct MRIS_HASH_TABLE {
 #undef MHT_ONLY_VIRTUAL
 
 #define MHT_ONLY_STATIC
-#define MHT_VIRTUAL virtual
-#define MHT_ABSTRACT = 0
-#define MHT_STATIC_MEMBER static
+#define MHT_VIRTUAL        virtual
+#define MHT_ABSTRACT       = 0
+#define MHT_STATIC_MEMBER  static
 #define MHT_FUNCTION(NAME) NAME
 #define MHT_FUNCTION(NAME) NAME
 #define MHT_CONST_THIS_PARAMETER
@@ -98,7 +93,7 @@ struct MRIS_HASH_TABLE {
 #define MHT_THIS_PARAMETER_NOCOMMA
 #define MHT_THIS_PARAMETER
 #define MHT_MRIS_PARAMETER_NOCOMMA MRIS *mris
-#define MHT_MRIS_PARAMETER MHT_MRIS_PARAMETER_NOCOMMA,
+#define MHT_MRIS_PARAMETER         MHT_MRIS_PARAMETER_NOCOMMA,
 #include "mrishash_traditional_functions.h"
 #undef MHT_ONLY_STATIC
 
@@ -106,7 +101,7 @@ protected:
   MHTFNO_t const m_fno_usage; // To enforce consistent use of fno:  face number
                               // or vertex number
   float const m_vres;         // Resolution of discretization
-  int const m_which_vertices; // ORIGINAL, CANONICAL, CURRENT, etc.
+  int const   m_which_vertices; // ORIGINAL, CANONICAL, CURRENT, etc.
 };
 
 // Construction, use either delete or MHTfree to destroy
@@ -132,7 +127,7 @@ void MHTfindReportCounts(int *BucketsChecked, int *BucketsPresent,
 void MHT_maybeParallel_begin(); // Note: Can be nested!
 void MHT_maybeParallel_end();
 
-int MHTwhich(MRIS_HASH_TABLE const *mht);
+int  MHTwhich(MRIS_HASH_TABLE const *mht);
 void MHTfree(MRIS_HASH_TABLE **mht);
 
 // Support multiple representations
@@ -140,13 +135,13 @@ void MHTfree(MRIS_HASH_TABLE **mht);
 #define MHT_VIRTUAL
 #define MHT_ABSTRACT
 #define MHT_STATIC_MEMBER
-#define MHT_FUNCTION(NAME) MHT##NAME
+#define MHT_FUNCTION(NAME)       MHT##NAME
 #define MHT_CONST_THIS_PARAMETER MRIS_HASH_TABLE const *mht,
 #define MHT_CONST_THIS
 #define MHT_THIS_PARAMETER_NOCOMMA MRIS_HASH_TABLE *mht
 #define MHT_MRIS_PARAMETER_NOCOMMA MRIS *mris
-#define MHT_MRIS_PARAMETER MHT_MRIS_PARAMETER_NOCOMMA,
-#define MHT_THIS_PARAMETER MHT_THIS_PARAMETER_NOCOMMA,
+#define MHT_MRIS_PARAMETER         MHT_MRIS_PARAMETER_NOCOMMA,
+#define MHT_THIS_PARAMETER         MHT_THIS_PARAMETER_NOCOMMA,
 
 #include "mrishash_traditional_functions.h"
 
@@ -154,19 +149,19 @@ void MHTfree(MRIS_HASH_TABLE **mht);
 //
 int MHTfindClosestVertexNo2(
     MRIS_HASH_TABLE
-        *mht,   // the result will be a vno in the mris used to create this
+        * mht,  // the result will be a vno in the mris used to create this
     MRIS *mris, // this mris should be the one used to create the mht
     MRIS *mris_for_vno, // this may not be the one for mht nor the one for the
                         // result
     VERTEX const *v,    // but this is looked up in it
-    float *pmin_dist);
+    float *       pmin_dist);
 
 VERTEX *
 MHTfindClosestVertex2(MRIS_HASH_TABLE *mht, MRIS *mris,
                       MRIS *mris_for_v, // this may not be the one for mht nor
                                         // the one for the result
                       VERTEX const *v,  // but this is looked up in it
-                      float *pmin_dist);
+                      float *       pmin_dist);
 
 VERTEX *MHTfindClosestVertexSet2(MRIS_HASH_TABLE *mht, MRIS *mris,
                                  MRIS *mris_for_vno, VERTEX const *v);
@@ -181,7 +176,7 @@ void MHTfindClosestFaceGeneric(
     // How far to search: set one or both
     double in_max_distance_mm, /* Use large number
                                 to ignore */
-    int in_max_mhts,           /* Use -1 to ignore */
+    int    in_max_mhts,        /* Use -1 to ignore */
     // only faces that projection is interior to (Use -1 to ignore )
     int project_into_face,
     //---------- outputs -------------

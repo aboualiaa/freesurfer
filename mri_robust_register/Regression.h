@@ -1,5 +1,4 @@
 /**
- * @file Regression.h
  * @brief A class to solve overconstrained system A X = b
  *
  *   it uses either least squares (standard regression)
@@ -10,12 +9,8 @@
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2016/03/10 15:14:00 $
- *    $Revision: 1.18 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -37,11 +32,11 @@
 #include "matrix.h"
 
 #define SATr 4.685 // this is suggested for gaussian noise
-#include <utility>
-#include <string>
 #include <cassert>
-#include <vnl/vnl_vector.h>
+#include <string>
+#include <utility>
 #include <vnl/vnl_matrix.h>
+#include <vnl/vnl_vector.h>
 
 /** \class Transform3dTranslate
  * \brief Templated class for iteratively reweighted least squares
@@ -53,8 +48,7 @@ public:
       : A(&Ap), b(&bp), lasterror(-1), lastweight(-1), lastzero(-1), verbose(1),
         floatsvd(false) {}
 
-  //! Constructor initializing b (for simple case where x is single variable and
-  //! A is (...1...)^T
+  //! Constructor initializing b (for simple case where x is single variable and A is (...1...)^T
   Regression(vnl_vector<T> &bp)
       : A(NULL), b(&bp), lasterror(-1), lastweight(-1), lastzero(-1),
         verbose(1), floatsvd(false) {}
@@ -95,24 +89,24 @@ public:
 protected:
   vnl_vector<T> getRobustEstWAB(vnl_vector<T> &w, double sat = SATr,
                                 double sig = 1.4826);
-  double getRobustEstWB(vnl_vector<T> &w, double sat = SATr,
-                        double sig = 1.4826);
+  double        getRobustEstWB(vnl_vector<T> &w, double sat = SATr,
+                               double sig = 1.4826);
 
   T getSigmaMAD(const vnl_vector<T> &r, T d = 1.4826);
   T VectorMedian(const vnl_vector<T> &v);
 
-  void getSqrtTukeyDiaWeights(const vnl_vector<T> &r, vnl_vector<T> &w,
-                              double sat = SATr);
-  void getTukeyBiweight(const vnl_vector<T> &r, vnl_vector<T> &w,
-                        double sat = SATr);
+  void   getSqrtTukeyDiaWeights(const vnl_vector<T> &r, vnl_vector<T> &w,
+                                double sat = SATr);
+  void   getTukeyBiweight(const vnl_vector<T> &r, vnl_vector<T> &w,
+                          double sat = SATr);
   double getTukeyPartialSat(const vnl_vector<T> &r, double sat = SATr);
 
 private:
   vnl_matrix<T> *A;
   vnl_vector<T> *b;
-  double lasterror, lastweight, lastzero;
-  int verbose;
-  bool floatsvd;
+  double         lasterror, lastweight, lastzero;
+  int            verbose;
+  bool           floatsvd;
 };
 
 #include "Regression.cpp"

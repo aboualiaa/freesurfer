@@ -3,15 +3,9 @@
 #
 # dicom-rename
 #
-# REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
 #
-# Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/12 21:43:14 $
-#    $Revision: 1.6 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,7 +18,7 @@
 #
 
 
-set VERSION = '$Id: dicom-rename,v 1.6 2016/02/12 21:43:14 zkaufman Exp $';
+set VERSION = 'dicom-rename @FS_VERSION@';
 set inputargs = ($argv);
 set PrintHelp = 0;
 

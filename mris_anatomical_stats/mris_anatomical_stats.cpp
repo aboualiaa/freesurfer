@@ -1,16 +1,11 @@
 /**
- * @file  mris_anatomical_stats.c
  * @brief measures a variety of anatomical properties
  *
  */
 /*
  * Original Author: Bruce Fischl and Doug Greve
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2016/03/14 15:15:34 $
- *    $Revision: 1.79 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,95 +17,103 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/utsname.h>
 
-#include "diag.h"
-#include "fio.h"
-#include "version.h"
 #include "cma.h"
+#include "colortab.h"
+#include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
 #include "mrisutils.h"
+#include "proto.h"
+#include "version.h"
 
-static char vcid[] =
-    "$Id: mris_anatomical_stats.c,v 1.79 2016/03/14 15:15:34 greve Exp $";
-
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
-double MRISmeasureTotalWhiteMatterVolume(MRI *mri);
-double MRISmeasureCorticalGrayMatterVolume(MRI_SURFACE *mris);
-int MRIScomputeCurvatureIndicesMarked(MRI_SURFACE *mris, double *pici,
-                                      double *pfi, int mark);
-int MRIScomputeCurvatureStats(MRI_SURFACE *mris, double *pavg, double *pvar,
-                              float ignore_below, float ignore_above);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
+double      MRISmeasureTotalWhiteMatterVolume(MRI *mri);
+double      MRISmeasureCorticalGrayMatterVolume(MRI_SURFACE *mris);
+int         MRIScomputeCurvatureIndicesMarked(MRI_SURFACE *mris, double *pici,
+                                              double *pfi, int mark);
+int    MRIScomputeCurvatureStats(MRI_SURFACE *mris, double *pavg, double *pvar,
+                                 float ignore_below, float ignore_above);
 double MRIScomputeAbsoluteCurvature(MRI_SURFACE *mris);
 double MRIScomputeAbsoluteCurvatureMarked(MRI_SURFACE *mris, int mark);
-int MRISrestoreSurface(MRI_SURFACE *mris);
-int MRIScountVertices(MRI_SURFACE *mris);
+int    MRISrestoreSurface(MRI_SURFACE *mris);
+int    MRIScountVertices(MRI_SURFACE *mris);
 #if 0
 int    MRISreadAnnotFile(MRI_SURFACE *mris, char *fname) ;
 int    MRISripVerticesWithMark(MRI_SURFACE *mris, int mark) ;
 int    MRISripVerticesWithoutMark(MRI_SURFACE *mris, int mark) ;
 int    MRISreplaceMarks(MRI_SURFACE *mris, int in_mark, int out_mark) ;
 #endif
-int MRISripVerticesWithAnnotation(MRI_SURFACE *mris, int annotation);
-int MRISripVerticesWithoutAnnotation(MRI_SURFACE *mris, int annotation);
-int MRISreplaceAnnotations(MRI_SURFACE *mris, int in_annotation,
-                           int out_annotation);
+int         MRISripVerticesWithAnnotation(MRI_SURFACE *mris, int annotation);
+int         MRISripVerticesWithoutAnnotation(MRI_SURFACE *mris, int annotation);
+int         MRISreplaceAnnotations(MRI_SURFACE *mris, int in_annotation,
+                                   int out_annotation);
 const char *Progname;
-static double sigma = 0.0f;
-static float ignore_below = 0;
-static float ignore_above = 20;
-static char *label_name = nullptr;
-static char *annotation_name = nullptr;
-static char *thickness_name = "thickness";
-static int histo_flag = 0;
-static char *gray_histo_name;
-static char *mri_name = "T1";
-static int noheader = 0;
-static char *log_file_name = nullptr;
-static int tabular_output_flag = 0;
-static char sdir[STRLEN] = "";
-static int MGZ = 1; // for use with MGZ format
-static char *tablefile = nullptr;
-static char *annotctabfile = nullptr; // for outputing the color table
-static FILE *fp = nullptr;
-static int nsmooth = 0;
-static char *white_name = "white";
-static char *pial_name = "pial";
-static LABEL *cortex_label = nullptr; // limit surface area calc to cortex.label
-static int crosscheck = 0;
-static int DoGlobalStats = 1;
+static double      sigma           = 0.0f;
+static float       ignore_below    = 0;
+static float       ignore_above    = 20;
+static char *      label_name      = NULL;
+static char *      annotation_name = NULL;
+static const char *thickness_name  = "thickness";
+static int         histo_flag      = 0;
+static char *      gray_histo_name;
+static const char *mri_name            = "T1";
+static int         noheader            = 0;
+static char *      log_file_name       = NULL;
+static int         tabular_output_flag = 0;
+static char        sdir[STRLEN]        = "";
+static int         MGZ                 = 1; // for use with MGZ format
+static char *      tablefile           = NULL;
+static char *      annotctabfile       = NULL; // for outputing the color table
+static FILE *      fp                  = NULL;
+static int         nsmooth             = 0;
+static const char *white_name          = "white";
+static const char *pial_name           = "pial";
+static LABEL *cortex_label  = NULL; // limit surface area calc to cortex.label
+static int    crosscheck    = 0;
+static int    DoGlobalStats = 1;
 
 #define MAX_INDICES 50000
 static char *names[MAX_INDICES];
-int UseTH3Vol = 1;
+int          UseTH3Vol = 1;
 
 int main(int argc, char *argv[]) {
-  char **av, *hemi, *sname, *cp, fname[STRLEN], *surf_name;
-  int ac, nargs, vno, n;
-  MRI_SURFACE *mris, *mrisw, *mrisp;
-  MRI *mri_wm, *mri_kernel = nullptr, *mri_orig, *mrisvol = nullptr;
-  double gray_volume, wm_volume;
-  double mean_abs_mean_curvature, mean_abs_gaussian_curvature;
-  double intrinsic_curvature_index, folding_index;
-  FILE *log_fp = nullptr;
-  VERTEX *v;
-  HISTOGRAM *histo_gray;
-  MRI *SurfaceMap = nullptr;
+  char **        av, *hemi, *sname, *cp, fname[STRLEN];
+  const char *   surf_name;
+  int            ac, nargs, vno, n;
+  MRI_SURFACE *  mris, *mrisw, *mrisp;
+  MRI *          mri_wm, *mri_kernel = NULL, *mri_orig, *mrisvol = NULL;
+  double         gray_volume, wm_volume;
+  double         mean_abs_mean_curvature, mean_abs_gaussian_curvature;
+  double         intrinsic_curvature_index, folding_index;
+  FILE *         log_fp = NULL;
+  VERTEX *       v;
+  HISTOGRAM *    histo_gray;
+  MRI *          SurfaceMap = NULL;
   struct utsname uts;
-  char *cmdline, full_name[STRLEN];
-  int num_cortex_vertices = 0;
-  float total_cortex_area = 0;
-  float mean_cortex_thickness = 0;
-  double voxelvolume = 0;
+  char *         cmdline, full_name[STRLEN];
+  int            num_cortex_vertices   = 0;
+  float          total_cortex_area     = 0;
+  float          mean_cortex_thickness = 0;
+  double         voxelvolume           = 0;
 
   nargs = handleVersionOption(argc, argv, "mris_anatomical_stats");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -118,9 +121,9 @@ int main(int argc, char *argv[]) {
   uname(&uts);
 
   mean_abs_mean_curvature = mean_abs_gaussian_curvature = gray_volume = 0.0;
-  Progname = argv[0];
+  Progname                                                            = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   ac = argc;
   av = argv;
@@ -159,12 +162,17 @@ int main(int argc, char *argv[]) {
   if (sigma > 0.0) {
     mri_kernel = MRIgaussian1d(sigma, 100);
   }
-  sprintf(fname, "%s/%s/mri/wm", sdir, sname);
+  int req = snprintf(fname, STRLEN, "%s/%s/mri/wm", sdir, sname);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
+
   if (MGZ) {
     strcat(fname, ".mgz");
   }
   fprintf(stderr, "reading volume %s...\n", fname);
-  mri_wm = MRIread(fname);
+  mri_wm      = MRIread(fname);
   voxelvolume = mri_wm->xsize * mri_wm->ysize * mri_wm->zsize;
   if (!mri_wm)
     ErrorExit(ERROR_NOFILE, "%s: could not read input volume %s", Progname,
@@ -173,18 +181,15 @@ int main(int argc, char *argv[]) {
   if (mri_kernel) {
     fprintf(stderr, "smoothing brain volume with sigma = %2.3f\n", sigma);
     MRIconvolveGaussian(mri_wm, mri_wm, mri_kernel);
-#if 0
-    fprintf(stderr, "smoothing wm volume with sigma = %2.3f\n", sigma) ;
-    MRIconvolveGaussian(mri_wm, mri_wm, mri_kernel) ;
-    if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
-    {
-      MRIwrite(mri_wm, "/tmp/wm_smooth.mnc") ;
-    }
-#endif
     MRIfree(&mri_kernel);
   }
 
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, surf_name);
+  req =
+      snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi, surf_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "reading input surface %s...\n", fname);
   mris = MRISread(fname);
   if (!mris)
@@ -201,28 +206,41 @@ int main(int argc, char *argv[]) {
   }
 
   if (UseTH3Vol) {
-    MRI *ctxmask;
+    MRI *  ctxmask;
     LABEL *label;
     double totvol;
     printf("Using TH3 vertex volume calc\n");
-    sprintf(fname, "%s/%s/surf/%s.white", sdir, sname, hemi);
+    int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.white", sdir, sname, hemi);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     mrisw = MRISread(fname);
     if (!mrisw)
       exit(1);
-    sprintf(fname, "%s/%s/surf/%s.pial", sdir, sname, hemi);
+    req = snprintf(fname, STRLEN, "%s/%s/surf/%s.pial", sdir, sname, hemi);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     mrisp = MRISread(fname);
     if (!mrisp)
       exit(1);
-    sprintf(fname, "%s/%s/label/%s.cortex.label", sdir, sname, hemi);
-    label = LabelRead(nullptr, fname);
-    if (label == nullptr)
+    req = snprintf(fname, STRLEN, "%s/%s/label/%s.cortex.label", sdir, sname,
+                   hemi);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+    label = LabelRead(NULL, fname);
+    if (label == NULL)
       exit(1);
-    ctxmask = MRISlabel2Mask(mrisw, label, nullptr);
-    if (ctxmask == nullptr)
+    ctxmask = MRISlabel2Mask(mrisw, label, NULL);
+    if (ctxmask == NULL)
       exit(1);
     LabelFree(&label);
-    mrisvol = MRISvolumeTH3(mrisw, mrisp, nullptr, ctxmask, &totvol);
-    if (mrisvol == nullptr)
+    mrisvol = MRISvolumeTH3(mrisw, mrisp, NULL, ctxmask, &totvol);
+    if (mrisvol == NULL)
       exit(1);
     MRISfree(&mrisw);
     MRISfree(&mrisp);
@@ -232,13 +250,23 @@ int main(int argc, char *argv[]) {
   MRISsaveVertexPositions(mris, ORIGINAL_VERTICES);
   // read in white and pial surfaces
   MRISsaveVertexPositions(mris, TMP_VERTICES);
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, pial_name);
+  req =
+      snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi, pial_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "reading input pial surface %s...\n", fname);
   if (MRISreadVertexPositions(mris, fname) != NO_ERROR)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
               fname);
   MRISsaveVertexPositions(mris, PIAL_VERTICES);
-  sprintf(fname, "%s/%s/surf/%s.%s", sdir, sname, hemi, white_name);
+  req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", sdir, sname, hemi,
+                 white_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "reading input white surface %s...\n", fname);
   if (MRISreadVertexPositions(mris, fname) != NO_ERROR)
     ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
@@ -259,19 +287,19 @@ int main(int argc, char *argv[]) {
   if (nsmooth > 0) {
     printf("Smooth thickness and area map with %d iterations on surface\n",
            nsmooth);
-    SurfaceMap = MRIcopyMRIS(nullptr, mris, 0, "curv");
-    if (SurfaceMap == nullptr) {
+    SurfaceMap = MRIcopyMRIS(NULL, mris, 0, "curv");
+    if (SurfaceMap == NULL) {
       printf("Unable to copy thickness data to an MRI volume \n");
     } else {
-      MRISsmoothMRI(mris, SurfaceMap, nsmooth, nullptr, SurfaceMap);
+      MRISsmoothMRI(mris, SurfaceMap, nsmooth, NULL, SurfaceMap);
       MRIScopyMRI(mris, SurfaceMap, 0, "curv");
       MRIfree(&SurfaceMap);
     }
-    SurfaceMap = MRIcopyMRIS(nullptr, mris, 0, "area");
-    if (SurfaceMap == nullptr) {
+    SurfaceMap = MRIcopyMRIS(NULL, mris, 0, "area");
+    if (SurfaceMap == NULL) {
       printf("Unable to copy thickness data to an  MRI volume \n");
     } else {
-      MRISsmoothMRI(mris, SurfaceMap, nsmooth, nullptr, SurfaceMap);
+      MRISsmoothMRI(mris, SurfaceMap, nsmooth, NULL, SurfaceMap);
       MRIScopyMRI(mris, SurfaceMap, 0, "area");
       MRIfree(&SurfaceMap);
     }
@@ -292,14 +320,18 @@ int main(int argc, char *argv[]) {
     if (MRISreadAnnotation(mris, annotation_name) != NO_ERROR)
       ErrorExit(ERROR_NOFILE, "%s:  could  not read annotation file %s",
                 Progname, annotation_name);
-    if (annotctabfile != nullptr && mris->ct != nullptr) {
+    if (annotctabfile != NULL && mris->ct != NULL) {
       printf("Saving annotation colortable %s\n", annotctabfile);
       CTABwriteFileASCII(mris->ct, annotctabfile);
     }
   }
 
   if (histo_flag) {
-    sprintf(fname, "%s/%s/mri/%s", sdir, sname, mri_name);
+    int req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, mri_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     if (MGZ) {
       strcat(fname, ".mgz");
     }
@@ -310,8 +342,8 @@ int main(int argc, char *argv[]) {
                 fname);
     histo_gray = HISTOalloc(256);
   } else {
-    histo_gray = nullptr;
-    mri_orig = nullptr;
+    histo_gray = NULL;
+    mri_orig   = NULL;
   }
 
   if (log_file_name) {
@@ -333,15 +365,24 @@ int main(int argc, char *argv[]) {
   */
   if (label_name) {
     LABEL *area;
-    char fname[STRLEN];
+    char   fname[STRLEN];
 
-    sprintf(fname, "%s/%s/label/%s", sdir, sname, label_name);
+    int req =
+        snprintf(fname, STRLEN, "%s/%s/label/%s", sdir, sname, label_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     // If that does not exist, use label_name as absolute path.
     if (!fio_FileExistsReadable(fname)) {
-      sprintf(fname, "%s", label_name);
+      int req = snprintf(fname, STRLEN, "%s", label_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
     }
 
-    area = LabelRead(nullptr, fname);
+    area = LabelRead(NULL, fname);
     if (!area) {
       ErrorExit(ERROR_NOFILE, "%s: could not read label file %s\n", sname,
                 fname);
@@ -363,23 +404,33 @@ int main(int argc, char *argv[]) {
     LabelFree(&area);
     MRIScomputeMetricProperties(mris);
     names[1] = label_name;
-    names[0] = nullptr;
+    names[0] = NULL;
     if ((label_name[0] == '/') || !strncmp(label_name, "./", 2)) // a full path
     {
       strcpy(full_name, label_name);
     } else {
       // build the full path string
-      if (strstr(label_name, ".label") == nullptr) {
-        sprintf(full_name, "%s/%s/label/%s.label", sdir, sname, label_name);
+      if (strstr(label_name, ".label") == NULL) {
+        int req = snprintf(full_name, STRLEN, "%s/%s/label/%s.label", sdir,
+                           sname, label_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
       } else {
-        sprintf(full_name, "%s/%s/label/%s", sdir, sname, label_name);
+        int req = snprintf(full_name, STRLEN, "%s/%s/label/%s", sdir, sname,
+                           label_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
       }
     }
     if (!fio_FileExistsReadable(full_name)) {
       sprintf(full_name, "%s", label_name);
     }
   } else if (annotation_name) {
-    int vno, index;
+    int     vno, index;
     VERTEX *v;
 
     if ((annotation_name[0] == '/') ||
@@ -389,21 +440,44 @@ int main(int argc, char *argv[]) {
     } else // build the full path string
     {
       char tmp[STRLEN];
-      sprintf(tmp, "%s.", hemi);
-      if (strstr(annotation_name, tmp) == nullptr) // no hemi in string
+      int  req = snprintf(tmp, STRLEN, "%s.", hemi);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+      if (strstr(annotation_name, tmp) == NULL) // no hemi in string
       {
-        if (strstr(annotation_name, ".annot") == nullptr)
-          sprintf(full_name, "%s/%s/label/%s.%s.annot", sdir, sname, hemi,
-                  annotation_name);
-        else
-          sprintf(full_name, "%s/%s/label/%s.%s", sdir, sname, hemi,
-                  annotation_name);
+        if (strstr(annotation_name, ".annot") == NULL) {
+          int req = snprintf(full_name, STRLEN, "%s/%s/label/%s.%s.annot", sdir,
+                             sname, hemi, annotation_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
+        } else {
+          int req = snprintf(full_name, STRLEN, "%s/%s/label/%s.%s", sdir,
+                             sname, hemi, annotation_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
+        }
       } else {
-        if (strstr(annotation_name, ".annot") == nullptr)
-          sprintf(full_name, "%s/%s/label/%s.annot", sdir, sname,
-                  annotation_name);
-        else
-          sprintf(full_name, "%s/%s/label/%s", sdir, sname, annotation_name);
+        if (strstr(annotation_name, ".annot") == NULL) {
+          int req = snprintf(full_name, STRLEN, "%s/%s/label/%s.annot", sdir,
+                             sname, annotation_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
+        } else {
+          int req = snprintf(full_name, STRLEN, "%s/%s/label/%s", sdir, sname,
+                             annotation_name);
+          if (req >= STRLEN) {
+            std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                      << std::endl;
+          }
+        }
       }
     }
     for (vno = 0; vno < mris->nvertices; vno++) {
@@ -417,7 +491,7 @@ int main(int argc, char *argv[]) {
         continue;
       }
       names[index] = mris->ct->entries[index]->name;
-      // printf("idx=%d, name=%s\n",index,names[index]);
+      //printf("idx=%d, name=%s\n",index,names[index]);
     }
   } else // do all of surface
   {
@@ -441,9 +515,9 @@ int main(int argc, char *argv[]) {
     fprintf(stdout, "\n");
   }
 
-  if (tablefile != nullptr) {
+  if (tablefile != NULL) {
     fp = fopen(tablefile, "w");
-    if (fp == nullptr) {
+    if (fp == NULL) {
       ErrorExit(ERROR_NOFILE, "%s: couldn't open file %s", Progname, tablefile);
     }
     fprintf(fp, "# Table of FreeSurfer cortical "
@@ -451,8 +525,8 @@ int main(int argc, char *argv[]) {
     fprintf(fp, "# \n");
     fprintf(fp, "# CreationTime %s\n", VERcurTimeStamp());
     fprintf(fp, "# generating_program %s\n", Progname);
-    fprintf(fp, "# cvs_version %s\n", vcid);
-    fprintf(fp, "# mrisurf.c-cvs_version %s\n", MRISurfSrcVersion());
+    fprintf(fp, "# cvs_version %s\n", getVersion().c_str());
+    fprintf(fp, "# mrisurf.c-cvs_version %s\n", getVersion().c_str());
     fprintf(fp, "# cmdline %s\n", cmdline);
     fprintf(fp, "# sysname  %s\n", uts.sysname);
     fprintf(fp, "# hostname %s\n", uts.nodename);
@@ -465,7 +539,8 @@ int main(int argc, char *argv[]) {
     fprintf(fp, "# hemi %s\n", hemi);
     fprintf(fp, "# AnnotationFile %s\n",
             annotation_name ? annotation_name
-                            : label_name ? label_name : mris->fname);
+            : label_name    ? label_name
+                            : mris->fname);
     fprintf(fp, "# AnnotationFileTimeStamp %s\n",
             (annotation_name || label_name) ? VERfileTimeStamp(full_name)
                                             : VERfileTimeStamp(mris->fname));
@@ -474,17 +549,17 @@ int main(int argc, char *argv[]) {
 #endif
 
     num_cortex_vertices = mris->nvertices;
-    total_cortex_area = mris->total_area;
+    total_cortex_area   = mris->total_area;
     // if -cortex option selected, then count vertices and area only in cortex
     if (cortex_label) {
       /* calculate "area" and thickness of the vertices labeled as cortex */
-      num_cortex_vertices = 0;
-      total_cortex_area = 0;
+      num_cortex_vertices   = 0;
+      total_cortex_area     = 0;
       mean_cortex_thickness = 0;
       int vno;
       for (vno = 0; vno < mris->nvertices; vno++) {
         VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-        VERTEX const *const v = &mris->vertices[vno];
+        VERTEX const *const          v  = &mris->vertices[vno];
 
         if (v->ripflag) {
           continue;
@@ -500,7 +575,7 @@ int main(int argc, char *argv[]) {
         for (lno = 0; lno < cortex_label->n_points; lno++) {
           if (cortex_label->lv[lno].vno == vno) {
             float area = 0.0;
-            int fno;
+            int   fno;
             for (fno = 0; fno < vt->num; fno++) {
               FACE *face = &mris->faces[vt->f[fno]];
               if (face->ripflag) {
@@ -546,9 +621,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (DoGlobalStats) {
-      char tmpstr[2000];
-      double atlas_icv = 0;
-      double determinant = 0;
+      char   tmpstr[2000];
+      double atlas_icv         = 0;
+      double determinant       = 0;
       double etiv_scale_factor = 1948.106;
       sprintf(tmpstr, "%s/%s/mri/transforms/talairach.xfm", sdir, sname);
       atlas_icv = MRIestimateTIV(tmpstr, etiv_scale_factor, &determinant);
@@ -647,9 +722,9 @@ int main(int argc, char *argv[]) {
   {
     double areas[MAX_INDICES], volumes[MAX_INDICES], thicknesses[MAX_INDICES],
         avg_thick, volume, thickness_vars[MAX_INDICES], std;
-    int v0_index, v1_index, v2_index, fno, m, i, dofs[MAX_INDICES];
+    int     v0_index, v1_index, v2_index, fno, m, i, dofs[MAX_INDICES];
     VERTEX *v0, *v1, *v2;
-    FACE *f;
+    FACE *  f;
 
     memset(areas, 0, sizeof(areas));
     memset(volumes, 0, sizeof(volumes));
@@ -669,16 +744,16 @@ int main(int argc, char *argv[]) {
       if (f->ripflag) {
         continue;
       }
-      v0 = &mris->vertices[f->v[0]];
-      v1 = &mris->vertices[f->v[1]];
-      v2 = &mris->vertices[f->v[2]];
+      v0       = &mris->vertices[f->v[0]];
+      v1       = &mris->vertices[f->v[1]];
+      v2       = &mris->vertices[f->v[2]];
       v0_index = v0->marked;
       v1_index = v1->marked;
       v2_index = v2->marked;
 
       for (avg_thick = 0.0, m = 0; m < VERTICES_PER_FACE; m++) {
         vno = f->v[m];
-        v = &mris->vertices[vno];
+        v   = &mris->vertices[vno];
         avg_thick += v->imag_val;
       }
       avg_thick /= VERTICES_PER_FACE;
@@ -705,7 +780,7 @@ int main(int argc, char *argv[]) {
 
       for (avg_thick = 0.0, m = 0; m < VERTICES_PER_FACE; m++) {
         vno = f->v[m];
-        v = &mris->vertices[vno];
+        v   = &mris->vertices[vno];
         avg_thick += v->imag_val;
       }
       avg_thick /= VERTICES_PER_FACE;
@@ -772,11 +847,11 @@ int main(int argc, char *argv[]) {
       thickness_vars[v0->marked] += std * std;
     }
 
-    int dofs_total = 0;
+    int   dofs_total  = 0;
     float areas_total = 0.0f;
 
     for (i = 0; i < MAX_INDICES; i++) {
-      if (dofs[i] == 0 || names[i] == nullptr) {
+      if (dofs[i] == 0 || names[i] == NULL) {
         continue;
       }
 
@@ -834,9 +909,9 @@ int main(int argc, char *argv[]) {
 
       /* output */
 
-      if (tablefile != nullptr) {
+      if (tablefile != NULL) {
         fp = fopen(tablefile, "a");
-        fprintf(fp, "%-40s", fio_basename(names[i], nullptr));
+        fprintf(fp, "%-40s", fio_basename(names[i], NULL));
         fprintf(fp, "%5d", dofs[i]);
         fprintf(fp, "  %5.0f", areas[i]);
         fprintf(fp, "  %5.0f", volumes[i]);
@@ -862,7 +937,7 @@ int main(int argc, char *argv[]) {
         fprintf(stdout, "  %s", names[i]);
         fprintf(stdout, "\n");
       } else {
-        if (annotation_name && mris->ct == nullptr)
+        if (annotation_name && mris->ct == NULL)
           ErrorExit(ERROR_BADFILE,
                     "%s: no color table loaded - cannot translate annot  file",
                     Progname);
@@ -983,7 +1058,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -997,29 +1072,34 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "log")) {
     log_file_name = argv[2];
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "outputting results to %s...\n", log_file_name);
   } else if (!stricmp(option, "nsmooth")) {
     nsmooth = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("Smooth thickness by %d steps before using it \n", nsmooth);
   } else if (!stricmp(option, "noheader")) {
     noheader = 1;
     printf("suppressing printing of headers to log file\n");
   } else if (!stricmp(option, "white")) {
     white_name = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using %s as white matter surface name\n", white_name);
   } else if (!stricmp(option, "pial")) {
     pial_name = argv[2];
-    nargs = 1;
+    nargs     = 1;
     printf("using %s as pial matter surface name\n", pial_name);
   } else if (!stricmp(option, "sdir")) {
     char str[STRLEN];
     strcpy(sdir, argv[2]);
     printf("using  %s as  SUBJECTS_DIR...\n", sdir);
-    nargs = 1;
-    sprintf(str, "SUBJECTS_DIR=%s", sdir);
+    nargs   = 1;
+    int req = snprintf(str, STRLEN, "SUBJECTS_DIR=%s", sdir);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     putenv(str);
   } else if (!stricmp(option, "mgz")) {
     MGZ = 1;
@@ -1028,8 +1108,8 @@ static int get_option(int argc, char *argv[]) {
     MGZ = 0;
     printf("INFO: assuming COR format for volumes.\n");
   } else if (!stricmp(option, "cortex")) {
-    cortex_label = LabelRead(nullptr, argv[2]);
-    if (cortex_label == nullptr) {
+    cortex_label = LabelRead(NULL, argv[2]);
+    if (cortex_label == NULL) {
       ErrorExit(ERROR_NOFILE, "");
     }
     nargs = 1;
@@ -1053,41 +1133,41 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'T':
       thickness_name = argv[2];
-      nargs = 1;
+      nargs          = 1;
       fprintf(stderr, "using thickness file %s.\n", thickness_name);
       break;
     case 'L':
       label_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       fprintf(stderr, "limiting computations to label %s.\n", label_name);
       break;
     case 'M':
       mri_name = argv[2];
-      nargs = 1;
+      nargs    = 1;
       fprintf(stderr, "computing histograms on intensity values from %s...\n",
               mri_name);
       break;
     case 'H':
-      histo_flag = 1;
+      histo_flag      = 1;
       gray_histo_name = argv[2];
-      nargs = 1;
+      nargs           = 1;
       fprintf(stderr,
               "writing histograms of intensity distributions to %s...\n",
               gray_histo_name);
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'A':
       annotation_name = argv[2];
-      nargs = 1;
+      nargs           = 1;
       fprintf(stderr, "computing statistics for each annotation in %s.\n",
               annotation_name);
       break;
     case 'C':
       annotctabfile = argv[2];
-      nargs = 1;
+      nargs         = 1;
       break;
     case 'I':
       ignore_below = atof(argv[2]);
@@ -1099,11 +1179,11 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'B':
       tabular_output_flag = 1;
-      nargs = 0;
+      nargs               = 0;
       break;
     case 'F':
       tablefile = argv[2];
-      nargs = 1;
+      nargs     = 1;
       break;
     case '?':
     case 'U':
@@ -1118,37 +1198,37 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_help();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   fprintf(stderr,
           "usage: %s [options] <subject name> <hemi> [<surface name>]\n",
           Progname);
 }
 
 #include "mris_anatomical_stats.help.xml.h"
-static void print_help() {
+static void print_help(void) {
   outputHelpXml(mris_anatomical_stats_help_xml,
                 mris_anatomical_stats_help_xml_len);
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 double MRISmeasureTotalWhiteMatterVolume(MRI *mri) {
-  double total_volume, voxel_volume;
-  int x, y, z, width, height, depth;
+  double   total_volume, voxel_volume;
+  int      x, y, z, width, height, depth;
   BUFTYPE *psrc;
 
-  width = mri->width;
-  height = mri->height;
-  depth = mri->depth;
+  width        = mri->width;
+  height       = mri->height;
+  depth        = mri->depth;
   voxel_volume = mri->xsize * mri->ysize * mri->zsize;
   for (total_volume = 0.0, y = 0; y < height; y++) {
     for (z = 0; z < depth; z++) {
@@ -1166,8 +1246,8 @@ double MRISmeasureTotalWhiteMatterVolume(MRI *mri) {
 int MRIScomputeCurvatureStats(MRI_SURFACE *mris, double *pavg, double *pvar,
                               float ignore_below, float ignore_above) {
   VERTEX *v;
-  int vno;
-  double mean, var, n;
+  int     vno;
+  double  mean, var, n;
 
   for (n = mean = 0.0, vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -1199,10 +1279,10 @@ int MRIScomputeCurvatureStats(MRI_SURFACE *mris, double *pavg, double *pvar,
   return (NO_ERROR);
 }
 double MRISmeasureCorticalGrayMatterVolume(MRI_SURFACE *mris) {
-  FACE *f;
+  FACE *  f;
   VERTEX *v;
-  int fno, m, vno;
-  double total, volume, avg_thick, white_area, pial_area, *white_areas;
+  int     fno, m, vno;
+  double  total, volume, avg_thick, white_area, pial_area, *white_areas;
 
   white_areas = (double *)calloc(mris->nfaces, sizeof(double));
   if (!white_areas)
@@ -1230,7 +1310,7 @@ double MRISmeasureCorticalGrayMatterVolume(MRI_SURFACE *mris) {
     }
     for (avg_thick = 0.0, m = 0; m < VERTICES_PER_FACE; m++) {
       vno = f->v[m];
-      v = &mris->vertices[vno];
+      v   = &mris->vertices[vno];
       avg_thick += v->curv;
     }
     avg_thick /= VERTICES_PER_FACE;
@@ -1247,8 +1327,8 @@ double MRISmeasureCorticalGrayMatterVolume(MRI_SURFACE *mris) {
 
 double MRIScomputeAbsoluteCurvature(MRI_SURFACE *mris) {
   VERTEX *v;
-  int vno;
-  double total, n;
+  int     vno;
+  double  total, n;
 
   for (n = total = 0.0, vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -1369,7 +1449,7 @@ MRISreplaceMarks(MRI_SURFACE *mris, int in_mark, int out_mark)
 #endif
 
 int MRISripVerticesWithAnnotation(MRI_SURFACE *mris, int annotation) {
-  int vno;
+  int     vno;
   VERTEX *v;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1386,7 +1466,7 @@ int MRISripVerticesWithAnnotation(MRI_SURFACE *mris, int annotation) {
 }
 
 int MRISripVerticesWithoutAnnotation(MRI_SURFACE *mris, int annotation) {
-  int vno;
+  int     vno;
   VERTEX *v;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1409,7 +1489,7 @@ int MRISripVerticesWithoutAnnotation(MRI_SURFACE *mris, int annotation) {
 
 int MRISreplaceAnnotations(MRI_SURFACE *mris, int in_annotation,
                            int out_annotation) {
-  int vno;
+  int     vno;
   VERTEX *v;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1425,16 +1505,16 @@ int MRISreplaceAnnotations(MRI_SURFACE *mris, int in_annotation,
 }
 
 int MRISrestoreSurface(MRI_SURFACE *mris) {
-  int vno, fno;
+  int     vno, fno;
   VERTEX *v;
-  FACE *f;
+  FACE *  f;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
-    v = &mris->vertices[vno];
+    v          = &mris->vertices[vno];
     v->ripflag = 0;
   }
   for (fno = 0; fno < mris->nfaces; fno++) {
-    f = &mris->faces[fno];
+    f          = &mris->faces[fno];
     f->ripflag = 0;
   }
   return (NO_ERROR);
@@ -1455,8 +1535,8 @@ int MRIScountVertices(MRI_SURFACE *mris) {
 
 double MRIScomputeAbsoluteCurvatureMarked(MRI_SURFACE *mris, int mark) {
   VERTEX *v;
-  double curv;
-  int vno;
+  double  curv;
+  int     vno;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -1477,7 +1557,7 @@ double MRIScomputeAbsoluteCurvatureMarked(MRI_SURFACE *mris, int mark) {
 int MRIScomputeCurvatureIndicesMarked(MRI_SURFACE *mris, double *pici,
                                       double *pfi, int mark) {
   VERTEX *v;
-  int ret, vno;
+  int     ret, vno;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];

@@ -3,8 +3,8 @@
 #include "datamodel/utils/EigenVectorInitPathStrategy.h" // dmri_poistats
 #include "datamodel/utils/FieldLineInitPathStrategy.h"   // dmri_poistats
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 PoistatsModel::PoistatsModel() {
 
@@ -95,8 +95,8 @@ void PoistatsModel::Init() {
   this->m_IsDebug = false;
 
   this->m_EigenVectors = NULL;
-  this->m_SeedVolume = NULL;
-  this->m_SeedValues = NULL;
+  this->m_SeedVolume   = NULL;
+  this->m_SeedValues   = NULL;
 
   // set up cubic spline filter
   m_CubicSplineFilter = CubicSplineFilterType::New();
@@ -144,9 +144,9 @@ PoistatsModel::MatrixPointer
 PoistatsModel::RethreadPath(MatrixPointer originalPath, const int nNewSamples) {
 
   // create evenly spaced parametric points for the original path
-  const double gridFloor = 0.0;
+  const double gridFloor   = 0.0;
   const double gridCeiling = 1.0;
-  ArrayType originalPathGrid(originalPath->rows());
+  ArrayType    originalPathGrid(originalPath->rows());
   PoistatsModel::SpaceEvenly(&originalPathGrid, gridFloor, gridCeiling);
 
   // interploate the spline
@@ -165,7 +165,7 @@ PoistatsModel::RethreadPath(MatrixPointer originalPath, const int nNewSamples) {
   // coordinates.  We do this by calculating a new spline based on the old one
   // and setting the parametric coordinates based on the path length
   ArrayType normalizedCumulativeSum(nNewSamples);
-  double pathLength = cumulativeSum[cumulativeSum.size() - 1];
+  double    pathLength = cumulativeSum[cumulativeSum.size() - 1];
 
   for (unsigned int cRow = 0; cRow < cumulativeSum.size(); cRow++) {
     normalizedCumulativeSum[cRow] = cumulativeSum[cRow] / pathLength;
@@ -186,8 +186,8 @@ PoistatsModel::RethreadPath(MatrixPointer originalPath, const int nNewSamples) {
  */
 PoistatsModel::MatrixPointer
 PoistatsModel::CubicSplineInterpolation(MatrixPointer originalPath,
-                                        ArrayPointer originalPathGrid,
-                                        const int nNewSamples) {
+                                        ArrayPointer  originalPathGrid,
+                                        const int     nNewSamples) {
 
   const int spatialDimension = 3;
 
@@ -232,7 +232,7 @@ PoistatsModel::CubicSplineInterpolation(MatrixPointer originalPath,
   // evaluate at regular steps
   for (int cRow = 0; cRow < nNewSamples; cRow++) {
 
-    double t = static_cast<double>(cRow) * resampledStepSize;
+    double       t    = static_cast<double>(cRow) * resampledStepSize;
     const double maxT = 1.0;
     if (t > maxT) {
       t = maxT;
@@ -270,7 +270,7 @@ void PoistatsModel::SpaceEvenly(ArrayPointer outputArray, const double floor,
 }
 
 void PoistatsModel::CalculatePathMagnitude(MatrixPointer path,
-                                           ArrayPointer magnitude) {
+                                           ArrayPointer  magnitude) {
 
   const int spatialDimension = path->columns();
 
@@ -314,7 +314,7 @@ void PoistatsModel::CalculatePathVectors(MatrixPointer path,
 }
 
 void PoistatsModel::CalculateMagnitude(MatrixPointer path,
-                                       ArrayPointer magnitude) {
+                                       ArrayPointer  magnitude) {
 
   const int spatialDimension = path->columns();
   for (int cRow = 0; cRow < static_cast<int>(path->rows()); cRow++) {

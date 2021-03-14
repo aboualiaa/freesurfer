@@ -1,16 +1,14 @@
 /**
- * @file  mri_fastmarching.cpp
  * @brief Creates a distance transform.
  *
  */
 /*
  * Original Author: Florent Segonne
- * CVS Revision Info:
  *    $Author$
  *    $Date$
  *    $Revision$
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -84,8 +82,8 @@ MRI *MRIextractDistanceMap(MRI *mri_src, MRI *mri_dst, int label,
           MRIFvox(mri_dst, x, y, z) = 0.0f;
 
     const int outside = 1;
-    const int inside = 2;
-    const int both = 3;
+    const int inside  = 2;
+    const int both    = 3;
 
     // positive inside and positive outside
     const int bothUnsigned = 4;

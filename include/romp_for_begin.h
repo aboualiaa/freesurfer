@@ -1,17 +1,11 @@
 /**
- * @file  romp_support.h
- * @brief prototypes and structures for getting reprodiucible results from and
- * for timing omp loops.
+ * @brief prototypes and structures for getting reprodiucible results from and for timing omp loops.
  *
  */
 /*
  * Original Author: Bevin Brett
- * CVS Revision Info:
- *    $Author: brettb $
- *    $Date: 2018/01 $
- *    $Revision: 1.0 $
  *
- * Copyright © 2018 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -102,8 +96,8 @@
                                                                                                                       \
         /* Serial iteration reproducing each partial sum    */ /*                                                  */ \
         int const ROMP_lo = ROMP_distributor.partials[ROMP_index].lo;                                                 \
-    int const ROMP_hi = ROMP_distributor.partials[ROMP_index].hi;                                                     \
-    int ROMP_VARIABLE;                                                                                                \
+    int const     ROMP_hi = ROMP_distributor.partials[ROMP_index].hi;                                                 \
+    int           ROMP_VARIABLE;                                                                                      \
     for (ROMP_VARIABLE = ROMP_lo; ROMP_VARIABLE < ROMP_hi; ROMP_VARIABLE++) {                                         \
                                                                                                                       \
       ROMP_PFLB_begin                                                                                                 \

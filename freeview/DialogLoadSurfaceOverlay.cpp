@@ -1,7 +1,7 @@
 #include "DialogLoadSurfaceOverlay.h"
 #include "ui_DialogLoadSurfaceOverlay.h"
-#include <QMessageBox>
 #include <QFileDialog>
+#include <QMessageBox>
 
 DialogLoadSurfaceOverlay::DialogLoadSurfaceOverlay(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogLoadSurfaceOverlay) {

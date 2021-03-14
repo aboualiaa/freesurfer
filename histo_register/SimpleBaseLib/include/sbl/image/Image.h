@@ -21,7 +21,7 @@ namespace sbl {
   }
 
 // debug mode image bound checking
-#define IMGCHK assertDebug(inBounds(x, y))
+#define IMGCHK        assertDebug(inBounds(x, y))
 #define IMGCHK_INTERP assertDebug(inBounds(x, y))
 
 // note: we use BGR order for RGB images
@@ -85,8 +85,8 @@ public:
   inline void setRGB(int x, int y, T r, T g, T b) {
     assertStatic(CHANNEL_COUNT >= 3);
     IMGCHK m_ptr[y][x * CHANNEL_COUNT + B_CHANNEL] = b;
-    m_ptr[y][x * CHANNEL_COUNT + G_CHANNEL] = g;
-    m_ptr[y][x * CHANNEL_COUNT + R_CHANNEL] = r;
+    m_ptr[y][x * CHANNEL_COUNT + G_CHANNEL]        = g;
+    m_ptr[y][x * CHANNEL_COUNT + R_CHANNEL]        = r;
   }
   inline void setB(int x, int y, T v) {
     assertStatic(CHANNEL_COUNT >= 3);
@@ -108,8 +108,8 @@ public:
   inline int memUsed() const {
     return sizeof(Image<T, CHANNEL_COUNT>) + m_rowBytes * m_height;
   }
-  inline int depth() const { return sizeof(T) * 8; }
-  inline int channelCount() const { return CHANNEL_COUNT; }
+  inline int  depth() const { return sizeof(T) * 8; }
+  inline int  channelCount() const { return CHANNEL_COUNT; }
   inline bool isFloat() const { return typeid(T) == typeid(float); }
 
   /// check whether position is in image bounds
@@ -121,9 +121,9 @@ public:
   }
 
   /// access image data via pointers
-  inline T *raw() { return m_raw; }
+  inline T *      raw() { return m_raw; }
   inline const T *rawConst() const { return m_raw; }
-  inline T **pointers() { return m_ptr; }
+  inline T **     pointers() { return m_ptr; }
 
   /// clear the image to the specified color
   void clear(T r, T g, T b);
@@ -134,7 +134,7 @@ private:
   void alloc(int width, int height);
 
   // image data
-  T *m_raw;
+  T * m_raw;
   T **m_ptr;
   int m_width;
   int m_height;
@@ -170,7 +170,7 @@ private:
 
   /// the stored IplImage, if any
   mutable IplImage *m_iplImage;
-  mutable bool m_deallocIplImage;
+  mutable bool      m_deallocIplImage;
 
 #endif // USE_OPENCV
 };
@@ -197,12 +197,12 @@ template <typename T, int CHANNEL_COUNT> Image<T, CHANNEL_COUNT>::~Image() {
 // common constructor code
 template <typename T, int CHANNEL_COUNT>
 void Image<T, CHANNEL_COUNT>::alloc(int width, int height) {
-  m_width = width;
+  m_width  = width;
   m_height = height;
 
   // require quad-word alignment for rows
   // (round up to nearest mult of 8)
-  m_rowBytes = (m_width * sizeof(T) * CHANNEL_COUNT + 7) & (0xffff - 7);
+  m_rowBytes   = (m_width * sizeof(T) * CHANNEL_COUNT + 7) & (0xffff - 7);
   int rowWidth = m_rowBytes / sizeof(T);
   assertDebug(rowWidth >= m_width);
   int size = rowWidth * m_height; // total number of elements
@@ -226,7 +226,7 @@ void Image<T, CHANNEL_COUNT>::alloc(int width, int height) {
 
     // init IPL pointer, if defined
 #ifdef USE_OPENCV
-  m_iplImage = NULL;
+  m_iplImage        = NULL;
   m_deallocIplImage = false;
 #endif
 }
@@ -255,9 +255,9 @@ void Image<T, CHANNEL_COUNT>::clear(T v) {
 template <typename T, int CHANNEL_COUNT>
 float Image<T, CHANNEL_COUNT>::interp(float x, float y) const {
   IMGCHK_INTERP
-  int xInt = (int)x;
-  int yInt = (int)y;
-  float val = 0;
+  int   xInt = (int)x;
+  int   yInt = (int)y;
+  float val  = 0;
   assertDebug(xInt >= 0 && yInt >= 0 && xInt < m_width && yInt < m_height);
   if (xInt == m_width - 1) { // fix(faster): make faster?
     if (yInt == m_height - 1) {
@@ -272,7 +272,7 @@ float Image<T, CHANNEL_COUNT>::interp(float x, float y) const {
   } else {
     float xFrac = x - xInt;
     float yFrac = y - yInt;
-    val = (1.0f - xFrac) * (1.0f - yFrac) * m_ptr[yInt][xInt] +
+    val         = (1.0f - xFrac) * (1.0f - yFrac) * m_ptr[yInt][xInt] +
           (1.0f - xFrac) * yFrac * m_ptr[yInt + 1][xInt] +
           xFrac * (1.0f - yFrac) * m_ptr[yInt][xInt + 1] +
           xFrac * yFrac * m_ptr[yInt + 1][xInt + 1];
@@ -284,8 +284,8 @@ float Image<T, CHANNEL_COUNT>::interp(float x, float y) const {
 template <typename T, int CHANNEL_COUNT>
 float Image<T, CHANNEL_COUNT>::interp(float x, float y, int c) const {
   IMGCHK_INTERP
-  int xInt = (int)x;
-  int yInt = (int)y;
+  int   xInt  = (int)x;
+  int   yInt  = (int)y;
   float xFrac = x - xInt;
   float yFrac = y - yInt;
   float val =
@@ -308,13 +308,13 @@ Image<T, CHANNEL_COUNT>::Image(IplImage *iplImage, bool deallocIplImage) {
   //    assertAlways( iplImage->origin == IPL_ORIGIN_BL );
   //    assertAlways( sizeof( T ) == 1 ? iplImage->depth == 8 : iplImage->depth
   //    == 4 ); // assuming U or F type
-  m_width = iplImage->width;
-  m_height = iplImage->height;
-  int rowWidth = iplImage->widthStep;
-  m_rowBytes = rowWidth * sizeof(T);
-  m_raw = (T *)iplImage->imageData;
-  m_iplImage = iplImage;
-  m_deleteRaw = false;
+  m_width           = iplImage->width;
+  m_height          = iplImage->height;
+  int rowWidth      = iplImage->widthStep;
+  m_rowBytes        = rowWidth * sizeof(T);
+  m_raw             = (T *)iplImage->imageData;
+  m_iplImage        = iplImage;
+  m_deleteRaw       = false;
   m_deallocIplImage = deallocIplImage;
 
   // create row pointers
@@ -333,13 +333,13 @@ void Image<T, CHANNEL_COUNT>::createIplImage() const {
   assert(m_iplImage);
   m_deallocIplImage = true;
   // fix(clean): make sure every field is initialized; use cvInitImageHeader?
-  m_iplImage->nSize = sizeof(IplImage);
-  m_iplImage->ID = 0;
+  m_iplImage->nSize     = sizeof(IplImage);
+  m_iplImage->ID        = 0;
   m_iplImage->nChannels = CHANNEL_COUNT;
-  m_iplImage->width = m_width;
-  m_iplImage->height = m_height;
+  m_iplImage->width     = m_width;
+  m_iplImage->height    = m_height;
   m_iplImage->dataOrder = IPL_DATA_ORDER_PIXEL;
-  m_iplImage->origin = IPL_ORIGIN_BL;
+  m_iplImage->origin    = IPL_ORIGIN_BL;
   if (isFloat()) {
     m_iplImage->depth = IPL_DEPTH_32F;
   } else if (depth() == 8) {
@@ -349,16 +349,16 @@ void Image<T, CHANNEL_COUNT>::createIplImage() const {
   } else {
     m_iplImage->depth = IPL_DEPTH_32S;
   }
-  m_iplImage->align = IPL_ALIGN_QWORD;
-  m_iplImage->imageSize = m_rowBytes * m_height;
-  m_iplImage->imageData = (char *)m_raw;
-  m_iplImage->widthStep = m_rowBytes;
+  m_iplImage->align           = IPL_ALIGN_QWORD;
+  m_iplImage->imageSize       = m_rowBytes * m_height;
+  m_iplImage->imageData       = (char *)m_raw;
+  m_iplImage->widthStep       = m_rowBytes;
   m_iplImage->imageDataOrigin = (char *)m_raw;
-  m_iplImage->imageData = (char *)m_raw;
-  m_iplImage->roi = NULL;
-  m_iplImage->maskROI = NULL;
-  m_iplImage->imageId = NULL;
-  m_iplImage->tileInfo = NULL;
+  m_iplImage->imageData       = (char *)m_raw;
+  m_iplImage->roi             = NULL;
+  m_iplImage->maskROI         = NULL;
+  m_iplImage->imageId         = NULL;
+  m_iplImage->tileInfo        = NULL;
 }
 
 #endif // USE_OPENCV
@@ -368,14 +368,14 @@ void Image<T, CHANNEL_COUNT>::createIplImage() const {
 //-------------------------------------------
 
 /// common image types
-typedef Image<unsigned char, 3> ImageColorU;
+typedef Image<unsigned char, 3>  ImageColorU;
 typedef Image<unsigned short, 3> ImageColorS;
-typedef Image<int, 3> ImageColorI;
-typedef Image<float, 3> ImageColorF;
-typedef Image<unsigned char, 1> ImageGrayU;
+typedef Image<int, 3>            ImageColorI;
+typedef Image<float, 3>          ImageColorF;
+typedef Image<unsigned char, 1>  ImageGrayU;
 typedef Image<unsigned short, 1> ImageGrayS;
-typedef Image<int, 1> ImageGrayI;
-typedef Image<float, 1> ImageGrayF;
+typedef Image<int, 1>            ImageGrayI;
+typedef Image<float, 1>          ImageGrayF;
 
 } // end namespace sbl
 #endif // _SBL_IMAGE_H_

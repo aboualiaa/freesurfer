@@ -23,7 +23,7 @@ AtlasMeshStatisticsCollector ::~AtlasMeshStatisticsCollector() {}
 void AtlasMeshStatisticsCollector ::Rasterize(const AtlasMesh *mesh) {
 
   // Initialize from a clean slate
-  m_LabelStatistics = nullptr;
+  m_LabelStatistics  = 0;
   m_MinLogLikelihood = 0;
   m_ThreadSpecificLabelStatistics.clear();
   m_ThreadSpecificMinLogLikelihoods.clear();
@@ -39,8 +39,7 @@ void AtlasMeshStatisticsCollector ::Rasterize(const AtlasMesh *mesh) {
     // Initialize cost to zero for this thread
     m_ThreadSpecificMinLogLikelihoods.push_back(0.0);
 
-    // Create a container to hold the label statistics of this thread, and
-    // initialize to zero
+    // Create a container to hold the label statistics of this thread, and initialize to zero
     StatisticsContainerType::Pointer labelStatistics =
         StatisticsContainerType::New();
     for (AtlasMesh::PointDataContainer::ConstIterator it =
@@ -94,7 +93,7 @@ bool AtlasMeshStatisticsCollector ::RasterizeTetrahedron(
   mesh->GetCell(tetrahedronId, cell);
 
   AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-  const AtlasMesh::PointIdentifier id0 = *pit;
+  const AtlasMesh::PointIdentifier     id0 = *pit;
   ++pit;
   const AtlasMesh::PointIdentifier id1 = *pit;
   ++pit;
@@ -125,7 +124,7 @@ bool AtlasMeshStatisticsCollector ::RasterizeTetrahedron(
   AtlasAlphasType statisticsInVertex1;
   AtlasAlphasType statisticsInVertex2;
   AtlasAlphasType statisticsInVertex3;
-  double minLogLikelihood = 0.0;
+  double          minLogLikelihood = 0.0;
   this->GetContributionOfTetrahedron(
       p0, p1, p2, p3, alphasInVertex0, alphasInVertex1, alphasInVertex2,
       alphasInVertex3, minLogLikelihood, statisticsInVertex0,

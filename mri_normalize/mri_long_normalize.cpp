@@ -1,5 +1,4 @@
 /**
- * @file  mri_normalize.c
  * @brief Normalize the white-matter, based on control points.
  *
  * The variation in intensity due to the B1 bias field is corrected.
@@ -11,12 +10,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2015/05/20 15:59:06 $
- *    $Revision: 1.1 $
  *
- * Copyright © 2011-2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,14 +23,14 @@
  *
  */
 
+#include "cma.h"
 #include "diag.h"
 #include "mrinorm.h"
 #include "tags.h"
 #include "version.h"
-#include "cma.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(int code);
 static MRI *find_control_points_always_in_WM(MRI *mri_aseg, MRI *mri_ctrl);
 static MRI *remove_points_not_in_range(MRI *mri_brain, MRI *mri_ctrl_src,
@@ -52,35 +47,33 @@ static float min_intensity = 95 ;
 
 static int intensity_pad = 2;
 
-static char *mask_fname = nullptr;
-static char *aseg_name = "aseg.mgz";
-static char *brain_name = "brain.mgz";
+static char *      mask_fname = NULL;
+static const char *aseg_name  = "aseg.mgz";
+static const char *brain_name = "brain.mgz";
 
 static char *control_volume_fname = nullptr;
 ;
-static char *bias_volume_fname = nullptr;
+static char *bias_volume_fname   = nullptr;
 static char *control_point_fname = nullptr;
-static float bias_sigma = 1.0;
-static float cross_time_sigma = -1;
+static float bias_sigma          = 1.0;
+static float cross_time_sigma    = -1;
 
 const char *Progname;
 
 #define MAX_TPS 1000
 
-int
-main(int argc, char *argv[])
-{
-  char   *tp_fname, *in_fname, *out_fname, *tp_names[MAX_TPS] ;
-  int    nargs, t, ntps ;
-  char line[STRLEN], *cp, fname[STRLEN], bdir[STRLEN], *bname, sdir[STRLEN] ;
-  MRI   *mri_norm = NULL, *mri_aseg = NULL, *mri_ctrl, *mri_bias, *mri_dst, *mri_brain = NULL ;
-  FILE  *fp ;
-  LTA   *ltas[MAX_TPS] ;
+int main(int argc, char *argv[]) {
+  char *tp_fname, *in_fname, *out_fname, *tp_names[MAX_TPS];
+  int   nargs, t, ntps;
+  char  line[STRLEN], *cp, fname[STRLEN], bdir[STRLEN], *bname, sdir[STRLEN];
+  MRI * mri_norm = NULL, *mri_aseg = NULL, *mri_ctrl, *mri_bias, *mri_dst,
+      *mri_brain = NULL;
+  FILE *fp;
+  LTA * ltas[MAX_TPS];
 
   nargs = handleVersionOption(argc, argv, "mri_long_normalize");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -94,26 +87,26 @@ main(int argc, char *argv[])
     argv += nargs;
   }
 
-  tp_fname = argv[1];
-  in_fname = argv[2];
+  tp_fname  = argv[1];
+  in_fname  = argv[2];
   out_fname = argv[3];
 
   ntps = FileNumberOfEntries(tp_fname);
   printf("reading time point file %s with %d timepoints\n", tp_fname, ntps);
 
   fp = fopen(tp_fname, "r");
-  if (ntps <= 0 || fp == nullptr)
+  if (ntps <= 0 || fp == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not read base tp file %s", Progname,
               tp_fname);
 
   FileNamePath(tp_fname, bdir);
   bname = strrchr(bdir, '/') + 1;
-  if (bname == nullptr)
+  if (bname == NULL)
     ErrorExit(ERROR_BADPARM, "%s: could not parse base name from %s", Progname,
               bdir);
   strcpy(sdir, bdir);
   cp = strrchr(sdir, '/');
-  if (cp == nullptr)
+  if (cp == NULL)
     ErrorExit(ERROR_BADPARM, "%s: could not parse SUBJECTS_DIR from %s",
               Progname, sdir);
   *cp = 0;
@@ -121,15 +114,20 @@ main(int argc, char *argv[])
   for (t = 0; t < ntps; t++) {
     MRI *mri_tmp, *mri_tmp2;
 
-    cp = fgetl(line, 199, fp);
+    cp          = fgetl(line, 199, fp);
     tp_names[t] = (char *)calloc(strlen(cp) + 1, sizeof(char));
     strcpy(tp_names[t], cp);
 
-    sprintf(fname, "%s/%s.long.%s/mri/%s", sdir, cp, bname, in_fname);
+    int req = snprintf(fname, STRLEN, "%s/%s.long.%s/mri/%s", sdir, cp, bname,
+                       in_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading input volume %s\n", fname);
     mri_tmp = MRIread(fname);
-    if (mri_tmp == nullptr)
-      ErrorExit(Gerror, nullptr);
+    if (mri_tmp == NULL)
+      ErrorExit(Gerror, NULL);
     if (t == 0) {
       mri_norm = MRIallocSequence(mri_tmp->width, mri_tmp->height,
                                   mri_tmp->depth, mri_tmp->type, ntps);
@@ -138,36 +136,50 @@ main(int argc, char *argv[])
     MRIcopyFrame(mri_tmp, mri_norm, 0, t);
     MRIfree(&mri_tmp);
 
-    sprintf(fname, "%s/%s/mri/%s", sdir, cp, brain_name);
+    req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, cp, brain_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading input volume %s\n", fname);
     mri_tmp = MRIread(fname);
-    if (mri_tmp == nullptr)
-      ErrorExit(Gerror, nullptr);
+    if (mri_tmp == NULL)
+      ErrorExit(Gerror, NULL);
     if (t == 0) {
       mri_brain = MRIallocSequence(mri_tmp->width, mri_tmp->height,
                                    mri_tmp->depth, mri_tmp->type, ntps);
       MRIcopyHeader(mri_tmp, mri_brain);
     }
 
-    sprintf(fname, "%s/mri/transforms/%s_to_%s.lta", bdir, bname, tp_names[t]);
+    req = snprintf(fname, STRLEN, "%s/mri/transforms/%s_to_%s.lta", bdir, bname,
+                   tp_names[t]);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
+
     printf("reading input transform %s\n", fname);
     ltas[t] = LTAread(fname);
-    if (ltas[t] == nullptr)
-      ErrorExit(Gerror, nullptr);
+    if (ltas[t] == NULL)
+      ErrorExit(Gerror, NULL);
     if (ltas[t]->type != LINEAR_VOX_TO_VOX)
       ErrorExit(ERROR_UNSUPPORTED, "%s: transforms must be linear vox to vox",
                 Progname);
-    mri_tmp2 =
-        MRIinverseLinearTransform(mri_tmp, nullptr, ltas[t]->xforms[0].m_L);
+    mri_tmp2 = MRIinverseLinearTransform(mri_tmp, NULL, ltas[t]->xforms[0].m_L);
     MRIcopyFrame(mri_tmp2, mri_brain, 0, t);
     MRIfree(&mri_tmp);
     MRIfree(&mri_tmp2);
 
-    sprintf(fname, "%s/%s.long.%s/mri/%s", sdir, cp, bname, aseg_name);
+    req = snprintf(fname, STRLEN, "%s/%s.long.%s/mri/%s", sdir, cp, bname,
+                   aseg_name);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("reading input volume %s\n", fname);
     mri_tmp = MRIread(fname);
-    if (mri_tmp == nullptr)
-      ErrorExit(Gerror, nullptr);
+    if (mri_tmp == NULL)
+      ErrorExit(Gerror, NULL);
     if (t == 0) {
       mri_aseg = MRIallocSequence(mri_tmp->width, mri_tmp->height,
                                   mri_tmp->depth, mri_tmp->type, ntps);
@@ -182,11 +194,11 @@ main(int argc, char *argv[])
   mri_ctrl = find_control_points_always_in_WM(mri_aseg, nullptr);
   //  remove_gradient_outliers(mri_norm, mri_ctrl, mri_ctrl, max_grad) ;
   for (t = 0; t < ntps; t++) {
-    MRI *mri_tmp = nullptr;
+    MRI * mri_tmp = nullptr;
     float scale;
 
     mri_tmp = MRIcopyFrame(mri_norm, mri_tmp, t, 0);
-    scale = MRImeanInLabel(mri_tmp, mri_ctrl, CONTROL_MARKED);
+    scale   = MRImeanInLabel(mri_tmp, mri_ctrl, CONTROL_MARKED);
     printf("mean in wm is %2.0f, scaling by %2.2f\n", scale, 110 / scale);
     scale = 110 / scale;
     MRIscalarMul(mri_tmp, mri_tmp, scale);
@@ -201,13 +213,18 @@ main(int argc, char *argv[])
   //  remove_absolute_outliers(mri_norm, mri_ctrl, mri_ctrl, min_intensity) ;
   printf("using %d final control points\n", MRIcountNonzero(mri_ctrl));
   for (t = 0; t < ntps; t++) {
-    MRI *mri_tmp = nullptr;
+    MRI *mri_tmp = NULL;
 
-    mri_tmp = MRIcopyFrame(mri_norm, mri_tmp, t, 0);
-    mri_bias = MRIbuildBiasImage(mri_tmp, mri_ctrl, nullptr, bias_sigma);
-    mri_dst = MRIapplyBiasCorrectionSameGeometry(
-        mri_tmp, mri_bias, nullptr, DEFAULT_DESIRED_WHITE_MATTER_VALUE);
-    sprintf(fname, "%s/%s.long.%s/mri/%s", sdir, tp_names[t], bname, out_fname);
+    mri_tmp  = MRIcopyFrame(mri_norm, mri_tmp, t, 0);
+    mri_bias = MRIbuildBiasImage(mri_tmp, mri_ctrl, NULL, bias_sigma);
+    mri_dst  = MRIapplyBiasCorrectionSameGeometry(
+        mri_tmp, mri_bias, NULL, DEFAULT_DESIRED_WHITE_MATTER_VALUE);
+    int req = snprintf(fname, STRLEN, "%s/%s.long.%s/mri/%s", sdir, tp_names[t],
+                       bname, out_fname);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     printf("writing output to %s\n", fname);
     MRIwrite(mri_dst, fname);
   }
@@ -221,7 +238,7 @@ main(int argc, char *argv[])
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -229,55 +246,55 @@ static int get_option(int argc, char *argv[]) {
     usage_exit(0);
   } else if (!stricmp(option, "cross_time_sigma")) {
     cross_time_sigma = atof(argv[2]);
-    nargs = 1;
+    nargs            = 1;
     printf("smoothing images with Parzen window with sigma=  = %2.2f\n",
            cross_time_sigma);
 
   } else if (!stricmp(option, "MASK")) {
     mask_fname = argv[2];
-    nargs = 1;
+    nargs      = 1;
     printf("using MR volume %s to mask input volume...\n", mask_fname);
   } else
     switch (toupper(*option)) {
     case 'P':
       intensity_pad = atoi(argv[2]);
-      nargs = 1;
+      nargs         = 1;
       printf("using intensity pad %d (default=2)\n", intensity_pad);
       break;
     case 'S':
       bias_sigma = atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("smoothing bias field with sigma = %2.2f\n", bias_sigma);
       break;
     case 'D':
-      Gx = atoi(argv[2]);
-      Gy = atoi(argv[3]);
-      Gz = atoi(argv[4]);
+      Gx    = atoi(argv[2]);
+      Gy    = atoi(argv[3]);
+      Gz    = atoi(argv[4]);
       nargs = 3;
       printf("debugging voxel (%d, %d, %d)\n", Gx, Gy, Gz);
       break;
     case 'V':
-      Gvx = atoi(argv[2]);
-      Gvy = atoi(argv[3]);
-      Gvz = atoi(argv[4]);
+      Gvx   = atoi(argv[2]);
+      Gvy   = atoi(argv[3]);
+      Gvz   = atoi(argv[4]);
       nargs = 3;
       printf("debugging alternative voxel (%d, %d, %d)\n", Gvx, Gvy, Gvz);
       break;
     case 'A':
       aseg_name = argv[1];
-      nargs = 1;
+      nargs     = 1;
       printf("using aseg %s for normalization\n", aseg_name);
       break;
     case 'W':
       control_volume_fname = argv[2];
-      bias_volume_fname = argv[3];
-      nargs = 2;
+      bias_volume_fname    = argv[3];
+      nargs                = 2;
       printf("writing ctrl pts to   %s\n", control_volume_fname);
       printf("writing bias field to %s\n", bias_volume_fname);
       break;
     case 'F':
       control_point_fname = argv[2];
-      nargs = 1;
+      nargs               = 1;
       printf("using control points from file %s...\n", control_point_fname);
       break;
     case '?':
@@ -330,7 +347,7 @@ static MRI *find_control_points_always_in_WM(MRI *mri_aseg, MRI *mri_ctrl) {
 static MRI *remove_points_not_in_range(MRI *mri_brain, MRI *mri_ctrl_src,
                                        MRI *mri_ctrl_dst, float min_target,
                                        float max_target) {
-  int x, y, z, f, removed, nremoved = 0;
+  int   x, y, z, f, removed, nremoved = 0;
   float val;
 
   if (mri_ctrl_dst == nullptr)

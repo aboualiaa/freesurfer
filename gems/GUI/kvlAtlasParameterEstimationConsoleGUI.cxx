@@ -7,7 +7,7 @@ void kvlAtlasParameterEstimationConsoleGUI::cb_m_Window_i(Fl_Double_Window *,
   exit(0);
 }
 void kvlAtlasParameterEstimationConsoleGUI::cb_m_Window(Fl_Double_Window *o,
-                                                        void *v) {
+                                                        void *            v) {
   ((kvlAtlasParameterEstimationConsoleGUI *)(o->user_data()))
       ->cb_m_Window_i(o, v);
 }
@@ -51,7 +51,7 @@ void kvlAtlasParameterEstimationConsoleGUI::cb_m_Size0_i(Fl_Value_Input *,
   // m_LabelImageNumber->do_callback();
 }
 void kvlAtlasParameterEstimationConsoleGUI::cb_m_Size0(Fl_Value_Input *o,
-                                                       void *v) {
+                                                       void *          v) {
   ((kvlAtlasParameterEstimationConsoleGUI *)(o->parent()->user_data()))
       ->cb_m_Size0_i(o, v);
 }
@@ -63,7 +63,7 @@ void kvlAtlasParameterEstimationConsoleGUI::cb_m_Size1_i(Fl_Value_Input *,
   // m_LabelImageNumber->do_callback();
 }
 void kvlAtlasParameterEstimationConsoleGUI::cb_m_Size1(Fl_Value_Input *o,
-                                                       void *v) {
+                                                       void *          v) {
   ((kvlAtlasParameterEstimationConsoleGUI *)(o->parent()->user_data()))
       ->cb_m_Size1_i(o, v);
 }
@@ -81,7 +81,7 @@ void kvlAtlasParameterEstimationConsoleGUI::cb_m_ShowMesh_i(Fl_Check_Button *,
   m_LabelImageNumber->do_callback();
 }
 void kvlAtlasParameterEstimationConsoleGUI::cb_m_ShowMesh(Fl_Check_Button *o,
-                                                          void *v) {
+                                                          void *           v) {
   ((kvlAtlasParameterEstimationConsoleGUI *)(o->parent()->user_data()))
       ->cb_m_ShowMesh_i(o, v);
 }
@@ -91,7 +91,7 @@ void kvlAtlasParameterEstimationConsoleGUI::cb_m_LabelNumber_i(Fl_Choice *,
   m_LabelImageNumber->do_callback();
 }
 void kvlAtlasParameterEstimationConsoleGUI::cb_m_LabelNumber(Fl_Choice *o,
-                                                             void *v) {
+                                                             void *     v) {
   ((kvlAtlasParameterEstimationConsoleGUI *)(o->parent()->user_data()))
       ->cb_m_LabelNumber_i(o, v);
 }
@@ -122,7 +122,7 @@ void kvlAtlasParameterEstimationConsoleGUI::cb_Interrupt_i(Fl_Button *,
   this->Interrupt();
 }
 void kvlAtlasParameterEstimationConsoleGUI::cb_Interrupt(Fl_Button *o,
-                                                         void *v) {
+                                                         void *     v) {
   ((kvlAtlasParameterEstimationConsoleGUI *)(o->parent()->user_data()))
       ->cb_Interrupt_i(o, v);
 }
@@ -209,7 +209,7 @@ void kvlAtlasParameterEstimationConsoleGUI::cb_m_Size2_i(Fl_Value_Input *,
   // m_LabelImageNumber->do_callback();
 }
 void kvlAtlasParameterEstimationConsoleGUI::cb_m_Size2(Fl_Value_Input *o,
-                                                       void *v) {
+                                                       void *          v) {
   ((kvlAtlasParameterEstimationConsoleGUI *)(o->parent()->user_data()))
       ->cb_m_Size2_i(o, v);
 }

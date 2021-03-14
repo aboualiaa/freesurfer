@@ -1,16 +1,11 @@
 /**
- * @file  WindowGroupPlot.h
  * @brief Tool window to plot group data
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/02/03 21:38:19 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,9 +20,9 @@
 #ifndef WINDOWGROUPPLOT_H
 #define WINDOWGROUPPLOT_H
 
-#include <QWidget>
 #include <QPixmap>
 #include <QVariantMap>
+#include <QWidget>
 
 namespace Ui {
 class WindowGroupPlot;
@@ -61,8 +56,8 @@ private:
   void UpdateCurrentConfig(const QString &shape, const QColor &c);
 
   Ui::WindowGroupPlot *ui;
-  FSGroupDescriptor *m_fsgd;
-  QList<QPixmap> m_listMarkerPixmaps;
+  FSGroupDescriptor *  m_fsgd;
+  QList<QPixmap>       m_listMarkerPixmaps;
 };
 
 #endif // WINDOWGROUPPLOT_H

@@ -1,16 +1,7 @@
-/**
- * @file  ToolWindowEdit.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/01/11 21:05:23 $
- *    $Revision: 1.22 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,8 +16,8 @@
 #define TOOLWINDOWEDIT_H
 
 #include "UIUpdateHelper.h"
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 
 namespace Ui {
 class ToolWindowEdit;
@@ -76,7 +67,7 @@ protected:
 private:
   Ui::ToolWindowEdit *ui;
 
-  bool m_bToUpdateWidgets;
+  bool             m_bToUpdateWidgets;
   QList<QWidget *> m_widgetsBrushSize;
   QList<QWidget *> m_widgetsReference;
   QList<QWidget *> m_widgetsTolerance;

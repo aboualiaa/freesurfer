@@ -49,57 +49,57 @@ public:
    * NIFTI intent codes.
    */
   enum IntentCodeEnum {
-    IntentNone = 0,
-    IntentCorrel = 2,
-    IntentTTest = 3,
-    IntentFTest = 4,
-    IntentZScore = 5,
-    IntentChiSQ = 6,
-    IntentBeta = 7,
-    IntentBinom = 8,
-    IntentGamma = 9,
-    IntentPoisson = 10,
-    IntentNormal = 11,
-    IntentFTestNonc = 12,
-    IntentChiSQNonc = 13,
-    IntentLogistic = 14,
-    IntentLaplace = 15,
-    IntentUniform = 16,
-    IntentTTestNonc = 17,
-    IntentWeibull = 18,
-    IntentChi = 19,
-    IntentInvGauss = 20,
-    IntentExtVal = 21,
-    IntentPVal = 22,
-    IntentLogPVal = 23,
-    IntentLog10PVal = 24,
-    IntentEstimate = 1001,
-    IntentLabel = 1002,
-    IntentNeuroName = 1003,
-    IntentGenMatrix = 1004,
-    IntentSymMatrix = 1005,
-    IntentDispVect = 1006,
-    IntentVector = 1007,
-    IntentPointSet = 1008,
-    IntentTriangle = 1009,
+    IntentNone       = 0,
+    IntentCorrel     = 2,
+    IntentTTest      = 3,
+    IntentFTest      = 4,
+    IntentZScore     = 5,
+    IntentChiSQ      = 6,
+    IntentBeta       = 7,
+    IntentBinom      = 8,
+    IntentGamma      = 9,
+    IntentPoisson    = 10,
+    IntentNormal     = 11,
+    IntentFTestNonc  = 12,
+    IntentChiSQNonc  = 13,
+    IntentLogistic   = 14,
+    IntentLaplace    = 15,
+    IntentUniform    = 16,
+    IntentTTestNonc  = 17,
+    IntentWeibull    = 18,
+    IntentChi        = 19,
+    IntentInvGauss   = 20,
+    IntentExtVal     = 21,
+    IntentPVal       = 22,
+    IntentLogPVal    = 23,
+    IntentLog10PVal  = 24,
+    IntentEstimate   = 1001,
+    IntentLabel      = 1002,
+    IntentNeuroName  = 1003,
+    IntentGenMatrix  = 1004,
+    IntentSymMatrix  = 1005,
+    IntentDispVect   = 1006,
+    IntentVector     = 1007,
+    IntentPointSet   = 1008,
+    IntentTriangle   = 1009,
     IntentQuaternion = 1010,
-    IntentDimless = 1011,
+    IntentDimless    = 1011,
     IntentTimeSeries = 2001,
-    IntentNodeIndex = 2002,
-    IntentRGBVector = 2003,
+    IntentNodeIndex  = 2002,
+    IntentRGBVector  = 2003,
     IntentRGBAVector = 2004,
-    IntentShape = 2005
+    IntentShape      = 2005
   };
 
   /**
    * NIFTI transform codes.
    */
   enum XFormCodeEnum {
-    XFormUnkown = 0,
+    XFormUnkown      = 0,
     XFormScannerAnat = 1,
     XFormAlignedAnat = 2,
-    XFormTalairach = 3,
-    XFormMNI152 = 4
+    XFormTalairach   = 3,
+    XFormMNI152      = 4
   };
 
   /**
@@ -107,10 +107,10 @@ public:
    */
   enum SliceCodeEnum {
     SliceUnknown = 0,
-    SliceSeqInc = 1,
-    SliceSeqDec = 2,
-    SliceAltInc = 3,
-    SliceAltDec = 4,
+    SliceSeqInc  = 1,
+    SliceSeqDec  = 2,
+    SliceAltInc  = 3,
+    SliceAltDec  = 4,
     SliceAltInc2 = 5,
     SliceAltDec2 = 6
   };
@@ -120,17 +120,17 @@ public:
    */
   enum UnitsXYZTEnum {
     UnitsUnknown = 0,
-    UnitsMeter = 1,
-    UnitsMM = 2,
-    UnitsMicron = 3,
-    UnitsSpace = 7,
-    UnitsSec = 8,
-    UnitsMSec = 16,
-    UnitsUSec = 24,
-    UnitsHz = 32,
-    UnitsPPM = 40,
-    UnitsRads = 48,
-    UnitsTime = 56
+    UnitsMeter   = 1,
+    UnitsMM      = 2,
+    UnitsMicron  = 3,
+    UnitsSpace   = 7,
+    UnitsSec     = 8,
+    UnitsMSec    = 16,
+    UnitsUSec    = 24,
+    UnitsHz      = 32,
+    UnitsPPM     = 40,
+    UnitsRads    = 48,
+    UnitsTime    = 56
   };
 
   /**
@@ -140,22 +140,22 @@ public:
    * images.  The NIFTI types Float128 and Complex256 are not supported.
    */
   enum DataTypeEnum {
-    TypeUInt8 = 2,
-    TypeInt16 = 4,
-    TypeInt32 = 8,
-    TypeFloat32 = 16,
-    TypeComplex64 = 32,
-    TypeFloat64 = 64,
-    TypeRGB24 = 128,
-    TypeInt8 = 256,
-    TypeUInt16 = 512,
-    TypeUInt32 = 768,
-    TypeInt64 = 1024,
-    TypeUInt64 = 1280,
-    TypeFloat128 = 1536,
+    TypeUInt8      = 2,
+    TypeInt16      = 4,
+    TypeInt32      = 8,
+    TypeFloat32    = 16,
+    TypeComplex64  = 32,
+    TypeFloat64    = 64,
+    TypeRGB24      = 128,
+    TypeInt8       = 256,
+    TypeUInt16     = 512,
+    TypeUInt32     = 768,
+    TypeInt64      = 1024,
+    TypeUInt64     = 1280,
+    TypeFloat128   = 1536,
     TypeComplex128 = 1792,
     TypeComplex256 = 2048,
-    TypeRGBA32 = 2304
+    TypeRGBA32     = 2304
   };
 
   /**
@@ -221,7 +221,7 @@ public:
   /**
    * Get the intent name.  This should match the intent code.
    */
-  void SetIntentName(const char *name);
+  void        SetIntentName(const char *name);
   const char *GetIntentName() { return this->IntentName; }
 
   //@{
@@ -312,7 +312,7 @@ public:
    * all NIFTI software, the NIFTI standard itself does not specify what
    * encodings are permitted.
    */
-  void SetDescrip(const char *descrip);
+  void        SetDescrip(const char *descrip);
   const char *GetDescrip() { return this->Descrip; }
 
   /**
@@ -321,7 +321,7 @@ public:
    * 24 characters, and it will be assumed to be in the same directory
    * as the NIFTI file.
    */
-  void SetAuxFile(const char *auxfile);
+  void        SetAuxFile(const char *auxfile);
   const char *GetAuxFile() { return this->AuxFile; }
 
   //@{
@@ -393,41 +393,41 @@ protected:
   vtkNIFTIImageHeader();
   ~vtkNIFTIImageHeader() override;
 
-  char Magic[12];
+  char         Magic[12];
   vtkTypeInt64 VoxOffset;
-  int DataType;
-  int BitPix;
+  int          DataType;
+  int          BitPix;
   vtkTypeInt64 Dim[8];
-  double PixDim[8];
-  int IntentCode;
-  char IntentName[18];
-  double IntentP1;
-  double IntentP2;
-  double IntentP3;
-  double SclSlope;
-  double SclInter;
-  double CalMin;
-  double CalMax;
-  double SliceDuration;
-  double TOffset;
+  double       PixDim[8];
+  int          IntentCode;
+  char         IntentName[18];
+  double       IntentP1;
+  double       IntentP2;
+  double       IntentP3;
+  double       SclSlope;
+  double       SclInter;
+  double       CalMin;
+  double       CalMax;
+  double       SliceDuration;
+  double       TOffset;
   vtkTypeInt64 SliceStart;
   vtkTypeInt64 SliceEnd;
-  int SliceCode;
-  int XYZTUnits;
-  int DimInfo;
-  char Descrip[82];
-  char AuxFile[26];
-  int QFormCode;
-  int SFormCode;
-  double QuaternB;
-  double QuaternC;
-  double QuaternD;
-  double QOffsetX;
-  double QOffsetY;
-  double QOffsetZ;
-  double SRowX[4];
-  double SRowY[4];
-  double SRowZ[4];
+  int          SliceCode;
+  int          XYZTUnits;
+  int          DimInfo;
+  char         Descrip[82];
+  char         AuxFile[26];
+  int          QFormCode;
+  int          SFormCode;
+  double       QuaternB;
+  double       QuaternC;
+  double       QuaternD;
+  double       QOffsetX;
+  double       QOffsetY;
+  double       QOffsetZ;
+  double       SRowX[4];
+  double       SRowY[4];
+  double       SRowZ[4];
 
   void SetStringValue(char *x, const char *y, size_t n);
 

@@ -1,16 +1,11 @@
 /**
- * @file  Interactor.cpp
  * @brief Base Interactor class manage mouse and key input in render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/02 18:41:17 $
- *    $Revision: 1.14 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,17 +19,17 @@
  */
 
 #include "Interactor.h"
-#include "RenderView.h"
 #include "CursorFactory.h"
-#include <vtkRenderer.h>
+#include "RenderView.h"
 #include <QDebug>
+#include <vtkRenderer.h>
 
 #ifdef Q_OS_MAC
 Qt::KeyboardModifier Interactor::CONTROL_MODIFIER = Qt::MetaModifier;
-Qt::Key Interactor::CONTROL_KEY = Qt::Key_Meta;
+Qt::Key              Interactor::CONTROL_KEY      = Qt::Key_Meta;
 #else
 Qt::KeyboardModifier Interactor::CONTROL_MODIFIER = Qt::ControlModifier;
-Qt::Key Interactor::CONTROL_KEY = Qt::Key_Control;
+Qt::Key              Interactor::CONTROL_KEY      = Qt::Key_Control;
 #endif
 
 Interactor::Interactor(QObject *parent) : QObject(parent) { m_nAction = 0; }
@@ -49,10 +44,10 @@ void Interactor::SetUseCommandControl(bool b) {
 #ifdef Q_OS_MAC
   if (b) {
     CONTROL_MODIFIER = Qt::ControlModifier;
-    CONTROL_KEY = Qt::Key_Control;
+    CONTROL_KEY      = Qt::Key_Control;
   } else {
     CONTROL_MODIFIER = Qt::MetaModifier;
-    CONTROL_KEY = Qt::Key_Meta;
+    CONTROL_KEY      = Qt::Key_Meta;
   }
 #else
   Q_UNUSED(b);

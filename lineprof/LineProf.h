@@ -1,17 +1,12 @@
 /**
- * @file LineProf.h
  * @brief Class to interface with the laplace solver and line profiler
  *
  */
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2012/10/24 19:19:28 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,8 +21,8 @@
 #ifndef _LineProf_h
 #define _LineProf_h
 
-#include <vector>
 #include "Tracer.h"
+#include <vector>
 
 class vtkPolyData;
 
@@ -83,11 +78,11 @@ private:
                        const std::vector<double> &pt2);
 
   std::vector<std::vector<double>> _points2d;
-  std::vector<int> _segment0;
-  std::vector<int> _segment1;
-  std::vector<int> _segmentL;
-  std::vector<int> _segmentR;
-  Tracer *_tracer;
+  std::vector<int>                 _segment0;
+  std::vector<int>                 _segment1;
+  std::vector<int>                 _segmentL;
+  std::vector<int>                 _segmentR;
+  Tracer *                         _tracer;
 };
 
 #endif

@@ -2,9 +2,8 @@
 #ifndef H_COORDS_H
 #define H_COORDS_H
 
-#include <assert.h>
-#include <cmath>
 #include <algorithm>
+#include <assert.h>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -31,7 +30,7 @@ public:
   TCoords operator=(const TCoords &_x);
 
   double norm() const;
-  void div(const TCoords &_d);
+  void   div(const TCoords &_d);
 
   T operator()(int i) const {
     assert(i > -1 && i < n);
@@ -44,14 +43,14 @@ public:
 
   void print(std::ostream &os) const;
 
-  CoordsStatusType &status() { return m_status; }
+  CoordsStatusType &      status() { return m_status; }
   const CoordsStatusType &status() const { return m_status; }
-  void invalidate() { m_status = cInvalid; }
-  void validate() { m_status = cValid; }
-  bool isValid() const { return m_status == cValid; }
+  void                    invalidate() { m_status = cInvalid; }
+  void                    validate() { m_status = cValid; }
+  bool                    isValid() const { return m_status == cValid; }
 
 private:
-  T m_pdata[n];
+  T                m_pdata[n];
   CoordsStatusType m_status;
 
   void clone(const TCoords &_x);
@@ -169,7 +168,7 @@ TCoords<T, n> TCoords<T, n>::operator=(const TCoords<T, n> &_x) {
 }
 
 template <class T, int n> void TCoords<T, n>::div(const TCoords<T, n> &_d) {
-  T *p = m_pdata;
+  T *      p  = m_pdata;
   const T *pd = _d.m_pdata;
   for (int i = 0; i < n; ++i, ++p, ++pd) {
     *p /= *pd;
@@ -179,7 +178,7 @@ template <class T, int n> void TCoords<T, n>::div(const TCoords<T, n> &_d) {
 template <class T, int n> double TCoords<T, n>::norm() const {
   double dret = 0.0;
   double dbuf;
-  int i = 0;
+  int    i = 0;
   for (const T *p = m_pdata; i < n; ++i, ++p) {
     dbuf = double(*p);
     dret += dbuf * dbuf;

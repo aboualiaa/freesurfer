@@ -1,16 +1,7 @@
-/**
- * @file  FSTrack.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/12/05 20:03:33 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -34,7 +25,7 @@ public:
   FSTrack(FSVolume *ref = 0, QObject *parent = 0);
   bool LoadFromFile(const QString &filename, const QString &ref_fn = QString());
   bool LoadFromFiles(const QStringList &filenames,
-                     const QString &ref_fn = QString());
+                     const QString &    ref_fn = QString());
 
   void GetRASBounds(double bounds[]);
 
@@ -44,7 +35,7 @@ public slots:
 
 protected:
   FSVolume *m_volumeRef;
-  double m_dRASBounds[6];
+  double    m_dRASBounds[6];
 };
 
 #endif // FSTRACK_H

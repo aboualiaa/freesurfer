@@ -1,8 +1,8 @@
 #ifndef __itkLabelVariableLengthVectorCurrents_txx
 #define __itkLabelVariableLengthVectorCurrents_txx
 
-#include "itkVariableLengthVectorCurrents.h"
 #include "itkNumericTraitsVariableLengthVectorPixel.h"
+#include "itkVariableLengthVectorCurrents.h"
 #include "vnl/vnl_math.h"
 #include <cstring>
 #include <stdlib.h>
@@ -14,10 +14,10 @@ void LabelVariableLengthVector<TValueType, TMesh>::SetCell(MeshPointerType mesh,
   CellAutoPointerType cellAutoPointer;
   mesh->GetCell(cellId, cellAutoPointer);
 
-  // CellType labels;
+  //CellType labels;
 
   typedef typename MeshType::CellPixelType CellType;
-  // std::vector<int> labels;
+  //std::vector<int> labels;
   CellType labels;
   mesh->GetCellData(cellId, &labels);
   this->SetSize(labels.size());

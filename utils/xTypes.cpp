@@ -1,15 +1,10 @@
 /**
- * @file  xTypes.c
  * @brief general purpose utils
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:55 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,14 +18,14 @@
 
 #include "xTypes.h"
 
-#define xColr_kfHilightAmt 0.3
+#define xColr_kfHilightAmt           0.3
 #define xColr_kfMinHighlightDistance 0.3
 
 void xColr_SetFloat(xColor3fRef iColor, float ifRed, float ifGreen,
                     float ifBlue) {
-  iColor->mfRed = ifRed;
+  iColor->mfRed   = ifRed;
   iColor->mfGreen = ifGreen;
-  iColor->mfBlue = ifBlue;
+  iColor->mfBlue  = ifBlue;
 }
 
 void xColr_SetFloatComponent(xColor3fRef iColor, xColr_tComponent iComponent,
@@ -67,9 +62,9 @@ float xColr_GetFloatComponent(xColor3fRef iColor, xColr_tComponent iComponent) {
 }
 
 void xColr_SetInt(xColor3nRef iColor, int inRed, int inGreen, int inBlue) {
-  iColor->mnRed = inRed;
+  iColor->mnRed   = inRed;
   iColor->mnGreen = inGreen;
-  iColor->mnBlue = inBlue;
+  iColor->mnBlue  = inBlue;
 }
 
 void xColr_SetIntComponent(xColor3nRef iColor, xColr_tComponent iComponent,

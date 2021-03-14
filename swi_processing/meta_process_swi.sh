@@ -18,4 +18,3 @@
 
 # DUKE GE
 ./process_swi.sh ge DUKE_GE ../0001_DUKE_20101027_MR1/SCANS/6/DICOM/custom.0001_MR.MR.INTR_DEV.6.1.20101027.131151.iruxgn.dcm
-

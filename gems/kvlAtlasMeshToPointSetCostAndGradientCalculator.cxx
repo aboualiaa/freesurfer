@@ -10,7 +10,7 @@ namespace kvl {
 AtlasMeshToPointSetCostAndGradientCalculator ::
     AtlasMeshToPointSetCostAndGradientCalculator() {
 
-  m_TargetPoints = nullptr;
+  m_TargetPoints = 0;
 }
 
 //

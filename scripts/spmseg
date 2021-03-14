@@ -1,7 +1,7 @@
 #!/bin/tcsh -f
 # spmseg
 
-set VERSION = '$Id: spmseg,v 1.3 2016/02/16 17:17:20 zkaufman Exp $';
+set VERSION = 'spmseg @FS_VERSION@';
 
 set subject = ();
 set invol = orig.mgz
@@ -51,8 +51,7 @@ goto check_params;
 check_params_return:
 
 if($#tmpdir == 0) then
-  if(-dw /scratch)   set tmpdir = /scratch/tmpdir.spmseg.$$
-  if(! -dw /scratch) set tmpdir = $SUBJECTS_DIR/$subject/tmp/tmpdir.spmseg.$$
+  set tmpdir = `fs_temp_dir --scratch`
 endif
 mkdir -p $tmpdir
 

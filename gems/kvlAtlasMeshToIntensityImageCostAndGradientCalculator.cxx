@@ -1,8 +1,8 @@
 #include "kvlAtlasMeshToIntensityImageCostAndGradientCalculator.h"
 
-#include <itkMath.h>
-#include "vnl/vnl_matrix_fixed.h"
 #include "kvlTetrahedronInteriorConstIterator.h"
+#include "vnl/vnl_matrix_fixed.h"
+#include <itkMath.h>
 
 namespace kvl {
 
@@ -39,8 +39,8 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::SetImages(
 void AtlasMeshToIntensityImageCostAndGradientCalculator ::SetParameters(
     const std::vector<vnl_vector<double>> &means,
     const std::vector<vnl_matrix<double>> &variances,
-    const std::vector<double> &mixtureWeights,
-    const std::vector<int> &numberOfGaussiansPerClass) {
+    const std::vector<double> &            mixtureWeights,
+    const std::vector<int> &               numberOfGaussiansPerClass) {
   m_LikelihoodFilter->SetParameters(means, variances, mixtureWeights,
                                     numberOfGaussiansPerClass);
 }
@@ -52,7 +52,7 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::Rasterize(
     const AtlasMesh *mesh) {
 
   // Make sure the likelihoods are up-to-date
-  // m_LikelihoodFilter->SetNumberOfThreads( 1 );
+  //m_LikelihoodFilter->SetNumberOfThreads( 1 );
   m_LikelihoodFilter->Update();
 
   // Now rasterize
@@ -66,14 +66,15 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::
     AddDataContributionOfTetrahedron(
         const AtlasMesh::PointType &p0, const AtlasMesh::PointType &p1,
         const AtlasMesh::PointType &p2, const AtlasMesh::PointType &p3,
-        const AtlasAlphasType &alphasInVertex0,
-        const AtlasAlphasType &alphasInVertex1,
-        const AtlasAlphasType &alphasInVertex2,
-        const AtlasAlphasType &alphasInVertex3, double &priorPlusDataCost,
-        AtlasPositionGradientType &gradientInVertex0,
-        AtlasPositionGradientType &gradientInVertex1,
-        AtlasPositionGradientType &gradientInVertex2,
-        AtlasPositionGradientType &gradientInVertex3) {
+        const AtlasAlphasType &               alphasInVertex0,
+        const AtlasAlphasType &               alphasInVertex1,
+        const AtlasAlphasType &               alphasInVertex2,
+        const AtlasAlphasType &               alphasInVertex3,
+        ThreadAccumDataType &                 priorPlusDataCost,
+        AtlasPositionGradientThreadAccumType &gradientInVertex0,
+        AtlasPositionGradientThreadAccumType &gradientInVertex1,
+        AtlasPositionGradientThreadAccumType &gradientInVertex2,
+        AtlasPositionGradientThreadAccumType &gradientInVertex3) {
 
   // Loop over all voxels within the tetrahedron and do The Right Thing
   const int numberOfClasses = alphasInVertex0.Size();
@@ -89,19 +90,18 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::
   for (; !it.IsAtEnd(); ++it) {
     // Skip voxels for which nothing is known
     if (it.Value().Size() == 0) {
-      // std::cout << "Skipping: " << it.Value().Size() << std::endl;
+      //std::cout << "Skipping: " << it.Value().Size() << std::endl;
       continue;
     }
 
     //
-    double likelihood = 0.0;
+    double likelihood     = 0.0;
     double xGradientBasis = 0.0;
     double yGradientBasis = 0.0;
     double zGradientBasis = 0.0;
     for (unsigned int classNumber = 0; classNumber < numberOfClasses;
          classNumber++) {
-      // Get the Gaussian mixture model likelihood of this class at the
-      // intensity of this pixel
+      // Get the Gaussian mixture model likelihood of this class at the intensity of this pixel
       const double mixture = it.Value()[classNumber];
 
       // Add contribution of the likelihood
@@ -117,7 +117,7 @@ void AtlasMeshToIntensityImageCostAndGradientCalculator ::
     } // End loop over all classes
 
     //  Add contribution to log-likelihood
-    likelihood = likelihood + 1e-15; // dont want to divide by zero
+    likelihood = likelihood + 1e-15; //dont want to divide by zero
     priorPlusDataCost -= log(likelihood);
 
     //

@@ -1,16 +1,11 @@
 /**
- * @file  VolumeFilterConvolve.cpp
  * @brief Base VolumeFilterConvolve class.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/10/18 18:13:24 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,13 +19,13 @@
  */
 
 #include "VolumeFilterConvolve.h"
-#include <math.h>
 #include "LayerMRI.h"
-#include <vtkImageData.h>
 #include "ProgressCallback.h"
-#include <vtkImageGaussianSmooth.h>
-#include <QDebug>
 #include "utils.h"
+#include <QDebug>
+#include <math.h>
+#include <vtkImageData.h>
+#include <vtkImageGaussianSmooth.h>
 
 VolumeFilterConvolve::VolumeFilterConvolve(LayerMRI *input, LayerMRI *output,
                                            QObject *parent)
@@ -54,7 +49,7 @@ bool VolumeFilterConvolve::Execute() {
   } else {
     ::SetProgressCallback(ProgressCallback, 0, 50);
     MRI *mri_src = CreateMRIFromVolume(m_volumeInput);
-    MRI *mri_g = MRIgaussian1d(m_dSigma, m_nKernelSize);
+    MRI *mri_g   = MRIgaussian1d(m_dSigma, m_nKernelSize);
     if (!mri_src || !mri_g) {
       return false;
     }

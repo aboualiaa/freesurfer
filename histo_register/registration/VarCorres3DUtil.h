@@ -1,9 +1,9 @@
 #ifndef _VAR_CORRES_3D_UTIL_H_
 #define _VAR_CORRES_3D_UTIL_H_
-#include <sbl/core/Config.h>
-#include <sbl/math/Vector.h>
 #include "registration/CorresField3D.h"
 #include "registration/ImageSetSeq.h"
+#include <sbl/core/Config.h>
+#include <sbl/math/Vector.h>
 using namespace sbl;
 namespace hb {
 

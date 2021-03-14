@@ -11,16 +11,17 @@
 #define KSPDestroy(x) KSPDestroy(&x)
 #endif
 #ifdef PETSC_LEGACY
-#define KSPSetOperators(x, y, z) KSPSetOperators(x, y, z, DIFFERENT_NONZERO_PATTERN)
+#define KSPSetOperators(x, y, z)                                               \
+  KSPSetOperators(x, y, z, DIFFERENT_NONZERO_PATTERN)
 #endif
 
 PetscSolver::PetscSolver() {
   data = NULL;
   mask = NULL;
 
-  sol = 0;
-  rhs = 0;
-  A = 0;
+  sol        = 0;
+  rhs        = 0;
+  A          = 0;
   indexImage = NULL;
 }
 
@@ -34,11 +35,11 @@ PetscSolver::~PetscSolver() {
 }
 
 void PetscSolver::SetInputMask(MaskImagePointer inputMask,
-                               MaskPixelType insideValue,
-                               MaskPixelType zeroValue) {
-  mask = inputMask;
+                               MaskPixelType    insideValue,
+                               MaskPixelType    zeroValue) {
+  mask        = inputMask;
   labelInside = insideValue;
-  labelZero = zeroValue;
+  labelZero   = zeroValue;
 }
 
 int PetscSolver::Update(double convergence) {
@@ -103,7 +104,7 @@ int PetscSolver::Update(double convergence) {
   ierr = MatMult(A, sol, vcheck);
   CHKERRQ(ierr);
   PetscScalar neg_one = -1.0;
-  PetscReal norm;
+  PetscReal   norm;
   ierr = VecAXPY(vcheck, neg_one, rhs);
   CHKERRQ(ierr);
   ierr = VecNorm(vcheck, NORM_2, &norm);
@@ -124,7 +125,7 @@ int PetscSolver::SetupIndexCorrespondence() {
   indexImage->Allocate();
 
   MaskConstIteratorType maskCiter(mask, mask->GetRequestedRegion());
-  IndexIterator indexIter(indexImage, indexImage->GetRequestedRegion());
+  IndexIterator         indexIter(indexImage, indexImage->GetRequestedRegion());
 
   unsigned int count = 0;
   for (maskCiter.GoToBegin(), indexIter.GoToBegin(); !indexIter.IsAtEnd();
@@ -136,14 +137,14 @@ int PetscSolver::SetupIndexCorrespondence() {
 }
 
 void PetscSolver::SetupSystem() {
-  typedef itk::ConstNeighborhoodIterator<MaskImageType> MaskCNIterator;
+  typedef itk::ConstNeighborhoodIterator<MaskImageType>  MaskCNIterator;
   typedef itk::ConstNeighborhoodIterator<IndexImageType> IndexCNIterator;
 
   MaskCNIterator::RadiusType radius;
   radius.Fill(1);
 
-  MaskCNIterator mask_cni(radius, mask, mask->GetRequestedRegion());
-  IndexCNIterator index_cni(radius, indexImage,
+  MaskCNIterator            mask_cni(radius, mask, mask->GetRequestedRegion());
+  IndexCNIterator           index_cni(radius, indexImage,
                             indexImage->GetRequestedRegion());
   ConstNeighborhoodIterator data_cni(radius, data, data->GetRequestedRegion());
 
@@ -152,19 +153,19 @@ void PetscSolver::SetupSystem() {
   NeighborhoodIterator::OffsetType offset_my;
   NeighborhoodIterator::OffsetType offset_py;
   NeighborhoodIterator::OffsetType offset_zero;
-  offset_mx[0] = -1;
-  offset_mx[1] = 0;
-  offset_px[0] = 1;
-  offset_px[1] = 0;
-  offset_my[0] = 0;
-  offset_my[1] = -1;
-  offset_py[0] = 0;
-  offset_py[1] = 1;
+  offset_mx[0]   = -1;
+  offset_mx[1]   = 0;
+  offset_px[0]   = 1;
+  offset_px[1]   = 0;
+  offset_my[0]   = 0;
+  offset_my[1]   = -1;
+  offset_py[0]   = 0;
+  offset_py[1]   = 1;
   offset_zero[0] = 0;
   offset_zero[1] = 0;
 
   typedef std::vector<NeighborhoodIterator::OffsetType> OffsetVectorType;
-  OffsetVectorType vecOffsets;
+  OffsetVectorType                                      vecOffsets;
 
   vecOffsets.push_back(offset_mx);
   vecOffsets.push_back(offset_px);
@@ -172,26 +173,26 @@ void PetscSolver::SetupSystem() {
   vecOffsets.push_back(offset_py);
 
   typedef std::map<int, double> MapType;
-  MapType map_rhs;
+  MapType                       map_rhs;
 
   OffsetVectorType::const_iterator off_cit;
-  int pj[5], counter = 0;
-  int row;
-  PetscScalar value[5];
+  int                              pj[5], counter = 0;
+  int                              row;
+  PetscScalar                      value[5];
   // int dbgCount = 0;
   for (index_cni.GoToBegin(), mask_cni.GoToBegin(), data_cni.GoToBegin();
        !index_cni.IsAtEnd(); ++index_cni, ++mask_cni, ++data_cni, counter = 0) {
     if (mask_cni.GetPixel(offset_zero) == labelInside) {
       row = index_cni.GetPixel(offset_zero);
 
-      pj[counter] = row;
+      pj[counter]    = row;
       value[counter] = 4;
       ++counter;
 
       for (off_cit = vecOffsets.begin(); off_cit != vecOffsets.end();
            ++off_cit) {
         if (mask_cni.GetPixel(*off_cit) == labelInside) {
-          pj[counter] = index_cni.GetPixel(*off_cit);
+          pj[counter]    = index_cni.GetPixel(*off_cit);
           value[counter] = -1;
           ++counter;
         } else
@@ -207,13 +208,13 @@ void PetscSolver::SetupSystem() {
   MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
 
   // collect values from RHS
-  int *rhsIndices = new int[map_rhs.size()];
-  double *rhsValues = new double[map_rhs.size()];
-  counter = 0;
+  int *   rhsIndices = new int[map_rhs.size()];
+  double *rhsValues  = new double[map_rhs.size()];
+  counter            = 0;
   for (MapType::const_iterator map_cit = map_rhs.begin();
        map_cit != map_rhs.end(); ++map_cit, ++counter) {
     rhsIndices[counter] = map_cit->first;
-    rhsValues[counter] = map_cit->second;
+    rhsValues[counter]  = map_cit->second;
   }
   VecSetValues(rhs, counter, rhsIndices, rhsValues, INSERT_VALUES);
   VecAssemblyBegin(rhs);
@@ -225,12 +226,12 @@ void PetscSolver::SetupSystem() {
 
 int PetscSolver::DistributeSolution() {
   // quick & dirty - use input image
-  Iterator iter(data, data->GetRequestedRegion());
-  MaskConstIterator mask_cit(mask, mask->GetRequestedRegion());
+  Iterator           iter(data, data->GetRequestedRegion());
+  MaskConstIterator  mask_cit(mask, mask->GetRequestedRegion());
   IndexConstIterator index_cit(indexImage, indexImage->GetRequestedRegion());
 
   // borrow array from the rhs
-  PetscScalar *array;
+  PetscScalar *  array;
   PetscErrorCode ierr;
   ierr = VecGetArray(sol, &array);
   CHKERRQ(ierr);

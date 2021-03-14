@@ -8,16 +8,16 @@
 
 // ITK includes
 #define export // obsolete feature "export template" used in these header files
-#include "itkImageIOBase.h"
-#include "itkIOCommon.h"
-#include "itkExceptionObject.h"
 #include "itkByteSwapper.h"
-#include "itkMetaDataObject.h"
+#include "itkExceptionObject.h"
+#include "itkIOCommon.h"
+#include "itkImageIOBase.h"
 #include "itkMatrix.h"
+#include "itkMetaDataObject.h"
 
+#include <vnl/vnl_cross.h>
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_vector.h>
-#include <vnl/vnl_cross.h>
 #undef export
 
 #include <zlib.h>
@@ -27,15 +27,15 @@
 // because of the templated functions, need to declare them here
 // try to avoid name scoping
 namespace fs {
-const int MRI_UCHAR = 0;
-const int MRI_INT = 1;
-const int MRI_FLOAT = 3;
-const int MRI_SHORT = 4;
+const int MRI_UCHAR  = 0;
+const int MRI_INT    = 1;
+const int MRI_FLOAT  = 3;
+const int MRI_SHORT  = 4;
 const int MRI_TENSOR = 6;
 
 const int FS_DIMENSION_HEADER_SIZE = sizeof(int) * 7;
-const int FS_RAS_HEADER_SIZE = (sizeof(float) * 15) + sizeof(short);
-const int FS_UNUSED_HEADER_SIZE = 256 - FS_RAS_HEADER_SIZE;
+const int FS_RAS_HEADER_SIZE       = (sizeof(float) * 15) + sizeof(short);
+const int FS_UNUSED_HEADER_SIZE    = 256 - FS_RAS_HEADER_SIZE;
 const int FS_WHOLE_HEADER_SIZE =
     FS_RAS_HEADER_SIZE + FS_DIMENSION_HEADER_SIZE + FS_UNUSED_HEADER_SIZE;
 
@@ -47,8 +47,8 @@ class OutputStreamWrapper;
 
 class ITK_EXPORT MGHImageIO : public ImageIOBase {
 public:
-  typedef MGHImageIO Self;
-  typedef ImageIOBase Superclass;
+  typedef MGHImageIO         Self;
+  typedef ImageIOBase        Superclass;
   typedef SmartPointer<Self> Pointer;
 
   /** Method for creation through the object factory **/

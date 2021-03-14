@@ -1,16 +1,11 @@
 /**
- * @file  WindowTimeCourse.h
  * @brief Tool window to display time course data
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2014/04/09 20:56:04 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,8 +20,8 @@
 #ifndef WINDOWTIMECOURSE_H
 #define WINDOWTIMECOURSE_H
 
-#include <QWidget>
 #include <QLabel>
+#include <QWidget>
 
 namespace Ui {
 class WindowTimeCourse;
@@ -42,8 +37,8 @@ class ClickableLabel : public QLabel {
   Q_OBJECT
 
 public:
-  explicit ClickableLabel(QWidget *parent = Q_NULLPTR,
-                          Qt::WindowFlags f = Qt::WindowFlags());
+  explicit ClickableLabel(QWidget *       parent = Q_NULLPTR,
+                          Qt::WindowFlags f      = Qt::WindowFlags());
   ~ClickableLabel();
 
 signals:
@@ -90,10 +85,10 @@ private:
   QWidget *MakeLegendWidget(QObject *obj, const TimeCourseData &td);
 
   Ui::WindowTimeCourse *ui;
-  LayerMRI *lastMRI;
-  LayerSurface *lastSurface;
-  SurfaceOverlay *lastOverlay;
-  FlowLayout *layoutLegend;
+  LayerMRI *            lastMRI;
+  LayerSurface *        lastSurface;
+  SurfaceOverlay *      lastOverlay;
+  FlowLayout *          layoutLegend;
 };
 
 #endif // WINDOWTIMECOURSE_H

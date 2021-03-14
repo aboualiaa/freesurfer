@@ -21,11 +21,10 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mrisp_write</name>
-	<synopsis>mrisp_write [options] &lt;input_surface&gt; &lt;input overlay&gt; &lt;output name&gt;</synopsis>
-	<description>This program is useful for taking a surface
+  <name>mrisp_write</name>
+  <synopsis>mrisp_write [options] &lt;input_surface&gt; &lt;input overlay&gt; &lt;output name&gt;</synopsis>
+  <description>This program is useful for taking a surface
 	overlay on a sphere and writing in into spherical
 	coordinates. Typically ?h.sphere.reg would be the input (or
 	possibly ?h.sphere)
@@ -77,6 +76,5 @@
     spherical coordinates. </explanation>
   </outputs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>mris_make_template</see-also>
+  <see-also>mris_make_template</see-also>
 </help>
-

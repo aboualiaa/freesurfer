@@ -1,16 +1,11 @@
 /**
- * @file  FSLabel.h
  * @brief Base label class that takes care of I/O and data conversion.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/08 21:01:00 $
- *    $Revision: 1.45 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,25 +18,23 @@
  *
  */
 
-#include <stdexcept>
-#include "vtkImageData.h"
-#include "FSVolume.h"
+#include "FSLabel.h"
 #include "FSSurface.h"
+#include "FSVolume.h"
 #include "MyVTKUtils.h"
+#include "vtkImageData.h"
+#include <QDebug>
 #include <QFile>
 #include <QTextStream>
+#include <stdexcept>
 #include <vector>
-#include <QDebug>
-#include "FSLabel.h"
-
-using namespace std;
 
 FSLabel::FSLabel(QObject *parent, FSVolume *mri_template)
     : QObject(parent), m_label(NULL), m_l2s(NULL),
       m_mri_template(mri_template) {
   m_dStatsRange[0] = 0;
   m_dStatsRange[1] = 1.0;
-  m_label = ::LabelAlloc(100, NULL, (char *)"");
+  m_label          = ::LabelAlloc(100, NULL, (char *)"");
   if (mri_template) {
     ::LabelInit(m_label, mri_template->GetMRI(), NULL, CURRENT_VERTICES);
     LabelToScannerRAS(m_label, mri_template->GetMRI(), m_label);
@@ -68,12 +61,13 @@ bool FSLabel::LabelRead(const QString &filename) {
 
   m_label = ::LabelRead(NULL, filename.toLatin1().data());
   if (m_label == NULL) {
-    cerr << "LabelRead failed\n";
+    std::cerr << "LabelRead failed\n";
     return false;
   }
   if (m_label->coords != LABEL_COORDS_SCANNER_RAS && m_mri_template) {
     LabelToScannerRAS(m_label, m_mri_template->GetMRI(), m_label);
-    cout << "Label coordinates are converted to scanner ras for " << qPrintable(filename) << endl;
+    std::cout << "Label coordinates are converted to scanner ras for "
+              << qPrintable(filename) << std::endl;
   }
 
   if (m_label && m_label->n_points > 0) {
@@ -108,12 +102,12 @@ void FSLabel::UpdateLabelFromImage(vtkImageData *rasImage, FSVolume *ref_vol) {
     ::LabelFree(&m_label);
   }
 
-  int nCount = 0;
-  int *dim = rasImage->GetDimensions();
-  double *orig = rasImage->GetOrigin();
-  double *vs = rasImage->GetSpacing();
-  vector<float> values;
-  float fvalue;
+  int                nCount = 0;
+  int *              dim    = rasImage->GetDimensions();
+  double *           orig   = rasImage->GetOrigin();
+  double *           vs     = rasImage->GetSpacing();
+  std::vector<float> values;
+  float              fvalue;
   // int nProgressStep = ( 90 - event.GetInt() ) / 5;
   double pos[3];
 
@@ -218,16 +212,16 @@ void FSLabel::UpdateLabelFromImage(vtkImageData *rasImage, FSVolume *ref_vol) {
   } break;
   }
 
-  m_label = ::LabelAlloc( nCount, NULL, (char*)"" );
+  m_label           = ::LabelAlloc(nCount, NULL, (char *)"");
   m_label->n_points = nCount;
   //  m_label->coords = LABEL_COORDS_TKREG_RAS;
   for (int i = 0; i < nCount; i++) {
-    m_label->lv[i].x = values[i * 4];
-    m_label->lv[i].y = values[i * 4 + 1];
-    m_label->lv[i].z = values[i * 4 + 2];
-    m_label->lv[i].vno = -1;
+    m_label->lv[i].x       = values[i * 4];
+    m_label->lv[i].y       = values[i * 4 + 1];
+    m_label->lv[i].z       = values[i * 4 + 2];
+    m_label->lv[i].vno     = -1;
     m_label->lv[i].deleted = false;
-    m_label->lv[i].stat = values[i * 4 + 3];
+    m_label->lv[i].stat    = values[i * 4 + 3];
   }
 }
 
@@ -269,16 +263,16 @@ void FSLabel::UpdateRASImage(vtkImageData *rasImage, FSVolume *ref_vol,
     return;
   }
 
-  int n[3];
+  int    n[3];
   double pos[3];
-  int *dim = rasImage->GetDimensions();
-  char *ptr = (char *)rasImage->GetScalarPointer();
-  int scalar_type = rasImage->GetScalarType();
+  int *  dim         = rasImage->GetDimensions();
+  char * ptr         = (char *)rasImage->GetScalarPointer();
+  int    scalar_type = rasImage->GetScalarType();
   memset(ptr, 0,
          ((size_t)rasImage->GetScalarSize()) * dim[0] * dim[1] * dim[2]);
   if (m_dStatsRange[0] <= 0) {
     size_t nsize = ((size_t)dim[0]) * dim[1] * dim[2];
-    float *p = (float *)rasImage->GetScalarPointer();
+    float *p     = (float *)rasImage->GetScalarPointer();
     for (size_t i = 0; i < nsize; i++) {
       p[i] = m_dStatsRange[0] - 1;
     }
@@ -311,7 +305,7 @@ void FSLabel::UpdateRASImage(vtkImageData *rasImage, FSVolume *ref_vol,
     }
   }
   if (!error_strg.isEmpty())
-    cerr << qPrintable(error_strg) << endl;
+    std::cerr << qPrintable(error_strg) << std::endl;
 
   rasImage->Modified();
 }
@@ -320,7 +314,7 @@ bool FSLabel::LabelWrite(const QString &filename) {
   int err = ::LabelWrite(m_label, filename.toLatin1().data());
 
   if (err != 0) {
-    cerr << "LabelWrite failed\n";
+    std::cerr << "LabelWrite failed\n";
   }
 
   return err == 0;
@@ -372,7 +366,7 @@ bool FSLabel::HasRedo() { return !m_redoBuffer.isEmpty(); }
 
 void FSLabel::Undo() {
   if (!m_undoBuffer.isEmpty()) {
-    LABEL *l = m_undoBuffer.last();
+    LABEL *l  = m_undoBuffer.last();
     LABEL *l2 = ::LabelCopy(m_label, NULL);
     ::LabelCopy(l, m_label);
     ::LabelFree(&l);
@@ -383,7 +377,7 @@ void FSLabel::Undo() {
 
 void FSLabel::Redo() {
   if (!m_redoBuffer.isEmpty()) {
-    LABEL *l = m_redoBuffer.last();
+    LABEL *l  = m_redoBuffer.last();
     LABEL *l2 = ::LabelCopy(m_label, NULL);
     ::LabelCopy(l, m_label);
     ::LabelFree(&l);

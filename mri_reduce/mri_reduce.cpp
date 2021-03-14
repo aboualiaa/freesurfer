@@ -1,17 +1,6 @@
-/**
- * @file  mri_reduce.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2012/10/19 13:56:00 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,22 +12,22 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
-int reductions = 1;
+int         reductions = 1;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs, i;
-  MRI *mri_src, *mri_dst = nullptr;
-  char *in_fname, *out_fname;
+  int    ac, nargs, i;
+  MRI *  mri_src, *mri_dst = nullptr;
+  char * in_fname, *out_fname;
 
   nargs = handleVersionOption(argc, argv, "mri_reduce");
   if (nargs && argc - nargs == 1)
@@ -100,7 +89,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

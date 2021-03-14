@@ -1,12 +1,12 @@
 #ifndef SURFACESPLINE_H
 #define SURFACESPLINE_H
 
-#include <QObject>
-#include <QColor>
 #include "vtkSmartPointer.h"
+#include <QColor>
+#include <QObject>
 
-#include "mri.h"
 #include "colortab.h"
+#include "mri.h"
 
 class vtkActor;
 class LayerSurface;
@@ -49,19 +49,19 @@ public slots:
   void SetLocked(bool bLocked) { m_bLocked = bLocked; }
 
 private:
-  void BuildSphereActor(vtkActor *actor, vtkPoints *pts);
-  MRI *m_mri;
-  MRI *m_mriSurf;
+  void                      BuildSphereActor(vtkActor *actor, vtkPoints *pts);
+  MRI *                     m_mri;
+  MRI *                     m_mriSurf;
   vtkSmartPointer<vtkActor> m_actor;
   vtkSmartPointer<vtkActor> m_actorSpheres;
   vtkSmartPointer<vtkActor> m_actor2D[3];
   vtkSmartPointer<vtkActor> m_actor2DSpheres[3];
-  QColor m_color;
-  int m_nActiveVertex;
-  bool m_bProjection;
-  bool m_bLocked;
-  bool m_bVisible;
-  QString m_strName;
+  QColor                    m_color;
+  int                       m_nActiveVertex;
+  bool                      m_bProjection;
+  bool                      m_bLocked;
+  bool                      m_bVisible;
+  QString                   m_strName;
 };
 
 #endif // SURFACESPLINE_H

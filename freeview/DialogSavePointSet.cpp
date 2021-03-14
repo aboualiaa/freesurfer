@@ -1,16 +1,7 @@
-/**
- * @file  DialogSavePointSet.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/12/14 17:13:44 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,11 +13,11 @@
  *
  */
 #include "DialogSavePointSet.h"
+#include "LayerPropertyPointSet.h"
 #include "ui_DialogSavePointSet.h"
-#include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
-#include "LayerPropertyPointSet.h"
+#include <QMessageBox>
 
 DialogSavePointSet::DialogSavePointSet(QWidget *parent)
     : QDialog(parent), m_bRemind(false), ui(new Ui::DialogSavePointSet) {
@@ -39,7 +30,7 @@ void DialogSavePointSet::SetFileName(const QString &fn_in, int type) {
   if (fn_in.isEmpty())
     return;
 
-  QString fn = fn_in;
+  QString fn     = fn_in;
   QString suffix = QFileInfo(fn).suffix();
   if (suffix == "label" || suffix == "dat" || suffix == "json")
     fn = fn.left(fn.length() - suffix.length() - 1);
@@ -87,7 +78,7 @@ void DialogSavePointSet::OnOK() {
 
 void DialogSavePointSet::OnOpen() {
   QString old_fn = GetFileName();
-  QString fn = QFileDialog::getSaveFileName(
+  QString fn     = QFileDialog::getSaveFileName(
       this, "Select File To Save", (old_fn.isEmpty() ? m_strLastDir : old_fn),
       "All Files (*)", NULL, QFileDialog::DontConfirmOverwrite);
   if (!fn.isEmpty()) {

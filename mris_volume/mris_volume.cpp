@@ -1,17 +1,12 @@
 /**
- * @file  mris_volume.c
  * @brief compute the enclosed volume of a surface
  *
  * Use Strokes theorem to compute the volume enclosed by a surface.
  */
 /*
  * Original Author: Bruce Fischl and Xiao Han
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:34 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,23 +24,20 @@
 // original author: Xiao Han
 //
 // Warning: Do not edit the following four lines.  CVS maintains them.
-// Revision Author: $Author: nicks $
-// Revision Date  : $Date: 2011/03/02 00:04:34 $
-// Revision       : $Revision: 1.6 $
 //
 ////////////////////////////////////////////////////////////////////
 
 #include "diag.h"
+#include "mrisutils.h"
 #include "timer.h"
 #include "version.h"
-#include "mrisutils.h"
 
 #define VERTEX_EDGE(vec, v0, v1)                                               \
   VECTOR_LOAD(vec, v1->x - v0->x, v1->y - v0->y, v1->z - v0->z)
 
 static int verbose = 0;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
@@ -54,10 +46,10 @@ static void usage_exit(int code);
 
 int main(int argc, char *argv[]) {
   char **av, *in_fname;
-  int ac, nargs;
-  MRIS *mris;
-  int msec, minutes, seconds, nv, nf, ne, eno;
-  Timer start;
+  int    ac, nargs;
+  MRIS * mris;
+  int    msec, minutes, seconds, nv, nf, ne, eno;
+  Timer  start;
   double total_volume;
 
   nargs = handleVersionOption(argc, argv, "mris_volume");
@@ -104,7 +96,7 @@ int main(int argc, char *argv[]) {
 
   total_volume = MRISvolumeInSurf(mris);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -128,7 +120,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

@@ -1,17 +1,6 @@
-/**
- * @file  mri_strip_nonwhite.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:25 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -28,8 +17,8 @@
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static MRI *MRImaskThresholdNeighborhood(MRI *mri_src, MRI *mri_mask,
                                          MRI *mri_dst, float threshold,
                                          int nsize);
@@ -38,22 +27,22 @@ const char *Progname;
 
 static void usage_exit(int code);
 
-#define T1_VOLUME 0
-#define WM_VOLUME 1
+#define T1_VOLUME     0
+#define WM_VOLUME     1
 #define FILLED_VOLUME 2
-#define EDIT_VOLUME 3
-#define MAX_VOLUMES 4
+#define EDIT_VOLUME   3
+#define MAX_VOLUMES   4
 
-static float pct = 0.0f;
-static int nsize = 0;
+static float pct   = 0.0f;
+static int   nsize = 0;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  MRI *mri, *mri_template, *mri_inverse_template;
-  char *in_fname, *template_fname, *out_fname, *xform_fname, fname[100];
-  M3D *m3d;
-  int msec;
+  int    ac, nargs;
+  MRI *  mri, *mri_template, *mri_inverse_template;
+  char * in_fname, *template_fname, *out_fname, *xform_fname, fname[100];
+  M3D *  m3d;
+  int    msec;
 
   nargs = handleVersionOption(argc, argv, "mri_strip_nonwhite");
   if (nargs && argc - nargs == 1)
@@ -77,10 +66,10 @@ int main(int argc, char *argv[]) {
   if (argc < 4)
     usage_exit(1);
 
-  in_fname = argv[1];
-  xform_fname = argv[2];
+  in_fname       = argv[1];
+  xform_fname    = argv[2];
   template_fname = argv[3];
-  out_fname = argv[4];
+  out_fname      = argv[4];
 
   mri = MRIread(in_fname);
   if (!mri)
@@ -132,7 +121,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -144,7 +133,7 @@ static int get_option(int argc, char *argv[]) {
     break;
   case 'T':
   case 'P':
-    pct = atof(argv[2]);
+    pct   = atof(argv[2]);
     nargs = 1;
     fprintf(stderr, "using threshold = %2.1f%%\n", pct);
     break;
@@ -190,9 +179,9 @@ static MRI *MRImaskThresholdNeighborhood(MRI *mri_src, MRI *mri_mask,
   if (!mri_dst)
     mri_dst = MRIclone(mri_src, nullptr);
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   /* now apply the inverse morph to build an average wm representation
      of the input volume

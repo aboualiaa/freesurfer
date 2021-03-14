@@ -1,17 +1,11 @@
 /**
- * @file  mris_curvature_vectors.cpp
- * @brief returns surface normals and directions of principal curvature
- * directions
+ * @brief returns surface normals and directions of principal curvature directions
  *
  */
 /*
  * Original Author:
- * CVS Revision Info:
- *    $Author: jonp $
- *    $Date: 2011/11/20 01:17:34 $
- *    $Revision: 1.1 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,11 +17,11 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -35,16 +29,15 @@
 #include <getopt.h>
 #include <stdarg.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
+#include "error.h"
+#include "label.h"
 #include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 #include "xDebug.h"
-#include "label.h"
 
 #define STRBUF 65536
 
@@ -74,16 +67,16 @@ short b_sortBySignedPrincipalCurv =
 static int G_nbrs = 2;
 
 int main(int argc, char *argv[]) {
-  char output_filename[STRBUF];
-  char *surf_name, *output_filename_stem;
-  int nargs;
+  char         output_filename[STRBUF];
+  char *       surf_name, *output_filename_stem;
+  int          nargs;
   MRI_SURFACE *mris;
 
-  InitDebugging( "mris_curvature_vectors" ) ;
+  InitDebugging("mris_curvature_vectors");
   nargs = handleVersionOption(argc, argv, "mris_curvature_vectors");
 
-   Progname = argv[0] ;
-//  sprintf(Progname, "mris_curvature_vectors");
+  Progname = argv[0];
+  //  sprintf(Progname, "mris_curvature_vectors");
   ErrorInit(NULL, NULL, NULL);
   DiagInit(NULL, NULL, NULL);
 
@@ -136,8 +129,7 @@ int main(int argc, char *argv[]) {
 
   // TODO: sort PCDs so that max and min are saved properly
   // TODO: smooth surface, or vectors themselves, to reduce noise?
-  // DONE: flip PCDs to be consistent with outward surface normal, cross(k1,k2)
-  // == n
+  // DONE: flip PCDs to be consistent with outward surface normal, cross(k1,k2) == n
 
   MRISsortPrincipalDirectionsByCurvatures(mris);
 
@@ -160,11 +152,11 @@ int main(int argc, char *argv[]) {
 }
 
 int MRISsortPrincipalDirectionsByCurvatures(MRI_SURFACE *mris) {
-  int vno;
+  int     vno;
   VERTEX *v;
 
   double holder[3];
-  float k1, k2;
+  float  k1, k2;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
@@ -193,21 +185,21 @@ int MRISsortPrincipalDirectionsByCurvatures(MRI_SURFACE *mris) {
       }
     } else {
       /*
-       * in general, for directions to be consistently oriented over
-       * large extents of folded surface, the appropriate comparison
-       * will be the absolute or unsigned curvature. the sign
-       * denotes the orientation of the curving relative to the
-       * normal, but here we only care about the radius of
-       * curvature. so, e.g., if we consider a chunk of surface from
-       * the crest of a gyrus down the bank to the fundus of a
-       * sulcus that is flat in the orthogonal direction, the first
-       * PCD should always point from the gyrus to the sulcus (maybe
-       * with a singularity somewhere in the bank) and the second
-       * PCD should always point in the orthogonal direction---which
-       * would not be the case if we used the SIGNED curvatures
-       * since the sign would flip at the transition from gyrus to
-       * sulcus.
-       */
+         * in general, for directions to be consistently oriented over
+         * large extents of folded surface, the appropriate comparison
+         * will be the absolute or unsigned curvature. the sign
+         * denotes the orientation of the curving relative to the
+         * normal, but here we only care about the radius of
+         * curvature. so, e.g., if we consider a chunk of surface from
+         * the crest of a gyrus down the bank to the fundus of a
+         * sulcus that is flat in the orthogonal direction, the first
+         * PCD should always point from the gyrus to the sulcus (maybe
+         * with a singularity somewhere in the bank) and the second
+         * PCD should always point in the orthogonal direction---which
+         * would not be the case if we used the SIGNED curvatures
+         * since the sign would flip at the transition from gyrus to
+         * sulcus.
+         */
       if (abs(k1) < abs(k2)) {
         // swap the two directions if the curvature corresponding to
         // the first direction is smaller than that of the second
@@ -237,7 +229,7 @@ int MRISsortPrincipalDirectionsByCurvatures(MRI_SURFACE *mris) {
    d[2] = a[0] * b[1] - b[0] * a[1])
 
 int MRISorderPrincipalDirectionsConsistentWithNormal(MRI_SURFACE *mris) {
-  int vno;
+  int     vno;
   VERTEX *v;
 
   double v1[3], v2[3], v3[3], n0[3], dot;
@@ -274,7 +266,7 @@ int MRISorderPrincipalDirectionsConsistentWithNormal(MRI_SURFACE *mris) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

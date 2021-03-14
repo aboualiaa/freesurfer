@@ -1,9 +1,21 @@
 from __future__ import print_function
 
 from keras.models import Model
-from keras.layers import Input, concatenate, \
-    Conv2D, MaxPooling2D, Conv2DTranspose, Conv3D,MaxPooling3D, Activation,\
-    Deconvolution3D,UpSampling3D, BatchNormalization, ZeroPadding3D, Cropping3D
+from keras.layers import (
+    Input,
+    concatenate,
+    Conv2D,
+    MaxPooling2D,
+    Conv2DTranspose,
+    Conv3D,
+    MaxPooling3D,
+    Activation,
+    Deconvolution3D,
+    UpSampling3D,
+    BatchNormalization,
+    ZeroPadding3D,
+    Cropping3D,
+)
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
@@ -11,11 +23,19 @@ from keras import backend as K
 import numpy as np
 
 
+K.set_image_data_format("channels_last")
 
-K.set_image_data_format('channels_last')
 
-def unet_model_3d(input_shape, num_filters, unet_depth, downsize_filters_factor=1, pool_size=(2, 2, 2), n_labels=1,
-                  initial_learning_rate=0.00001, deconvolution=False):
+def unet_model_3d(
+    input_shape,
+    num_filters,
+    unet_depth,
+    downsize_filters_factor=1,
+    pool_size=(2, 2, 2),
+    n_labels=1,
+    initial_learning_rate=0.00001,
+    deconvolution=False,
+):
     """
     Builds the 3D UNet Keras model.
     :param input_shape: Shape of the input data (x_size, y_size, z_size).
@@ -33,7 +53,7 @@ def unet_model_3d(input_shape, num_filters, unet_depth, downsize_filters_factor=
     input_shape_list.append(1)
     input_shape_append = tuple(input_shape_list)
     print(input_shape_append)
-    input_img = Input(shape=input_shape_append, name='input' )
+    input_img = Input(shape=input_shape_append, name="input")
     convs = []
     pools = []
     inputs = []
@@ -41,47 +61,78 @@ def unet_model_3d(input_shape, num_filters, unet_depth, downsize_filters_factor=
     endpoints = []
 
     for i in range(unet_depth):
-        prev = input_img if i == 0 else pools[i-1]
-        conv = Conv3D(int(num_filters*(2**i)/downsize_filters_factor), (3, 3, 3),
-                      activation='relu', padding='same', kernel_initializer="he_normal",
-                      name=('conv3D_D_1_%d' % (i)))(prev)
-        conv = BatchNormalization(name=('bnorm_D_1_%d' % (i)))(conv)
-        conv = Conv3D(int(num_filters*(2**i)/downsize_filters_factor), (3, 3, 3),
-                      activation='relu', padding='same', kernel_initializer="he_normal",
-                      name=('conv3D_D_2_%d' % (i)))(conv)
-        conv = BatchNormalization(name=('bnorm_D_2_%d' % (i)))(conv)
+        prev = input_img if i == 0 else pools[i - 1]
+        conv = Conv3D(
+            int(num_filters * (2 ** i) / downsize_filters_factor),
+            (3, 3, 3),
+            activation="relu",
+            padding="same",
+            kernel_initializer="he_normal",
+            name=("conv3D_D_1_%d" % (i)),
+        )(prev)
+        conv = BatchNormalization(name=("bnorm_D_1_%d" % (i)))(conv)
+        conv = Conv3D(
+            int(num_filters * (2 ** i) / downsize_filters_factor),
+            (3, 3, 3),
+            activation="relu",
+            padding="same",
+            kernel_initializer="he_normal",
+            name=("conv3D_D_2_%d" % (i)),
+        )(conv)
+        conv = BatchNormalization(name=("bnorm_D_2_%d" % (i)))(conv)
         if i < (unet_depth - 1):
-            pools.append(MaxPooling3D(pool_size, name=('pool_D_%d' % (i)))(conv))
+            pools.append(
+                MaxPooling3D(pool_size, name=("pool_D_%d" % (i)))(conv)
+            )
 
         convs.append(conv)
 
     for i in range(unet_depth - 1):
         index = i + unet_depth - 1
         level = unet_depth - (i + 2)
-        up = concatenate([UpSampling3D(size=pool_size,  name=('upsampling_U_%d' % (level+1)))(convs[index]),
-                          convs[level]], axis=-1,  name=('concat_%d' % (level)))
-        conv = Conv3D(num_filters * (2 ** level), (3, 3, 3), padding="same", activation="relu",
-                      kernel_initializer="he_normal",
-                      name=('conv3D_U_1_%d' % (level))
-                      )(up)
-        conv = BatchNormalization(name=('bnorm_U_1_%d' % (level)))(conv)
-        conv = Conv3D(num_filters * (2 ** level), (3, 3, 3), padding="same", activation="relu",
-                      kernel_initializer="he_normal",
-                      name=('conv3D_U_2_%d' % (level)))(conv)
-        convs.append(BatchNormalization(name=('bnorm_U_2_%d' % (level)))(conv))
+        up = concatenate(
+            [
+                UpSampling3D(
+                    size=pool_size, name=("upsampling_U_%d" % (level + 1))
+                )(convs[index]),
+                convs[level],
+            ],
+            axis=-1,
+            name=("concat_%d" % (level)),
+        )
+        conv = Conv3D(
+            num_filters * (2 ** level),
+            (3, 3, 3),
+            padding="same",
+            activation="relu",
+            kernel_initializer="he_normal",
+            name=("conv3D_U_1_%d" % (level)),
+        )(up)
+        conv = BatchNormalization(name=("bnorm_U_1_%d" % (level)))(conv)
+        conv = Conv3D(
+            num_filters * (2 ** level),
+            (3, 3, 3),
+            padding="same",
+            activation="relu",
+            kernel_initializer="he_normal",
+            name=("conv3D_U_2_%d" % (level)),
+        )(conv)
+        convs.append(BatchNormalization(name=("bnorm_U_2_%d" % (level)))(conv))
 
-#    conv = ZeroPadding3D(padding=(1, 1, 1))(convs[-1])
-#    conv = Conv3D(num_filters * 2, (3, 3, 3), padding="valid", activation="relu",
-#                  kernel_initializer="he_normal")(conv)
-#    conv = BatchNormalization()(conv)
-#    center_input = Cropping3D(cropping=(0, 0, 0))(input_img)
+    #    conv = ZeroPadding3D(padding=(1, 1, 1))(convs[-1])
+    #    conv = Conv3D(num_filters * 2, (3, 3, 3), padding="valid", activation="relu",
+    #                  kernel_initializer="he_normal")(conv)
+    #    conv = BatchNormalization()(conv)
+    #    center_input = Cropping3D(cropping=(0, 0, 0))(input_img)
 
     inputs.append(input_img)
-#    centered_inputs.append(center_input)
-#    endpoints.append(conv)
+    #    centered_inputs.append(center_input)
+    #    endpoints.append(conv)
 
-#    up = concatenate(centered_inputs + endpoints, axis=-1)
-    conv = Conv3D(1, (1,1,1), activation='relu', name='final_conv_3d')(convs[-1])
+    #    up = concatenate(centered_inputs + endpoints, axis=-1)
+    conv = Conv3D(1, (1, 1, 1), activation="relu", name="final_conv_3d")(
+        convs[-1]
+    )
     model = Model(inputs=inputs, outputs=conv)
     #
     #
@@ -120,11 +171,13 @@ def unet_model_3d(input_shape, num_filters, unet_depth, downsize_filters_factor=
     #
     # conv8 = Conv3D(1, (1, 1, 1), activation="relu", name='final_conv_3d')(conv7)
     # model = Model(inputs, conv8)
-    #conv8 = Conv3D(n_labels, (1, 1, 1))(conv7)
-    #act = Activation('sigmoid')(conv8) # sigmoid for segmentation
-    #model = Model(inputs=inputs, outputs=act)
-    #model.compile(optimizer=Adam(lr=initial_learning_rate), loss=dice_coef_loss, metrics=[dice_coef])
-    model.compile(optimizer=Adam(lr=initial_learning_rate), loss='mean_absolute_error')
+    # conv8 = Conv3D(n_labels, (1, 1, 1))(conv7)
+    # act = Activation('sigmoid')(conv8) # sigmoid for segmentation
+    # model = Model(inputs=inputs, outputs=act)
+    # model.compile(optimizer=Adam(lr=initial_learning_rate), loss=dice_coef_loss, metrics=[dice_coef])
+    model.compile(
+        optimizer=Adam(lr=initial_learning_rate), loss="mean_absolute_error"
+    )
 
     return model
 
@@ -140,26 +193,53 @@ def compute_level_output_shape(filters, depth, pool_size, image_shape):
     :return: 5D vector of the shape of the output node
     """
     if depth != 0:
-        output_image_shape = np.divide(image_shape, np.multiply(pool_size, depth)).tolist()
+        output_image_shape = np.divide(
+            image_shape, np.multiply(pool_size, depth)
+        ).tolist()
     else:
         output_image_shape = image_shape
     return tuple([None, filters] + [int(x) for x in output_image_shape])
 
 
-
-def get_upconv(depth, nb_filters, pool_size, image_shape, kernel_size=(2, 2, 2), strides=(2, 2, 2),
-               deconvolution=False):
+def get_upconv(
+    depth,
+    nb_filters,
+    pool_size,
+    image_shape,
+    kernel_size=(2, 2, 2),
+    strides=(2, 2, 2),
+    deconvolution=False,
+):
     if deconvolution:
-        return Deconvolution3D(filters=nb_filters, kernel_size=kernel_size,
-                               output_shape=compute_level_output_shape(filters=nb_filters, depth=depth,
-                                                                       pool_size=pool_size, image_shape=image_shape),
-                               strides=strides, input_shape=compute_level_output_shape(filters=nb_filters,
-                                                                                       depth=depth+1,
-                                                                                       pool_size=pool_size,
-                                                                                       image_shape=image_shape))
+        return Deconvolution3D(
+            filters=nb_filters,
+            kernel_size=kernel_size,
+            output_shape=compute_level_output_shape(
+                filters=nb_filters,
+                depth=depth,
+                pool_size=pool_size,
+                image_shape=image_shape,
+            ),
+            strides=strides,
+            input_shape=compute_level_output_shape(
+                filters=nb_filters,
+                depth=depth + 1,
+                pool_size=pool_size,
+                image_shape=image_shape,
+            ),
+        )
     else:
         return UpSampling3D(size=pool_size)
 
-if __name__=="__main__":
-    model = unet_model_3d((16,16,16), 32, 5, downsize_filters_factor=1, pool_size=(2, 2, 2), n_labels=1,
-                  initial_learning_rate=0.00001, deconvolution=False)
+
+if __name__ == "__main__":
+    model = unet_model_3d(
+        (16, 16, 16),
+        32,
+        5,
+        downsize_filters_factor=1,
+        pool_size=(2, 2, 2),
+        n_labels=1,
+        initial_learning_rate=0.00001,
+        deconvolution=False,
+    )

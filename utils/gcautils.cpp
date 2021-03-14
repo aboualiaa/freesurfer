@@ -1,16 +1,11 @@
 /**
- * @file  gcautils.cpp
  * @brief C++ GCA utilities
  *
  */
 /*
  * Original Authors: Richard Edgar
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:44 $
- *    $Revision: 1.2 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -58,7 +53,7 @@ void GetGCAnodeStats(const GCA *const src) {
             << "( " << nx << ", " << ny << ", " << nz << " )" << std::endl;
   // ---
 
-  MinMax<int> nLabelsNode, nMaxLabelsNode;
+  MinMax<int>   nLabelsNode, nMaxLabelsNode;
   MinMax<short> nLabelsGC1D[GIBBS_NEIGHBORHOOD];
 
   for (unsigned int ix = 0; ix < nx; ix++) {

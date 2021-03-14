@@ -1,17 +1,6 @@
-/**
- * @file  ic2562.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:45 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -7730,7 +7719,7 @@ MRI_SURFACE *ic2562_make_surface(int max_vertices, int max_faces) {
     int fno;
     for (fno = 0; fno < ICO_NFACES; fno++) {
       int vno;
-      vno = ic2562_faces[fno].vno[1];
+      vno                      = ic2562_faces[fno].vno[1];
       ic2562_faces[fno].vno[1] = ic2562_faces[fno].vno[2];
       ic2562_faces[fno].vno[2] = vno;
     }

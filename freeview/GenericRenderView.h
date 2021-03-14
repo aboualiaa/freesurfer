@@ -1,16 +1,7 @@
-/**
- * @file  GenericRenderView.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/01 15:28:54 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,10 +21,10 @@
 #else
 #include "QVTKWidget.h"
 #endif
-#include <vtkSmartPointer.h>
-#include <QPoint>
-#include <QPair>
 #include <QList>
+#include <QPair>
+#include <QPoint>
+#include <vtkSmartPointer.h>
 
 class vtkGenericRenderView;
 class QKeyEvent;
@@ -86,7 +77,7 @@ public:
   int GetStereoPairAngle() { return m_nStereoPairAngle; }
 
   vtkCamera *GetCamera();
-  void SetCamera(vtkCamera *camera);
+  void       SetCamera(vtkCamera *camera);
 
   void Zoom(double dZoomFactor);
 
@@ -103,7 +94,7 @@ public:
   double GetHeadLightIntensity();
   double GetBackLightIntensity();
 
-  void GetVisibleProps(vtkPropCollection *propc);
+  void     GetVisibleProps(vtkPropCollection *propc);
   vtkProp *PickObject(const QPoint &point, vtkPropCollection *propc = NULL,
                       double *pickpos = NULL);
 
@@ -130,15 +121,15 @@ public slots:
   void CopyToClipboard();
   void EnableInteractor(bool bEnable);
 
-  void SetStereoRender(bool bOn);
+  void        SetStereoRender(bool bOn);
   inline void StereoRenderOff() { SetStereoRender(false); }
-  void SetStereoTypeToAnaglyph();
-  void SetStereoTypeToRedBlue();
-  void SetStereoTypeToInterlaced();
-  void SetStereoTypeToDresden();
-  void SetStereoTypeToCrystalEyes();
-  void SetStereoTypeToLeftRight(bool b = true);
-  void SetStereoPairAngle(int nAngle);
+  void        SetStereoTypeToAnaglyph();
+  void        SetStereoTypeToRedBlue();
+  void        SetStereoTypeToInterlaced();
+  void        SetStereoTypeToDresden();
+  void        SetStereoTypeToCrystalEyes();
+  void        SetStereoTypeToLeftRight(bool b = true);
+  void        SetStereoPairAngle(int nAngle);
 
   void SetKeyLightIntensity(double d, bool redraw = true);
   void SetFillLightIntensity(double d, bool redraw = true);
@@ -167,9 +158,9 @@ protected:
 
 private:
   vtkSmartPointer<vtkLightKit> m_lightKit;
-  int m_nStereoPairAngle;
-  QPoint ptOld;
-  bool m_bEnableRender;
+  int                          m_nStereoPairAngle;
+  QPoint                       ptOld;
+  bool                         m_bEnableRender;
 };
 
 #endif

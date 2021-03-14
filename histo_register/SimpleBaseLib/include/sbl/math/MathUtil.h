@@ -12,16 +12,16 @@ namespace sbl {
 // fix(clean): use templates; how do we name to avoid conflicts with c libraries
 #undef min
 #undef max
-inline int min(int a, int b) { return a < b ? a : b; }
-inline int max(int a, int b) { return a > b ? a : b; }
-inline float min(float a, float b) { return a < b ? a : b; }
-inline float max(float a, float b) { return a > b ? a : b; }
+inline int    min(int a, int b) { return a < b ? a : b; }
+inline int    max(int a, int b) { return a > b ? a : b; }
+inline float  min(float a, float b) { return a < b ? a : b; }
+inline float  max(float a, float b) { return a > b ? a : b; }
 inline double min(double a, double b) { return a < b ? a : b; }
 inline double max(double a, double b) { return a > b ? a : b; }
-inline float min(float a, float b, float c) { return min(a, min(b, c)); }
-inline float max(float a, float b, float c) { return max(a, max(b, c)); }
-inline int min(int a, int b, int c) { return min(a, min(b, c)); }
-inline int max(int a, int b, int c) { return max(a, max(b, c)); }
+inline float  min(float a, float b, float c) { return min(a, min(b, c)); }
+inline float  max(float a, float b, float c) { return max(a, max(b, c)); }
+inline int    min(int a, int b, int c) { return min(a, min(b, c)); }
+inline int    max(int a, int b, int c) { return max(a, max(b, c)); }
 
 /// bound the input to lie within the given range [min, max]
 inline int bound(int v, int min, int max) {
@@ -55,8 +55,8 @@ inline int round(double val) {
 }
 
 /// absolute value
-inline int iAbs(int a) { return a > 0 ? a : -a; }
-inline float fAbs(float a) { return a > 0 ? a : -a; }
+inline int    iAbs(int a) { return a > 0 ? a : -a; }
+inline float  fAbs(float a) { return a > 0 ? a : -a; }
 inline double dAbs(double a) { return a > 0 ? a : -a; }
 
 /// convert integer to bool
@@ -74,14 +74,14 @@ inline double gauss(double distSqd, double gaussFactor) {
 }
 
 /// compute factor used by gauss()
-inline float gaussFactor(float sigma) { return -0.5f / (sigma * sigma); }
+inline float  gaussFactor(float sigma) { return -0.5f / (sigma * sigma); }
 inline double gaussFactor(double sigma) { return -0.5 / (sigma * sigma); }
 
 /// swap two values using an intermediate value
 template <typename T> inline void swap(T &v1, T &v2) {
   T t = v2;
-  v2 = v1;
-  v1 = t;
+  v2  = v1;
+  v1  = t;
 }
 
 /// returns a random float between 0.0 and 1.0;

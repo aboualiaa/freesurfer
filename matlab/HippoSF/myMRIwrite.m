@@ -34,12 +34,8 @@ function err = myMRIwrite(mri,fstring,datatype,tempdir)
 % MRIwrite.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:12 $
-%    $Revision: 1.14 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -226,12 +222,8 @@ function r = save_mgh(vol, fname, M, mr_parms,tempdir);
 % save_mgh.m
 %
 % Original Author: Bruce Fischl
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:13 $
-%    $Revision: 1.8 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -371,18 +363,13 @@ function err = save_nifti(hdr,niftifile)
 % reshaped to 27307x1x6xnframes. This is for handling the 7th
 % order icosahedron used by FS group analysis.
 %
-% $Id: save_nifti.m,v 1.14 2011/10/17 19:58:37 nicks Exp $
 
 %
 % save_nifti.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/10/17 19:58:37 $
-%    $Revision: 1.14 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

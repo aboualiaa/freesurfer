@@ -8,10 +8,10 @@ class LabelsEntropyAndIntersectionMembershipFunction
     : public LabelPerPointMembershipFunction<TVector> {
 public:
   /** Standard class typedefs */
-  using Self = LabelsEntropyAndIntersectionMembershipFunction<TVector>;
-  using Superclass = LabelPerPointMembershipFunction<TVector>;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef LabelsEntropyAndIntersectionMembershipFunction Self;
+  typedef LabelPerPointMembershipFunction<TVector>       Superclass;
+  typedef itk::SmartPointer<Self>                        Pointer;
+  typedef itk::SmartPointer<const Self>                  ConstPointer;
 
   /** Strandard macros */
   itkTypeMacro(LabelsEntropyAndIntersectionMembershipFunction,
@@ -19,20 +19,20 @@ public:
   itkNewMacro(Self);
 
   /** Typedef alias for the measurement vectors */
-  using MeasurementVectorType = TVector;
-  using CentroidType = TVector;
+  typedef TVector MeasurementVectorType;
+  typedef TVector CentroidType;
 
   /** Typedef to represent the length of measurement vectors */
-  using MeasurementVectorSizeType =
-      typename Superclass::MeasurementVectorSizeType;
+  typedef
+      typename Superclass::MeasurementVectorSizeType MeasurementVectorSizeType;
 
   virtual double Evaluate(const MeasurementVectorType *m1,
                           const MeasurementVectorType *m2) const;
-  void SetIntersection(bool inter) { this->m_intersection = inter; }
-  void SetEntropy(bool entro) { this->m_entropy = entro; }
-  void SetLabels(bool labels) { this->m_labels = labels; }
-  void SetDice(bool dice) { this->m_dice = dice; }
-  void SetEuclidean(bool euclidean) { this->m_euclidean = euclidean; }
+  void           SetIntersection(bool inter) { this->m_intersection = inter; }
+  void           SetEntropy(bool entro) { this->m_entropy = entro; }
+  void           SetLabels(bool labels) { this->m_labels = labels; }
+  void           SetDice(bool dice) { this->m_dice = dice; }
+  void           SetEuclidean(bool euclidean) { this->m_euclidean = euclidean; }
   void SetKulczynskis(bool kulczynskis) { this->m_kulczynskis = kulczynskis; }
   void SetRuzicka(bool js) { this->m_ruzicka = js; }
   void SetJensenShannon(bool js) { this->m_jensenShannon = js; }
@@ -49,24 +49,24 @@ public:
   void SetMeanAndCovGaussian(bool m) { this->m_meanAndCovGaussian = m; }
 
 protected:
-  LabelsEntropyAndIntersectionMembershipFunction() : Superclass() {
-    this->m_intersection = false;
-    this->m_entropy = false;
-    this->m_labels = false;
-    this->m_labelsAndEuclid = false;
-    this->m_euclidean = false;
-    this->m_dice = false;
-    this->m_kulczynskis = false;
-    this->m_jensenShannon = false;
-    this->m_ruzicka = false;
-    this->m_meanEuclidean = false;
-    this->m_gaussian = false;
-    this->m_meanClosestPointInvert = false;
-    this->m_meanAndCovInvert = false;
+  LabelsEntropyAndIntersectionMembershipFunction(void) : Superclass() {
+    this->m_intersection             = false;
+    this->m_entropy                  = false;
+    this->m_labels                   = false;
+    this->m_labelsAndEuclid          = false;
+    this->m_euclidean                = false;
+    this->m_dice                     = false;
+    this->m_kulczynskis              = false;
+    this->m_jensenShannon            = false;
+    this->m_ruzicka                  = false;
+    this->m_meanEuclidean            = false;
+    this->m_gaussian                 = false;
+    this->m_meanClosestPointInvert   = false;
+    this->m_meanAndCovInvert         = false;
     this->m_meanClosestPointGaussian = false;
-    this->m_meanAndCovGaussian = false;
+    this->m_meanAndCovGaussian       = false;
   }
-  virtual ~LabelsEntropyAndIntersectionMembershipFunction() {}
+  virtual ~LabelsEntropyAndIntersectionMembershipFunction(void) {}
 
 private:
   bool m_intersection;

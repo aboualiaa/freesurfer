@@ -1,15 +1,10 @@
 /**
- * @file  xVoxel.h
  * @brief general purpose utils
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/11/11 18:40:47 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained

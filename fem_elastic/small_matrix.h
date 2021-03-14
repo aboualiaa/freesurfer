@@ -17,7 +17,7 @@ public:
 
   void identity(int size);
 
-  double operator()(int i, int j) const;
+  double  operator()(int i, int j) const;
   double &operator()(int i, int j);
 
   int rows() const { return m_rows; }
@@ -25,7 +25,7 @@ public:
 
   void set_block(const SmallMatrix &m, size_t start_row, size_t start_col);
 
-  SmallMatrix operator*(const SmallMatrix &m);
+  SmallMatrix        operator*(const SmallMatrix &m);
   const SmallMatrix &operator*=(const double val);
 
   SmallMatrix operator+(const SmallMatrix &m) const;
@@ -34,14 +34,14 @@ public:
   void operator+=(const SmallMatrix &m);
   void operator-=(const SmallMatrix &m);
 
-  SmallMatrix transpose() const; // will generate a new matrix
-  void inplace_transpose();      // will perform the operation in-place
+  SmallMatrix transpose() const;   // will generate a new matrix
+  void        inplace_transpose(); // will perform the operation in-place
 
   double norm() const; // returns the 2-norm of a matrix (as a vector)
 
 private:
   double *m_pdata;
-  int m_rows, m_cols;
+  int     m_rows, m_cols;
 
   void clone(const SmallMatrix &sm);
 };

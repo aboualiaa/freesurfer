@@ -12,7 +12,7 @@ if(-e $FREESURFER_HOME/sources.csh) then
   source $FREESURFER_HOME/sources.csh
 endif
 
-set VERSION = '$Id$';
+set VERSION = 'fsr-coreg @FS_VERSION@';
 set selfname = `basename $0`
 
 set importdir = ();
@@ -53,12 +53,6 @@ set hour   = `date +%H`
 set min    = `date +%M`
 
 mkdir -p $outdir/log
-
-#if($#tmpdir == 0) then
-#  if(-dw /scratch)   set tmpdir = /scratch/tmpdir.fsr-coreg.$$
-#  if(! -dw /scratch) set tmpdir = $outdir/tmpdir.fsr-coreg.$$
-#endif
-#mkdir -p $tmpdir
 
 # Set up log file
 if($#LF == 0) set LF = $outdir/log/fsr-coreg.Y$year.M$month.D$day.H$hour.M$min.log

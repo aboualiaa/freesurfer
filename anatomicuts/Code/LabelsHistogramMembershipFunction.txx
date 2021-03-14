@@ -3,20 +3,20 @@
 
 #include <iostream>
 
-#include <fstream>
 #include "itkLabelsHistogramMembershipFunction.h"
+#include <fstream>
 #include <limits>
 
 #include <set>
 template <class TVector>
 double LabelsHistogramMembershipFunction<TVector>::Evaluate(
     const MeasurementVectorType *m1, const MeasurementVectorType *m2) const {
-  double dist = 0.0;
-  double dist_inv = 0.0;
+  double                                           dist     = 0.0;
+  double                                           dist_inv = 0.0;
   typedef typename MeasurementVectorType::CellType CellType;
-  const std::vector<CellType> labels1 = *m1->GetLabels();
-  const std::vector<CellType> labels2 = *m2->GetLabels();
-  std::set<int> set1, set2;
+  const std::vector<CellType>                      labels1 = *m1->GetLabels();
+  const std::vector<CellType>                      labels2 = *m2->GetLabels();
+  std::set<int>                                    set1, set2;
 
   int validLabels = 0;
   for (int i = 0; i < labels2.size(); i++) {

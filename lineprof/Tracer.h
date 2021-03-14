@@ -7,35 +7,35 @@
 #include <list>
 
 // VTK
-#include <vtkPolyData.h>
 #include <vtkPointLocator.h>
+#include <vtkPolyData.h>
 
 // ITK
 #define export // obsolete feature "export template" used in these header files
 #include <itkImage.h>
-#include <itkImageSpatialObject.h>
 #include <itkImageMaskSpatialObject.h>
+#include <itkImageSpatialObject.h>
 #include <itkLinearInterpolateImageFunction.h>
 #undef export
 
 class Tracer {
 public:
   // some typedefs
-  static const unsigned int Dimension = 2;
-  typedef double PixelType;
-  typedef itk::Image<PixelType, Dimension> ImageType;
-  typedef ImageType::Pointer ImagePointer;
+  static const unsigned int                             Dimension = 2;
+  typedef double                                        PixelType;
+  typedef itk::Image<PixelType, Dimension>              ImageType;
+  typedef ImageType::Pointer                            ImagePointer;
   typedef itk::ImageSpatialObject<Dimension, PixelType> ImageSOType;
-  typedef ImageSOType::Pointer ImageSOPointer;
+  typedef ImageSOType::Pointer                          ImageSOPointer;
 
-  typedef unsigned char MaskPixelType;
-  typedef itk::Image<MaskPixelType, Dimension> MaskImageType;
-  typedef MaskImageType::Pointer MaskImagePointer;
+  typedef unsigned char                          MaskPixelType;
+  typedef itk::Image<MaskPixelType, Dimension>   MaskImageType;
+  typedef MaskImageType::Pointer                 MaskImagePointer;
   typedef itk::ImageMaskSpatialObject<Dimension> MaskImageSOType;
-  typedef MaskImageSOType::Pointer MaskImageSOPointer;
+  typedef MaskImageSOType::Pointer               MaskImageSOPointer;
 
   typedef MaskImageSOType::PointType PointType;
-  typedef std::list<PointType> LineType;
+  typedef std::list<PointType>       LineType;
 
   Tracer();
   ~Tracer();
@@ -51,27 +51,27 @@ public:
   static bool DoNotExitOnError;
 
 private:
-  typedef ImageSOType::VectorType VectorType;
+  typedef ImageSOType::VectorType           VectorType;
   typedef std::pair<VectorType, VectorType> FrameType;
 
   // initial region contour - used to solve for profiles
   vtkPointLocator *locator;
-  vtkPoints *pts;
+  vtkPoints *      pts;
 
   // returns tangent at a point
   VectorType GetTangent(const PointType &pt) const;
-  FrameType GetLocalFrame(const PointType &pt) const;
-  bool StepTangent(const PointType &, PointType &returnedPoint, double dval,
-                   bool negative = false) const;
-  bool StepGradient(const PointType &, PointType &returnedPoint,
+  FrameType  GetLocalFrame(const PointType &pt) const;
+  bool  StepTangent(const PointType &, PointType &returnedPoint, double dval,
                     bool negative = false) const;
+  bool  StepGradient(const PointType &, PointType &returnedPoint,
+                     bool negative = false) const;
   float stepSize;
   MaskImageSOPointer mask;
-  ImageSOPointer data;
+  ImageSOPointer     data;
 
   typedef itk::LinearInterpolateImageFunction<ImageType> InterpolatorType;
-  typedef InterpolatorType::Pointer InterpolatorPointer;
-  InterpolatorPointer imageInterpolator;
+  typedef InterpolatorType::Pointer                      InterpolatorPointer;
+  InterpolatorPointer                                    imageInterpolator;
   InterpolatorPointer derivativeInterpolator[Dimension];
 
   void ValueAt(const PointType &pt, double &dval) const;

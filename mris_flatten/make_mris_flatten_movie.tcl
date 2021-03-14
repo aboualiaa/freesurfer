@@ -1,12 +1,8 @@
 ##
 ## make_mris_flatten_movie.tcl
 ##
-## CVS Revision Info:
-##    $Author: fischl $
-##    $Date: 2007/11/30 19:46:34 $
-##    $Revision: 1.1 $
 ##
-## Copyright (C) 2002-2007,
+## Copyright © 2021
 ## The General Hospital Corporation (Boston, MA). 
 ## All rights reserved.
 ##

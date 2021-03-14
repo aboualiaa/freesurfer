@@ -1,16 +1,11 @@
 /**
- * @file  Region2D.h
  * @brief Region2D data object.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/10/07 20:01:59 $
- *    $Revision: 1.11 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -62,7 +57,7 @@ public:
 
   virtual QString DataToString() = 0;
 
-  virtual Region2D *ObjectFromString(RenderView2D *view,
+  virtual Region2D *ObjectFromString(RenderView2D * view,
                                      const QString &text) = 0;
 
   Region2D *Duplicate(RenderView2D *view = NULL) {
@@ -83,9 +78,9 @@ signals:
   void StatsUpdated();
 
 protected:
-  RenderView2D *m_view;
-  QString m_strShortStats;
-  QStringList m_strsLongStats;
+  RenderView2D *                m_view;
+  QString                       m_strShortStats;
+  QStringList                   m_strsLongStats;
   vtkSmartPointer<vtkTextActor> m_actorText;
 };
 

@@ -1,8 +1,8 @@
 #ifndef _SBL_MOTION_FIELD_UTIL_H_
 #define _SBL_MOTION_FIELD_UTIL_H_
 #include <sbl/core/Pointer.h>
-#include <sbl/math/Vector.h>
 #include <sbl/image/MotionField.h>
+#include <sbl/math/Vector.h>
 namespace sbl {
 
 /*! \file MotionFieldUtil.h

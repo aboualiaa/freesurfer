@@ -18,11 +18,11 @@ namespace pvl {
 /// scaleFactor (if not 1) is used to estimate flow at a lower resolution (for
 /// example, at half resolution if scaleFactor == 2)
 aptr<MotionField> varMotion(const ImageColorU &src, const ImageColorU &dest,
-                            const String &configFileName,
+                            const String &     configFileName,
                             const MotionField *init,
                             const ImageGrayU *mask = NULL, int scaleFactor = 1);
 aptr<MotionField> varMotion(const ImageGrayU &src, const ImageGrayU &dest,
-                            const String &configFileName,
+                            const String &     configFileName,
                             const MotionField *init,
                             const ImageGrayU *mask = NULL, int scaleFactor = 1);
 

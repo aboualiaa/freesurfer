@@ -1,12 +1,8 @@
 ##
 ## make_mris_register_movie.tcl
 ##
-## CVS Revision Info:
-##    $Author: fischl $
-##    $Date: 2011/12/12 17:19:39 $
-##    $Revision: 1.1 $
 ##
-## Copyright (C) 2002-2007,
+## Copyright © 2021
 ## The General Hospital Corporation (Boston, MA). 
 ## All rights reserved.
 ##

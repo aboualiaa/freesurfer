@@ -1,5 +1,4 @@
 /**
- * @file  vtkFreesurferLookupTable.h
  * @brief A VTK table that reads Freesurfer LUT files
  *
  * This is a vtkLookupTable subclass that can read the Freesurfer LUT
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained

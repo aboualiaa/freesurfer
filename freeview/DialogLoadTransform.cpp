@@ -1,8 +1,8 @@
 #include "DialogLoadTransform.h"
 #include "ui_DialogLoadTransform.h"
-#include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 
 #include "mri.h"
 

@@ -14,11 +14,11 @@ namespace sbl {
 /// A DictItem is a key-value pair in an integer-keyed dictionary.
 template <typename T> class DictItem {
 public:
-  T *item;
-  int key;
+  T *          item;
+  int          key;
   DictItem<T> *next;
   inline DictItem(int newKey, T *newItem, DictItem<T> *newNext) {
-    key = newKey;
+    key  = newKey;
     item = newItem;
     next = newNext;
   }
@@ -36,14 +36,14 @@ public:
 
   /// get item with given key; returns NULL if not found;
   /// does not remove or relinquish control of the object
-  T *find(int key);
+  T *      find(int key);
   const T *find(int key) const;
 
   /// access as array
-  inline int refArrayKey(int index) const { return m_keyArray[index]; }
+  inline int      refArrayKey(int index) const { return m_keyArray[index]; }
   inline const T &refArray(int index) const { return m_array[index]; }
-  inline T &refArray(int index) { return m_array[index]; }
-  inline int count() const { return m_array.count(); }
+  inline T &      refArray(int index) { return m_array[index]; }
+  inline int      count() const { return m_array.count(); }
   inline const Array<T> &arrayRef() const { return m_array; }
 
   /// add an item to the dictionary; takes ownership of pointer unless dealloc
@@ -76,7 +76,7 @@ private:
   // an array of items in the dictionary (for iterating over the members of a
   // dictionary)
   PtrArray<T> m_array; // use non-owning array because dict will own the items
-  Array<int> m_keyArray;
+  Array<int>  m_keyArray;
 
   // disable copy constructor and assignment operator
   Dict(const Dict &x);
@@ -86,10 +86,10 @@ private:
 // create an empty dictionary
 template <typename T> Dict<T>::Dict() {
   m_deallocObjs = true;
-  m_binMask = 0xffff;
-  m_binCount = m_binMask + 1;
-  m_count = 0;
-  m_bin = new DictItem<T> *[m_binCount];
+  m_binMask     = 0xffff;
+  m_binCount    = m_binMask + 1;
+  m_count       = 0;
+  m_bin         = new DictItem<T> *[m_binCount];
   assertDebug(m_bin);
   for (int i = 0; i < m_binCount; i++)
     m_bin[i] = NULL;
@@ -101,7 +101,7 @@ template <typename T> Dict<T>::~Dict() {
     DictItem<T> *bin = m_bin[i];
     while (bin) {
       DictItem<T> *delItem = bin;
-      bin = bin->next;
+      bin                  = bin->next;
       if (m_deallocObjs)
         delete delItem->item;
       delete delItem;
@@ -140,8 +140,8 @@ template <typename T> void Dict<T>::add(int key, T *obj) {
   assertDebug(obj);
 
   // look for existing item
-  int binIndex = key & m_binMask;
-  DictItem<T> *bin = m_bin[binIndex];
+  int          binIndex = key & m_binMask;
+  DictItem<T> *bin      = m_bin[binIndex];
   while (bin) {
     if (bin->key == key) {
       assertAlways(true); // fix(later): does not update array
@@ -171,7 +171,7 @@ template <typename T> void Dict<T>::reset() {
     DictItem<T> *bin = m_bin[i];
     while (bin) {
       DictItem<T> *delItem = bin;
-      bin = bin->next;
+      bin                  = bin->next;
       if (m_deallocObjs)
         delete delItem->item;
       delete delItem;
@@ -181,10 +181,10 @@ template <typename T> void Dict<T>::reset() {
 
   // re-init
   m_deallocObjs = true;
-  m_binMask = 0xffff;
-  m_binCount = m_binMask + 1;
-  m_count = 0;
-  m_bin = new DictItem<T> *[m_binCount];
+  m_binMask     = 0xffff;
+  m_binCount    = m_binMask + 1;
+  m_count       = 0;
+  m_bin         = new DictItem<T> *[m_binCount];
   assertDebug(m_bin);
   for (int i = 0; i < m_binCount; i++)
     m_bin[i] = NULL;
@@ -201,13 +201,13 @@ template <typename T> void Dict<T>::reset() {
 /// A StringDictItem is a key-value pair in an string-keyed dictionary.
 template <typename T> class StringDictItem {
 public:
-  T *item;
-  int hash;
-  String key;
+  T *                item;
+  int                hash;
+  String             key;
   StringDictItem<T> *next;
   inline StringDictItem(const String &newKey, int newHash, T *newItem,
                         StringDictItem<T> *newNext) {
-    key = newKey;
+    key  = newKey;
     hash = newHash;
     item = newItem;
     next = newNext;
@@ -226,7 +226,7 @@ public:
 
   /// get item with given key; returns NULL if not found;
   /// does not remove or relinquish control of the object
-  T *find(const String &key);
+  T *      find(const String &key);
   const T *find(const String &key) const;
 
   /// access as array
@@ -234,8 +234,8 @@ public:
     return m_keyArray[index];
   }
   inline const T &refArray(int index) const { return m_array[index]; }
-  inline T &refArray(int index) { return m_array[index]; }
-  inline int count() const { return m_array.count(); }
+  inline T &      refArray(int index) { return m_array[index]; }
+  inline int      count() const { return m_array.count(); }
 
   /// add an item to the dictionary; takes ownership of pointer unless dealloc
   /// disabled; replaces item with same key if already exists
@@ -266,7 +266,7 @@ private:
 
   // an array of items in the dictionary (for iterating over the members of a
   // dictionary)
-  PtrArray<T> m_array; // use non-owning array because dict will own the items
+  PtrArray<T>   m_array; // use non-owning array because dict will own the items
   Array<String> m_keyArray;
 
   // disable copy constructor and assignment operator
@@ -277,10 +277,10 @@ private:
 // basic constructor
 template <typename T> StringDict<T>::StringDict() {
   m_deallocObjs = true;
-  m_binMask = 0xffff;
-  m_binCount = m_binMask + 1;
-  m_count = 0;
-  m_bin = new StringDictItem<T> *[m_binCount];
+  m_binMask     = 0xffff;
+  m_binCount    = m_binMask + 1;
+  m_count       = 0;
+  m_bin         = new StringDictItem<T> *[m_binCount];
   assertDebug(m_bin);
   for (int i = 0; i < m_binCount; i++)
     m_bin[i] = NULL;
@@ -292,7 +292,7 @@ template <typename T> StringDict<T>::~StringDict() {
     StringDictItem<T> *bin = m_bin[i];
     while (bin) {
       StringDictItem<T> *delItem = bin;
-      bin = bin->next;
+      bin                        = bin->next;
       if (m_deallocObjs)
         delete delItem->item;
       delete delItem;
@@ -304,8 +304,8 @@ template <typename T> StringDict<T>::~StringDict() {
 /// get item with given key; returns NULL if not found;
 /// does not remove or relinquish control of the object
 template <typename T> T *StringDict<T>::find(const String &key) {
-  int hash = strHash(key);
-  StringDictItem<T> *bin = m_bin[hash & m_binMask];
+  int                hash = strHash(key);
+  StringDictItem<T> *bin  = m_bin[hash & m_binMask];
   while (bin) {
     if (bin->hash == hash &&
         bin->key == key) // note: using string equality operator
@@ -318,8 +318,8 @@ template <typename T> T *StringDict<T>::find(const String &key) {
 /// get item with given key; returns NULL if not found;
 /// does not remove or relinquish control of the object
 template <typename T> const T *StringDict<T>::find(const String &key) const {
-  int hash = strHash(key);
-  StringDictItem<T> *bin = m_bin[hash & m_binMask];
+  int                hash = strHash(key);
+  StringDictItem<T> *bin  = m_bin[hash & m_binMask];
   while (bin) {
     if (bin->hash == hash &&
         bin->key == key) // note: using string equality operator
@@ -336,8 +336,8 @@ template <typename T> void StringDict<T>::add(const String &key, T *obj) {
   int hash = strHash(key);
 
   // look for existing item
-  int binIndex = hash & m_binMask;
-  StringDictItem<T> *bin = m_bin[binIndex];
+  int                binIndex = hash & m_binMask;
+  StringDictItem<T> *bin      = m_bin[binIndex];
   while (bin) {
     if (bin->hash == hash &&
         bin->key == key) { // note: using string equality operator
@@ -368,7 +368,7 @@ template <typename T> void StringDict<T>::reset() {
     StringDictItem<T> *bin = m_bin[i];
     while (bin) {
       StringDictItem<T> *delItem = bin;
-      bin = bin->next;
+      bin                        = bin->next;
       if (m_deallocObjs)
         delete delItem->item;
       delete delItem;
@@ -378,10 +378,10 @@ template <typename T> void StringDict<T>::reset() {
 
   // re-init
   m_deallocObjs = true;
-  m_binMask = 0xffff;
-  m_binCount = m_binMask + 1;
-  m_count = 0;
-  m_bin = new StringDictItem<T> *[m_binCount];
+  m_binMask     = 0xffff;
+  m_binCount    = m_binMask + 1;
+  m_count       = 0;
+  m_bin         = new StringDictItem<T> *[m_binCount];
   assertDebug(m_bin);
   for (int i = 0; i < m_binCount; i++)
     m_bin[i] = NULL;

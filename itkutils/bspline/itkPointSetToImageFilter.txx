@@ -83,7 +83,7 @@ template <class TInputPointSet, class TOutputImage>
 void PointSetToImageFilter<TInputPointSet, TOutputImage>::SetSpacing(
     const float *v) {
   Vector<float, OutputImageDimension> vf(v);
-  SpacingType spacing;
+  SpacingType                         spacing;
   spacing.CastFrom(vf);
   this->SetSpacing(spacing);
 }
@@ -99,7 +99,7 @@ template <class TInputPointSet, class TOutputImage>
 void PointSetToImageFilter<TInputPointSet, TOutputImage>::SetOrigin(
     const float *v) {
   Point<float, OutputImageDimension> pf(v);
-  PointType origin;
+  PointType                          origin;
   origin.CastFrom(pf);
   this->SetOrigin(origin);
 }
@@ -121,10 +121,10 @@ void PointSetToImageFilter<TInputPointSet, TOutputImage>::GenerateData(void) {
 
   // Get the input and output pointers
   const InputPointSetType *InputPointSet = this->GetInput();
-  OutputImagePointer OutputImage = this->GetOutput();
+  OutputImagePointer       OutputImage   = this->GetOutput();
 
   // Generate the image
-  double origin[InputPointSetDimension];
+  double   origin[InputPointSetDimension];
   SizeType size;
 
   typedef typename InputPointSetType::BoundingBoxType BoundingBoxType;

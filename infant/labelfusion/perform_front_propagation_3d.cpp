@@ -23,19 +23,19 @@
 #include "labelfusion.h"
 #include "perform_front_propagation_3d.h"
 
-#define kDead -1
-#define kOpen 0
-#define kFar 1
+#define kDead                    -1
+#define kOpen                    0
+#define kFar                     1
 #define ACCESS_ARRAY(a, i, j, k) a[(i) + n * (j) + n * p * (k)]
-#define D_(i, j, k) ACCESS_ARRAY(D, i, j, k)
-#define S_(i, j, k) ACCESS_ARRAY(S, i, j, k)
-#define W_(i, j, k) ACCESS_ARRAY(W, i, j, k)
-#define H_(i, j, k) ACCESS_ARRAY(H, i, j, k)
-#define L_(i, j, k) ACCESS_ARRAY(L, i, j, k)
-#define Q_(i, j, k) ACCESS_ARRAY(Q, i, j, k)
-#define heap_pool_(i, j, k) ACCESS_ARRAY(heap_pool, i, j, k)
-#define start_points_(i, s) start_points[(i) + 3 * (s)]
-#define end_points_(i, s) end_points[(i) + 3 * (s)]
+#define D_(i, j, k)              ACCESS_ARRAY(D, i, j, k)
+#define S_(i, j, k)              ACCESS_ARRAY(S, i, j, k)
+#define W_(i, j, k)              ACCESS_ARRAY(W, i, j, k)
+#define H_(i, j, k)              ACCESS_ARRAY(H, i, j, k)
+#define L_(i, j, k)              ACCESS_ARRAY(L, i, j, k)
+#define Q_(i, j, k)              ACCESS_ARRAY(Q, i, j, k)
+#define heap_pool_(i, j, k)      ACCESS_ARRAY(heap_pool, i, j, k)
+#define start_points_(i, s)      start_points[(i) + 3 * (s)]
+#define end_points_(i, s)        end_points[(i) + 3 * (s)]
 
 /*
   Performs a fast marching front propagation and computes the distance function
@@ -54,7 +54,7 @@ pyarrayd performFrontPropagation3D(const pyarrayd &weights,
   prop.q = weights.shape(2);
 
   // start points
-  prop.start_points = start.data(0);
+  prop.start_points    = start.data(0);
   prop.nb_start_points = start.shape(1);
   if (start.shape(0) != 3)
     throw std::runtime_error("start points must be of shape 3 x N");
@@ -131,7 +131,7 @@ void Propagator::perform_front_propagation_3d(
       throw std::runtime_error("start_points should not contain duplicates");
 
     point *pt = new point(i, j, k);
-    pt->pval = &D_(i, j, k);
+    pt->pval  = &D_(i, j, k);
     existing_points.push_back(pt);                  // for deleting at the end
     heap_pool_(i, j, k) = fh_insert(open_heap, pt); // add to heap
     if (values == NULL) {
@@ -144,19 +144,19 @@ void Propagator::perform_front_propagation_3d(
   }
 
   // perform the front propagation
-  int num_iter = 0;
+  int  num_iter       = 0;
   bool stop_iteration = GW_False;
   while (!fh_isempty(open_heap) && num_iter < nb_iter_max && !stop_iteration) {
     num_iter++;
 
     // remove from open list and set up state to dead
-    point &cur_point = *((point *)fh_extractmin(open_heap)); // current point
-    int i = cur_point.i;
-    int j = cur_point.j;
-    int k = cur_point.k;
+    point &cur_point    = *((point *)fh_extractmin(open_heap)); // current point
+    int    i            = cur_point.i;
+    int    j            = cur_point.j;
+    int    k            = cur_point.k;
     heap_pool_(i, j, k) = NULL;
-    S_(i, j, k) = kDead;
-    stop_iteration = end_points_reached(i, j, k);
+    S_(i, j, k)         = kDead;
+    stop_iteration      = end_points_reached(i, j, k);
 
     // recurse on each neighbor
     int nei_i[6] = {i + 1, i, i - 1, i, i, i};
@@ -195,8 +195,8 @@ void Propagator::perform_front_propagation_3d(
         double tmp = 0;
 #define SWAP(a, b)                                                             \
   tmp = a;                                                                     \
-  a = b;                                                                       \
-  b = tmp
+  a   = b;                                                                     \
+  b   = tmp
 #define SWAPIF(a, b)                                                           \
   if (a > b) {                                                                 \
     SWAP(a, b);                                                                \
@@ -222,7 +222,7 @@ void Propagator::perform_front_propagation_3d(
           //=> 2*a^2 - 2*(a1+a2)*a + a1^2+a2^2-P^2
           // delta = (a2+a1)^2 - 2*(a1^2 + a2^2 - P^2)
           delta = (a2 + a1) * (a2 + a1) - 2 * (a1 * a1 + a2 * a2 - P * P);
-          A1 = 0;
+          A1    = 0;
           if (delta >= 0)
             A1 = 0.5 * (a2 + a1 + sqrt(delta));
           if (A1 <= a2)
@@ -262,7 +262,7 @@ void Propagator::perform_front_propagation_3d(
             Q_(ii, jj, kk) = Q_(i, j, k);
             // add to open list
             point *pt = new point(ii, jj, kk);
-            pt->pval = &D_(ii, jj, kk);
+            pt->pval  = &D_(ii, jj, kk);
             existing_points.push_back(pt);
             heap_pool_(ii, jj, kk) = fh_insert(open_heap, pt); // add to heap
           }

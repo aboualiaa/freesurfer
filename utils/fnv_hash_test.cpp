@@ -1,17 +1,11 @@
 /**
- * @file  fnv_hash_test.c
- * @brief Tests for the hash function that can be used to replace getting a
- * sequence of random numbers
+ * @brief Tests for the hash function that can be used to replace getting a sequence of random numbers
  *
  */
 /*
  * Original Author: Bevin Brett
- * CVS Revision Info:
- *    $Author: ohinds $
- *    $Date: 2018/01/16 00:00:00 $
- *    $Revision: 1.0 $
  *
- * Copyright © 2018 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,8 +19,8 @@
 
 #include "fnv_hash.h"
 
-#include <stdio.h>
 #include <malloc.h>
+#include <stdio.h>
 
 int main() {
 
@@ -35,15 +29,15 @@ int main() {
   double LO = 0;
   double HI = 1000;
 
-  int bucketsSize = 1000;
-  long *buckets = (long *)calloc(bucketsSize, sizeof(long));
+  int   bucketsSize = 1000;
+  long *buckets     = (long *)calloc(bucketsSize, sizeof(long));
 
   for (i = 0; i < bucketsSize; i++) {
     for (k = 0; k < 100; k++) {
       int random_counter = 0;
       for (r = 0; r < 3; r++) {
-        float f = fnv_hash(i, k, &random_counter, LO, HI);
-        int index = (int)f;
+        float f     = fnv_hash(i, k, &random_counter, LO, HI);
+        int   index = (int)f;
         if (index < 0 || index >= bucketsSize) {
           fprintf(stderr, "Bad index\n");
           return 1;
@@ -53,8 +47,8 @@ int main() {
     }
   }
 
-  int histogramsSize = 1000;
-  int *histograms = (int *)calloc(histogramsSize, sizeof(int));
+  int  histogramsSize = 1000;
+  int *histograms     = (int *)calloc(histogramsSize, sizeof(int));
 
   for (i = 0; i < bucketsSize; i++) {
     int index = (int)buckets[i];

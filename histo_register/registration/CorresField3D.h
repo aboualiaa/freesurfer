@@ -1,7 +1,7 @@
 #ifndef _CORRES_FIELD_3D_H_
 #define _CORRES_FIELD_3D_H_
-#include <sbl/core/Pointer.h>
 #include <sbl/core/File.h>
+#include <sbl/core/Pointer.h>
 #include <sbl/image/Image.h>
 using namespace sbl;
 namespace hb {
@@ -24,9 +24,9 @@ public:
   ~CorresField3D();
 
   /// access correspondence field images
-  inline ImageGrayF &u() { return *m_u; }
-  inline ImageGrayF &v() { return *m_v; }
-  inline ImageGrayF &w() { return *m_w; }
+  inline ImageGrayF &      u() { return *m_u; }
+  inline ImageGrayF &      v() { return *m_v; }
+  inline ImageGrayF &      w() { return *m_w; }
   inline const ImageGrayF &u() const { return *m_u; }
   inline const ImageGrayF &v() const { return *m_v; }
   inline const ImageGrayF &w() const { return *m_w; }

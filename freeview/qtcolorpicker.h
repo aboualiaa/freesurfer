@@ -50,13 +50,13 @@
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QtWidgets>
 #else
-#include <QtGui/QPushButton>
 #include <QtCore/QString>
 #include <QtGui/QColor>
+#include <QtGui/QPushButton>
 
-#include <QtGui/QLabel>
 #include <QtCore/QEvent>
 #include <QtGui/QFocusEvent>
+#include <QtGui/QLabel>
 #endif
 
 #if defined(Q_WS_WIN)
@@ -118,10 +118,10 @@ private Q_SLOTS:
 
 private:
   ColorPickerPopup *popup;
-  QColor col;
-  bool withColorDialog;
-  bool dirty;
-  bool firstInserted;
+  QColor            col;
+  bool              withColorDialog;
+  bool              dirty;
+  bool              firstInserted;
 };
 
 #endif

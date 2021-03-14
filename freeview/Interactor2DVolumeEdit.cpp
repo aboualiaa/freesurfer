@@ -1,16 +1,11 @@
 /**
- * @file  Interactor2DVolumeEdit.cpp
  * @brief Interactor for editing volume in 2D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/07/30 20:22:19 $
- *    $Revision: 1.35 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,23 +19,23 @@
  */
 
 #include "Interactor2DVolumeEdit.h"
-#include "RenderView2D.h"
+#include "BrushProperty.h"
+#include "Contour2D.h"
 #include "Cursor2D.h"
-#include "MainWindow.h"
+#include "CursorFactory.h"
 #include "LayerCollection.h"
-#include "LayerVolumeBase.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
-#include "Contour2D.h"
-#include "CursorFactory.h"
-#include "BrushProperty.h"
-#include <vtkRenderer.h>
-#include <QDebug>
 #include "LayerROI.h"
+#include "LayerVolumeBase.h"
+#include "MainWindow.h"
+#include "RenderView2D.h"
+#include <QDebug>
 #include <QTimer>
+#include <vtkRenderer.h>
 
 Interactor2DVolumeEdit::Interactor2DVolumeEdit(const QString &layerTypeName,
-                                               QObject *parent)
+                                               QObject *      parent)
     : Interactor2D(parent), m_bEditing(false), m_bColorPicking(false) {
   m_strLayerTypeName = layerTypeName;
 }
@@ -64,7 +59,7 @@ void Interactor2DVolumeEdit::PreprocessMouseEvent(QMouseEvent *event) {
 #include "LUTDataHolder.h"
 
 bool Interactor2DVolumeEdit::ProcessMouseDownEvent(QMouseEvent *event,
-                                                   RenderView *renderview) {
+                                                   RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   //  if ( !view->hasFocus() )
@@ -78,8 +73,8 @@ bool Interactor2DVolumeEdit::ProcessMouseDownEvent(QMouseEvent *event,
     if ((event->button() == Qt::LeftButton ||
          event->button() == Qt::RightButton) &&
         !(event->modifiers() & CONTROL_MODIFIER)) {
-      BrushProperty *bp = MainWindow::GetMainWindow()->GetBrushProperty();
-      LayerMRI *mri = (LayerMRI *)bp->GetReferenceLayer();
+      BrushProperty *bp  = MainWindow::GetMainWindow()->GetBrushProperty();
+      LayerMRI *     mri = (LayerMRI *)bp->GetReferenceLayer();
       if (!mri) {
         emit Error(QString("Must select a reference layer."));
         return false;
@@ -97,7 +92,7 @@ bool Interactor2DVolumeEdit::ProcessMouseDownEvent(QMouseEvent *event,
           delete layer_draw;
           return false;
         }
-        QVariantMap map = bp->GetGeosSettings();
+        QVariantMap       map = bp->GetGeosSettings();
         QMap<int, QColor> colors;
         colors[0] = QColor(0, 0, 0, 0);
         colors[1] = map.contains("ForegroundColor")
@@ -152,7 +147,7 @@ bool Interactor2DVolumeEdit::ProcessMouseDownEvent(QMouseEvent *event,
   if (event->button() == Qt::LeftButton ||
       (event->button() == Qt::RightButton &&
        (event->buttons() & Qt::LeftButton))) {
-    if ((event->modifiers() & CONTROL_MODIFIER) &&
+    if ((event->modifiers() & Qt::ControlModifier) &&
         (event->modifiers() & Qt::ShiftModifier)) {
       if (event->button() == Qt::LeftButton) {
         view->UpdateCursorRASPosition(event->x(), event->y());
@@ -374,7 +369,7 @@ bool Interactor2DVolumeEdit::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor2DVolumeEdit::ProcessMouseUpEvent(QMouseEvent *event,
-                                                 RenderView *renderview) {
+                                                 RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
   view->releaseMouse();
   PreprocessMouseEvent(event);
@@ -402,7 +397,7 @@ bool Interactor2DVolumeEdit::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor2DVolumeEdit::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                   RenderView *renderview) {
+                                                   RenderView * renderview) {
   RenderView2D *view = (RenderView2D *)renderview;
 
   PreprocessMouseEvent(event);
@@ -505,7 +500,7 @@ bool Interactor2DVolumeEdit::ProcessMouseMoveEvent(QMouseEvent *event,
         if (mri_ref) {
           double dMin = mri_ref->GetProperty()->GetMinValue();
           double dMax = mri_ref->GetProperty()->GetMaxValue();
-          scale = (dMax - dMin) * 0.0005;
+          scale       = (dMax - dMin) * 0.0005;
         }
         c2d->SetContourValue(c2d->GetContourValue() +
                              scale * (posY - m_nMousePosY));
@@ -530,7 +525,7 @@ bool Interactor2DVolumeEdit::ProcessMouseMoveEvent(QMouseEvent *event,
   }
 }
 
-bool Interactor2DVolumeEdit::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor2DVolumeEdit::ProcessKeyDownEvent(QKeyEvent * event,
                                                  RenderView *renderview) {
   UpdateCursor(event, renderview);
 
@@ -549,16 +544,18 @@ bool Interactor2DVolumeEdit::ProcessKeyDownEvent(QKeyEvent *event,
     return false;
   }
 
-  if ((event->modifiers() & Qt::ShiftModifier) && m_nAction == EM_Shift) {
+  // disable using keyboard to shift voxels
+  if (false) // (event->modifiers() & Qt::ShiftModifier) && m_nAction == EM_Shift )
+  {
     int nKeyCode = event->key();
-    int n[3] = {0, 0, 0};
+    int n[3]     = {0, 0, 0};
     int nx = 0, ny = 1;
-    int nPlane = view->GetViewPlane();
+    int nPlane  = view->GetViewPlane();
     int nx_sign = -1;
     switch (nPlane) {
     case 0:
-      nx = 1;
-      ny = 2;
+      nx      = 1;
+      ny      = 2;
       nx_sign = 1;
       break;
     case 1:
@@ -596,7 +593,7 @@ bool Interactor2DVolumeEdit::ProcessKeyDownEvent(QKeyEvent *event,
   }
 }
 
-bool Interactor2DVolumeEdit::ProcessKeyUpEvent(QKeyEvent *event,
+bool Interactor2DVolumeEdit::ProcessKeyUpEvent(QKeyEvent * event,
                                                RenderView *renderview) {
   UpdateCursor(event, renderview);
 
@@ -610,7 +607,7 @@ void Interactor2DVolumeEdit::UpdateCursor(QEvent *event, QWidget *wnd) {
         event->type() == QEvent::MouseButtonRelease ||
         event->type() == QEvent::MouseMove) {
       QMouseEvent *e = (QMouseEvent *)event;
-      bMouseEvent = true;
+      bMouseEvent    = true;
       if (((e->button() == Qt::MidButton || e->button() == Qt::RightButton) &&
            !m_bEditing) ||
           ((e->modifiers() & CONTROL_MODIFIER) &&

@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <help>
   <name>mris_remesh</name>
   <synopsis>mris_remesh [options] -i &lt;insurf&gt; -o &lt;outsurf&gt;</synopsis>

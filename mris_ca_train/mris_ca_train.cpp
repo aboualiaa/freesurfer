@@ -1,5 +1,4 @@
 /**
- * @file  mris_ca_train.c
  * @brief builds a cortical parcellation atlas (.gcs) file from a training set
  *
  * Creates a cortical parcellation atlas file based on one or more annotated
@@ -20,12 +19,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:27 $
- *    $Revision: 1.17 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -37,68 +32,80 @@
  *
  */
 
-#include "mrisurf_project.h"
-#include "diag.h"
-#include "timer.h"
-#include "gcsa.h"
-#include "version.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-static char vcid[] =
-    "$Id: mris_ca_train.c,v 1.17 2011/03/02 00:04:27 nicks Exp $";
+#include "macros.h"
+
+#include "mri.h"
+#include "mrisurf.h"
+#include "mrisurf_project.h"
+
+#include "diag.h"
+#include "error.h"
+#include "gcsa.h"
+#include "label.h"
+#include "proto.h"
+#include "timer.h"
+#include "transform.h"
+#include "utils.h"
+#include "version.h"
 
 #define MAX_LABELS 1000
 #if 0
 static int write_ptable(char *fname, int *ptable, int nparcs) ;
 #endif
-static int find_parc_index(int parc, int *ptable, int nparcs);
-static int add_to_ptable(MRI_SURFACE *mris, int *ptable, int nparcs);
-static int *ptable = nullptr;
-static int nbrs = 2;
-static int navgs = 5;
-static int normalize1_flag = 0;
-static int normalize2_flag = 0;
-static int normalize3_flag = 0;
-static int nparcs = 0;
-static char *ptable_fname = nullptr;
-static COLOR_TABLE *ctab = nullptr;
-static int which_norm = NORM_MEAN;
+static int          find_parc_index(int parc, int *ptable, int nparcs);
+static int          add_to_ptable(MRI_SURFACE *mris, int *ptable, int nparcs);
+static int *        ptable          = NULL;
+static int          nbrs            = 2;
+static int          navgs           = 5;
+static int          normalize1_flag = 0;
+static int          normalize2_flag = 0;
+static int          normalize3_flag = 0;
+static int          nparcs          = 0;
+static char *       ptable_fname    = NULL;
+static COLOR_TABLE *ctab            = NULL;
+static int          which_norm      = NORM_MEAN;
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
-static void print_usage();
-static void print_help();
-static void print_version();
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
-static char *orig_name = "smoothwm";
-static char *label_name = nullptr;
-static int label_index;
+static const char *orig_name  = "smoothwm";
+static char *      label_name = NULL;
+static int         label_index;
 
-static int ninputs = 1; /* curv and sulc */
-static int icno_priors = 7;
+static int ninputs          = 1; /* curv and sulc */
+static int icno_priors      = 7;
 static int icno_classifiers = 4;
 
 #if 0
 static char *curv_name = "curv" ;
 #endif
-static char *thickness_name = "thickness";
-static char *sulc_name = "sulc";
-static int sulconly = 0;
+static const char *thickness_name = "thickness";
+static const char *sulc_name      = "sulc";
+static int         sulconly       = 0;
 
 static char subjects_dir[STRLEN];
 
 int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN], *out_fname, *subject_name, *cp, *hemi;
-  char *canon_surf_name, *annot_name;
-  int ac, nargs, i, train_type;
-  int msec, minutes, seconds, nsubjects, input1_flags;
-  int input2_flags, input3_flags;
-  Timer start;
+  char **      av, fname[STRLEN], *out_fname, *subject_name, *cp, *hemi;
+  char *       canon_surf_name, *annot_name;
+  int          ac, nargs, i, train_type;
+  int          msec, minutes, seconds, nsubjects, input1_flags;
+  int          input2_flags, input3_flags;
+  Timer        start;
   MRI_SURFACE *mris;
-  GCSA *gcsa;
-  int unknown_index = -1;
+  GCSA *       gcsa;
+  int          unknown_index = -1;
 
   nargs = handleVersionOption(argc, argv, "mris_ca_train");
   if (nargs && argc - nargs == 1)
@@ -107,7 +114,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
@@ -151,13 +158,13 @@ int main(int argc, char *argv[]) {
   if (argc < 6)
     usage_exit(1);
 
-  hemi = argv[1];
+  hemi            = argv[1];
   canon_surf_name = argv[2];
-  annot_name = argv[3];
-  out_fname = argv[argc - 1];
-  nsubjects = argc - 5;
+  annot_name      = argv[3];
+  out_fname       = argv[argc - 1];
+  nsubjects       = argc - 5;
 
-  gcsa = GCSAalloc(ninputs, icno_priors, icno_classifiers);
+  gcsa         = GCSAalloc(ninputs, icno_priors, icno_classifiers);
   input1_flags = input2_flags = input3_flags = 0;
   if (normalize1_flag)
     input1_flags |= GCSA_NORMALIZE;
@@ -186,8 +193,12 @@ int main(int argc, char *argv[]) {
       subject_name = argv[i + 4];
       printf("processing subject %s, %d of %d...\n", subject_name, i + 1,
              nsubjects);
-      sprintf(fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
-              orig_name);
+      int req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s", subjects_dir,
+                         subject_name, hemi, orig_name);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       if (DIAG_VERBOSE_ON)
         printf("reading surface from %s...\n", fname);
       mris = MRISread(fname);
@@ -198,14 +209,19 @@ int main(int argc, char *argv[]) {
       MRIScomputeSecondFundamentalForm(mris);
       MRISsaveVertexPositions(mris, ORIGINAL_VERTICES);
       if (label_name) {
-        LABEL *area;
-        int i;
+        LABEL * area;
+        int     i;
         VERTEX *v;
 
-        sprintf(fname, "%s/%s/label/%s.%s", subjects_dir, subject_name, hemi,
-                annot_name);
+        int req = snprintf(fname, STRLEN, "%s/%s/label/%s.%s", subjects_dir,
+                           subject_name, hemi, annot_name);
+        if (req >= STRLEN) {
+          std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                    << std::endl;
+        }
+
         area = LabelRead(subject_name, fname);
-        if (area == nullptr)
+        if (area == NULL)
           ErrorExit(ERROR_NOFILE, "%s: could not read label file %s for %s",
                     Progname, fname, subject_name);
         for (i = 0; i < area->n_points; i++) {
@@ -296,7 +312,7 @@ int main(int argc, char *argv[]) {
   gcsa->ptable_fname = ptable_fname;
   GCSAwrite(gcsa, out_fname);
   GCSAfree(&gcsa);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -313,7 +329,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -326,12 +342,12 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
     printf("using %s as subjects directory\n", subjects_dir);
   } else if (!stricmp(option, "nbrs")) {
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "using neighborhood size=%d\n", nbrs);
   } else if (!stricmp(option, "ORIG")) {
     orig_name = argv[2];
-    nargs = 1;
+    nargs     = 1;
     printf("using %s as original surface\n", orig_name);
   } else if (!stricmp(option, "NORM1")) {
     printf("normalizing input #1 after reading...\n");
@@ -343,9 +359,9 @@ static int get_option(int argc, char *argv[]) {
     printf("normalizing input #3 after reading...\n");
     normalize3_flag = 1;
   } else if (!stricmp(option, "IC")) {
-    icno_priors = atoi(argv[2]);
+    icno_priors      = atoi(argv[2]);
     icno_classifiers = atoi(argv[3]);
-    nargs = 2;
+    nargs            = 2;
     printf("using ico # %d for classifier array, and %d for priors\n",
            icno_classifiers, icno_priors);
   } else if (!stricmp(option, "SULC") || !stricmp(option, "SULCONLY")) {
@@ -355,7 +371,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'L':
       label_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       printf("interpreting inputs as label files for %s "
              "intead of annotations\n",
              label_name);
@@ -366,16 +382,16 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       ptable_fname = argv[2];
-      nargs = 1;
-      ptable = (int *)calloc(MAX_LABELS, sizeof(int));
+      nargs        = 1;
+      ptable       = (int *)calloc(MAX_LABELS, sizeof(int));
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'N':
       ninputs = atoi(argv[2]);
-      nargs = 1;
+      nargs   = 1;
       break;
     case '?':
     case 'U':
@@ -395,7 +411,7 @@ static int get_option(int argc, char *argv[]) {
 
   Description:
   ----------------------------------------------------------------------*/
-static void print_usage() {
+static void print_usage(void) {
   fprintf(stderr,
           "Usage:\n"
           "------\n"
@@ -409,7 +425,7 @@ static void usage_exit(int code) {
   exit(code);
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   fprintf(stderr,
           "\n"
@@ -472,8 +488,8 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
@@ -498,14 +514,14 @@ write_ptable(char *fname, int *ptable, int nparcs)
 }
 #endif
 static int add_to_ptable(MRI_SURFACE *mris, int *ptable, int nparcs) {
-  int vno, i;
+  int     vno, i;
   VERTEX *v;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
     i = find_parc_index(v->annotation, ptable, nparcs);
     if (i < 0 || i >= nparcs) {
-      i = nparcs++;
+      i         = nparcs++;
       ptable[i] = v->annotation;
     }
   }

@@ -1,6 +1,5 @@
 function r = fast_functwf(varargin)
 % r = fast_functwf(varargin)
-% '$Id: fast_functwf.m,v 1.3 2011/03/02 00:04:04 nicks Exp $'
 %
 % Temporal analysis of functional data.
 
@@ -9,12 +8,8 @@ function r = fast_functwf(varargin)
 % fast_functwf.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:04 $
-%    $Revision: 1.3 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,7 +21,7 @@ function r = fast_functwf(varargin)
 %
 
 tic;
-version = '$Id: fast_functwf.m,v 1.3 2011/03/02 00:04:04 nicks Exp $';
+version = 'fast_functwf.m @FS_VERSION@';
 fprintf(1,'%s\n',version);
 r = 1;
 

@@ -3,10 +3,13 @@
 
 #include "MeshToImageFilter.h"
 
-#include <itkImageIterator.h>
-#include <itkGaussianSpatialFunction.h>
 #include <algorithm>
+#include <exception>
 #include <iostream>
+#include <itkGaussianSpatialFunction.h>
+#include <itkImageIterator.h>
+#include <itkImageRegionConstIteratorWithIndex.h>
+#include <itkImageRegionIterator.h>
 
 using namespace itk;
 
@@ -108,10 +111,9 @@ void MeshToImageFilter<TInputMesh, TOutputImage>::GenerateData() {
   this->GetOutput()->SetBufferedRegion(this->GetOutput()->GetRequestedRegion());
   this->GetOutput()->Allocate();
   this->GetOutput()->FillBuffer(0);
-  //      std::cout <<  " region " << this->GetOutput()->GetRequestedRegion() <<
-  //      std::endl;
+  //      std::cout <<  " region " << this->GetOutput()->GetRequestedRegion() << std::endl;
   //   this->GetOutput()->FillBuffer(0);
-  int outsidePixels = 0;
+  int       outsidePixels = 0;
   IndexType index;
   this->GetOutput()->TransformPhysicalPointToIndex(
       this->GetInput()->GetPoints()->Begin().Value(), index);
@@ -144,9 +146,9 @@ void MeshToImageFilter<TInputMesh, TOutputImage>::GenerateData() {
   if (outsidePixels > 1000) {
     outsidePixels = 0;
     /*				PointType point;
-                                    std::cout <<  " mi n" << min << std::endl;
-                                    std::cin.get();
-                                    */
+						std::cout <<  " mi n" << min << std::endl;
+						std::cin.get();	
+						*/
     for (int i = 0; i < 3; i++)
       min[i] = min[i];
 
@@ -156,15 +158,14 @@ void MeshToImageFilter<TInputMesh, TOutputImage>::GenerateData() {
     std::cin.get();
     //
     //
-    /*				typename  OutputImageType::SizeType size =
-       this->GetOutput()->GetLargestPossibleRegion().GetSize(); IndexType start;
+    /*				typename  OutputImageType::SizeType size = this->GetOutput()->GetLargestPossibleRegion().GetSize();
+						IndexType start;
 
-                                    for(int i=0;i<3;i++)
-                                    start[i]=min[i];
-                                    typedef typename OutputImageType::RegionType
-       RegionType; RegionType region(start,size);
-                                    this->GetOutput()->SetRequestedRegion(
-       region );*/
+						for(int i=0;i<3;i++)
+						start[i]=min[i];	
+						typedef typename OutputImageType::RegionType RegionType;
+						RegionType region(start,size);
+						this->GetOutput()->SetRequestedRegion( region );*/
     std::cout << this->GetOutput()->GetRequestedRegion() << std::endl;
     this->GetOutput()->Allocate();
     this->GetOutput()->FillBuffer(0);
@@ -175,9 +176,9 @@ void MeshToImageFilter<TInputMesh, TOutputImage>::GenerateData() {
       //          std::cout <<  it.Value()<<std::endl;
       if (this->GetOutput()->TransformPhysicalPointToIndex(it.Value(), index)) {
         /*		for(int i = 0 ; i<3;i++)
-                        {
-                        index[i]= index[i]-min[i];
-                        }*/
+						{
+						index[i]= index[i]-min[i];
+						}*/
         this->GetOutput()->SetPixel(index,
                                     this->GetOutput()->GetPixel(index) + 1);
       } else {
@@ -193,14 +194,14 @@ template <class TInputMesh, class TOutputImage>
 float MeshToImageFilter<TInputMesh, TOutputImage>::BinaryImageOfLabels(
     int label, int flip) {
 
-  float averageX = 0;
-  this->m_usingLabels = true;
-  int count = 0;
+  float averageX                                            = 0;
+  this->m_usingLabels                                       = true;
+  int                                                 count = 0;
   typename MeshType::CellDataContainer::ConstIterator cellData;
-  // if(label != -1 )
+  //if(label != -1 )
   cellData = this->GetInput()->GetCellData()->Begin();
   typename MeshType::PointType pt;
-  IndexType index;
+  IndexType                    index;
   for (typename MeshType::CellsContainer::ConstIterator cells =
            this->GetInput()->GetCells()->Begin();
        cells != this->GetInput()->GetCells()->End(); cells++, ++cellData) {
@@ -211,7 +212,7 @@ float MeshToImageFilter<TInputMesh, TOutputImage>::BinaryImageOfLabels(
 
         this->GetInput()->GetPoint(*pointIdIt, &pt);
         if (this->GetOutput()->TransformPhysicalPointToIndex(pt, index)) {
-          // this->GetOutput()->SetPixel(index, 1);
+          //this->GetOutput()->SetPixel(index, 1);
           if (flip != 0) {
             index[0] = flip * 2 - index[0];
             this->GetOutput()->SetPixel(index, 1);
@@ -227,7 +228,7 @@ float MeshToImageFilter<TInputMesh, TOutputImage>::BinaryImageOfLabels(
     }
   }
   return averageX / count;
-  // std::cout << " count " <<count <<std::endl;
+  //std::cout << " count " <<count <<std::endl;
 }
 
 #endif

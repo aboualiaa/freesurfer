@@ -1,17 +1,6 @@
-/**
- * @file  mris_add_template.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:26 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,25 +12,22 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
+#include "error.h"
+#include "macros.h"
 #include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
-
-static char vcid[] =
-    "$Id: mris_add_template.c,v 1.8 2011/03/02 00:04:26 nicks Exp $";
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit(void);
 static void print_usage(void);
 static void print_help(void);
@@ -50,22 +36,22 @@ static void print_version(void);
 const char *Progname;
 
 static char curvature_fname[STRLEN] = "";
-static int which_norm = NORM_MEAN;
+static int  which_norm              = NORM_MEAN;
 
 #define IMAGES_PER_SURFACE 3 /* mean, variance, and dof */
-#define SURFACES 2           /* smoothwm and inflated */
-#define PARAM_IMAGES (IMAGES_PER_SURFACE * SURFACES)
+#define SURFACES           2 /* smoothwm and inflated */
+#define PARAM_IMAGES       (IMAGES_PER_SURFACE * SURFACES)
 
-static int nbrs = 2;
-static int navgs = 0;
+static int   nbrs  = 2;
+static int   navgs = 0;
 static float scale = 1;
 
 int main(int argc, char *argv[]) {
   char **av, surf_fname[100], *template_fname, *out_fname, *surf_dir, *hemi,
       *sphere_name;
-  int ac, nargs;
+  int          ac, nargs;
   MRI_SURFACE *mris;
-  MRI_SP *mrisp, *mrisp_template;
+  MRI_SP *     mrisp, *mrisp_template;
 
   nargs = handleVersionOption(argc, argv, "mris_add_template");
   if (nargs && argc - nargs == 1)
@@ -87,8 +73,8 @@ int main(int argc, char *argv[]) {
   if (argc < 5)
     usage_exit();
 
-  surf_dir = argv[1];
-  hemi = argv[2];
+  surf_dir    = argv[1];
+  hemi        = argv[2];
   sphere_name = argv[3];
   out_fname = template_fname = argv[4];
   if (argc > 5)
@@ -177,7 +163,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -186,7 +172,7 @@ static int get_option(int argc, char *argv[]) {
   else if (!stricmp(option, "-version"))
     print_version();
   else if (!stricmp(option, "nbrs")) {
-    nbrs = atoi(argv[2]);
+    nbrs  = atoi(argv[2]);
     nargs = 1;
     fprintf(stderr, "using neighborhood size = %d\n", nbrs);
   } else
@@ -240,6 +226,6 @@ static void print_help(void) {
 }
 
 static void print_version(void) {
-  fprintf(stderr, "%s\n", vcid);
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

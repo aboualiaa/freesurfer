@@ -1,16 +1,11 @@
 /**
- * @file  MyCmdLineParser.h
  * @brief A simple command-line parser class.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/01 15:28:54 $
- *    $Revision: 1.24 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,16 +19,14 @@
  */
 
 #include "MyCmdLineParser.h"
+#include <iostream>
 #include <string.h>
 #include <string>
 #include <vector>
-#include <iostream>
-
-using namespace std;
 
 #define CONSOLE_WIDTH 78
 
-MyCmdLineParser::MyCmdLineParser(const char *ProgramName,
+MyCmdLineParser::MyCmdLineParser(const char *  ProgramName,
                                  CmdLineEntry *entries) {
   SetProgramName(ProgramName);
   m_nNumberOfPureArguments = 0;
@@ -49,7 +42,7 @@ MyCmdLineParser::MyCmdLineParser(const MyCmdLineParser *parser) {
   m_nNumberOfPureArguments = 0;
   m_cmdLineEntries.clear();
   m_cmdLineEntriesValid = parser->m_cmdLineEntriesValid;
-  m_bNewLineStyle = true;
+  m_bNewLineStyle       = true;
 }
 
 MyCmdLineParser::~MyCmdLineParser() {
@@ -59,7 +52,7 @@ MyCmdLineParser::~MyCmdLineParser() {
 
 void MyCmdLineParser::SetValidCmdLineEntries(CmdLineEntry *entries) {
   m_cmdLineEntriesValid.clear();
-  int n = 0;
+  int  n        = 0;
   bool bHasHelp = false;
   while (entries[n].type != CMD_LINE_NONE) {
     if (strcmp(entries[n].shortName, "h") == 0) {
@@ -83,9 +76,11 @@ void MyCmdLineParser::AddValidCmdLineEntry(int nType, const char *shortname,
   m_cmdLineEntriesValid.push_back(e);
 }
 
-void MyCmdLineParser::SetProgramName(string name) { m_strProgramName = name; }
+void MyCmdLineParser::SetProgramName(std::string name) {
+  m_strProgramName = name;
+}
 
-void MyCmdLineParser::SetProgramDescription(string text) {
+void MyCmdLineParser::SetProgramDescription(std::string text) {
   m_strProgramDescription = text;
 }
 
@@ -110,7 +105,7 @@ bool MyCmdLineParser::Found(const char *ch, string_array *sa, int nIndex) {
 
 bool MyCmdLineParser::Found(const QString flag, QStringList *args, int nIndex) {
   string_array sa;
-  bool ret = Found(flag.toLatin1().constData(), &sa, nIndex);
+  bool         ret = Found(flag.toLatin1().constData(), &sa, nIndex);
   if (ret) {
     args->clear();
     for (size_t i = 0; i < sa.size(); i++) {
@@ -170,9 +165,8 @@ int MyCmdLineParser::GetNumberOfArguments(const char *ch) {
 
   return 0;
 }
-
-string MyCmdLineParser::GetArgument(const char *ch, int n,
-                                    const char *chDefault) {
+std::string MyCmdLineParser::GetArgument(const char *ch, int n,
+                                         const char *chDefault) {
   CmdLineEntry e;
   if (Found(ch, &e)) {
     if ((int)e.arguments.size() > n) {
@@ -196,28 +190,28 @@ string_array MyCmdLineParser::GetArguments(const char *ch, int nIndex) {
 }
 
 void MyCmdLineParser::PrintHelp() {
-  cout << "\n"
-       << "Usage: " << m_strProgramName.c_str()
-       << " [OPTION <ARGUMENT:SUB-OPTION>]..."
-       << "\n";
+  std::cout << "\n"
+            << "Usage: " << m_strProgramName.c_str()
+            << " [OPTION <ARGUMENT:SUB-OPTION>]..."
+            << "\n";
 
-  string desc = m_strProgramDescription;
+  std::string desc = m_strProgramDescription;
   while (desc.length() > CONSOLE_WIDTH) {
     int n = desc.rfind(" ", CONSOLE_WIDTH);
     if (n >= 0) {
-      cout << desc.substr(0, n).c_str() << "\n";
+      std::cout << desc.substr(0, n).c_str() << "\n";
     }
     desc = desc.substr(n + 1);
   }
   if (desc.length() > 0) {
-    cout << desc.c_str() << "\n";
+    std::cout << desc.c_str() << "\n";
   }
-  cout << "\n";
+  std::cout << "\n";
 
   size_t nLen = 0;
   for (size_t i = 0; i < m_cmdLineEntriesValid.size(); i++) {
-    CmdLineEntry e = m_cmdLineEntriesValid[i];
-    string strg = string(e.shortName) + e.longName + e.arguName;
+    CmdLineEntry e    = m_cmdLineEntriesValid[i];
+    std::string  strg = std::string(e.shortName) + e.longName + e.arguName;
     if (nLen < strg.length()) {
       nLen = strg.length();
     }
@@ -228,48 +222,48 @@ void MyCmdLineParser::PrintHelp() {
   }
   for (size_t i = 0; i < m_cmdLineEntriesValid.size(); i++) {
     CmdLineEntry e = m_cmdLineEntriesValid[i];
-    string strg("-");
+    std::string  strg("-");
     strg = strg + e.shortName + ", --" + e.longName + " " + e.arguName;
-    cout << strg.c_str();
+    std::cout << strg.c_str();
     if (m_bNewLineStyle) {
-      cout << "\n";
+      std::cout << "\n";
       for (size_t j = 0; j < nLen; j++) {
-        cout << " ";
+        std::cout << " ";
       }
     } else {
       int nCnt = nLen - strg.length();
       for (int j = 0; j < nCnt; j++) {
-        cout << " ";
+        std::cout << " ";
       }
     }
     desc = e.description;
     while (desc.length() > CONSOLE_WIDTH - nLen ||
-           desc.find("\n") != string::npos) {
+           desc.find("\n") != std::string::npos) {
       size_t n = desc.rfind(" ", CONSOLE_WIDTH - nLen);
       size_t m = desc.substr(0, CONSOLE_WIDTH - nLen).find("\n");
-      if (m != string::npos) {
+      if (m != std::string::npos) {
         n = m;
       }
-      if (n != string::npos) {
-        cout << desc.substr(0, n).c_str() << "\n";
+      if (n != std::string::npos) {
+        std::cout << desc.substr(0, n).c_str() << "\n";
         desc = desc.substr(n + 1);
       }
       if (desc.size() > 0) {
         for (size_t j = 0; j < nLen; j++) {
-          cout << " ";
+          std::cout << " ";
         }
       } else {
-        cout << "\n";
+        std::cout << "\n";
       }
     }
     if (desc.length() > 0) {
-      cout << desc.c_str() << "\n";
+      std::cout << desc.c_str() << "\n";
     }
   }
-  cout << "\n";
+  std::cout << "\n";
 }
 
-void MyCmdLineParser::PrintErrorMessage(string msg) {
+void MyCmdLineParser::PrintErrorMessage(std::string msg) {
   // PrintHelp();
 
   std::cerr << msg.c_str() << " Run 'freeview -h' for more information.\n\n";
@@ -286,7 +280,7 @@ bool MyCmdLineParser::Parse(int argc, char *argv[]) {
 
 bool MyCmdLineParser::Parse(const QString &cmd) {
   string_array args;
-  QStringList list = cmd.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+  QStringList  list = cmd.split(QRegExp("\\s+"), QString::SkipEmptyParts);
   for (int i = 0; i < list.size(); i++) {
     args.push_back(list[i].toStdString());
   }
@@ -296,14 +290,14 @@ bool MyCmdLineParser::Parse(const QString &cmd) {
 bool MyCmdLineParser::Parse(const string_array &args) {
   // first parse the input command line into entries, don't care if they are
   // valid or not
-  vector<string_array *> entries;
-  string_array pureArgs;
-  string_array *sa = NULL;
+  std::vector<string_array *> entries;
+  string_array                pureArgs;
+  string_array *              sa = NULL;
 
   int argc = args.size();
   for (int i = 1; i < argc; i++) {
     // hack to ignore mac os x bundle argument
-    string arg = args[i];
+    std::string arg = args[i];
 #ifdef Q_CYGWIN_WIN
     arg = MyUtils::CygwinPathProof(args[i].c_str()).toStdString();
 #endif
@@ -329,8 +323,8 @@ bool MyCmdLineParser::Parse(const string_array &args) {
 
   m_cmdLineEntries.clear();
   CmdLineEntry e;
-  bool bSucceed = true;
-  string error_msg = "";
+  bool         bSucceed  = true;
+  std::string  error_msg = "";
   for (size_t i = 0; i < entries.size(); i++) {
     string_array strgs = *entries[i];
 
@@ -352,7 +346,7 @@ bool MyCmdLineParser::Parse(const string_array &args) {
       }
       if ((int)e.arguments.size() < e.minArguments) {
         bSucceed = false;
-        //  cout << e.arguments.size() << " " << e.minArguments << "\n";
+        //  std::cout << e.arguments.size() << " " << e.minArguments << "\n";
         error_msg += "Argument missing for option '" + strgs[0] + "'.";
       }
     } else if (e.type == CMD_LINE_SWITCH) {

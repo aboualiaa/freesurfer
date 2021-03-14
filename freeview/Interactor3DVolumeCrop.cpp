@@ -1,16 +1,11 @@
 /**
- * @file  Interactor3DVolumeCrop.cpp
  * @brief Interactor for volume cropping in 3D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/09/15 18:29:04 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,13 +19,13 @@
  */
 
 #include "Interactor3DVolumeCrop.h"
-#include "RenderView3D.h"
-#include "MainWindow.h"
-#include "LayerCollection.h"
-#include "LayerPropertyMRI.h"
-#include "LayerMRI.h"
-#include "VolumeCropper.h"
 #include "CursorFactory.h"
+#include "LayerCollection.h"
+#include "LayerMRI.h"
+#include "LayerPropertyMRI.h"
+#include "MainWindow.h"
+#include "RenderView3D.h"
+#include "VolumeCropper.h"
 
 Interactor3DVolumeCrop::Interactor3DVolumeCrop(QObject *parent)
     : Interactor3D(parent), m_bCropping(false) {}
@@ -38,7 +33,7 @@ Interactor3DVolumeCrop::Interactor3DVolumeCrop(QObject *parent)
 Interactor3DVolumeCrop::~Interactor3DVolumeCrop() {}
 
 bool Interactor3DVolumeCrop::ProcessMouseDownEvent(QMouseEvent *event,
-                                                   RenderView *renderview) {
+                                                   RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   m_nMousePosX = event->x();
@@ -55,7 +50,7 @@ bool Interactor3DVolumeCrop::ProcessMouseDownEvent(QMouseEvent *event,
 }
 
 bool Interactor3DVolumeCrop::ProcessMouseUpEvent(QMouseEvent *event,
-                                                 RenderView *renderview) {
+                                                 RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   if (m_bCropping) {
@@ -69,7 +64,7 @@ bool Interactor3DVolumeCrop::ProcessMouseUpEvent(QMouseEvent *event,
 }
 
 bool Interactor3DVolumeCrop::ProcessMouseMoveEvent(QMouseEvent *event,
-                                                   RenderView *renderview) {
+                                                   RenderView * renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 
   int posX = event->x();
@@ -86,7 +81,7 @@ bool Interactor3DVolumeCrop::ProcessMouseMoveEvent(QMouseEvent *event,
   }
 }
 
-bool Interactor3DVolumeCrop::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor3DVolumeCrop::ProcessKeyDownEvent(QKeyEvent * event,
                                                  RenderView *renderview) {
   RenderView3D *view = (RenderView3D *)renderview;
 

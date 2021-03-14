@@ -1,14 +1,6 @@
-/**
- * @file  zero_lt_4dfp.c
- *
- */
 /*
  * Original Author: Avi Z. Snyder, Washington University
- *
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2007/05/05 00:00:07 $
- *    $Revision: 1.2 $
+ * 
  *
  * Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
  * Washington University, Mallinckrodt Institute of Radiology.
@@ -23,11 +15,11 @@
  *
  */
 
+#include <Getifh.h>
+#include <endianio.h>
+#include <rec.h>
 #include <stdlib.h>
 #include <string.h>
-#include <endianio.h>
-#include <Getifh.h>
-#include <rec.h>
 
 #define MAXL 256
 
@@ -41,30 +33,28 @@ void setprog(char *program, char **argv) {
   strcpy(program, ptr);
 }
 
-static char rcsid[] =
-    "$Id: zero_lt_4dfp.c,v 1.2 2007/05/05 00:00:07 nicks Exp $";
 int main(int argc, char **argv) {
   /*************/
   /* image I/O */
   /*************/
   FILE *fp_img, *fp_out;
-  IFH ifh;
-  char imgfile[MAXL], imgroot[MAXL];
-  char outfile[MAXL], outroot[MAXL] = "";
+  IFH   ifh;
+  char  imgfile[MAXL], imgroot[MAXL];
+  char  outfile[MAXL], outroot[MAXL] = "";
 
   /**************/
   /* processing */
   /**************/
-  int imgdim[4], dimension, orient, isbig;
-  float voxdim[3];
+  int    imgdim[4], dimension, orient, isbig;
+  float  voxdim[3];
   float *imgr;
-  float thresh = 0.0;
-  char control = '\0';
+  float  thresh  = 0.0;
+  char   control = '\0';
 
   /***********/
   /* utility */
   /***********/
-  int c, i, k;
+  int   c, i, k;
   char *ptr, command[MAXL], program[MAXL];
 
   /*********/
@@ -72,7 +62,7 @@ int main(int argc, char **argv) {
   /*********/
   int status = 0;
 
-  printf("%s\n", rcsid);
+  printf("%s\n", "freesurfer zero_lt_4dfp.c");
   setprog(program, argv);
 
   /************************/
@@ -86,7 +76,7 @@ int main(int argc, char **argv) {
         switch (c) {
         case '@':
           control = *ptr++;
-          *ptr = '\0';
+          *ptr    = '\0';
           break;
         }
     } else
@@ -173,7 +163,7 @@ int main(int argc, char **argv) {
   /*******************/
   /* create rec file */
   /*******************/
-  startrece(outfile, argc, argv, rcsid, control);
+  startrece(outfile, argc, argv, "freesurfer zero_lt_4dfp.c", control);
   catrec(imgfile);
   endrec();
 

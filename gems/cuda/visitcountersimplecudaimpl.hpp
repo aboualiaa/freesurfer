@@ -20,7 +20,7 @@ void RunVisitCounterSimpleCUDA<float, float>(
 
 template <>
 void RunVisitCounterSimpleCUDA<double, double>(
-    CudaImage<int, 3, unsigned short> &d_output,
+    CudaImage<int, 3, unsigned short> & d_output,
     const CudaImage<double, 3, size_t> &d_tetrahedra);
 
 template <>

@@ -1,5 +1,4 @@
 /**
- * @file  QdecMain.cxx
  * @brief Starts the application
  *
  * This starts the Tcl interpreter, inits our application library, and
@@ -7,12 +6,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:35 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,20 +20,18 @@
  */
 
 #include <string>
-#include <vtksys/SystemTools.hxx>
 #include <vtksys/CommandLineArguments.hxx>
+#include <vtksys/SystemTools.hxx>
 
 #include "vtkKWQdecApp.h"
 
 #include "diag.h"
 #include "error.h"
-#include "unistd.h" // getcwd
 #include "tix.h"
+#include "unistd.h" // getcwd
 
 extern int Qdeclib_SafeInit(Tcl_Interp *iInterp);
 extern int Blt_Init(Tcl_Interp *iInterp);
-
-using namespace std;
 
 const char *Progname = "qdec";
 
@@ -50,7 +43,8 @@ int main(int argc, char **argv) {
   // if SUBJECTS_DIR is not set, then set it to the current working dir
   if (NULL == getenv("SUBJECTS_DIR")) {
     if (setenv("SUBJECTS_DIR", getcwd(NULL, 0), 1)) {
-      cerr << endl << "ERROR: failure setting SUBJECTS_DIR to cwd." << endl;
+      std::cerr << std::endl
+                << "ERROR: failure setting SUBJECTS_DIR to cwd." << std::endl;
       return 1;
     }
   }
@@ -58,7 +52,7 @@ int main(int argc, char **argv) {
   // Initialize Tcl.
   Tcl_Interp *interp = vtkKWApplication::InitializeTcl(argc, argv, &cerr);
   if (!interp) {
-    cerr << "Error initializing Tcl." << endl;
+    std::cerr << "Error initializing Tcl." << std::endl;
     return 1;
   }
 
@@ -66,7 +60,7 @@ int main(int argc, char **argv) {
   int rTcl = Tix_Init(interp);
   if (TCL_OK != rTcl) {
     const char *sResult = Tcl_GetStringResult(interp);
-    cerr << "Tix_Init returned not TCL_OK: " << sResult << endl;
+    std::cerr << "Tix_Init returned not TCL_OK: " << sResult << std::endl;
     return 1;
   }
 
@@ -74,7 +68,7 @@ int main(int argc, char **argv) {
   rTcl = Blt_Init(interp);
   if (TCL_OK != rTcl) {
     const char *sResult = Tcl_GetStringResult(interp);
-    cerr << "Blt_Init returned not TCL_OK: " << sResult << endl;
+    std::cerr << "Blt_Init returned not TCL_OK: " << sResult << std::endl;
     return 1;
   }
 

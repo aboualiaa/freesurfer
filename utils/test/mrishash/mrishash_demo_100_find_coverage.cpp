@@ -32,20 +32,20 @@
 
   ----------------------------------------------*/
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
+#include "error.h"
+#include "macros.h"
 #include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "version.h"
 
 #include "gw_utils.h"
@@ -66,22 +66,22 @@ GWUTILS_FACE faces[FACECOUNT] = {{{3, 2, 6}}, {{3, 6, 7}}, {{1, 3, 7}},
 //---------------- main at bottom ---------------
 char *Progname;
 
-#define int_bkg 10
+#define int_bkg     10
 #define int_default 20
-#define int_base 50
-#define int_cube 255
+#define int_base    50
+#define int_cube    255
 //-----------------------------------
 void CoverageTest() {
   //-----------------------------------
-  const int xyzmid = 127;
+  const int   xyzmid  = 127;
   const float hashres = 16.0;
 
-  MRI *amri;
-  MRIS *amris;
-  MHT *amht;
-  int rslt;
-  int xsi, ysi, zsi, xvi, yvi, zvi;
-  int intens, halfscansize, closest_vertnum, vno;
+  MRI *  amri;
+  MRIS * amris;
+  MHT *  amht;
+  int    rslt;
+  int    xsi, ysi, zsi, xvi, yvi, zvi;
+  int    intens, halfscansize, closest_vertnum, vno;
   double xs, ys, zs, xv, yv, zv;
   VERTEX vtx, *v;
   double ddist;

@@ -1,17 +1,6 @@
-/**
- * @file  mri_ca_configFile.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:10 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,35 +15,27 @@
 #ifndef ConfigFile_h
 #define ConfigFile_h
 
+#include "mri_ca_util.h"
+#include <fstream>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
-#include <fstream>
 #include <string>
-#include "mri_ca_util.h"
 
 /* [[]]
-         The CConfigFile class needs to be enhanced so that a configFile can be
-   written out to disk without seeking in the file for section names This means
-   that all the entries in a section must be grouped and passed to a write
-   command so that that section can be written out all at once and not revisited
-   . This will simplify the code and make it possible to write out to cout just
-   like a file.
+         The CConfigFile class needs to be enhanced so that a configFile can be written out to disk without seeking in the file for section names
+          This means that all the entries in a section must be grouped and passed to a write command so that that section can be written out all at once and
+          not revisited . This will simplify the code and make it possible to write out to cout just like a file.
 
-         This has been started in CStatisticsVolumeHeader.h and other config
-   file containing classes should be updated so the obsolete write() functions
-   can be removed from CConfigFile (grep on obsolete in this file)
+         This has been started in CStatisticsVolumeHeader.h and other config file containing classes should be updated so the obsolete write() functions can
+           be removed from CConfigFile (grep on obsolete in this file)
 
-         Class CConfigFile should be a namespace of static functions which
-   enable more operations on the iostream object -if only methods on the
-   iostream class are used then a filter program could be written with a
-   configFile read in from cin or written to  cout
+         Class CConfigFile should be a namespace of static functions which enable more operations on the iostream object
+         -if only methods on the iostream class are used then a filter program could be written with a configFile read in from cin or written to  cout
 
-         -dont want to replicate fstrean methods in this class, just want to
-   augment it -Want to write a simple filter program by simply reading from cin
-   and writing to cout -DONT WANT CConfigFile to be derived from iostream
-   because then the cout and cin objects cannot be written to since they are not
-   of the inherited type.
+         -dont want to replicate fstrean methods in this class, just want to augment it
+         -Want to write a simple filter program by simply reading from cin and writing to cout
+         -DONT WANT CConfigFile to be derived from iostream because then the cout and cin objects cannot be written to since they are not of the inherited type.
 
          1) rewrite classes which use CConfigFile:
          cin >> labelLUT;
@@ -62,33 +43,29 @@
               friend ostream& operator>>(ostream&, labelLUT&);
            }
 
-         2) verify that the operations in ConfigFile can work on an iostream
-   object by replacing fstream with iostream and removing the open and close
-   operations 3) declare the config file functions static. 4) invoke the
-   functions in the classes which use CConfigFile with CConfigFile::get(istream,
-   ...) and CConfigFile::write(ostream, ...)
+         2) verify that the operations in ConfigFile can work on an iostream object by replacing fstream with iostream and removing the open and close operations
+         3) declare the config file functions static.
+         4) invoke the functions in the classes which use CConfigFile with CConfigFile::get(istream, ...) and CConfigFile::write(ostream, ...)
 
 
          Currently:
-         A config file Extends fstream with special extraction and insertion
-   operators which pertain to the cfg file format Which is basically an
-   exteneded .ini file format from windows which is easy to read and supports
-          singletons, vectors and vectors of vectors (including matrices) of
-   ints, doubles and strings
+         A config file Extends fstream with special extraction and insertion operators which pertain to the cfg file format
+          Which is basically an exteneded .ini file format from windows which is easy to read and supports
+          singletons, vectors and vectors of vectors (including matrices) of ints, doubles and strings
 
 */
 
 #define debugAid 0
-#define EOL 10
+#define EOL      10
 
 using namespace std;
 
 class CConfigFile {
 private:
-  // Assuming the last character retrieved indicates the beginning of a string
-  // we are interested in occurs after the current character get the next
-  // sequence of characters up to the first 'ch' character or EOL or EOF If EOL
-  // is found first then bEOLFoundFirst is set to true
+  // Assuming the last character retrieved indicates the beginning of a string we are interested in
+  // occurs after the current character
+  // get the next sequence of characters up to the first 'ch' character or EOL or EOF
+  // If EOL is found first then bEOLFoundFirst is set to true
   string getDelimitedString(fstream &ifs, char ch, bool &bEOLFoundFirst) {
 
     bEOLFoundFirst = false;
@@ -110,10 +87,10 @@ private:
   string getDelimitedString(fstream &ifs, char ch, bool &bEOLFoundFirst,
                             bool &bEQUALFound, bool &bSqBracketFound,
                             bool &bEOFFound) {
-    bEOLFoundFirst = false;
-    bEQUALFound = false;
+    bEOLFoundFirst  = false;
+    bEQUALFound     = false;
     bSqBracketFound = false;
-    bEOFFound = false;
+    bEOFFound       = false;
     string strDelimitedString; // initially an empty string
     strDelimitedString.erase();
 
@@ -192,17 +169,15 @@ private:
     return (bFoundSection);
   }
 
-  // skip to the end of the current line next non blank and get the sequence of
-  // characters up to the first '='
+  // skip to the end of the current line next non blank and get the sequence of characters up to the first '='
   string getNextValueName(fstream &ifs) {
-    bool bEOLFound = true;
+    bool   bEOLFound = true;
     string strNextValueName;
 
-    while ((ifs.good()) &&
-           (bEOLFound)) // keep looking until we find a value which is
-                        // terminated by an '=' char and not by EOL because that
-                        // could simply by part of a matrix definition and not a
-                        // valid value in a config file
+    while (
+        (ifs.good()) &&
+        (bEOLFound)) // keep looking until we find a value which is terminated by an '=' char and not by EOL
+    // because that could simply by part of a matrix definition and not a valid value in a config file
     {
       skipOver(ifs, ' ');
       strNextValueName = getDelimitedString(ifs, '=', bEOLFound);
@@ -235,8 +210,8 @@ private:
       return (false);
     else {
       if ((strNextElement.size() == 0) &&
-          (bMoreCols == false)) // if this is the only element on a row and its
-                                // empty then discount it
+          (bMoreCols ==
+           false)) // if this is the only element on a row and its empty then discount it
         return (false);
       else
         return (true);
@@ -244,7 +219,7 @@ private:
   }
 
   bool skipToSection(fstream &ifs, string &strSectionName) {
-    bool bFoundSection = false;
+    bool   bFoundSection = false;
     string strNextSectionName;
     while ((ifs.good()) && (getNextSectionName(ifs, strNextSectionName))) {
       if (strNextSectionName == strSectionName) {
@@ -261,8 +236,7 @@ private:
     return (bFoundSection);
   }
 
-  // Skip to the equal sign after the value strValueName but dont go beyond the
-  // current section
+  // Skip to the equal sign after the value strValueName but dont go beyond the current section
   bool skipToValue(fstream &ifs, string &strValueName) {
     bool bFoundValue = false;
     if (strValueName == "") {
@@ -277,8 +251,7 @@ private:
       }
 
       if (!fs.good()) {
-        fs.clear(); // we read off the end of the file so clear the fs error
-                    // bits
+        fs.clear(); // we read off the end of the file so clear the fs error bits
         fs.seekg(0, ios::end); // move the file pointer to the end of the file
       }
     }
@@ -307,10 +280,8 @@ public:
   ~CConfigFile() { fs.close(); }
 
   // Opens and reads in the file strFilepath, throws if there is an error
-  // DEFAULT file mode is  CREATE (create the file if nec.),
-  // OVERWRITE_AT_BEGINNING (for all new data written to the file) over-ride
-  // these default by passing in ios::nocreate  or ios::trunc   or ios::append
-  // as the nProt argument
+  // DEFAULT file mode is  CREATE (create the file if nec.), OVERWRITE_AT_BEGINNING (for all new data written to the file)
+  // over-ride these default by passing in ios::nocreate  or ios::trunc   or ios::append as the nProt argument
   void init(string strTheFilepath, int nProt = 0) {
     strFilepath = strTheFilepath;
 
@@ -345,8 +316,8 @@ public:
       // read in the comma separated strings into  vectIntValues
       //
       string strNextElement;
-      bool bMoreCols = true;
-      bool bMoreRowsDummy;
+      bool   bMoreCols = true;
+      bool   bMoreRowsDummy;
       while ((bMoreCols == true) &&
              (getNextVectorElement(fs, strNextElement, bMoreCols,
                                    bMoreRowsDummy))) {
@@ -367,10 +338,10 @@ public:
       // permit the number of columns in ea row to be different
       //
       string strNextElement;
-      bool bMoreRows = true;
+      bool   bMoreRows = true;
       while (bMoreRows == true) {
         TypeVectorString vectString;
-        bool bMoreCols = true;
+        bool             bMoreCols = true;
         while (
             (bMoreCols == true) &&
             (getNextVectorElement(fs, strNextElement, bMoreCols, bMoreRows))) {
@@ -388,9 +359,9 @@ public:
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
-      bool bEOLFound;
+      bool   bEOLFound;
       string strValue = getDelimitedString(fs, ' ', bEOLFound);
-      nValue = atoi(strValue.c_str());
+      nValue          = atoi(strValue.c_str());
     }
   }
 
@@ -404,8 +375,8 @@ public:
       // read in the comma separated strings into  vectIntValues
       //
       string strNextElement;
-      bool bMoreCols = true;
-      bool bMoreRowsDummy;
+      bool   bMoreCols = true;
+      bool   bMoreRowsDummy;
       while ((bMoreCols == true) &&
              (getNextVectorElement(fs, strNextElement, bMoreCols,
                                    bMoreRowsDummy))) {
@@ -429,10 +400,10 @@ public:
       // permit the number of columns in ea row to be different
       //
       string strNextElement;
-      bool bMoreRows = true;
+      bool   bMoreRows = true;
       while (bMoreRows == true) {
         TypeVectorInt vectInt;
-        bool bMoreCols = true;
+        bool          bMoreCols = true;
         while (
             (bMoreCols == true) &&
             (getNextVectorElement(fs, strNextElement, bMoreCols, bMoreRows))) {
@@ -453,9 +424,9 @@ public:
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
-      bool bEOLFound;
+      bool   bEOLFound;
       string strValue = getDelimitedString(fs, ' ', bEOLFound);
-      dValue = atof(strValue.c_str());
+      dValue          = atof(strValue.c_str());
     }
   }
 
@@ -463,9 +434,9 @@ public:
     fs.clear();
     fs.seekg(0, ios::beg); // move the file pointer to the beginning of the file
     if (skipTo(strSectionName, valueName)) {
-      bool bEOLFound;
+      bool   bEOLFound;
       string strValue = getDelimitedString(fs, ' ', bEOLFound);
-      fValue = atof(strValue.c_str());
+      fValue          = atof(strValue.c_str());
     }
   }
 
@@ -478,8 +449,8 @@ public:
       // read in the comma separated strings into  vectIntValues
       //
       string strNextElement;
-      bool bMoreCols = true;
-      bool bMoreRowsDummy;
+      bool   bMoreCols = true;
+      bool   bMoreRowsDummy;
       while ((bMoreCols == true) &&
              (getNextVectorElement(fs, strNextElement, bMoreCols,
                                    bMoreRowsDummy))) {
@@ -502,10 +473,10 @@ public:
       // permit the number of columns in ea row to be different
       //
       string strNextElement;
-      bool bMoreRows = true;
+      bool   bMoreRows = true;
       while (bMoreRows == true) {
         TypeVectorDouble vectDouble;
-        bool bMoreCols = true;
+        bool             bMoreCols = true;
         while (
             (bMoreCols == true) &&
             (getNextVectorElement(fs, strNextElement, bMoreCols, bMoreRows))) {
@@ -529,8 +500,8 @@ public:
       // read in the comma separated strings into  vectIntValues
       //
       string strNextElement;
-      bool bMoreCols = true;
-      bool bMoreRowsDummy;
+      bool   bMoreCols = true;
+      bool   bMoreRowsDummy;
       while ((bMoreCols == true) &&
              (getNextVectorElement(fs, strNextElement, bMoreCols,
                                    bMoreRowsDummy))) {
@@ -553,10 +524,10 @@ public:
       // permit the number of columns in ea row to be different
       //
       string strNextElement;
-      bool bMoreRows = true;
+      bool   bMoreRows = true;
       while (bMoreRows == true) {
         TypeVectorFloat vectFloat;
-        bool bMoreCols = true;
+        bool            bMoreCols = true;
         while (
             (bMoreCols == true) &&
             (getNextVectorElement(fs, strNextElement, bMoreCols, bMoreRows))) {
@@ -590,8 +561,7 @@ public:
       }
     }
   }
-  // methods to be used by specific config file implementations to write out
-  // sections and values in a file
+  // methods to be used by specific config file implementations to write out sections and values in a file
 
   // Strings -----------
   void write(string strValue, string strValueName, bool bEchoToStdOut = false) {
@@ -1053,7 +1023,7 @@ public:
   }
 
 protected:
-  string strFilepath;
+  string  strFilepath;
   fstream fs; // an i/o stream  which writes to files
 };
 

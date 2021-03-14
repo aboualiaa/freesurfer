@@ -1,5 +1,4 @@
 /**
- * @file  mris_mef_surfaces.c
  * @brief repositions cortical surface to gray/white boundary
  *
  * This program positions the tessellation of the cortical surface
@@ -10,12 +9,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: zkaufman $
- *    $Date: 2015/02/05 23:34:41 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,35 +22,44 @@
  *
  */
 
-#include "diag.h"
-#include "timer.h"
-#include "mrisurf.h"
-#include "tags.h"
-#include "mrinorm.h"
-#include "version.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-static char vcid[] =
-    "$Id: mris_mef_surfaces.c,v 1.7 2015/02/05 23:34:41 zkaufman Exp $";
+#include "diag.h"
+#include "error.h"
+#include "label.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrimorph.h"
+#include "mrinorm.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "tags.h"
+#include "timer.h"
+#include "version.h"
 
 int main(int argc, char *argv[]);
 
 //#define BRIGHT_LABEL         130
 //#define BRIGHT_BORDER_LABEL  100
 
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_T1, float thresh, int out_label,
                       MRI *mri_dst);
 
-int LocalMRISfindExpansionRegions(MRI_SURFACE *mris);
-int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm);
+int  LocalMRISfindExpansionRegions(MRI_SURFACE *mris);
+int  MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm);
 MRI *LocalMRIfindBrightNonWM(MRI *mri_T1, MRI *mri_wm);
 
-int MRISaverageMarkedValbaks(MRI_SURFACE *mris, int navgs);
+int        MRISaverageMarkedValbaks(MRI_SURFACE *mris, int navgs);
 static int MRIcomputeClassStatistics_mef(MRI *mri_T1_30, MRI *mri_T1_5,
                                          MRI *mri_em_seg, float *white_mean,
                                          float *white_std, float *gray_mean,
@@ -73,46 +77,42 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
                                      float gm_std[2], double sigma,
                                      float max_thickness, FILE *log_fp);
 
-// int MRISpositionSurface_mef(MRI_SURFACE *mris, MRI *mri_30, MRI *mri_5,
-// INTEGRATION_PARMS *parms, float weight30, float weight5);
+// int MRISpositionSurface_mef(MRI_SURFACE *mris, MRI *mri_30, MRI *mri_5, INTEGRATION_PARMS *parms, float weight30, float weight5);
 
-// static double mrisRmsValError_mef(MRI_SURFACE *mris, MRI *mri_30, MRI *mri_5,
-// float weight30, float weight5);
+// static double mrisRmsValError_mef(MRI_SURFACE *mris, MRI *mri_30, MRI *mri_5, float weight30, float weight5);
 
-// static int mrisComputeIntensityTerm_mef(MRI_SURFACE *mris, double
-// l_intensity, MRI *mri_30, MRI *mri_5, double sigma_global, float weight30,
-// float weight5);
+// static int mrisComputeIntensityTerm_mef(MRI_SURFACE *mris, double l_intensity, MRI *mri_30, MRI *mri_5, double sigma_global, float weight30, float weight5);
 
 static int MRInormalizeMEF(MRI *mri, MRI *mri_em_seg);
 
-static LABEL *highres_label = nullptr;
+static LABEL *highres_label = NULL;
 
 static char T1_30_name[STRLEN] =
-    "flash30_T1"; // INU corrected flash30, can use EM's output
+    "flash30_T1"; //INU corrected flash30, can use EM's output
 static char T1_5_name[STRLEN] =
-    "flash5_T1"; // INU corrected flash5, can use EM's output
+    "flash5_T1"; //INU corrected flash5, can use EM's output
 static char em_name[STRLEN] =
-    "atlas_EM_combined"; // synthesized volume from EM segmentation
+    "atlas_EM_combined"; //synthesized volume from EM segmentation
 
-static char *white_fname = nullptr;
+static char *white_fname = NULL;
 
-static char *orig_white = nullptr;
-static char *orig_pial = nullptr;
+static char *orig_white = NULL;
+static char *orig_pial  = NULL;
 
 const char *Progname;
 
 static double std_scale = 1.0;
 
-static int graymid = 0;
+static int graymid        = 0;
 static int curvature_avgs = 10;
-static int create = 1;
-static int smoothwm = 0;
-static int white_only = 0;
-static int overlay = 0;
+static int create         = 1;
+static int smoothwm       = 0;
+static int white_only     = 0;
+static int overlay        = 0;
 
 static int auto_detect_stats = 1;
 
-static int in_out_in_flag = 0;
+static int in_out_in_flag      = 0;
 static int apply_median_filter = 0;
 
 static int nbhd_size = 20;
@@ -123,36 +123,36 @@ static float base_dt_scale = BASE_DT_SCALE;
 
 static int add = 0;
 
-static double l_tsmooth = 0.0;
+static double l_tsmooth      = 0.0;
 static double l_surf_repulse = 5.0;
 
 static int smooth = 5;
-static int vavgs = 5;
+static int vavgs  = 5;
 static int nwhite = 20 /*5*/;
-static int ngray = 30 /*45*/;
+static int ngray  = 30 /*45*/;
 
-static int nowhite = 0;
-static int nbrs = 2;
+static int nowhite    = 0;
+static int nbrs       = 2;
 static int write_vals = 0;
 
-static char *orig_name = ORIG_NAME;
-static char *suffix = "";
-static char *output_suffix = "";
-static char *xform_fname = nullptr;
+static const char *orig_name     = ORIG_NAME;
+static const char *suffix        = "";
+static const char *output_suffix = "";
+static char *      xform_fname   = NULL;
 
-static char pial_name[STRLEN] = "pial";
+static char pial_name[STRLEN]         = "pial";
 static char white_matter_name[STRLEN] = WHITE_MATTER_NAME;
 
 static int lh_label = LH_LABEL;
 static int rh_label = RH_LABEL;
 
-static int max_pial_averages = 16;
-static int min_pial_averages = 2;
-static int max_white_averages = 4;
-static int min_white_averages = 0;
-static float pial_sigma = 2.0f;
-static float white_sigma = 2.0f;
-static float max_thickness = 5.0;
+static int   max_pial_averages  = 16;
+static int   min_pial_averages  = 2;
+static int   max_white_averages = 4;
+static int   min_white_averages = 0;
+static float pial_sigma         = 2.0f;
+static float white_sigma        = 2.0f;
+static float max_thickness      = 5.0;
 
 static char sdir[STRLEN] = "";
 
@@ -161,17 +161,17 @@ static int MGZ = 0; // for use with MGZ format
 static int longitudinal = 0;
 
 int main(int argc, char *argv[]) {
-  char *hemi, *sname, *cp, fname[STRLEN], mdir[STRLEN];
-  int nargs, i, replace_val, msec, n_averages, j;
+  char *       hemi, *sname, *cp, fname[STRLEN], mdir[STRLEN];
+  int          nargs, i, replace_val, msec, n_averages, j;
   MRI_SURFACE *mris;
-  MRI *mri_wm, *mri_filled, *mri_T1_30, *mri_T1_5; // *mri_labeled;
-  MRI *mri_em_seg;
-  float max_len;
-  // need to be estimated from EM segmentation;
+  MRI *        mri_wm, *mri_filled, *mri_T1_30, *mri_T1_5; // *mri_labeled;
+  MRI *        mri_em_seg;
+  float        max_len;
+  //need to be estimated from EM segmentation;
   // need to mask out cerebellum though
-  float white_mean[2], white_std[2], gray_mean[2], gray_std[2];
+  float  white_mean[2], white_std[2], gray_mean[2], gray_std[2];
   double current_sigma;
-  Timer then;
+  Timer  then;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_mef_surfaces");
 
@@ -183,32 +183,31 @@ int main(int argc, char *argv[]) {
   Gdiag |= DIAG_SHOW;
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
-  memset(&parms, 0, sizeof(parms));
-  parms.projection = NO_PROJECTION;
-  parms.tol = 1e-4;
-  parms.dt = 0.5f;
-  parms.base_dt = BASE_DT_SCALE * parms.dt;
-  parms.l_spring = 1.0f;
-  parms.l_curv = 1.0;
+  parms.projection  = NO_PROJECTION;
+  parms.tol         = 1e-4;
+  parms.dt          = 0.5f;
+  parms.base_dt     = BASE_DT_SCALE * parms.dt;
+  parms.l_spring    = 1.0f;
+  parms.l_curv      = 1.0;
   parms.l_intensity = 0.2;
-  parms.l_spring = 0.0f;
-  parms.l_curv = 1.0;
+  parms.l_spring    = 0.0f;
+  parms.l_curv      = 1.0;
   parms.l_intensity = 0.2;
-  parms.l_tspring = 1.0f;
-  parms.l_nspring = 0.5f;
+  parms.l_tspring   = 1.0f;
+  parms.l_nspring   = 0.5f;
 
-  parms.niterations = 0;
+  parms.niterations      = 0;
   parms.write_iterations = 0 /*WRITE_ITERATIONS */;
   parms.integration_type = INTEGRATE_MOMENTUM;
-  parms.momentum = 0.0 /*0.8*/;
-  parms.dt_increase = 1.0 /* DT_INCREASE */;
-  parms.dt_decrease = 0.50 /* DT_DECREASE*/;
-  parms.error_ratio = 50.0 /*ERROR_RATIO */;
+  parms.momentum         = 0.0 /*0.8*/;
+  parms.dt_increase      = 1.0 /* DT_INCREASE */;
+  parms.dt_decrease      = 0.50 /* DT_DECREASE*/;
+  parms.error_ratio      = 50.0 /*ERROR_RATIO */;
   /*  parms.integration_type = INTEGRATE_LINE_MINIMIZE ;*/
   parms.l_surf_repulse = 0.0;
-  parms.l_repulse = 1;
+  parms.l_repulse      = 1;
 
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
@@ -226,7 +225,7 @@ int main(int argc, char *argv[]) {
 
   then.reset();
   sname = argv[1];
-  hemi = argv[2];
+  hemi  = argv[2];
   if (!strlen(sdir)) {
     cp = getenv("SUBJECTS_DIR");
     if (!cp)
@@ -241,7 +240,11 @@ int main(int argc, char *argv[]) {
               "%s: FREESURFER_HOME not defined in environment.\n", Progname);
   strcpy(mdir, cp);
 
-  sprintf(fname, "%s/%s/mri/filled", sdir, sname);
+  int req = snprintf(fname, STRLEN, "%s/%s/mri/filled", sdir, sname);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   if (MGZ)
     strcat(fname, ".mgz");
   fprintf(stderr, "reading volume %s...\n", fname);
@@ -258,7 +261,11 @@ int main(int argc, char *argv[]) {
     replace_val = lh_label;
   }
 
-  sprintf(fname, "%s/%s/mri/%s", sdir, sname, T1_30_name);
+  req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, T1_30_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   if (MGZ)
     strcat(fname, ".mgz");
   fprintf(stderr, "reading volume %s...\n", fname);
@@ -268,7 +275,11 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_NOFILE, "%s: could not read input volume %s", Progname,
               fname);
 
-  sprintf(fname, "%s/%s/mri/%s", sdir, sname, T1_5_name);
+  req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, T1_5_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   if (MGZ)
     strcat(fname, ".mgz");
   fprintf(stderr, "reading volume %s...\n", fname);
@@ -278,7 +289,11 @@ int main(int argc, char *argv[]) {
     ErrorExit(ERROR_NOFILE, "%s: could not read input volume %s", Progname,
               fname);
 
-  sprintf(fname, "%s/%s/mri/%s", sdir, sname, em_name);
+  req = snprintf(fname, STRLEN, "%s/%s/mri/%s", sdir, sname, em_name);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   if (MGZ)
     strcat(fname, ".mgz");
   fprintf(stderr, "reading volume %s...\n", fname);
@@ -296,16 +311,16 @@ int main(int argc, char *argv[]) {
     MRI *mri_tmp;
 
     fprintf(stderr, "applying median filter to T1 image...\n");
-    mri_tmp = MRImedian(mri_T1_30, nullptr, 3, nullptr);
+    mri_tmp = MRImedian(mri_T1_30, NULL, 3, NULL);
     MRIfree(&mri_T1_30);
     mri_T1_30 = mri_tmp;
 
-    mri_tmp = MRImedian(mri_T1_5, nullptr, 3, nullptr);
+    mri_tmp = MRImedian(mri_T1_5, NULL, 3, NULL);
     MRIfree(&mri_T1_5);
     mri_T1_5 = mri_tmp;
   }
 
-  // normalize each input volume to have same mean and std within WM
+  //normalize each input volume to have same mean and std within WM
   MRInormalizeMEF(mri_T1_30, mri_em_seg);
   MRInormalizeMEF(mri_T1_5, mri_em_seg);
 
@@ -322,7 +337,11 @@ int main(int argc, char *argv[]) {
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
     MRIwrite(mri_T1_30, "r30.mgz");
 
-  sprintf(fname, "%s/%s/mri/wm", sdir, sname);
+  req = snprintf(fname, STRLEN, "%s/%s/mri/wm", sdir, sname);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   if (MGZ)
     strcat(fname, ".mgz");
   fprintf(stderr, "reading volume %s...\n", fname);
@@ -333,7 +352,7 @@ int main(int argc, char *argv[]) {
   //////////////////////////////////////////
   setMRIforSurface(mri_wm);
 
-  // the following two steps might as well be ignored
+  //the following two steps might as well be ignored
   //  MRIsmoothBrightWM(mri_T1_30, mri_wm) ;
   //  mri_labeled = MRIfindBrightNonWM(mri_T1_30, mri_wm) ;
 
@@ -346,7 +365,12 @@ int main(int argc, char *argv[]) {
          gray_std[0], gray_std[1]);
 
   MRIfree(&mri_wm);
-  sprintf(fname, "%s/%s/surf/%s.%s%s", sdir, sname, hemi, orig_name, suffix);
+  req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s%s", sdir, sname, hemi,
+                 orig_name, suffix);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "reading original surface position from %s...\n", fname);
   mris = MRISreadOverAlloc(fname, 1.1);
   if (!mris)
@@ -379,7 +403,7 @@ int main(int argc, char *argv[]) {
       }
   }
 
-  // what if I need a vector-values intensity??
+  //what if I need a vector-values intensity??
   MRISsetVals(mris, -1); /* clear white matter intensities */
   MRIScopyValToValBak(mris);
 
@@ -406,17 +430,17 @@ int main(int argc, char *argv[]) {
     parms.n_averages = n_averages;
     MRISprintTessellationStats(mris, stderr);
 
-    // This following function needs major modification
+    //This following function needs major modification
     MRIScomputeBorderValues_MEF_WHITE(
         mris, mri_em_seg, mri_T1_30, mri_T1_5, white_mean, white_std, gray_mean,
         gray_std, current_sigma, 2 * max_thickness, parms.fp);
 
-    // what does this do?
+    //what does this do?
     LocalMRISfindExpansionRegions(mris);
 
     if (vavgs) {
       fprintf(stderr, "averaging target values for %d iterations...\n", vavgs);
-      // the following function needs be modified too to use two channels
+      //the following function needs be modified too to use two channels
       MRISaverageMarkedVals(mris, vavgs);
       MRISaverageMarkedValbaks(mris, vavgs);
       if (Gdiag_no > 0) {
@@ -429,12 +453,12 @@ int main(int argc, char *argv[]) {
 
     if (write_vals) {
       sprintf(fname, "./%s-white%2.2f.w", hemi, current_sigma);
-      // MRISwriteValues(mris, fname) ;
+      //MRISwriteValues(mris, fname) ;
       MRISwrite(mris, fname);
     }
 
-    // the following function needs major change
-    // and may need different versions for white and pial resp.
+    //the following function needs major change
+    //and may need different versions for white and pial resp.
     MRISpositionSurface_mef(mris, mri_T1_30, mri_T1_5, &parms, 0.75, 0.25);
 
     if (add) {
@@ -447,8 +471,12 @@ int main(int argc, char *argv[]) {
   }
 
   if (!nowhite) {
-    sprintf(fname, "%s/%s/surf/%s.%s%s%s", sdir, sname, hemi, white_matter_name,
-            output_suffix, suffix);
+    req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s%s%s", sdir, sname, hemi,
+                   white_matter_name, output_suffix, suffix);
+    if (req >= STRLEN) {
+      std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                << std::endl;
+    }
     fprintf(stderr, "writing white matter surface to %s...\n", fname);
     MRISaverageVertexPositions(mris, smoothwm);
     MRISwrite(mris, fname);
@@ -517,9 +545,9 @@ int main(int argc, char *argv[]) {
       ErrorExit(Gerror, "reading orig pial positions failed");
 
     MRIScomputeMetricProperties(mris); /*shouldn't this be done whenever
-                                         orig_pial is used??? Maybe that's
-                                         why the cross-intersection
-                                         was caused */
+                                          orig_pial is used??? Maybe that's
+                                          why the cross-intersection
+                                          was caused */
   }
 
   /*    parms.l_convex = 1000 ;*/
@@ -530,9 +558,9 @@ int main(int argc, char *argv[]) {
     for (n_averages = max_pial_averages, i = 0; n_averages >= min_pial_averages;
          n_averages /= 2, current_sigma /= 2, i++) {
 
-      parms.sigma = current_sigma;
+      parms.sigma      = current_sigma;
       parms.n_averages = n_averages;
-      parms.l_tsmooth = l_tsmooth;
+      parms.l_tsmooth  = l_tsmooth;
       /*
         replace bright stuff such as eye sockets with 255.
         Simply zeroing it out
@@ -542,16 +570,16 @@ int main(int argc, char *argv[]) {
         doesn't mess up gradients.
       */
       //   MRImask(mri_T1_30, mri_labeled, mri_T1_30, BRIGHT_LABEL, 255) ;
-      //  MRImask(mri_T1_30, mri_labeled, mri_T1_30, BRIGHT_BORDER_LABEL,
-      //  MID_GRAY) ; if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
+      //  MRImask(mri_T1_30, mri_labeled, mri_T1_30, BRIGHT_BORDER_LABEL, MID_GRAY) ;
+      //  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
       //  MRIwrite(mri_T1_30, "pial_masked.mgz") ;
 
-      // The following function need major modification
+      //The following function need major modification
       MRIScomputeBorderValues_MEF_PIAL(
           mris, mri_em_seg, mri_T1_30, mri_T1_5, white_mean, white_std,
           gray_mean, gray_std, current_sigma, 2 * max_thickness, parms.fp);
 
-      // MRImask(mri_T1_30, mri_labeled, mri_T1_30, BRIGHT_LABEL, 0) ;
+      //MRImask(mri_T1_30, mri_labeled, mri_T1_30, BRIGHT_LABEL, 0) ;
 
       if (vavgs) {
         fprintf(stderr, "averaging target values for %d iterations...\n",
@@ -572,7 +600,7 @@ int main(int argc, char *argv[]) {
         MRISwriteValues(mris, fname);
       }
 
-      // The following function need major modification
+      //The following function need major modification
       MRISpositionSurface_mef(mris, mri_T1_30, mri_T1_5, &parms, 0.95, 0.05);
       /*    parms.l_nspring = 0 ;*/
       if (!n_averages)
@@ -580,8 +608,12 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  sprintf(fname, "%s/%s/surf/%s.%s%s%s", sdir, sname, hemi, pial_name,
-          output_suffix, suffix);
+  req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s%s%s", sdir, sname, hemi,
+                 pial_name, output_suffix, suffix);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   fprintf(stderr, "writing pial surface to %s...\n", fname);
   MRISwrite(mris, fname);
 
@@ -604,8 +636,12 @@ int main(int argc, char *argv[]) {
     if (graymid) {
       MRISsaveVertexPositions(mris, TMP_VERTICES);
       mrisFindMiddleOfGray(mris);
-      sprintf(fname, "%s/%s/surf/%s.%s%s", sdir, sname, hemi, GRAYMID_NAME,
-              suffix);
+      req = snprintf(fname, STRLEN, "%s/%s/surf/%s.%s%s", sdir, sname, hemi,
+                     GRAYMID_NAME, suffix);
+      if (req >= STRLEN) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       fprintf(stderr, "writing layer IV surface to %s...\n", fname);
       MRISwrite(mris, fname);
       MRISrestoreVertexPositions(mris, TMP_VERTICES);
@@ -624,7 +660,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -641,7 +677,7 @@ static int get_option(int argc, char *argv[]) {
     printf("using %s as volume for white matter deformation...\n", white_fname);
     nargs = 1;
   } else if (!stricmp(option, "hires") || !stricmp(option, "highres")) {
-    highres_label = LabelRead(nullptr, argv[2]);
+    highres_label = LabelRead(NULL, argv[2]);
     if (!highres_label)
       ErrorExit(ERROR_NOFILE, "%s: could not read highres label %s", Progname,
                 argv[2]);
@@ -693,16 +729,16 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "generating graymid surface...\n");
   } else if (!strcmp(option, "rval")) {
     rh_label = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "using %d as fill val for right hemisphere.\n", rh_label);
   } else if (!strcmp(option, "nbhd_size")) {
     nbhd_size = atoi(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "using %d size nbhd for thickness calculation.\n",
             nbhd_size);
   } else if (!strcmp(option, "lval")) {
     lh_label = atoi(argv[2]);
-    nargs = 1;
+    nargs    = 1;
     fprintf(stderr, "using %d as fill val for left hemisphere.\n", lh_label);
   } else if (!stricmp(option, "whiteonly")) {
     white_only = 1;
@@ -722,42 +758,42 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
     fprintf(stderr, "base name = %s\n", parms.base_name);
   } else if (!stricmp(option, "dt")) {
-    parms.dt = atof(argv[2]);
-    parms.base_dt = base_dt_scale * parms.dt;
+    parms.dt               = atof(argv[2]);
+    parms.base_dt          = base_dt_scale * parms.dt;
     parms.integration_type = INTEGRATE_MOMENTUM;
     fprintf(stderr, "using dt = %2.1e\n", parms.dt);
     nargs = 1;
   } else if (!stricmp(option, "spring")) {
     parms.l_spring = atof(argv[2]);
-    nargs = 1;
+    nargs          = 1;
     fprintf(stderr, "l_spring = %2.3f\n", parms.l_spring);
   } else if (!stricmp(option, "tsmooth")) {
     l_tsmooth = atof(argv[2]);
-    nargs = 1;
+    nargs     = 1;
     fprintf(stderr, "l_tsmooth = %2.3f\n", l_tsmooth);
   } else if (!stricmp(option, "grad")) {
     parms.l_grad = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_grad = %2.3f\n", parms.l_grad);
   } else if (!stricmp(option, "tspring")) {
     parms.l_tspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_tspring = %2.3f\n", parms.l_tspring);
   } else if (!stricmp(option, "nspring")) {
     parms.l_nspring = atof(argv[2]);
-    nargs = 1;
+    nargs           = 1;
     fprintf(stderr, "l_nspring = %2.3f\n", parms.l_nspring);
   } else if (!stricmp(option, "curv")) {
     parms.l_curv = atof(argv[2]);
-    nargs = 1;
+    nargs        = 1;
     fprintf(stderr, "l_curv = %2.3f\n", parms.l_curv);
   } else if (!stricmp(option, "smooth")) {
     smooth = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     fprintf(stderr, "smoothing for %d iterations\n", smooth);
   } else if (!stricmp(option, "output")) {
     output_suffix = argv[2];
-    nargs = 1;
+    nargs         = 1;
     fprintf(stderr, "appending %s to output names...\n", output_suffix);
   } else if (!stricmp(option, "vavgs")) {
     vavgs = atoi(argv[2]);
@@ -769,14 +805,14 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "using %s as white matter name...\n", white_matter_name);
   } else if (!stricmp(option, "intensity")) {
     parms.l_intensity = atof(argv[2]);
-    nargs = 1;
+    nargs             = 1;
     fprintf(stderr, "l_intensity = %2.3f\n", parms.l_intensity);
   } else if (!stricmp(option, "lm")) {
     parms.integration_type = INTEGRATE_LINE_MINIMIZE;
     fprintf(stderr, "integrating with line minimization\n");
   } else if (!stricmp(option, "nwhite")) {
     nwhite = atoi(argv[2]);
-    nargs = 1;
+    nargs  = 1;
     fprintf(stderr,
             "integrating gray/white surface positioning for %d time steps\n",
             nwhite);
@@ -825,7 +861,7 @@ static int get_option(int argc, char *argv[]) {
     fprintf(stderr, "adding vertices to tessellation during deformation.\n");
   } else if (!stricmp(option, "max")) {
     max_thickness = atof(argv[2]);
-    nargs = 1;
+    nargs         = 1;
     printf("using max_thickness = %2.1f\n", max_thickness);
   } else if (!stricmp(option, "mgz")) {
     MGZ = 1;
@@ -844,12 +880,12 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'T':
       xform_fname = argv[2];
-      nargs = 1;
+      nargs       = 1;
       fprintf(stderr, "applying ventricular xform %s\n", xform_fname);
       break;
     case 'O':
       orig_name = argv[2];
-      nargs = 1;
+      nargs     = 1;
       fprintf(stderr, "reading original vertex positions from %s\n", orig_name);
       break;
     case 'Q':
@@ -871,8 +907,8 @@ static int get_option(int argc, char *argv[]) {
 #endif
     case 'M':
       parms.integration_type = INTEGRATE_MOMENTUM;
-      parms.momentum = atof(argv[2]);
-      nargs = 1;
+      parms.momentum         = atof(argv[2]);
+      nargs                  = 1;
       fprintf(stderr, "momentum = %2.2f\n", parms.momentum);
       break;
     case 'R':
@@ -883,11 +919,11 @@ static int get_option(int argc, char *argv[]) {
     case 'B':
       base_dt_scale = atof(argv[2]);
       parms.base_dt = base_dt_scale * parms.dt;
-      nargs = 1;
+      nargs         = 1;
       break;
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'C':
       create = !create;
@@ -915,17 +951,17 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   fprintf(stderr, "usage: %s [options] <subject name> <hemisphere>\n",
           Progname);
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   fprintf(stderr,
           "\nThis program positions the tessellation of the cortical surface\n"
@@ -944,22 +980,22 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_T1, float thresh, int out_label,
                       MRI *mri_dst) {
   BUFTYPE *pdst, *pinv_lv, out_val, inv_lv_val, *pT1;
-  int width, height, depth, x, y, z, ventricle_voxels;
+  int      width, height, depth, x, y, z, ventricle_voxels;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_T1, nullptr);
+    mri_dst = MRIclone(mri_T1, NULL);
 
-  width = mri_T1->width;
+  width  = mri_T1->width;
   height = mri_T1->height;
-  depth = mri_T1->depth;
+  depth  = mri_T1->depth;
   /* now apply the inverse morph to build an average wm representation
      of the input volume
   */
@@ -967,13 +1003,13 @@ MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_T1, float thresh, int out_label,
   ventricle_voxels = 0;
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
-      pdst = &MRIvox(mri_dst, 0, y, z);
-      pT1 = &MRIvox(mri_T1, 0, y, z);
+      pdst    = &MRIvox(mri_dst, 0, y, z);
+      pT1     = &MRIvox(mri_T1, 0, y, z);
       pinv_lv = &MRIvox(mri_inv_lv, 0, y, z);
       for (x = 0; x < width; x++) {
         pT1++;
         inv_lv_val = *pinv_lv++;
-        out_val = 0;
+        out_val    = 0;
         if (inv_lv_val >= thresh) {
           ventricle_voxels++;
           out_val = out_label;
@@ -992,7 +1028,7 @@ MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_T1, float thresh, int out_label,
 }
 
 int LocalMRISfindExpansionRegions(MRI_SURFACE *mris) {
-  int vno, num, n, num_long, total;
+  int   vno, num, n, num_long, total;
   float d, dsq, mean, std, dist;
 
   d = dsq = 0.0f;
@@ -1007,13 +1043,13 @@ int LocalMRISfindExpansionRegions(MRI_SURFACE *mris) {
   }
 
   mean = d / num;
-  std = sqrt(dsq / num - mean * mean);
+  std  = sqrt(dsq / num - mean * mean);
   fprintf(stderr, "mean absolute distance = %2.2f +- %2.2f\n", mean, std);
 
   for (num = vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-    VERTEX *const v = &mris->vertices[vno];
-    v->curv = 0;
+    VERTEX *const                v  = &mris->vertices[vno];
+    v->curv                         = 0;
     if (v->ripflag || v->val <= 0)
       continue;
     if (fabs(v->d) < mean + 2 * std)
@@ -1043,12 +1079,12 @@ int LocalMRISfindExpansionRegions(MRI_SURFACE *mris) {
 }
 
 int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm) {
-  int width, height, depth, x, y, z, nthresholded;
+  int      width, height, depth, x, y, z, nthresholded;
   BUFTYPE *pT1, *pwm, val, wm;
 
-  width = mri_T1->width;
+  width  = mri_T1->width;
   height = mri_T1->height;
-  depth = mri_T1->depth;
+  depth  = mri_T1->depth;
 
   nthresholded = 0;
   for (z = 0; z < depth; z++) {
@@ -1057,7 +1093,7 @@ int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm) {
       pwm = &MRIvox(mri_wm, 0, y, z);
       for (x = 0; x < width; x++) {
         val = *pT1;
-        wm = *pwm++;
+        wm  = *pwm++;
         if (wm >= WM_MIN_VAL) /* labeled as white */
         {
           if (val > DEFAULT_DESIRED_WHITE_MATTER_VALUE) {
@@ -1077,12 +1113,12 @@ int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm) {
 MRI *LocalMRIfindBrightNonWM(MRI *mri_T1, MRI *mri_wm) {
   int width, height, depth, x, y, z, nlabeled, nwhite, xk, yk, zk, xi, yi, zi;
   BUFTYPE *pT1, *pwm, val, wm;
-  MRI *mri_labeled, *mri_tmp;
+  MRI *    mri_labeled, *mri_tmp;
 
-  mri_labeled = MRIclone(mri_T1, nullptr);
-  width = mri_T1->width;
-  height = mri_T1->height;
-  depth = mri_T1->depth;
+  mri_labeled = MRIclone(mri_T1, NULL);
+  width       = mri_T1->width;
+  height      = mri_T1->height;
+  depth       = mri_T1->depth;
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
@@ -1090,7 +1126,7 @@ MRI *LocalMRIfindBrightNonWM(MRI *mri_T1, MRI *mri_wm) {
       pwm = &MRIvox(mri_wm, 0, y, z);
       for (x = 0; x < width; x++) {
         val = *pT1++;
-        wm = *pwm++;
+        wm  = *pwm++;
 
         if (x == Gx && y == Gy && z == Gz) /* T1=127 */
           DiagBreak();
@@ -1117,14 +1153,14 @@ MRI *LocalMRIfindBrightNonWM(MRI *mri_T1, MRI *mri_wm) {
   }
 
   /* find all connected voxels that are above 115 */
-  MRIdilateThreshLabel(mri_labeled, mri_T1, nullptr, BRIGHT_LABEL, 10, 115);
+  MRIdilateThreshLabel(mri_labeled, mri_T1, NULL, BRIGHT_LABEL, 10, 115);
   MRIclose(mri_labeled, mri_labeled);
 
   /* expand once more to all neighboring voxels that are bright. At
      worst we will erase one voxel of white matter.
   */
   mri_tmp =
-      MRIdilateThreshLabel(mri_labeled, mri_T1, nullptr, BRIGHT_LABEL, 1, 100);
+      MRIdilateThreshLabel(mri_labeled, mri_T1, NULL, BRIGHT_LABEL, 1, 100);
   MRIxor(mri_labeled, mri_tmp, mri_tmp, 1, 255);
   MRIreplaceValues(mri_tmp, mri_tmp, 1, BRIGHT_BORDER_LABEL);
   MRIunion(mri_tmp, mri_labeled, mri_labeled);
@@ -1158,13 +1194,13 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
   double previous_mag, next_mag, previous_mag30, previous_mag5, next_mag30,
       next_mag5;
   double mag30, mag5, previous_val30, next_val30;
-  int total_vertices, vno, nmissing = 0, nout = 0, nin = 0, nfound = 0,
+  int    total_vertices, vno, nmissing = 0, nout = 0, nin = 0, nfound = 0,
                            nalways_missing = 0, local_max_found, ngrad_max,
                            ngrad, nmin, num_changed = 0;
-  float mean_border, mean_in, mean_out, dist, nx, ny, nz, mean_dist, step_size;
+  float  mean_border, mean_in, mean_out, dist, nx, ny, nz, mean_dist, step_size;
   double current_sigma;
   VERTEX *v;
-  FILE *fp = nullptr;
+  FILE *  fp = NULL;
 
   step_size = mri_30->xsize / 2;
 
@@ -1187,9 +1223,9 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
     y = v->y + v->ny;
     z = v->z + v->nz;
     MRISsurfaceRASToVoxel(mris, mri_30, x, y, z, &xw1, &yw1, &zw1);
-    nx = xw1 - xw;
-    ny = yw1 - yw;
-    nz = zw1 - zw;
+    nx   = xw1 - xw;
+    ny   = yw1 - yw;
+    nz   = zw1 - zw;
     dist = sqrt(SQR(nx) + SQR(ny) + SQR(nz));
     if (FZERO(dist))
       dist = 1;
@@ -1202,14 +1238,14 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
     the surface normal in which the gradient is pointing 'inwards'.
     The border will then be constrained to be within that region.
     */
-    inward_dist = 1.0;
+    inward_dist  = 1.0;
     outward_dist = -1.0;
     for (current_sigma = sigma; current_sigma <= 10 * sigma;
          current_sigma *= 2) {
       for (dist = 0; dist > -max_thickness; dist -= step_size) {
-        dx = v->x - v->origx;
-        dy = v->y - v->origy;
-        dz = v->z - v->origz;
+        dx        = v->x - v->origx;
+        dy        = v->y - v->origy;
+        dz        = v->z - v->origz;
         orig_dist = fabs(dx * v->nx + dy * v->ny + dz * v->nz);
         if (fabs(dist) + orig_dist > max_thickness)
           break;
@@ -1223,7 +1259,7 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
         // nx, ny,nz,&mag5,  current_sigma);
 
         //       if (mag30 >= 0.0 || mag5 <= 0)
-        if (mag30 >= 0.0) // this condition doesn't make much sense to me
+        if (mag30 >= 0.0) //this condition doesn't make much sense to me
           break;
         MRIsampleVolume(mri_30, xw, yw, zw, &val30);
         // MRIsampleVolume(mri_5, xw, yw, zw, &val5) ;
@@ -1233,9 +1269,9 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
       }
       inward_dist = dist + step_size / 2;
       for (dist = 0; dist < max_thickness; dist += step_size) {
-        dx = v->x - v->origx;
-        dy = v->y - v->origy;
-        dz = v->z - v->origz;
+        dx        = v->x - v->origx;
+        dy        = v->y - v->origy;
+        dz        = v->z - v->origz;
         orig_dist = fabs(dx * v->nx + dy * v->ny + dz * v->nz);
         if (fabs(dist) + orig_dist > max_thickness)
           break;
@@ -1255,9 +1291,9 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
         if (val30 < gm_mean[0] || val5 > (gm_mean[1] + gm_std[1]))
           break;
       }
-      outward_dist = dist-step_size/2 ;
+      outward_dist = dist - step_size / 2;
       if (!std::isfinite(outward_dist))
-        DiagBreak() ;
+        DiagBreak();
       if (inward_dist <= 0 || outward_dist >= 0)
         break;
     }
@@ -1287,13 +1323,13 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
     */
 
     /* search in the normal direction to find the min value */
-    max_mag_val30 = -10.0f;
-    mag = 5.0f; // is 5 too high?
-    max_mag = 0.0f;
-    min_val30 = 10000.0;
-    max_mag_val5 = -10.0f;
-    min_val5 = 10000.0;
-    min_val_dist = 0.0f;
+    max_mag_val30   = -10.0f;
+    mag             = 5.0f; //is 5 too high?
+    max_mag         = 0.0f;
+    min_val30       = 10000.0;
+    max_mag_val5    = -10.0f;
+    min_val5        = 10000.0;
+    min_val_dist    = 0.0f;
     local_max_found = 0;
     for (dist = inward_dist; dist <= outward_dist; dist += STEP_SIZE) {
       x = v->x + v->nx * (dist - STEP_SIZE);
@@ -1335,15 +1371,15 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
         MRIsampleVolumeDerivativeScale(mri_5, xw, yw, zw, nx, ny, nz,
                                        &previous_mag5, sigma);
 
-        // flash30 and flash5 have oppisite contrast at gray/white boundary
+        //flash30 and flash5 have oppisite contrast at gray/white boundary
         // the weights are arbitrary for now,
-        mag = mag30 * 0.7 - mag5 * 0.3;
+        mag          = mag30 * 0.7 - mag5 * 0.3;
         previous_mag = previous_mag30 * 0.7 - previous_mag5 * 0.3;
-        next_mag = next_mag30 * 0.7 - next_mag5 * 0.3;
+        next_mag     = next_mag30 * 0.7 - next_mag5 * 0.3;
 
         if (val30 < min_val30) {
-          min_val30 = val30; /* used if no gradient max is found */
-          min_val5 = val5;
+          min_val30    = val30; /* used if no gradient max is found */
+          min_val5     = val5;
           min_val_dist = dist;
         }
 
@@ -1357,7 +1393,7 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
         */
         if ((fabs(mag) > fabs(previous_mag)) && (fabs(mag) > fabs(next_mag)) &&
             (val30 <= (wm_mean[0] + wm_std[0])) &&
-            (val30 >= gm_mean[0]) // is this too restrictive??
+            (val30 >= gm_mean[0]) //is this too restrictive??
         ) {
           x = v->x + v->nx * (dist + 1);
           y = v->y + v->ny * (dist + 1);
@@ -1374,10 +1410,10 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
               (next_val30 <= (wm_mean[0] + wm_std[0])) &&
               (!local_max_found || (max_mag < fabs(mag)))) {
             local_max_found = 1;
-            max_mag_dist = dist;
-            max_mag = fabs(mag);
-            max_mag_val30 = val30;
-            max_mag_val5 = val5;
+            max_mag_dist    = dist;
+            max_mag         = fabs(mag);
+            max_mag_val30   = val30;
+            max_mag_val5    = val5;
           }
         } else {
           /*
@@ -1394,10 +1430,10 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
             // MRIsampleVolume(mri_5, xw, yw, zw, &next_val5) ;
             if ((next_val30 >= (gm_mean[0] - gm_std[0])) &&
                 (next_val30 <= (wm_mean[0] + wm_std[0]))) {
-              max_mag_dist = dist;
-              max_mag = fabs(mag);
+              max_mag_dist  = dist;
+              max_mag       = fabs(mag);
               max_mag_val30 = val30;
-              max_mag_val5 = val5;
+              max_mag_val5  = val5;
             }
           }
         }
@@ -1424,12 +1460,12 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
       }
 
       mean_dist += max_mag_dist;
-      v->val = max_mag_val30;
+      v->val    = max_mag_val30;
       v->valbak = max_mag_val5;
-      v->mean = max_mag;
+      v->mean   = max_mag;
       mean_border += max_mag_val30;
       total_vertices++;
-      v->d = max_mag_dist;
+      v->d      = max_mag_dist;
       v->marked = 1;
     } else /* couldn't find the border value */
     {
@@ -1439,11 +1475,11 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
         if (min_val30 < (gm_mean[0] - gm_std[0]))
           min_val30 = gm_mean[0] - gm_std[0];
 
-        // note for channel 1 (flash5), wm has lower intensity
+        //note for channel 1 (flash5), wm has lower intensity
         if (min_val5 < (wm_mean[1] - wm_std[1]))
           min_val5 = wm_mean[1] - wm_std[1];
 
-        v->val = min_val30;
+        v->val    = min_val30;
         v->valbak = min_val5;
         mean_border += min_val30;
         total_vertices++;
@@ -1461,10 +1497,12 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
       }
     }
     if (vno == Gdiag_no)
-      fprintf(
-          stdout, "v %d, target value = %2.1f, mag = %2.1f, dist = %2.2f, %s\n",
-          Gdiag_no, v->val, v->mean, v->d,
-          local_max_found ? "local max" : max_mag_val30 > 0 ? "grad" : "min");
+      fprintf(stdout,
+              "v %d, target value = %2.1f, mag = %2.1f, dist = %2.2f, %s\n",
+              Gdiag_no, v->val, v->mean, v->d,
+              local_max_found     ? "local max"
+              : max_mag_val30 > 0 ? "grad"
+                                  : "min");
   }
 
   mean_dist /= (float)(total_vertices - nmissing);
@@ -1511,10 +1549,10 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
                                      float wm_std[2], float gm_mean[2],
                                      float gm_std[2], double sigma,
                                      float max_thickness, FILE *log_fp) {
-  // for pial surface, dura is a problem if I still use
+  //for pial surface, dura is a problem if I still use
   // original images, really need to use the membership functions
-  // or equivalently, the EM_combined
-  // dura may be still low at both flash30 and flash5, but not that low
+  //or equivalently, the EM_combined
+  //dura may be still low at both flash30 and flash5, but not that low
   double val, val30, val5, x, y, z, max_mag_val30, max_mag_val5, xw, yw, zw,
       mag, max_mag, max_mag_dist = 0.0f, min_val30, min_val5, inward_dist,
                     outward_dist, xw1, yw1, zw1, min_val_dist, orig_dist, dx,
@@ -1522,13 +1560,13 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
   double previous_mag, next_mag, previous_mag30, previous_mag5, next_mag30,
       next_mag5;
   double mag30, mag5, previous_val30, previous_val5, next_val30, next_val5;
-  int total_vertices, vno, nmissing = 0, nout = 0, nin = 0, nfound = 0,
+  int    total_vertices, vno, nmissing = 0, nout = 0, nin = 0, nfound = 0,
                            nalways_missing = 0, local_max_found, ngrad_max,
                            ngrad, nmin, num_changed = 0;
-  float mean_border, mean_in, mean_out, dist, nx, ny, nz, mean_dist, step_size;
+  float  mean_border, mean_in, mean_out, dist, nx, ny, nz, mean_dist, step_size;
   double current_sigma;
   VERTEX *v;
-  FILE *fp = nullptr;
+  FILE *  fp = NULL;
 
   step_size = mri_30->xsize / 2;
 
@@ -1550,9 +1588,9 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
     y = v->y + v->ny;
     z = v->z + v->nz;
     MRISsurfaceRASToVoxel(mris, mri_30, x, y, z, &xw1, &yw1, &zw1);
-    nx = xw1 - xw;
-    ny = yw1 - yw;
-    nz = zw1 - zw;
+    nx   = xw1 - xw;
+    ny   = yw1 - yw;
+    nz   = zw1 - zw;
     dist = sqrt(SQR(nx) + SQR(ny) + SQR(nz));
     if (FZERO(dist))
       dist = 1;
@@ -1565,14 +1603,14 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
     the surface normal in which the gradient is pointing 'inwards'.
     The border will then be constrained to be within that region.
     */
-    inward_dist = 1.0;
+    inward_dist  = 1.0;
     outward_dist = -1.0;
     for (current_sigma = sigma; current_sigma <= 10 * sigma;
          current_sigma *= 2) {
       for (dist = 0; dist > -max_thickness; dist -= step_size) {
-        dx = v->x - v->origx;
-        dy = v->y - v->origy;
-        dz = v->z - v->origz;
+        dx        = v->x - v->origx;
+        dy        = v->y - v->origy;
+        dz        = v->z - v->origz;
         orig_dist = fabs(dx * v->nx + dy * v->ny + dz * v->nz);
         if (fabs(dist) + orig_dist > max_thickness)
           break;
@@ -1585,7 +1623,7 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
         MRIsampleVolumeDerivativeScale(mri_5, xw, yw, zw, nx, ny, nz, &mag5,
                                        current_sigma);
 
-        // The inside check can be restrictive, since pial surface have
+        //The inside check can be restrictive, since pial surface have
         // to move outside anyway. No not necessary for longitudinal method
         if (mag30 >= 0.0 || mag5 > 0.0)
           break;
@@ -1598,9 +1636,9 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
       }
       inward_dist = dist + step_size / 2;
       for (dist = 0; dist < max_thickness; dist += step_size) {
-        dx = v->x - v->origx;
-        dy = v->y - v->origy;
-        dz = v->z - v->origz;
+        dx        = v->x - v->origx;
+        dy        = v->y - v->origy;
+        dz        = v->z - v->origz;
         orig_dist = fabs(dx * v->nx + dy * v->ny + dz * v->nz);
         if (fabs(dist) + orig_dist > max_thickness)
           break;
@@ -1616,15 +1654,15 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
         if (mag30 >= 0.0)
           break;
         MRIsampleVolume(mri_30, xw, yw, zw, &val30);
-        MRIsampleVolume(mri_em_combined, xw, yw, zw, &val5); // borrowed
+        MRIsampleVolume(mri_em_combined, xw, yw, zw, &val5); //borrowed
         if (val30 < (gm_mean[0] - 3 * gm_std[0]) || val5 < 40)
           break;
       }
       outward_dist = dist;
       if (!std::isfinite(outward_dist))
-        DiagBreak() ;
-      if (outward_dist >= (0.5*step_size))
-        break ;
+        DiagBreak();
+      if (outward_dist >= (0.5 * step_size))
+        break;
     }
 
     if (inward_dist > 0 && outward_dist <= 0)
@@ -1652,13 +1690,13 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
     */
 
     /* search in the normal direction to find the min value */
-    max_mag_val30 = -10.0f;
-    mag = 0.0f;
-    max_mag = 0.0f;
-    min_val30 = 10000.0;
-    max_mag_val5 = -10.0f;
-    min_val5 = 10000.0;
-    min_val_dist = 0.0f;
+    max_mag_val30   = -10.0f;
+    mag             = 0.0f;
+    max_mag         = 0.0f;
+    min_val30       = 10000.0;
+    max_mag_val5    = -10.0f;
+    min_val5        = 10000.0;
+    min_val_dist    = 0.0f;
     local_max_found = 0;
     for (dist = inward_dist; dist <= outward_dist; dist += STEP_SIZE) {
       x = v->x + v->nx * (dist - STEP_SIZE);
@@ -1666,7 +1704,7 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
       z = v->z + v->nz * (dist - STEP_SIZE);
       MRISsurfaceRASToVoxel(mris, mri_30, x, y, z, &xw, &yw, &zw);
       MRIsampleVolume(mri_30, xw, yw, zw, &previous_val30);
-      MRIsampleVolume(mri_em_combined, xw, yw, zw, &previous_val5); // borrowed
+      MRIsampleVolume(mri_em_combined, xw, yw, zw, &previous_val5); //borrowed
 
       /* the previous point was inside the surface */
       if (previous_val30 < (wm_mean[0] - wm_std[0]) && previous_val5 > 50) {
@@ -1700,15 +1738,15 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
         MRIsampleVolumeDerivativeScale(mri_5, xw, yw, zw, nx, ny, nz,
                                        &previous_mag5, sigma);
 
-        // flash30 and flash5 have same contrast at gray/csf boundary
+        //flash30 and flash5 have same contrast at gray/csf boundary
         // the weights are arbitrary for now,
-        mag = mag30 * 0.8 + mag5 * 0.2;
+        mag          = mag30 * 0.8 + mag5 * 0.2;
         previous_mag = previous_mag30 * 0.8 + previous_mag5 * 0.2;
-        next_mag = next_mag30 * 0.8 + next_mag5 * 0.2;
+        next_mag     = next_mag30 * 0.8 + next_mag5 * 0.2;
 
         if (val30 < min_val30) {
-          min_val30 = val30; /* used if no gradient max is found */
-          min_val5 = val5;
+          min_val30    = val30; /* used if no gradient max is found */
+          min_val5     = val5;
           min_val_dist = dist;
         }
 
@@ -1723,7 +1761,7 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
           y = v->y + v->ny * (dist + STEP_SIZE);
           z = v->z + v->nz * (dist + STEP_SIZE);
           MRISsurfaceRASToVoxel(mris, mri_30, x, y, z, &xw, &yw, &zw);
-          MRIsampleVolume(mri_em_combined, xw, yw, zw, &next_val5); // borrowed
+          MRIsampleVolume(mri_em_combined, xw, yw, zw, &next_val5); //borrowed
           if (next_val5 < 40)
             next_mag = 0;
         }
@@ -1738,7 +1776,7 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
         */
         if ((fabs(mag) > fabs(previous_mag)) && (fabs(mag) > fabs(next_mag)) &&
             (val30 <= (gm_mean[0] - 0.5 * gm_std[0])) &&
-            (val30 >= (gm_mean[0] - 3 * gm_std[0])) // is this too restrictive??
+            (val30 >= (gm_mean[0] - 3 * gm_std[0])) //is this too restrictive??
         ) {
           x = v->x + v->nx * (dist + 1);
           y = v->y + v->ny * (dist + 1);
@@ -1755,10 +1793,10 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
           if ((next_val30 <= (gm_mean[0] - gm_std[0])) &&
               (!local_max_found || (max_mag < fabs(mag)))) {
             local_max_found = 1;
-            max_mag_dist = dist;
-            max_mag = fabs(mag);
-            max_mag_val30 = val30;
-            max_mag_val5 = val5;
+            max_mag_dist    = dist;
+            max_mag         = fabs(mag);
+            max_mag_val30   = val30;
+            max_mag_val5    = val5;
           }
         } else {
           /*
@@ -1775,15 +1813,15 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
             MRIsampleVolume(mri_30, xw, yw, zw, &next_val30);
             // MRIsampleVolume(mri_5, xw, yw, zw, &next_val5) ;
             if ((next_val30 <= (gm_mean[0] - gm_std[0]))) {
-              max_mag_dist = dist;
-              max_mag = fabs(mag);
+              max_mag_dist  = dist;
+              max_mag       = fabs(mag);
               max_mag_val30 = val30;
-              max_mag_val5 = val5;
+              max_mag_val5  = val5;
             }
           }
         }
 
-      } // end of if(previous_val30 ...)
+      } //end of if(previous_val30 ...)
     }
 
     if (vno == Gdiag_no)
@@ -1792,7 +1830,7 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
     //      if (which == GRAY_CSF && local_max_found == 0 && max_mag_dist > 0)
     {
       float outlen;
-      int allgray = 1;
+      int   allgray = 1;
 
       /* check to make sure it's not ringing near the gray white boundary,
          by seeing if there is uniform stuff outside that could be gray matter.
@@ -1803,7 +1841,7 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
         y = v->y + v->ny * outlen;
         z = v->z + v->nz * outlen;
         MRISsurfaceRASToVoxel(mris, mri_30, x, y, z, &xw, &yw, &zw);
-        MRIsampleVolume(mri_em_combined, xw, yw, zw, &val); // borrowed
+        MRIsampleVolume(mri_em_combined, xw, yw, zw, &val); //borrowed
         if (val < 50) {
           allgray = 0;
           break;
@@ -1815,7 +1853,7 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
                  "ignoring large gradient at %2.3f (I=%2.1f)\n",
                  vno, max_mag_dist, max_mag_val30);
         max_mag_val30 = -10; /* don't worry about largest gradient */
-        max_mag_dist = 0;
+        max_mag_dist  = 0;
         num_changed++;
       }
     }
@@ -1837,12 +1875,12 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
       }
 
       mean_dist += max_mag_dist;
-      v->val = max_mag_val30;
+      v->val    = max_mag_val30;
       v->valbak = max_mag_val5;
-      v->mean = max_mag;
+      v->mean   = max_mag;
       mean_border += max_mag_val30;
       total_vertices++;
-      v->d = max_mag_dist;
+      v->d      = max_mag_dist;
       v->marked = 1;
     } else /* couldn't find the border value */
     {
@@ -1852,13 +1890,13 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
         if (min_val30 < (gm_mean[0] - 3 * gm_std[0]))
           min_val30 = gm_mean[0] - 3 * gm_std[0];
 
-        // note that flash5 may make the surface trying to move inwards!!
-        // so for pial surface movement,
+        //note that flash5 may make the surface trying to move inwards!!
+        //so for pial surface movement,
         // may better only use flash30 for intensity term
         if (min_val5 < (gm_mean[1] - 3 * gm_std[1]))
           min_val5 = gm_mean[1] - 3 * gm_std[1];
 
-        v->val = min_val30;
+        v->val    = min_val30;
         v->valbak = min_val5;
         mean_border += min_val30;
         total_vertices++;
@@ -1915,8 +1953,8 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
 }
 
 #if 0
-#define MAX_ASYNCH_MM 0.3
-#define REDUCTION_PCT 0.5
+#define MAX_ASYNCH_MM  0.3
+#define REDUCTION_PCT  0.5
 #define MAX_REDUCTIONS 2
 
 int
@@ -2302,17 +2340,17 @@ static int MRInormalizeMEF(MRI *mri_src, MRI *mri_em_seg) {
   /* mri_dst and mri_src can be the same */
   /* mri_em_seg should be 120 for WM, and 75 for GM, and 30 for CSF */
 
-  int width, height, depth, x, y, z;
+  int    width, height, depth, x, y, z;
   double mean, variance, std, total, tmpval;
   double val1, val2;
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   /* compute mean */
-  mean = 0.0;
-  total = 0.0;
+  mean     = 0.0;
+  total    = 0.0;
   variance = 0.0;
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
@@ -2358,38 +2396,38 @@ static int MRIcomputeClassStatistics_mef(MRI *mri_T1_30, MRI *mri_T1_5,
                                          MRI *mri_em_seg, float *white_mean,
                                          float *white_std, float *gray_mean,
                                          float *gray_std) {
-  // Do I include all WM and GM or just at boundaries?
-  // when mri_em_seg is generated, WM mean is set to 120, GM is 75, CSF is 30
-  int channel;
-  float val30, val5;
-  float val;
+  //Do I include all WM and GM or just at boundaries?
+  //when mri_em_seg is generated, WM mean is set to 120, GM is 75, CSF is 30
+  int    channel;
+  float  val30, val5;
+  float  val;
   double dist1, dist2, dist3, sumdist;
-  int x, y, z, width, height, depth;
+  int    x, y, z, width, height, depth;
   double mem_wm, mem_gm;
   double sum_wm, sum_gm;
-  int total;
+  int    total;
 
-  width = mri_T1_30->width;
+  width  = mri_T1_30->width;
   height = mri_T1_30->height;
-  depth = mri_T1_30->depth;
+  depth  = mri_T1_30->depth;
 
   white_mean[0] = 0;
   white_mean[1] = 0;
-  gray_mean[0] = 0;
-  gray_mean[1] = 0;
-  white_std[0] = 0;
-  white_std[1] = 0;
-  gray_std[0] = 0;
-  gray_std[1] = 0;
-  sum_wm = 0;
-  sum_gm = 0;
-  total = 0;
+  gray_mean[0]  = 0;
+  gray_mean[1]  = 0;
+  white_std[0]  = 0;
+  white_std[1]  = 0;
+  gray_std[0]   = 0;
+  gray_std[1]   = 0;
+  sum_wm        = 0;
+  sum_gm        = 0;
+  total         = 0;
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
       for (x = 0; x < width; x++) {
-        val = MRIgetVoxVal(mri_em_seg, x, y, z, 0);
+        val   = MRIgetVoxVal(mri_em_seg, x, y, z, 0);
         val30 = MRIgetVoxVal(mri_T1_30, x, y, z, 0);
-        val5 = MRIgetVoxVal(mri_T1_5, x, y, z, 0);
+        val5  = MRIgetVoxVal(mri_T1_5, x, y, z, 0);
 
         if (val30 <= 1e-10 || val5 <= 1e-10 || val < 40)
           continue;
@@ -2447,18 +2485,18 @@ static int MRIcomputeClassStatistics_mef(MRI *mri_T1_30, MRI *mri_T1_5,
 }
 
 int MRISaverageMarkedValbaks(MRI_SURFACE *mris, int navgs) {
-  int i, vno, vnb, vnum;
+  int   i, vno, vnb, vnum;
   float val, num;
 
   for (i = 0; i < navgs; i++) {
     for (vno = 0; vno < mris->nvertices; vno++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-      VERTEX *const v = &mris->vertices[vno];
+      VERTEX *const                v  = &mris->vertices[vno];
       if (v->ripflag || v->marked == 0)
         continue;
-      val = v->valbak;
+      val            = v->valbak;
       int const *pnb = vt->v;
-      vnum = vt->vnum;
+      vnum           = vt->vnum;
       for (num = 0.0f, vnb = 0; vnb < vnum; vnb++) {
         VERTEX const *const vn =
             &mris->vertices[*pnb++]; /* neighboring vertex pointer */

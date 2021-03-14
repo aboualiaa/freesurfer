@@ -1,5 +1,4 @@
 /**
- * @file  LayerPropertySurface.h
  * @brief The common properties available to MRI layers
  *
  * An interface implemented by a collection. Layers will get
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/01/26 20:34:24 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,8 +24,8 @@
 #ifndef LayerPropertySurface_h
 #define LayerPropertySurface_h
 
-#include "vtkSmartPointer.h"
 #include "LayerProperty.h"
+#include "vtkSmartPointer.h"
 #include <QColor>
 #include <QVariantMap>
 
@@ -60,7 +55,7 @@ public:
 
   double *GetThresholdHighColor() { return m_dRGBThresholdHigh; }
   double *GetThresholdLowColor() { return m_dRGBThresholdLow; }
-  void SetThresholdColor(double *low, double *high);
+  void    SetThresholdColor(double *low, double *high);
 
   double GetThresholdMidPoint() { return m_dThresholdMidPoint; }
 
@@ -97,7 +92,7 @@ public:
   int GetMeshColorMap() { return m_nMeshColorMap; }
 
   double *GetPosition() { return m_dPosition; }
-  void SetPosition(double *p);
+  void    SetPosition(double *p);
 
   QVariantMap GetFullSettings();
 
@@ -166,8 +161,8 @@ private:
   double m_dRGBEdge[3];
   double m_dRGBVector[3];
   double m_dRGBMesh[3];
-  int m_nEdgeThickness;
-  int m_nVectorPointSize;
+  int    m_nEdgeThickness;
+  int    m_nVectorPointSize;
 
   double m_dThresholdMidPoint;
   double m_dThresholdSlope;
@@ -178,9 +173,9 @@ private:
 
   int m_nSurfaceRenderMode;
 
-  bool m_bShowVertices;
+  bool   m_bShowVertices;
   double m_dRGBVertex[3];
-  int m_nVertexPointSize;
+  int    m_nVertexPointSize;
 
   int m_nMeshColorMap;
 

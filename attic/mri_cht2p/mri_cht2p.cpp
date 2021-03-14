@@ -1,17 +1,6 @@
-/**
- * @file  mri_cht2p.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:14 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,12 +15,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "volcluster.h"
 #include "numerics.h"
+#include "volcluster.h"
 
 const char *Progname = "mri_cht2p";
-int n;
-CHT *cht, *cht2;
+int         n;
+CHT *       cht, *cht2;
 
 /*----------------------------------------*/
 int main(int argc, char **argv) {
@@ -41,13 +30,13 @@ int main(int argc, char **argv) {
   printf("p = %lf\n", p);
   exit(1);
 
-  cht = CHTalloc(5, 2, 7, 5, 50, 60);
-  cht->nsim = 100000;
-  cht->nvox = 100;
+  cht          = CHTalloc(5, 2, 7, 5, 50, 60);
+  cht->nsim    = 100000;
+  cht->nvox    = 100;
   cht->nsmooth = 200;
-  cht->fwhm = 5.7;
+  cht->fwhm    = 5.7;
   cht->totsize = 456.7;
-  n = CHTsetSignString(cht, "pos");
+  n            = CHTsetSignString(cht, "pos");
   if (n)
     return (1);
 

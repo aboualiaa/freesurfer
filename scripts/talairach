@@ -3,12 +3,8 @@
 #
 # talairach
 #
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/16 17:17:20 $
-#    $Revision: 1.8 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -21,7 +17,7 @@
 #
 
 #
-set VERSION = '$Id: talairach,v 1.8 2016/02/16 17:17:20 zkaufman Exp $'
+set VERSION = 'talairach @FS_VERSION@';
 setenv LANG C # needed by MNI perl module
 
 

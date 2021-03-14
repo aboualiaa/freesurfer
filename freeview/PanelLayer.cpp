@@ -1,16 +1,7 @@
-/**
- * @file  PanelLayer.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/07/07 19:24:39 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,14 +15,14 @@
 #include "PanelLayer.h"
 #include "Layer.h"
 #include "LayerProperty.h"
-#include <QTimer>
-#include <QApplication>
-#include <QTreeWidget>
+#include "MainWindow.h"
 #include <QAction>
+#include <QApplication>
+#include <QDebug>
 #include <QLineEdit>
 #include <QSpinBox>
-#include <QDebug>
-#include "MainWindow.h"
+#include <QTimer>
+#include <QTreeWidget>
 
 PanelLayer::PanelLayer(const QString &layerType, QWidget *parent)
     : QScrollArea(parent), UIUpdateHelper(), m_bToUpdate(false),
@@ -63,13 +54,12 @@ void PanelLayer::OnUpdate() {
 
 void PanelLayer::SetCurrentLayer(Layer *layer) {
   m_currentLayer = layer;
-
   UpdateWidgets();
 }
 
 void PanelLayer::InitializeLayerTreeWidget(QTreeWidget *treeWidget) {
-  allWidgets = this->widget()->findChildren<QWidget *>();
-  allActions = this->findChildren<QAction *>();
+  allWidgets       = this->widget()->findChildren<QWidget *>();
+  allActions       = this->findChildren<QAction *>();
   treeWidgetLayers = treeWidget;
   /*
   connect( cl, SIGNAL(LayerAdded(Layer*)), this, SLOT(OnLayerAdded(Layer*)),

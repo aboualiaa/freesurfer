@@ -1,17 +1,19 @@
+
 #include "itkMGHImageIOFactory.h"
+#include "itkCreateObjectFunction.h"
 #include "itkMGHImageIO.h"
 #include "itkVersion.h"
 
 namespace itk {
 
 MGHImageIOFactory::MGHImageIOFactory() {
-  this->RegisterOverride("itkImageIOBase", "itkMGHImageIO", "MGH Image IO",
-                         true, CreateObjectFunction<MGHImageIO>::New());
+  this->RegisterOverride("itkImageIOBase", "itkMGHImageIO", "MGH Image IO", 1,
+                         CreateObjectFunction<MGHImageIO>::New());
 }
 
 MGHImageIOFactory::~MGHImageIOFactory() {}
 
-const char *MGHImageIOFactory::GetITKSourceVersion() const {
+const char *MGHImageIOFactory::GetITKSourceVersion(void) const {
   return ITK_SOURCE_VERSION;
 }
 

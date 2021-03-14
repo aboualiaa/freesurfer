@@ -7,9 +7,9 @@ namespace kvl {
 class SetAlphasInMeshNodes : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef SetAlphasInMeshNodes Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef SetAlphasInMeshNodes          Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -19,7 +19,7 @@ public:
   itkTypeMacro(SetAlphasInMeshNodes, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlSetAlphasInMeshNodes( mesh, alphas )
@@ -36,7 +36,7 @@ public:
         kvl::MatlabObjectArray::GetInstance()->GetObject(meshHandle);
     // if ( typeid( *object ) != typeid( kvl::AtlasMesh ) )
     if (strcmp(typeid(*object).name(),
-               typeid(kvl::AtlasMesh).name()) != 0) // Eugenio: MAC compatibility
+               typeid(kvl::AtlasMesh).name())) // Eugenio: MAC compatibility
     {
       mexErrMsgTxt("mesh doesn't refer to the correct ITK object type");
     }
@@ -46,7 +46,7 @@ public:
         const_cast<kvl::AtlasMesh *>(constMesh.GetPointer());
 
     // Get pointer to the Matlab data
-    const int numberOfNodes = mxGetDimensions(prhs[1])[0];
+    const int numberOfNodes  = mxGetDimensions(prhs[1])[0];
     const int numberOfLabels = mxGetDimensions(prhs[1])[1];
     if (mesh->GetPointData()->Size() != numberOfNodes) {
       mexErrMsgTxt("Dimensions of alphas don't match the mesh properties");
@@ -68,11 +68,11 @@ public:
   }
 
 protected:
-  SetAlphasInMeshNodes()= default;;
-  ~SetAlphasInMeshNodes() override= default;;
+  SetAlphasInMeshNodes(){};
+  virtual ~SetAlphasInMeshNodes(){};
 
-  SetAlphasInMeshNodes(const Self &); // purposely not implemented
-  void operator=(const Self &);       // purposely not implemented
+  SetAlphasInMeshNodes(const Self &); //purposely not implemented
+  void operator=(const Self &);       //purposely not implemented
 
 private:
 };

@@ -2,7 +2,6 @@
 
 #ifndef kvlAtlasMeshViewingConsoleGUI_h
 #define kvlAtlasMeshViewingConsoleGUI_h
-#include "kvlImageViewer.h"
 #include <FL/Fl.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Check_Button.H>
@@ -11,6 +10,8 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Round_Button.H>
 #include <FL/Fl_Value_Slider.H>
+
+#include "kvlImageViewer.h"
 
 class kvlAtlasMeshViewingConsoleGUI {
 public:
@@ -126,14 +127,15 @@ private:
 
 public:
   Fl_Check_Button *m_InvertOrder;
-  ~kvlAtlasMeshViewingConsoleGUI()= default;;
+  ~kvlAtlasMeshViewingConsoleGUI() = default;
+  ;
   virtual void Draw() = 0;
-  virtual void SelectTriangleContainingPoint(float, float) = 0;
+  //  virtual void SelectTriangleContainingPoint(float, float)                = 0;
   virtual void SetSliceLocation(unsigned int, unsigned int, unsigned int) = 0;
-  virtual void ShowSelectedView() = 0;
-  virtual void GetScreenShot() = 0;
-  virtual void GetScreenShotSeries() = 0;
-  virtual void DumpImage() = 0;
-  virtual void GetScreenShotSeries(int directionNumber) = 0;
+  virtual void ShowSelectedView()                                         = 0;
+  virtual void GetScreenShot()                                            = 0;
+  virtual void GetScreenShotSeries()                                      = 0;
+  virtual void DumpImage()                                                = 0;
+  virtual void GetScreenShotSeries(int directionNumber)                   = 0;
 };
 #endif

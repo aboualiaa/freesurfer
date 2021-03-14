@@ -1,16 +1,7 @@
-/**
- * @file  DialogSaveScreenshot.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:47 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,8 +15,8 @@
 #ifndef DIALOGSAVESCREENSHOT_H
 #define DIALOGSAVESCREENSHOT_H
 
-#include <QDialog>
 #include "CommonDataStruct.h"
+#include <QDialog>
 
 namespace Ui {
 class DialogSaveScreenshot;
@@ -33,8 +24,7 @@ class DialogSaveScreenshot;
 
 class Layer;
 
-class DialogSaveScreenshot : public QDialog
-{
+class DialogSaveScreenshot : public QDialog {
   Q_OBJECT
 
 public:
@@ -56,10 +46,10 @@ protected slots:
 
 private:
   Ui::DialogSaveScreenshot *ui;
-  QString m_strLastDir;
-  QStringList m_listFilenames;
-  QList<Layer*> m_listLayers;
-  int m_nLayerIndex;
+  QString                   m_strLastDir;
+  QStringList               m_listFilenames;
+  QList<Layer *>            m_listLayers;
+  int                       m_nLayerIndex;
 };
 
 #endif // DIALOGSAVESCREENSHOT_H

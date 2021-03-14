@@ -1,16 +1,11 @@
 /**
- * @file  Interactor2DVoxelEdit.cpp
  * @brief Interactor for editing voxel in 2D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2016/04/18 16:37:39 $
- *    $Revision: 1.23 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -31,21 +26,21 @@ Interactor2DVoxelEdit::Interactor2DVoxelEdit(QObject *parent)
     : Interactor2DVolumeEdit("MRI", parent) {}
 
 bool Interactor2DVoxelEdit::ProcessMouseDownEvent(QMouseEvent *event,
-                                                  RenderView *view) {
+                                                  RenderView * view) {
   return Interactor2DVolumeEdit::ProcessMouseDownEvent(event, view);
 }
 
 bool Interactor2DVoxelEdit::ProcessMouseUpEvent(QMouseEvent *event,
-                                                RenderView *view) {
+                                                RenderView * view) {
   return Interactor2DVolumeEdit::ProcessMouseUpEvent(event, view);
 }
 
-bool Interactor2DVoxelEdit::ProcessKeyDownEvent(QKeyEvent *event,
+bool Interactor2DVoxelEdit::ProcessKeyDownEvent(QKeyEvent * event,
                                                 RenderView *renderview) {
   return Interactor2DVolumeEdit::ProcessKeyDownEvent(event, renderview);
 }
 
-bool Interactor2DVoxelEdit::ProcessKeyUpEvent(QKeyEvent *event,
+bool Interactor2DVoxelEdit::ProcessKeyUpEvent(QKeyEvent * event,
                                               RenderView *renderview) {
   return Interactor2DVolumeEdit::ProcessKeyUpEvent(event, renderview);
 }

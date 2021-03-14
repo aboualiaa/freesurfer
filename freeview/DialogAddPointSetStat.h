@@ -15,7 +15,7 @@ public:
   ~DialogAddPointSetStat();
 
   QString GetStatName();
-  double GetStatValue();
+  double  GetStatValue();
 
 public slots:
   void OnButtonAdd();

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-source "$(dirname $0)/../test.sh"
+source "$(dirname $0)/test_main.sh"
+
+# untaring and taring the large gcam data is time consuming,
+# so don't remove output before each test
+FSTEST_NO_DATA_RESET=1 && init_testdata
 
 # apply mask
 test_command mri_mask nu.1.mgz brainmask.1.mgz mask.mgz

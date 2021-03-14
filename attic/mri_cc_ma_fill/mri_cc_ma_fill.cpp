@@ -1,17 +1,6 @@
-/**
- * @file  mri_cc_ma_fill.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:14 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -30,31 +19,26 @@
 // date: 11/11/04
 //
 // Warning: Do not edit the following four lines.  CVS maintains them.
-// Revision Author: $Author: nicks $
-// Revision Date  : $Date: 2011/03/02 00:04:14 $
-// Revision       : $Revision: 1.3 $
 ////////////////////////////////////////////
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <ctype.h>
-#include "mri.h"
+#include "cma.h"
 #include "const.h"
 #include "diag.h"
 #include "error.h"
 #include "macros.h"
+#include "mri.h"
 #include "proto.h"
 #include "timer.h"
-#include "cma.h"
 #include "version.h"
-#include "error.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-// static char vcid[] = "$Id: mri_cc_ma_fill.c,v 1.3 2011/03/02 00:04:14 nicks
-// Exp $";
+//static char vcid[] = "$Id: mri_cc_ma_fill.c,v 1.3 2011/03/02 00:04:14 nicks Exp $";
 
 typedef struct medial_axis_type_ {
   float x, y;     /* curr position */
@@ -64,19 +48,19 @@ typedef struct medial_axis_type_ {
   float radius;
 } atom_type, MEDATOM;
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 const char *Progname;
 
 int main(int argc, char *argv[]) {
-  int nargs, msec, length = 100, n = 0, i = 0, j = 0, k = 0;
-  int cc_x = 0, width, height, depth;
-  int nearest = 0;
-  int dist = 0;
-  Timer then;
-  MRI *mri_cc, *mri_ma, *mri_out;
-  FILE *fp;
-  float x, y, val;
+  int      nargs, msec, length = 100, n = 0, i = 0, j = 0, k = 0;
+  int      cc_x    = 0, width, height, depth;
+  int      nearest = 0;
+  int      dist    = 0;
+  Timer    then;
+  MRI *    mri_cc, *mri_ma, *mri_out;
+  FILE *   fp;
+  float    x, y, val;
   MEDATOM *medial_axis;
 
   Progname = argv[0];
@@ -108,19 +92,18 @@ int main(int argc, char *argv[]) {
   }
   fprintf(stdout, "reading p value from %s\n", argv[2]);
 
-  width = mri_cc->width;
+  width  = mri_cc->width;
   height = mri_cc->height;
-  depth = mri_cc->depth;
+  depth  = mri_cc->depth;
 
   /*find mid-sagittal plane*/
   for (k = floor(depth / 2) - 2; k < floor(depth / 2) + 2; k++) {
     for (j = floor(height / 2) - 2; j < floor(height / 2) + 2; j++) {
       for (i = 0; i < mri_cc->width; i++) {
-        if
-            (MRIvox(mri_cc, i, j, k) > 0) {
-            cc_x = i;
-            break;
-          }
+        if (MRIvox(mri_cc, i, j, k) > 0) {
+          cc_x = i;
+          break;
+        }
       }
     }
   }
@@ -141,8 +124,8 @@ int main(int argc, char *argv[]) {
       if (MRIvox(mri_cc, cc_x, j, k) > 0) {
         nearest = 1000;
         for (i = 0; i < length; i++) {
-          x = medial_axis[i].x - 0.5;
-          y = medial_axis[i].y - 0.5;
+          x    = medial_axis[i].x - 0.5;
+          y    = medial_axis[i].y - 0.5;
           dist = sqrt((k - x) * (k - x) + (j - y) * (j - y));
           if (dist < nearest)
             MRIvox(mri_out, cc_x, j, k) = nint(100 * medial_axis[i].radius);
@@ -165,7 +148,7 @@ int main(int argc, char *argv[]) {
 }
 
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

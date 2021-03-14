@@ -1,5 +1,4 @@
 /**
- * @file  legacy.h
  * @brief The environment object API.
  *
  * This file contains old legacy code, consolidated here during testing
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Rudolph Pienaar / Christian Haselgrove
- * CVS Revision Info:
- *    $Author: rudolph $
- *    $Date: 2012/07/06 14:24:02 $
- *    $Revision: 1.1 $
  *
- * Copyright © 2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -186,13 +181,13 @@ float costFunc_distanceReturn(s_env &st_env, s_iterInfo *pst_iterInfo,
 /// \param ast_env   Core simulation environment
 /// \param astr_comms  Control string parsed from socket
 /// \return  true|false  Status: success or fail.
-bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms);
+bool asynchEvent_processDWGHT(s_env &ast_env, std::string astr_comms);
 
 /// \fn void asynchEvent_processWGHT(s_env& st_env, string str_comms)
 /// \brief Process socket-based access to the core weight structure
 /// \param ast_env   Core simulation environment
 /// \param astr_comms  Control string parsed from socket
 /// \return  true|false  Status: success or fail.
-bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms);
+bool asynchEvent_processWGHT(s_env &ast_env, std::string astr_comms);
 
 #endif //__LEGACY_H__

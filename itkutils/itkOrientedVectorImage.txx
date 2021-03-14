@@ -24,9 +24,6 @@
 
 namespace itk {
 
-/**
- *
- */
 template <class TPixel, unsigned int VImageDimension>
 OrientedVectorImage<TPixel, VImageDimension>::OrientedVectorImage()
     : m_VectorLength(0) {
@@ -132,20 +129,12 @@ void OrientedVectorImage<
   this->SetVectorLength(static_cast<VectorLengthType>(n));
 }
 
-/**
- *
- */
-template <class TPixel, unsigned int VImageDimension>
-void OrientedVectorImage<TPixel, VImageDimension>::PrintSelf(
-    std::ostream &os, Indent indent) const {
-  Superclass::PrintSelf(os, indent);
+os << indent << "VectorLength: " << m_VectorLength << std::endl;
+os << indent << "PixelContainer: " << std::endl;
+m_Buffer->Print(os, indent.GetNextIndent());
 
-  os << indent << "VectorLength: " << m_VectorLength << std::endl;
-  os << indent << "PixelContainer: " << std::endl;
-  m_Buffer->Print(os, indent.GetNextIndent());
-
-  // m_Origin and m_Spacing are printed in the Superclass
-}
+// m_Origin and m_Spacing are printed in the Superclass
+} // namespace itk
 } // end namespace itk
 
 #endif

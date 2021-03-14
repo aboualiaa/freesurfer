@@ -6,13 +6,8 @@
 # cross-session anatomical registration.  This is a front end
 # for minctracc.  The inputs are directories pointing to COR volumes.
 #
-# Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2016/02/16 17:17:20 $
-#    $Revision: 1.8 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,7 +20,7 @@
 #
 
 
-set VERSION = '$Id: xsanatreg,v 1.8 2016/02/16 17:17:20 zkaufman Exp $';
+set VERSION = 'xsanatreg @FS_VERSION@';
 
 set src      = ();
 set srcminc  = ();
@@ -54,7 +49,7 @@ parse_args_return:
 
 ## Set up the tmp directory ##
 if($#tmpdir == 0) then
-  set tmpdir = /tmp
+  set tmpdir = `fs_temp_dir`
 else
   mkdir -p $tmpdir
 endif

@@ -64,7 +64,7 @@ public:
   void drawPath(const QPainterPath &path);
 
 protected:
-  QVTKWidget *Widget;
+  QVTKWidget *             Widget;
   QVTKPaintEngineInternal *Internal;
 };
 

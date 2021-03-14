@@ -1,21 +1,18 @@
 #ifndef __kvlHistogrammer_h
 #define __kvlHistogrammer_h
 
-#include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
+#include "kvlAtlasMeshRasterizor.h"
 
 namespace kvl {
 
-/**
- *
- */
 class Histogrammer : public AtlasMeshRasterizor {
 public:
   /** Standard class typedefs */
-  using Self = Histogrammer;
-  using Superclass = AtlasMeshRasterizor;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef Histogrammer                  Self;
+  typedef AtlasMeshRasterizor           Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -24,15 +21,17 @@ public:
   itkTypeMacro(Histogrammer, itk::Object);
 
   /** Some typedefs */
-  using ImageType = itk::Image<float, 3>;
-  using BinnedImageType = itk::Image<int, 3>;
-  using HistogramType = std::vector<std::vector<double>>;
-  using ConditionalIntensityDistributionType = std::vector<double>;
+  typedef itk::Image<float, 3>             ImageType;
+  typedef itk::Image<int, 3>               BinnedImageType;
+  typedef std::vector<std::vector<double>> HistogramType;
+  typedef std::vector<std::vector<ThreadAccumDataType>>
+                              HistogramThreadAccumType;
+  typedef std::vector<double> ConditionalIntensityDistributionType;
 
   /** */
   void SetImage(const ImageType *image) {
-    m_Image = image;
-    m_BinnedImage = nullptr;
+    m_Image        = image;
+    m_BinnedImage  = 0;
     m_NumberOfBins = 0;
   }
 
@@ -46,7 +45,7 @@ public:
     if (m_BinnedImage) {
       // Check if number of bins has changed. If so, forgot cached binned image
       if (conditionalIntensityDistributions[0].size() != m_NumberOfBins) {
-        m_BinnedImage = nullptr;
+        m_BinnedImage  = 0;
         m_NumberOfBins = 0;
       }
     }
@@ -77,13 +76,13 @@ protected:
   virtual ~Histogrammer();
 
   //
-  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+  bool RasterizeTetrahedron(const AtlasMesh *         mesh,
                             AtlasMesh::CellIdentifier tetrahedronId,
-                            int threadNumber);
+                            int                       threadNumber);
 
 private:
-  Histogrammer(const Self &);   // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  Histogrammer(const Self &);   //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   void ComputeRobustRange(const ImageType *image, double &robustMin,
@@ -95,15 +94,15 @@ private:
   //
   ImageType::ConstPointer m_Image;
   std::vector<ConditionalIntensityDistributionType>
-      m_ConditionalIntensityDistributions;
+                           m_ConditionalIntensityDistributions;
   BinnedImageType::Pointer m_BinnedImage;
-  int m_NumberOfBins;
-  HistogramType m_Histogram;
-  double m_MinLogLikelihood;
+  int                      m_NumberOfBins;
+  HistogramType            m_Histogram;
+  double                   m_MinLogLikelihood;
 
   //
-  std::vector<HistogramType> m_ThreadSpecificHistograms;
-  std::vector<double> m_ThreadSpecificMinLogLikelihoods;
+  std::vector<HistogramThreadAccumType> m_ThreadSpecificHistograms;
+  std::vector<ThreadAccumDataType>      m_ThreadSpecificMinLogLikelihoods;
 };
 
 } // end namespace kvl

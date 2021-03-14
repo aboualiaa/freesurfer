@@ -21,27 +21,26 @@
 <!ELEMENT reporting (#PCDATA)>
 <!ELEMENT see-also (#PCDATA)>
 ]>
-
 <help>
-	<name>mri_ca_normalize</name>
-	<synopsis>mri_ca_normalize [&lt;options&gt;] &lt;inbrain1&gt; &lt;inbrain2&gt; ... &lt;atlas&gt; &lt;xform&gt; &lt;output1&gt; &lt;output2&gt; ...</synopsis>
-	<description>This program creates a normalized volume using the brain volume and an input gca file.</description>
+  <name>mri_ca_normalize</name>
+  <synopsis>mri_ca_normalize [&lt;options&gt;] &lt;inbrain1&gt; &lt;inbrain2&gt; ... &lt;atlas&gt; &lt;xform&gt; &lt;output1&gt; &lt;output2&gt; ...</synopsis>
+  <description>This program creates a normalized volume using the brain volume and an input gca file.</description>
   <arguments>
     <positional>
       <argument>inbrain1</argument>
-      <explanation>input volume</explanation> 
+      <explanation>input volume</explanation>
       <argument>inbrain2</argument>
-      <explanation>input volume</explanation> 
+      <explanation>input volume</explanation>
       <argument>atlas</argument>
-      <explanation>atlas file in gca format</explanation> 
+      <explanation>atlas file in gca format</explanation>
       <argument>xform</argument>
-      <explanation>tranform file in lta format</explanation> 
+      <explanation>tranform file in lta format</explanation>
       <argument>output1</argument>
-      <explanation>output volume</explanation> 
+      <explanation>output volume</explanation>
       <argument>output2</argument>
-      <explanation>output volume</explanation> 
-   </positional>
-   <required-flagged>
+      <explanation>output volume</explanation>
+    </positional>
+    <required-flagged>
       <intro>None</intro>
     </required-flagged>
     <optional-flagged>
@@ -99,8 +98,8 @@
     <output>outvol</output>
     <explanation>output volume in either mgh or mgz format</explanation>
   </outputs>
-	<example>mri_ca_normalize -mask -p 0.25 subject1/mri/brain subject1/mri/nu single_one.gca subject1/mri/transforms/talairach_one.lta subject1/mri/norm_one.mgh</example>
+  <example>mri_ca_normalize -mask -p 0.25 subject1/mri/brain subject1/mri/nu single_one.gca subject1/mri/transforms/talairach_one.lta subject1/mri/norm_one.mgh</example>
   <bugs>None</bugs>
   <reporting>Report bugs to &lt;freesurfer@nmr.mgh.harvard.edu&gt;</reporting>
-	<see-also>***********************************************************************</see-also>
+  <see-also>***********************************************************************</see-also>
 </help>

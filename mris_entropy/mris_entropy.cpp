@@ -1,17 +1,6 @@
-/**
- * @file  mris_entropy.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:31 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -27,12 +16,9 @@
 #include "mrisurf.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_entropy.c,v 1.7 2011/03/02 00:04:31 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 static void print_help();
 static void print_version();
@@ -40,16 +26,16 @@ static void print_version();
 const char *Progname;
 
 static char *log_fname = nullptr;
-static int navgs = 0;
-static char sdir[STRLEN];
-static int normalize_flag = 0;
+static int   navgs     = 0;
+static char  sdir[STRLEN];
+static int   normalize_flag = 0;
 
 int main(int argc, char *argv[]) {
-  char **av, fname[STRLEN], *subject_name, *wfile_name, *cp, *hemi;
-  int ac, nargs, vno;
+  char **      av, fname[STRLEN], *subject_name, *wfile_name, *cp, *hemi;
+  int          ac, nargs, vno;
   MRI_SURFACE *mris;
-  VERTEX *v;
-  double entropy, total_len, min_w;
+  VERTEX *     v;
+  double       entropy, total_len, min_w;
 
   nargs = handleVersionOption(argc, argv, "mris_entropy");
   if (nargs && argc - nargs == 1)
@@ -72,8 +58,8 @@ int main(int argc, char *argv[]) {
     print_help();
 
   subject_name = argv[1];
-  hemi = argv[2];
-  wfile_name = argv[3];
+  hemi         = argv[2];
+  wfile_name   = argv[3];
 
   if (strlen(sdir) == 0) {
     cp = getenv("SUBJECTS_DIR");
@@ -145,7 +131,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -204,7 +190,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

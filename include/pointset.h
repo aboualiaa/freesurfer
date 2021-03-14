@@ -38,12 +38,12 @@ public:
   }
 
   // let's make PointSet an extension of std::vector for ease of use
-  void clear() { points.clear(); }
-  void remove(int index) { points.erase(points.begin() + index); }
+  void   clear() { points.clear(); }
+  void   remove(int index) { points.erase(points.begin() + index); }
   Point &operator[](int index) { return points[index]; }
 
   // let's support iteration as well
-  using iterator = std::vector<Point>::iterator;
+  using iterator       = std::vector<Point>::iterator;
   using const_iterator = std::vector<Point>::const_iterator;
   iterator begin() { return points.begin(); }
   iterator end() { return points.end(); }

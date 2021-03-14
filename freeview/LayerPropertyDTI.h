@@ -1,5 +1,4 @@
 /**
- * @file  LayerPropertyDTI.h
  * @brief Layer properties available to DTI layers
  *
  * An interface implemented by a collection. Layers will get
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:47 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,8 +24,8 @@
 #ifndef LayerPropertyDTI_h
 #define LayerPropertyDTI_h
 
-#include "vtkSmartPointer.h"
 #include "LayerPropertyMRI.h"
+#include "vtkSmartPointer.h"
 
 class vtkLookupTable;
 
@@ -52,7 +47,7 @@ public slots:
   void SetDirectionCode(int nCode);
 
 private:
-  int m_nDirectionCode;
+  int                             m_nDirectionCode;
   vtkSmartPointer<vtkLookupTable> mDirectionCodedTable;
 };
 

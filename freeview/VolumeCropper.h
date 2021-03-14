@@ -1,16 +1,11 @@
 /**
- * @file  VolumeCropper.h
  * @brief Class to crop volume.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:48 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -94,23 +89,23 @@ protected:
   void UpdateActivePlane();
   void ValidateActiveBound();
 
-  vtkSmartPointer<vtkBox> m_box;
-  vtkSmartPointer<vtkCubeSource> m_boxSource;
-  vtkSmartPointer<vtkPlaneSource> m_planeSource;
-  vtkSmartPointer<vtkActor> m_actorBox;
-  vtkSmartPointer<vtkActor> m_actorFrame;
-  vtkSmartPointer<vtkActor> m_actorActivePlane;
-  vtkSmartPointer<vtkActor> m_actorSphere[6];
-  vtkSmartPointer<vtkActor> m_actorBox2D[3];
-  vtkSmartPointer<vtkActor> m_actorFrame2D[3];
-  vtkSmartPointer<vtkActor> m_actorActivePlane2D[3];
+  vtkSmartPointer<vtkBox>          m_box;
+  vtkSmartPointer<vtkCubeSource>   m_boxSource;
+  vtkSmartPointer<vtkPlaneSource>  m_planeSource;
+  vtkSmartPointer<vtkActor>        m_actorBox;
+  vtkSmartPointer<vtkActor>        m_actorFrame;
+  vtkSmartPointer<vtkActor>        m_actorActivePlane;
+  vtkSmartPointer<vtkActor>        m_actorSphere[6];
+  vtkSmartPointer<vtkActor>        m_actorBox2D[3];
+  vtkSmartPointer<vtkActor>        m_actorFrame2D[3];
+  vtkSmartPointer<vtkActor>        m_actorActivePlane2D[3];
   vtkSmartPointer<vtkSphereSource> m_sphereSource[6];
   vtkSmartPointer<vtkClipPolyData> m_clipper;
 
   LayerMRI *m_mri;
-  double m_bounds[6];
-  int m_extent[6];
-  bool m_bEnabled;
+  double    m_bounds[6];
+  int       m_extent[6];
+  bool      m_bEnabled;
 
   int m_nActivePlane;
 };

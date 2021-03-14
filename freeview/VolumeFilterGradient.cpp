@@ -1,16 +1,11 @@
 /**
- * @file  VolumeFilterGradient.cpp
  * @brief Base VolumeFilterGradient class.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/10/18 18:13:24 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,12 +20,12 @@
 
 #include "VolumeFilterGradient.h"
 #include "LayerMRI.h"
+#include <vtkDataArray.h>
 #include <vtkImageData.h>
+#include <vtkImageGaussianSmooth.h>
 #include <vtkImageGradientMagnitude.h>
 #include <vtkImageShiftScale.h>
-#include <vtkImageGaussianSmooth.h>
 #include <vtkPointData.h>
-#include <vtkDataArray.h>
 
 VolumeFilterGradient::VolumeFilterGradient(LayerMRI *input, LayerMRI *output,
                                            QObject *parent)
@@ -65,9 +60,9 @@ bool VolumeFilterGradient::Execute() {
   grad->Update();
   double *orig_range =
       m_volumeInput->GetImageData()->GetPointData()->GetScalars()->GetRange();
-  vtkImageData *img = grad->GetOutput();
-  double *range = img->GetPointData()->GetScalars()->GetRange();
-  double scale = orig_range[1] / range[1];
+  vtkImageData *img   = grad->GetOutput();
+  double *      range = img->GetPointData()->GetScalars()->GetRange();
+  double        scale = orig_range[1] / range[1];
   if (scale < 0) {
     scale = -scale;
   }

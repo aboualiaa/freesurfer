@@ -23,7 +23,7 @@ void fatalError(const char *str, ...);
 /// displays progress bar (assumes index in [0, count - 1]);
 /// closes progress bar when index == count - 1;
 /// if count == -1, assumes unknown number if items
-void progress(int index, int count = -1);
+void        progress(int index, int count = -1);
 inline void progressDone() { progress(0, 1); }
 
 /// don't show or log disp() messages with indent greater than this threshold

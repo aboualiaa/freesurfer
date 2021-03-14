@@ -19,25 +19,25 @@ itkEventMacro(DeformationEndEvent, itk::UserEvent);
  * especially Chapter 3 for the line search implemented here,
  * Chapter 5 for the conjugate gradient subclass, and Chapter 9 for
  * the limited-memory BFGS subclass.
- *
+ * 
  */
 class AtlasMeshDeformationOptimizer : public itk::Object {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshDeformationOptimizer;
-  using Superclass = itk::Object;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshDeformationOptimizer Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
-  // itkNewMacro( Self );
+  //itkNewMacro( Self );
 
   /** Run-time type information (and related methods). */
   itkTypeMacro(AtlasMeshDeformationOptimizer, itk::Object);
 
   /** */
   void SetMesh(AtlasMesh *mesh) {
-    m_Mesh = mesh;
+    m_Mesh            = mesh;
     m_IterationNumber = 0;
   }
 
@@ -138,7 +138,7 @@ protected:
   void
   AddDeformation(const AtlasMesh::PointsContainer *position, double alpha,
                  const AtlasPositionGradientContainerType *deformationDirection,
-                 AtlasMesh::PointsContainer::Pointer &newPosition,
+                 AtlasMesh::PointsContainer::Pointer &     newPosition,
                  double &maximalDeformation) const;
 
   // Compute inner product deformation1' * deformation2
@@ -150,40 +150,40 @@ protected:
   AtlasPositionGradientContainerType::Pointer LinearlyCombineDeformations(
       const AtlasPositionGradientContainerType *deformation1, double beta1,
       const AtlasPositionGradientContainerType *deformation2,
-      double beta2) const;
+      double                                    beta2) const;
 
   // Compute beta * deformation
   AtlasPositionGradientContainerType::Pointer
   ScaleDeformation(const AtlasPositionGradientContainerType *deformation,
-                   double beta) const;
+                   double                                    beta) const;
 
   //
-  void DoLineSearch(const AtlasMesh::PointsContainer *startPosition,
-                    double startCost,
+  void DoLineSearch(const AtlasMesh::PointsContainer *        startPosition,
+                    double                                    startCost,
                     const AtlasPositionGradientContainerType *startGradient,
                     const AtlasPositionGradientContainerType *searchDirection,
                     double startAlpha, double c1, double c2,
-                    AtlasMesh::PointsContainer::Pointer &newPosition,
-                    double &newCost,
+                    AtlasMesh::PointsContainer::Pointer &        newPosition,
+                    double &                                     newCost,
                     AtlasPositionGradientContainerType::Pointer &newGradient,
-                    double &alphaUsed);
+                    double &                                     alphaUsed);
 
   //
-  bool m_Verbose;
-  double m_Cost;
-  AtlasMesh::PointsContainer::Pointer m_Position;
+  bool                                        m_Verbose;
+  double                                      m_Cost;
+  AtlasMesh::PointsContainer::Pointer         m_Position;
   AtlasPositionGradientContainerType::Pointer m_Gradient;
 
 private:
-  AtlasMeshDeformationOptimizer(const Self &); // purposely not implemented
-  void operator=(const Self &);                // purposely not implemented
+  AtlasMeshDeformationOptimizer(const Self &); //purposely not implemented
+  void operator=(const Self &);                //purposely not implemented
 
   //
   int m_IterationNumber;
   int m_MaximumNumberOfIterations;
   int m_IterationEventResolution;
 
-  AtlasMesh::Pointer m_Mesh;
+  AtlasMesh::Pointer                                  m_Mesh;
   AtlasMeshPositionCostAndGradientCalculator::Pointer m_Calculator;
   double m_MaximalDeformationStopCriterion;
 

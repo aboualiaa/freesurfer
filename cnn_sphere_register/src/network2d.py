@@ -20,9 +20,9 @@ import keras.initializers
 import tensorflow as tf
 
 # import neuron layers, which will be useful for Transforming.
-sys.path.append('../ext/neuron')
-sys.path.append('../ext/pynd-lib')
-sys.path.append('../ext/pytools-lib')
+sys.path.append("../ext/neuron")
+sys.path.append("../ext/pynd-lib")
+sys.path.append("../ext/pytools-lib")
 import neuron.layers as nrn_layers
 import neuron.utils as nrn_utils
 
@@ -44,10 +44,10 @@ def unet_core(vol_size, enc_nf, dec_nf, full_size=True):
     # inputs
     src = Input(shape=vol_size + (1,))
     tgt = Input(shape=vol_size + (1,))
-    #sigma = Input(shape=vol_size + (1,))
+    # sigma = Input(shape=vol_size + (1,))
     x_in = concatenate([src, tgt])
 
-    #print('tgt', tgt.shape)
+    # print('tgt', tgt.shape)
 
     # down-sample path (encoder)
     x_enc = [x_in]
@@ -100,17 +100,26 @@ def unet(vol_size, enc_nf, dec_nf, full_size=True):
     x = unet_model.output
 
     # transform the results into a flow field.
-    flow = Conv2D(2, kernel_size=3, padding='same',
-                  kernel_initializer=RandomNormal(mean=0.0, stddev=1e-5), name='flow')(x)
+    flow = Conv2D(
+        2,
+        kernel_size=3,
+        padding="same",
+        kernel_initializer=RandomNormal(mean=0.0, stddev=1e-5),
+        name="flow",
+    )(x)
 
     # warp the source with the flow
-    y = nrn_layers.SpatialTransformer(interp_method='linear', indexing='xy')([src, flow])
+    y = nrn_layers.SpatialTransformer(interp_method="linear", indexing="xy")(
+        [src, flow]
+    )
     # prepare model
     model = Model(inputs=[src, tgt], outputs=[y, flow])
     return model
 
 
-def miccai2018_net(vol_size, enc_nf, dec_nf, use_miccai_int=True, int_steps=7, indexing='xy'):
+def miccai2018_net(
+    vol_size, enc_nf, dec_nf, use_miccai_int=True, int_steps=7, indexing="xy"
+):
     """
     architecture for probabilistic diffeomoprhic VoxelMorph presented in the MICCAI 2018 paper.
     You may need to modify this code (e.g., number of layers) to suit your project needs.
@@ -132,54 +141,71 @@ def miccai2018_net(vol_size, enc_nf, dec_nf, use_miccai_int=True, int_steps=7, i
 
     # get unet
     unet_model = unet_core(vol_size, enc_nf, dec_nf, full_size=False)
-    [src,tgt] = unet_model.inputs
+    [src, tgt] = unet_model.inputs
     x_out = unet_model.outputs[-1]
-    #print(x_out.shape)
+    # print(x_out.shape)
 
     # velocity mean and logsigma layers
-    flow_mean = Conv2D(2, kernel_size=3, padding='same',
-                       kernel_initializer=RandomNormal(mean=0.0, stddev=1e-5), name='flow')(x_out)
+    flow_mean = Conv2D(
+        2,
+        kernel_size=3,
+        padding="same",
+        kernel_initializer=RandomNormal(mean=0.0, stddev=1e-5),
+        name="flow",
+    )(x_out)
 
-    flow_log_sigma = Conv2D(2, kernel_size=3, padding='same',
-                            kernel_initializer=RandomNormal(mean=0.0, stddev=1e-10),
-                            bias_initializer=keras.initializers.Constant(value=-10), name='log_sigma')(x_out)
+    flow_log_sigma = Conv2D(
+        2,
+        kernel_size=3,
+        padding="same",
+        kernel_initializer=RandomNormal(mean=0.0, stddev=1e-10),
+        bias_initializer=keras.initializers.Constant(value=-10),
+        name="log_sigma",
+    )(x_out)
     flow_params = concatenate([flow_mean, flow_log_sigma])
 
     # velocity sample
     flow = Lambda(sample, name="z_sample")([flow_mean, flow_log_sigma])
-    #print(flow.shape)
+    # print(flow.shape)
     # integrate if diffeomorphic (i.e. treating 'flow' above as stationary velocity field)
     if use_miccai_int:
         # for the miccai2018 submission, the scaling and squaring layer
         # was manually composed of a Transform and and Add Layer.
-        #flow = Lambda(lambda x: x, name='flow-fix')(flow)  # remanant of old code
+        # flow = Lambda(lambda x: x, name='flow-fix')(flow)  # remanant of old code
         v = flow
-        #print(v.shape)
+        # print(v.shape)
         for _ in range(int_steps):
-            v1 = nrn_layers.SpatialTransformer(interp_method='linear', indexing=indexing)([v, v])
+            v1 = nrn_layers.SpatialTransformer(
+                interp_method="linear", indexing=indexing
+            )([v, v])
             v = keras.layers.add([v, v1])
         flow = v
-        #print(flow.shape)
+        # print(flow.shape)
 
     else:
         # new implementation in neuron is cleaner.
         # the 2**int_steps is a correcting factor left over from the miccai implementation.
         # * (2**int_steps)
         z_sample = flow
-        #flow = Lambda(lambda x: x, name='flow-fix')(flow)
-        flow = nrn_layers.VecInt(method='ss', name='flow-int', int_steps=7)(z_sample)
+        # flow = Lambda(lambda x: x, name='flow-fix')(flow)
+        flow = nrn_layers.VecInt(method="ss", name="flow-int", int_steps=7)(
+            z_sample
+        )
 
-    #print(flow.shape)
+    # print(flow.shape)
     # get up to final resolution
-    flow = Lambda(interp_upsampling, output_shape=vol_size+(2,), name='pre_diffflow')(flow)
-    flow = Lambda(lambda arg: arg*2, name='diffflow')(flow)
+    flow = Lambda(
+        interp_upsampling, output_shape=vol_size + (2,), name="pre_diffflow"
+    )(flow)
+    flow = Lambda(lambda arg: arg * 2, name="diffflow")(flow)
 
     # transform
-    y = nrn_layers.SpatialTransformer(interp_method='linear', indexing=indexing)([src, flow])
+    y = nrn_layers.SpatialTransformer(
+        interp_method="linear", indexing=indexing
+    )([src, flow])
 
     # prepare outputs and losses
     outputs = [y, flow_params, flow]
-
 
     # build the model
     return Model(inputs=[src, tgt], outputs=outputs)
@@ -193,12 +219,14 @@ def nn_trf(vol_size):
     ndims = len(vol_size)
 
     # nn warp model
-    subj_input = Input((*vol_size, 1), name='subj_input')
-    trf_input = Input((*vol_size, ndims) , name='trf_input')
+    subj_input = Input((*vol_size, 1), name="subj_input")
+    trf_input = Input((*vol_size, ndims), name="trf_input")
 
     # note the nearest neighbour interpolation method
     # note xy indexing because Guha's original code switched x and y dimensions
-    nn_output = nrn_layers.SpatialTransformer(interp_method='nearest', indexing='xy')
+    nn_output = nrn_layers.SpatialTransformer(
+        interp_method="nearest", indexing="xy"
+    )
     nn_spatial_output = nn_output([subj_input, trf_input])
     return keras.models.Model([subj_input, trf_input], nn_spatial_output)
 
@@ -209,8 +237,13 @@ def conv_block(x_in, nf, strides=1):
     specific convolution module including convolution followed by leakyrelu
     """
 
-    x_out = Conv2D(nf, kernel_size=3, padding='same',
-                   kernel_initializer='he_normal', strides=strides)(x_in)
+    x_out = Conv2D(
+        nf,
+        kernel_size=3,
+        padding="same",
+        kernel_initializer="he_normal",
+        strides=strides,
+    )(x_in)
     x_out = LeakyReLU(0.2)(x_out)
     return x_out
 
@@ -222,32 +255,35 @@ def sample(args):
     mu = args[0]
     log_sigma = args[1]
     noise = tf.random_normal(tf.shape(mu), 0, 1, dtype=tf.float32)
-    z = mu + tf.exp(log_sigma/2.0) * noise
+    z = mu + tf.exp(log_sigma / 2.0) * noise
     return z
+
 
 def interp_upsampling(V):
     """
     upsample a field by a factor of 2
     TODO: should switch this to use neuron.utils.interpn()
     """
-    #print(V.shape)
-    grid = nrn_utils.volshape_to_ndgrid([f*2 for f in V.get_shape().as_list()[1:-1]])
-    grid = [tf.cast(f, 'float32') for f in grid]
-    grid = [tf.expand_dims(f/2 - f, 0) for f in grid]
-    offset = tf.stack(grid, len(grid)+1)
-    #xx = tf.cast(xx, 'float32')
-    #yy = tf.cast(yy, 'float32')
-    #zz = tf.cast(zz, 'float32')
-    #xx = tf.expand_dims(xx/2-xx, 0)
-    #yy = tf.expand_dims(yy/2-yy, 0)
-    #zz = tf.expand_dims(zz/2-zz, 0)
-    #print(xx.shape)
-    #offset = tf.stack([xx, yy], 3)
-    #print(offset.shape)
-    #print(V.shape)
+    # print(V.shape)
+    grid = nrn_utils.volshape_to_ndgrid(
+        [f * 2 for f in V.get_shape().as_list()[1:-1]]
+    )
+    grid = [tf.cast(f, "float32") for f in grid]
+    grid = [tf.expand_dims(f / 2 - f, 0) for f in grid]
+    offset = tf.stack(grid, len(grid) + 1)
+    # xx = tf.cast(xx, 'float32')
+    # yy = tf.cast(yy, 'float32')
+    # zz = tf.cast(zz, 'float32')
+    # xx = tf.expand_dims(xx/2-xx, 0)
+    # yy = tf.expand_dims(yy/2-yy, 0)
+    # zz = tf.expand_dims(zz/2-zz, 0)
+    # print(xx.shape)
+    # offset = tf.stack([xx, yy], 3)
+    # print(offset.shape)
+    # print(V.shape)
 
     # V = nrn_utils.transform(V, offset)
-    V = nrn_layers.SpatialTransformer(interp_method='linear')([V, offset])
-    #print(V.shape)
+    V = nrn_layers.SpatialTransformer(interp_method="linear")([V, offset])
+    # print(V.shape)
 
     return V

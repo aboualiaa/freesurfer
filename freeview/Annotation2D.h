@@ -1,16 +1,11 @@
 /**
- * @file  Annotation2D.h
  * @brief Annotation for 2D view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2013/08/23 19:29:18 $
- *    $Revision: 1.15 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,9 +21,9 @@
 #ifndef Annotation2D_h
 #define Annotation2D_h
 
-#include <QObject>
-#include <QColor>
 #include "vtkSmartPointer.h"
+#include <QColor>
+#include <QObject>
 
 class vtkTextActor;
 class vtkActor2D;
@@ -67,9 +62,9 @@ Q_SIGNALS:
 private:
   void UpdateScaleActors(double length, int nNumOfTicks, const char *title);
 
-  vtkSmartPointer<vtkTextActor> m_actorCoordinates[6];
-  vtkSmartPointer<vtkActor2D> m_actorScaleLine;
-  vtkSmartPointer<vtkTextActor> m_actorScaleTitle;
+  vtkSmartPointer<vtkTextActor>      m_actorCoordinates[6];
+  vtkSmartPointer<vtkActor2D>        m_actorScaleLine;
+  vtkSmartPointer<vtkTextActor>      m_actorScaleTitle;
   vtkSmartPointer<vtkPropCollection> m_actorsAll;
 };
 

@@ -1,17 +1,11 @@
 /**
- * @file  connectcomp.c
  * @brief utilities for computing connected components
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
  * Original Author: Florent Segonne
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2011/10/25 13:52:38 $
- *    $Revision: 1.1 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,10 +20,10 @@
 /* connectcomp.c */
 
 #include "connectcomp.h"
+#include "mri.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include "mri.h"
 
 static int xoff6[6] = {1, 0, 0, -1, 0, 0};
 static int yoff6[6] = {0, 1, 0, 0, -1, 0};
@@ -49,12 +43,12 @@ void RemoveHoles(MRI *orivol) {
      CC.
    */
 
-  MRI *tmpvol;
-  MRI *Label;
-  int i, j, k, curSize;
+  MRI *  tmpvol;
+  MRI *  Label;
+  int    i, j, k, curSize;
   POINTI seed;
-  int minX, minY, minZ, maxX, maxY, maxZ;
-  int XN, YN, ZN;
+  int    minX, minY, minZ, maxX, maxY, maxZ;
+  int    XN, YN, ZN;
 
   XN = orivol->width;
   YN = orivol->height;
@@ -69,7 +63,7 @@ void RemoveHoles(MRI *orivol) {
   for (i = 0; i < YN; i++)
     for (j = 0; j < XN; j++)
       for (k = 0; k < ZN; k++) {
-        MRIIvox(Label, j, i, k) = 0; /* Initialization */
+        MRIsetVoxVal(Label, j, i, k, 0, 0); /* Initialization */
 
         /* Invert the volume inorder to do Connected-Component labelling on
            background */
@@ -81,7 +75,7 @@ void RemoveHoles(MRI *orivol) {
 
   /* Find a seed for the boundary CC. Here we use the boundary of X-axis */
   for (j = 0; j < XN; j++) {
-    if (MRIvox(tmpvol, j, 0, 0) != 0 && MRIIvox(Label, j, 0, 0) == 0) {
+    if (MRIvox(tmpvol, j, 0, 0) != 0 && MRIgetVoxVal(Label, j, 0, 0, 0) == 0) {
       seed.x = j;
       seed.y = 0;
       seed.z = 0;
@@ -93,7 +87,7 @@ void RemoveHoles(MRI *orivol) {
   for (i = 0; i < YN; i++)
     for (j = 0; j < XN; j++)
       for (k = 0; k < ZN; k++) {
-        if (MRIIvox(Label, j, i, k) == 0)
+        if (MRIgetVoxVal(Label, j, i, k, 0) == 0)
           MRIsetVoxVal(orivol, j, i, k, 0, 1);
       }
 
@@ -114,11 +108,11 @@ void GrassFire(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
      If a point has LABEL = 0, then it's a unlabelled point or bkground point.
    */
 
-  POINTI cPt, nPt;
+  POINTI  cPt, nPt;
   MYqueue NeiQ;
-  int ci, cj, ck, ni, nj, nk;
-  int ioff, joff, koff;
-  int XN, YN, ZN;
+  int     ci, cj, ck, ni, nj, nk;
+  int     ioff, joff, koff;
+  int     XN, YN, ZN;
 
   XN = orivol->width;
   YN = orivol->height;
@@ -132,7 +126,7 @@ void GrassFire(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
   (*maxZ) = Pt->z;
 
   NeiQ = myQueue(sizeof(POINTI));
-  MRIIvox(Label, Pt->x, Pt->y, Pt->z) = label;
+  MRIsetVoxVal(Label, Pt->x, Pt->y, Pt->z, 0, label);
 
   myQueuePush(NeiQ, Pt);
 
@@ -165,13 +159,13 @@ void GrassFire(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
           nj = cj + joff;
           nk = ck + koff;
           if (ni >= 0 && ni < YN && nj >= 0 && nj < XN && nk >= 0 && nk < ZN) {
-            if (MRIIvox(Label, nj, ni, nk) == 0 &&
+            if (MRIgetVoxVal(Label, nj, ni, nk, 0) == 0 &&
                 MRIgetVoxVal(orivol, nj, ni, nk, 0) > 0) {
               /* Unlabelled object point found */
               nPt.x = nj;
               nPt.y = ni;
               nPt.z = nk;
-              MRIIvox(Label, nj, ni, nk) = label;
+              MRIsetVoxVal(Label, nj, ni, nk, 0, label);
               myQueuePush(NeiQ, &nPt);
             }
           }
@@ -193,11 +187,11 @@ void GrassFire6(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
      If a point has LABEL = 0, then it's a unlabelled point or bkground point.
    */
 
-  POINTI cPt, nPt;
+  POINTI  cPt, nPt;
   MYqueue NeiQ;
-  int ci, cj, ck, ni, nj, nk;
-  int XN, YN, ZN;
-  int index;
+  int     ci, cj, ck, ni, nj, nk;
+  int     XN, YN, ZN;
+  int     index;
 
   XN = orivol->width;
   YN = orivol->height;
@@ -211,7 +205,7 @@ void GrassFire6(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
   (*maxZ) = Pt->z;
 
   NeiQ = myQueue(sizeof(POINTI));
-  MRIIvox(Label, Pt->x, Pt->y, Pt->z) = label;
+  MRIsetVoxVal(Label, Pt->x, Pt->y, Pt->z, 0, label);
 
   myQueuePush(NeiQ, Pt);
 
@@ -243,13 +237,13 @@ void GrassFire6(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
       nk = ck + zoff6[index];
 
       if (ni >= 0 && ni < YN && nj >= 0 && nj < XN && nk >= 0 && nk < ZN) {
-        if (MRIIvox(Label, nj, ni, nk) == 0 &&
+        if (MRIgetVoxVal(Label, nj, ni, nk, 0) == 0 &&
             MRIgetVoxVal(orivol, nj, ni, nk, 0) > 0) {
           /* Unlabelled object point found */
           nPt.x = nj;
           nPt.y = ni;
           nPt.z = nk;
-          MRIIvox(Label, nj, ni, nk) = label;
+          MRIsetVoxVal(Label, nj, ni, nk, 0, label);
           myQueuePush(NeiQ, &nPt);
         }
       }
@@ -271,11 +265,11 @@ void GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
      If a point has LABEL = 0, then it's a unlabelled point or bkground point.
    */
 
-  POINTI cPt, nPt;
+  POINTI  cPt, nPt;
   MYqueue NeiQ;
-  int ci, cj, ck, ni, nj, nk;
-  int XN, YN, ZN;
-  int index;
+  int     ci, cj, ck, ni, nj, nk;
+  int     XN, YN, ZN;
+  int     index;
 
   XN = orivol->width;
   YN = orivol->height;
@@ -289,7 +283,7 @@ void GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
   (*maxZ) = Pt->z;
 
   NeiQ = myQueue(sizeof(POINTI));
-  MRIIvox(Label, Pt->x, Pt->y, Pt->z) = label;
+  MRIsetVoxVal(Label, Pt->x, Pt->y, Pt->z, 0, label);
 
   myQueuePush(NeiQ, Pt);
 
@@ -321,13 +315,13 @@ void GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
       nk = ck + zoff26[index];
 
       if (ni >= 0 && ni < YN && nj >= 0 && nj < XN && nk >= 0 && nk < ZN) {
-        if (MRIIvox(Label, nj, ni, nk) == 0 &&
+        if (MRIgetVoxVal(Label, nj, ni, nk, 0) == 0 &&
             MRIgetVoxVal(orivol, nj, ni, nk, 0) > 0) {
           /* Unlabelled object point found */
           nPt.x = nj;
           nPt.y = ni;
           nPt.z = nk;
-          MRIIvox(Label, nj, ni, nk) = label;
+          MRIsetVoxVal(Label, nj, ni, nk, 0, label);
           myQueuePush(NeiQ, &nPt);
         }
       }
@@ -341,11 +335,11 @@ void GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
 void GetLargestCC6(MRI *orivol) {
   /* This function keeps the largest CC, and reset all other CC to bgvalue (0)
    */
-  MRI *Label;
-  int i, j, k;
-  int maxSize, maxLabel, curSize, curLabel;
-  int minX, minY, minZ, maxX, maxY, maxZ;
-  int XN, YN, ZN;
+  MRI *  Label;
+  int    i, j, k;
+  int    maxSize, maxLabel, curSize, curLabel;
+  int    minX, minY, minZ, maxX, maxY, maxZ;
+  int    XN, YN, ZN;
   POINTI Pt;
 
   XN = orivol->width;
@@ -358,24 +352,24 @@ void GetLargestCC6(MRI *orivol) {
   for (i = 0; i < YN; i++)
     for (j = 0; j < XN; j++)
       for (k = 0; k < ZN; k++)
-        MRIIvox(Label, j, i, k) = 0;
+        MRIsetVoxVal(Label, j, i, k, 0, 0);
 
   curLabel = 1;
-  maxSize = 0;
+  maxSize  = 0;
   maxLabel = 1;
 
   for (i = 0; i < YN; i++)
     for (j = 0; j < XN; j++)
       for (k = 0; k < ZN; k++) {
         if (MRIgetVoxVal(orivol, j, i, k, 0) > 0 &&
-            MRIIvox(Label, j, i, k) == 0) {
+            MRIgetVoxVal(Label, j, i, k, 0) == 0) {
           Pt.x = j;
           Pt.y = i;
           Pt.z = k;
           GrassFire6(orivol, Label, curLabel, &Pt, &curSize, &minX, &maxX,
                      &minY, &maxY, &minZ, &maxZ);
           if (maxSize < curSize) {
-            maxSize = curSize;
+            maxSize  = curSize;
             maxLabel = curLabel;
           }
           curLabel++;
@@ -385,7 +379,7 @@ void GetLargestCC6(MRI *orivol) {
   for (i = 0; i < YN; i++)
     for (j = 0; j < XN; j++)
       for (k = 0; k < ZN; k++) {
-        if (MRIIvox(Label, j, i, k) != maxLabel)
+        if (MRIgetVoxVal(Label, j, i, k, 0) != maxLabel)
           MRIsetVoxVal(orivol, j, i, k, 0, 0);
       }
 
@@ -396,11 +390,11 @@ void GetLargestCC6(MRI *orivol) {
 void GetLargestCC18(MRI *orivol) {
   /* This function keeps the largest CC, and reset all other CC to bgvalue (0)
    */
-  MRI *Label;
-  int i, j, k;
-  int maxSize, maxLabel, curSize, curLabel;
-  int minX, minY, minZ, maxX, maxY, maxZ;
-  int XN, YN, ZN;
+  MRI *  Label;
+  int    i, j, k;
+  int    maxSize, maxLabel, curSize, curLabel;
+  int    minX, minY, minZ, maxX, maxY, maxZ;
+  int    XN, YN, ZN;
   POINTI Pt;
 
   XN = orivol->width;
@@ -413,24 +407,24 @@ void GetLargestCC18(MRI *orivol) {
   for (i = 0; i < YN; i++)
     for (j = 0; j < XN; j++)
       for (k = 0; k < ZN; k++)
-        MRIIvox(Label, j, i, k) = 0;
+        MRIsetVoxVal(Label, j, i, k, 0, 0);
 
   curLabel = 1;
-  maxSize = 0;
+  maxSize  = 0;
   maxLabel = 1;
 
   for (i = 0; i < YN; i++)
     for (j = 0; j < XN; j++)
       for (k = 0; k < ZN; k++) {
         if (MRIgetVoxVal(orivol, j, i, k, 0) > 0 &&
-            MRIIvox(Label, j, i, k) == 0) {
+            MRIgetVoxVal(Label, j, i, k, 0) == 0) {
           Pt.x = j;
           Pt.y = i;
           Pt.z = k;
           GrassFire18(orivol, Label, curLabel, &Pt, &curSize, &minX, &maxX,
                       &minY, &maxY, &minZ, &maxZ);
           if (maxSize < curSize) {
-            maxSize = curSize;
+            maxSize  = curSize;
             maxLabel = curLabel;
           }
           curLabel++;
@@ -440,7 +434,7 @@ void GetLargestCC18(MRI *orivol) {
   for (i = 0; i < YN; i++)
     for (j = 0; j < XN; j++)
       for (k = 0; k < ZN; k++) {
-        if (MRIIvox(Label, j, i, k) != maxLabel)
+        if (MRIgetVoxVal(Label, j, i, k, 0) != maxLabel)
           MRIsetVoxVal(orivol, j, i, k, 0, 0);
       }
 
@@ -449,7 +443,7 @@ void GetLargestCC18(MRI *orivol) {
 }
 
 MRI *Dilation6(MRI *ori, MRI *out, int R) {
-  int i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
+  int  i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
   MRI *tmpvol;
 
   XN = ori->width;
@@ -507,7 +501,7 @@ MRI *Dilation6(MRI *ori, MRI *out, int R) {
 }
 
 MRI *Erosion6(MRI *ori, MRI *out, int R) {
-  int i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
+  int  i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
   MRI *tmpvol;
 
   XN = ori->width;
@@ -566,7 +560,7 @@ MRI *Erosion6(MRI *ori, MRI *out, int R) {
 }
 
 MRI *Dilation26(MRI *ori, MRI *out, int R) {
-  int i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
+  int  i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
   MRI *tmpvol;
 
   XN = ori->width;
@@ -628,7 +622,7 @@ MRI *Dilation26(MRI *ori, MRI *out, int R) {
 }
 
 MRI *Erosion26(MRI *ori, MRI *out, int R) {
-  int i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
+  int  i, j, k, index, ci, cj, ck, count, XN, YN, ZN;
   MRI *tmpvol;
 
   XN = ori->width;
@@ -695,7 +689,7 @@ MRI *BinaryOpen6(MRI *ori, MRI *out, int R) {
   MRI *tmpvol = nullptr;
 
   tmpvol = Erosion6(ori, tmpvol, R);
-  out = Dilation6(tmpvol, out, R);
+  out    = Dilation6(tmpvol, out, R);
 
   MRIfree(&tmpvol);
 
@@ -729,7 +723,7 @@ MRI *BinaryClose6(MRI *ori, MRI *out, int R) {
   MRI *tmpvol = nullptr;
 
   tmpvol = Dilation6(ori, tmpvol, R);
-  out = Erosion6(tmpvol, out, R);
+  out    = Erosion6(tmpvol, out, R);
 
   MRIfree(&tmpvol);
 
@@ -745,27 +739,16 @@ MRI *BinaryClose26(MRI *ori, MRI *out, int R) {
   MRI *tmpvol = nullptr;
 
   tmpvol = Dilation26(ori, tmpvol, R);
-  out = Erosion26(tmpvol, out, R);
+  out    = Erosion26(tmpvol, out, R);
 
   MRIfree(&tmpvol);
 
   return (out);
 }
 
-/**
- * @file  myutils.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2011/10/25 13:52:38 $
- *    $Revision: 1.1 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -784,17 +767,17 @@ MRI *BinaryClose26(MRI *ori, MRI *out, int R) {
 //
 //--------------------------------------------------------------------------*/
 
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory.h>
 
 /*---------------------------------------------------------------------------
 // Construct an empty MYlist with specified capacity and capacity increment
 //-------------------------------------------------------------------------*/
 MYlist myList2(int elementSize, int capacity, int capacityIncrement) {
   MYlist list;
-  void *data;
+  void * data;
 
   if (elementSize < 1) {
     fprintf(stderr, "myList(): elementSize must be a postive integer!\n");
@@ -851,18 +834,18 @@ MYlist myList(int elementSize) {
 //-------------------------------------------------------------------------*/
 MYlist myListOfSize(int size, int elementSize) {
   MYlist list;
-  char *data;
-  int i;
-  int capacity, capacityIncrement;
+  char * data;
+  int    i;
+  int    capacity, capacityIncrement;
 
   if (size < 0) {
     fprintf(stderr, "myListOfSize(): size must not be negative!\n");
     exit(1);
   }
 
-  capacity = size;
+  capacity          = size;
   capacityIncrement = 100;
-  list = myList2(elementSize, capacity, capacityIncrement);
+  list              = myList2(elementSize, capacity, capacityIncrement);
   myListSetSize(list, size);
   data = (char *)myListData(list);
   for (i = 0; i < elementSize * size; i++)
@@ -886,13 +869,13 @@ void myListDelete(MYlist list) {
 // Add an element to this list
 //-------------------------------------------------------------------------*/
 void myListAddElement(MYlist list, void *element) {
-  int size, capacity, elementSize, capacityIncrement;
+  int   size, capacity, elementSize, capacityIncrement;
   void *data;
 
-  size = myListSize(list);
-  capacity = myListCapacity(list);
+  size        = myListSize(list);
+  capacity    = myListCapacity(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
   if (size >= capacity) {
     capacityIncrement = myListCapacityIncrement(list);
     capacity += capacityIncrement;
@@ -915,13 +898,13 @@ void myListAddElement(MYlist list, void *element) {
 // Add an integer to this list (must be a list consists of only integers)
 //-------------------------------------------------------------------------*/
 void myListAddInt(MYlist list, int element) {
-  int size, capacity, elementSize, capacityIncrement;
+  int  size, capacity, elementSize, capacityIncrement;
   int *data;
 
-  size = myListSize(list);
-  capacity = myListCapacity(list);
+  size        = myListSize(list);
+  capacity    = myListCapacity(list);
   elementSize = myListElementSize(list);
-  data = (int *)myListData(list);
+  data        = (int *)myListData(list);
 
   if (size >= capacity) {
     capacityIncrement = myListCapacityIncrement(list);
@@ -945,16 +928,16 @@ void myListAddInt(MYlist list, int element) {
 // Add an array to this list
 //-------------------------------------------------------------------------*/
 void myListAddArray(MYlist list, void *array, int num) {
-  int size, capacity, elementSize, capacityIncrement, actualIncrement;
+  int   size, capacity, elementSize, capacityIncrement, actualIncrement;
   void *data;
 
-  size = myListSize(list);
-  capacity = myListCapacity(list);
+  size        = myListSize(list);
+  capacity    = myListCapacity(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
   if (size + num > capacity) {
     capacityIncrement = myListCapacityIncrement(list);
-    actualIncrement = (capacityIncrement > num) ? capacityIncrement : num;
+    actualIncrement   = (capacityIncrement > num) ? capacityIncrement : num;
     capacity += actualIncrement;
     myListSetCapacity(list, capacity);
 
@@ -976,13 +959,13 @@ void myListAddArray(MYlist list, void *array, int num) {
 // Insert an element into the list at the specified index
 //-------------------------------------------------------------------------*/
 int myListInsertElementAt(MYlist list, int index, void *element) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
   void *tempPtr;
   char *currentPtr, *nextPtr;
-  int i;
+  int   i;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
 
   if (index < 0 || index > size - 1) {
@@ -996,7 +979,7 @@ int myListInsertElementAt(MYlist list, int index, void *element) {
 
   for (i = size - 1; i >= index; i--) {
     currentPtr = (char *)data + i * elementSize;
-    nextPtr = (char *)currentPtr + elementSize;
+    nextPtr    = (char *)currentPtr + elementSize;
     memcpy(nextPtr, currentPtr, elementSize);
   }
 
@@ -1009,12 +992,12 @@ int myListInsertElementAt(MYlist list, int index, void *element) {
 // Retrieve an element from this list at a given index
 //-------------------------------------------------------------------------*/
 int myListElementAt(MYlist list, int index, void *element) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
 
   if (index < 0 || index > size - 1) {
     return (-1); /* out of bound error */
@@ -1028,12 +1011,12 @@ int myListElementAt(MYlist list, int index, void *element) {
 // Sets a list element at a given index
 //-------------------------------------------------------------------------*/
 int myListSetElementAt(MYlist list, int index, void *element) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
 
   if (index < 0 || index > size - 1) {
     return (-1); /* out of bound error */
@@ -1048,14 +1031,14 @@ int myListSetElementAt(MYlist list, int index, void *element) {
 // Removes all elements from this list and sets its size to zero
 //-------------------------------------------------------------------------*/
 int myListRemoveElementAt(MYlist list, int index) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
   char *currentPtr, *nextPtr;
-  int i;
+  int   i;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
 
   if (index < 0 || index > size - 1) {
     return (-1); /* out of bound error */
@@ -1063,7 +1046,7 @@ int myListRemoveElementAt(MYlist list, int index) {
 
   for (i = index; i < size - 1; i++) {
     currentPtr = (char *)data + i * elementSize;
-    nextPtr = (char *)currentPtr + elementSize;
+    nextPtr    = (char *)currentPtr + elementSize;
     memcpy(currentPtr, nextPtr, elementSize);
   }
 
@@ -1082,11 +1065,11 @@ void myListRemoveAllElements(MYlist list) { myListSetSize(list, 0); }
 //-------------------------------------------------------------------------*/
 void myListTrim(MYlist list) {
   void *data;
-  int size, elementSize;
+  int   size, elementSize;
 
-  size = myListSize(list);
+  size        = myListSize(list);
   elementSize = myListElementSize(list);
-  data = myListData(list);
+  data        = myListData(list);
 
   data = (void *)myRealloc(data, elementSize * size);
   myListSetData(list, data);
@@ -1096,9 +1079,9 @@ void myListTrim(MYlist list) {
 void myListInfo(MYlist list) {
   int elementSize, size, capacity, capacityIncrement;
 
-  elementSize = myListElementSize(list);
-  size = myListSize(list);
-  capacity = myListCapacity(list);
+  elementSize       = myListElementSize(list);
+  size              = myListSize(list);
+  capacity          = myListCapacity(list);
   capacityIncrement = myListCapacityIncrement(list);
 
   printf("         elementSize = %d\n", elementSize);
@@ -1112,12 +1095,12 @@ void myListInfo(MYlist list) {
 // pop out the top element from the stack
 //-------------------------------------------------------------------------*/
 void myStackPop(MYstack stack, void *element) {
-  int size, elementSize;
+  int   size, elementSize;
   void *data;
 
-  size = myListSize(stack);
+  size        = myListSize(stack);
   elementSize = myListElementSize(stack);
-  data = myListData(stack);
+  data        = myListData(stack);
 
   memcpy((char *)element, (char *)data + (size - 1) * elementSize, elementSize);
   myListSetSize(stack, size - 1);
@@ -1129,10 +1112,10 @@ void myStackPop(MYstack stack, void *element) {
 MYqueue myQueue2(int elementSize, int capacity, int capacityIncrement) {
   MYqueue queue;
 
-  queue = (MYqueue)myMalloc(sizeof(MYqueueStruct));
+  queue        = (MYqueue)myMalloc(sizeof(MYqueueStruct));
   queue->start = 0;
-  queue->end = -1;
-  queue->list = myList2(elementSize, capacity, capacityIncrement);
+  queue->end   = -1;
+  queue->list  = myList2(elementSize, capacity, capacityIncrement);
 
   return (queue);
 }
@@ -1179,7 +1162,7 @@ void myQueueDelete(MYqueue queue) {
 //-------------------------------------------------------------------------*/
 void myQueueRemoveAllElements(MYqueue queue) {
   queue->start = 0;
-  queue->end = -1;
+  queue->end   = -1;
   myQueueEnsureSize(queue);
 }
 
@@ -1187,16 +1170,16 @@ void myQueueRemoveAllElements(MYqueue queue) {
 void myQueueMoveToFront(MYqueue queue) {
   void *data;
   void *s1, *s2;
-  int elementSize, start, end;
+  int   elementSize, start, end;
 
   elementSize = myListElementSize(queue->list);
-  data = myListData(queue->list);
-  start = queue->start;
-  end = queue->end;
-  s2 = (char *)data + start * elementSize;
-  s1 = data;
+  data        = myListData(queue->list);
+  start       = queue->start;
+  end         = queue->end;
+  s2          = (char *)data + start * elementSize;
+  s1          = data;
   memmove(s1, s2, (end - start + 1) * elementSize);
-  queue->end = end - start;
+  queue->end   = end - start;
   queue->start = 0;
   myQueueEnsureSize(queue);
 }
@@ -1211,7 +1194,7 @@ void myQueuePush(MYqueue queue, void *element) {
   /* a factor of n denotes that (n-1)*memory(queue) will be
   wasted */
 
-  size = myQueueSize(queue);
+  size     = myQueueSize(queue);
   capacity = myListCapacity(queue->list);
 
   if (queue->end >= (capacity - 1) &&
@@ -1234,7 +1217,7 @@ void myQueuePushArray(MYqueue queue, void *array, int num) {
   /* a factor of n denotes that (n-1)*memory(queue) will be
   wasted */
 
-  size = myQueueSize(queue);
+  size     = myQueueSize(queue);
   capacity = myListCapacity(queue->list);
 
   if (queue->end >= (capacity - 1) &&
@@ -1278,16 +1261,16 @@ void myQueueTrim(MYqueue queue) {
 //-------------------------------------------------------------------------*/
 void *myQueueToArray(MYqueue queue) {
   void *arr, *data;
-  int size, elementSize;
+  int   size, elementSize;
 
-  size = myQueueSize(queue);
+  size        = myQueueSize(queue);
   elementSize = myListElementSize(queue->list);
 
   if (size == 0) {
     arr = nullptr;
   } else {
     data = myListData(queue->list);
-    arr = (void *)myMalloc(elementSize * size);
+    arr  = (void *)myMalloc(elementSize * size);
     memcpy(arr, (char *)data + queue->start * elementSize, size * elementSize);
   }
 

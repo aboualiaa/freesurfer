@@ -1,16 +1,16 @@
-#include "kvlMatlabRunner.h"
-#include "kvlMatlabObjectArray.h"
 #include "kvlAtlasMeshCollection.h"
 #include "kvlAtlasMeshSmoother.h"
+#include "kvlMatlabObjectArray.h"
+#include "kvlMatlabRunner.h"
 
 namespace kvl {
 
 class SmoothMesh : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef SmoothMesh Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef SmoothMesh                    Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -20,7 +20,7 @@ public:
   itkTypeMacro(SmoothMesh, itk::Object);
 
   virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    // std::cout << "I am " << this->GetNameOfClass()
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
     // kvlSmoothMesh( mesh, sigma, classesToSmooth )
@@ -56,8 +56,8 @@ public:
     for (int classNumber = 0; classNumber < numberOfClasses; classNumber++) {
       classesToSmooth.push_back((mxGetPr(prhs[2]))[classNumber]);
     }
-    // std::cout << "mesh: " << mesh.GetPointer() << std::endl;
-    // std::cout << "sigma: " << sigma << std::endl;
+    //std::cout << "mesh: " << mesh.GetPointer() << std::endl;
+    //std::cout << "sigma: " << sigma << std::endl;
 
     // Construct a tempory mesh collection
     kvl::AtlasMeshCollection::Pointer collection =
@@ -88,8 +88,8 @@ protected:
   SmoothMesh(){};
   virtual ~SmoothMesh(){};
 
-  SmoothMesh(const Self &);     // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+  SmoothMesh(const Self &);     //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
 private:
 };

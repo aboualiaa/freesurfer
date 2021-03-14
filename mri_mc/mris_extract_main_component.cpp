@@ -1,16 +1,11 @@
 /**
- * @file  mris_extract_main_component.c
  * @brief extract the main connected component from a surface
  *
  */
 /*
  * Original Author: Florent Segonne
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2015/04/10 20:16:29 $
- *    $Revision: 1.8 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained

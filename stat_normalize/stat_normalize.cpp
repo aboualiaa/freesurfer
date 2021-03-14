@@ -1,17 +1,6 @@
-/**
- * @file  stat_normalize.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:40 $
- *    $Revision: 1.14 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,43 +12,52 @@
  *
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mrisurf.h"
+#include "proto.h"
 #include "stats.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: stat_normalize.c,v 1.14 2011/03/02 00:04:40 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
-static void usage_exit();
-static void print_usage();
-static void print_help();
-static void print_version();
+static int  get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
 const char *Progname;
 
-static float resolution = 8.0f;
-static float fov = 256.0f;
-static int coordinate_system = TALAIRACH_COORDS;
+static float resolution        = 8.0f;
+static float fov               = 256.0f;
+static int   coordinate_system = TALAIRACH_COORDS;
 static char *hemi;
 static char *surf_name; /* used if in surface-based coordinates */
 
 int main(int argc, char *argv[]) {
   char *in_prefix, *out_prefix, out_fname[100], name[100], path[100],
-      *coord_name, fname[100], *cp, subjects_dir[100];
-  int n, nargs, ino, event;
-  SV *sv, *sv_avg = nullptr;
+      fname[100], *cp, subjects_dir[100];
+  const char * coord_name;
+  int          n, nargs, ino, event;
+  SV *         sv, *sv_avg = NULL;
   MRI_SURFACE *mris;
 
   nargs = handleVersionOption(argc, argv, "stat_normalize");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   /* print out command-line */
   for (n = 0; n < argc; n++)
@@ -95,11 +93,6 @@ int main(int argc, char *argv[]) {
 
   out_prefix = argv[argc - 1];
 
-#if 0
-  if (StatVolumeExists(out_prefix))
-    sv_avg = StatReadVolume(out_prefix) ;
-#endif
-
   for (ino = 1; ino < argc - 1; ino++) {
     /* for each path/prefix specified, go through all slices */
     in_prefix = argv[ino];
@@ -121,7 +114,12 @@ int main(int argc, char *argv[]) {
       break;
     case SPHERICAL_COORDS:
     case ELLIPSOID_COORDS:
-      sprintf(fname, "%s/%s/surf/%s.orig", subjects_dir, sv->reg->name, hemi);
+      int req = snprintf(fname, 100, "%s/%s/surf/%s.orig", subjects_dir,
+                         sv->reg->name, hemi);
+      if (req >= 100) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
       fprintf(stderr, "reading surface %s\n", fname);
       mris = MRISread(fname);
       if (!mris)
@@ -138,13 +136,6 @@ int main(int argc, char *argv[]) {
       MRISfree(&mris);
       break;
     }
-
-#if 0
-    if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
-      sprintf(out_fname, "avg%d.mnc", ino-1) ;
-      MRIwrite(sv->mri_avgs[0], out_fname) ;
-    }
-#endif
 
     StatFree(&sv);
   }
@@ -172,7 +163,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -184,15 +175,15 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'E':
       coordinate_system = ELLIPSOID_COORDS;
-      hemi = argv[2];
-      surf_name = argv[3];
-      nargs = 2;
+      hemi              = argv[2];
+      surf_name         = argv[3];
+      nargs             = 2;
       break;
     case 'S':
       coordinate_system = SPHERICAL_COORDS;
-      hemi = argv[2];
-      surf_name = argv[3];
-      nargs = 2;
+      hemi              = argv[2];
+      surf_name         = argv[3];
+      nargs             = 2;
       break;
     case '?':
     case 'U':
@@ -235,12 +226,12 @@ static int get_option(int argc, char *argv[]) {
   return (nargs);
 }
 
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
-static void print_usage() {
+static void print_usage(void) {
   fprintf(stderr, "usage: %s [options] <input sv prefix> <output sv prefix>\n",
           Progname);
   fprintf(stderr, "options are:\n");
@@ -257,14 +248,14 @@ static void print_usage() {
   fprintf(stderr, "\t-c float2int - <tkregister>, round\n");
 }
 
-static void print_help() {
+static void print_help(void) {
   print_usage();
   fprintf(stderr, "\nThis program will convert average a sequence of\n");
   fprintf(stderr, "volume-based statistics in Talairach space:\n\n");
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

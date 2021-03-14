@@ -1,16 +1,11 @@
 /**
- * @file  mris_distance_transform.c
  * @brief program for computing a distance transform on the surface
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:32 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,32 +18,29 @@
  */
 
 #include "diag.h"
-#include "timer.h"
-#include "mrisurf.h"
-#include "version.h"
 #include "mri_identify.h"
+#include "mrisurf.h"
+#include "timer.h"
+#include "version.h"
 
-static char vcid[] =
-    "$Id: mris_hausdorff_dist.c,v 1.3 2011/03/02 00:04:32 nicks Exp $";
-
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
 static void print_version();
 
-const char *Progname;
+const char * Progname;
 static char *annot_name = nullptr;
-static float binarize = 0;
+static float binarize   = 0;
 
 int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs, msec, mode = HDIST_MODE_SYMMETRIC_MEAN, a1, a2;
-  LABEL *area1, *area2;
+  char **      av;
+  int          ac, nargs, msec, mode = HDIST_MODE_SYMMETRIC_MEAN, a1, a2;
+  LABEL *      area1, *area2;
   MRI_SURFACE *mris;
-  Timer then;
-  double hdist;
+  Timer        then;
+  double       hdist;
 
   nargs = handleVersionOption(argc, argv, "mris_hausdorff_dist");
   if (nargs && argc - nargs == 1)
@@ -187,7 +179,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -199,11 +191,11 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'B':
       binarize = atof(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case 'A':
       annot_name = argv[2];
-      nargs = 1;
+      nargs      = 1;
       break;
     case '?':
     case 'U':
@@ -240,7 +232,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <random>
-#include <iostream>
 #include <chrono>
+#include <iostream>
+#include <random>
 
 class RandomSupply {
 public:
@@ -35,5 +35,5 @@ public:
 
 private:
   std::minstd_rand0 generator;
-  unsigned int mySeed;
+  unsigned int      mySeed;
 };

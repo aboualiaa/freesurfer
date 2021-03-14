@@ -1,15 +1,10 @@
 /**
- * @file  mriTransform.h
  * @brief general purpose utils
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2014/11/11 18:40:47 $
- *    $Revision: 1.15 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -63,7 +58,7 @@ typedef struct {
 
   MATRIX *mCoord1; /* temp matricies for transforms. */
   MATRIX *mCoord2;
-  int type; /* RAS or voxel (see transform.h) */
+  int     type; /* RAS or voxel (see transform.h) */
 
 } mriTransform, *mriTransformRef;
 
@@ -138,9 +133,9 @@ Trns_tErr Trns_ConvertMatrixBtoRAS(mriTransformRef ThisKRT, MATRIX *iBMatrix,
 Trns_tErr Trns_CalcMatricies_(mriTransformRef ThisKRT);
 
 /* debugging support */
-Trns_tErr Trns_Verify(mriTransformRef ThisKRT);
-void Trns_DebugPrint_(mriTransformRef ThisKRT);
-void Trns_Signal(const char *inMsg, int inLineNum, Trns_tErr ieCode);
+Trns_tErr   Trns_Verify(mriTransformRef ThisKRT);
+void        Trns_DebugPrint_(mriTransformRef ThisKRT);
+void        Trns_Signal(const char *inMsg, int inLineNum, Trns_tErr ieCode);
 const char *Trns_GetErrorString(Trns_tErr ieCode);
 
 #endif

@@ -1,16 +1,7 @@
-/**
- * @file  DialogLoadDTI.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2013/09/25 18:45:12 $
- *    $Revision: 1.18 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,12 +13,12 @@
  *
  */
 #include "DialogLoadDTI.h"
-#include "ui_DialogLoadDTI.h"
 #include "MainWindow.h"
-#include <QMessageBox>
-#include <QFileInfo>
-#include <QFileDialog>
 #include "MyUtils.h"
+#include "ui_DialogLoadDTI.h"
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QMessageBox>
 
 DialogLoadDTI::DialogLoadDTI(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogLoadDTI) {

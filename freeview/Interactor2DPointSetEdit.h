@@ -1,16 +1,11 @@
 /**
- * @file  Interactor2DPointSetEdit.h
  * @brief Interactor for editing way points in 2D render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:47 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -44,7 +39,7 @@ protected:
   void UpdateCursor(QEvent *event, QWidget *wnd);
 
   bool m_bEditing;
-  int m_nCurrentIndex;
+  int  m_nCurrentIndex;
 };
 
 #endif

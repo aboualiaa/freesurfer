@@ -3,16 +3,16 @@
 
 #include "kvlAtlasMeshPositionCostAndGradientCalculator.h"
 #include "kvlAtlasMeshToIntensityImageCostAndGradientCalculator.h"
-#include "kvlConditionalGaussianEntropyCostAndGradientCalculator.h"
-#include "kvlMutualInformationCostAndGradientCalculator.h"
 #include "kvlAtlasMeshToPointSetCostAndGradientCalculator.h"
 #include "kvlAverageAtlasMeshPositionCostAndGradientCalculator.h"
+#include "kvlConditionalGaussianEntropyCostAndGradientCalculator.h"
+#include "kvlMutualInformationCostAndGradientCalculator.h"
 
 #include "kvlAtlasMeshCollection.h"
 #include "pyKvlImage.h"
+#include "pyKvlMesh.h"
 #include "pyKvlNumpy.h"
 #include "pybind11/pybind11.h"
-#include "pyKvlMesh.h"
 
 class KvlCostAndGradientCalculator {
 
@@ -21,13 +21,13 @@ public:
 
   KvlCostAndGradientCalculator(
       std::string typeName, std::vector<KvlImage> images,
-      std::string boundaryCondition,
-      KvlTransform transform = KvlTransform(nullptr),
-      py::array_t<double> means = py::array_t<double>(),
-      py::array_t<double> variances = py::array_t<double>(),
-      py::array_t<float> mixtureWeights = py::array_t<float>(),
-      py::array_t<int> numberOfGaussiansPerClass = py::array_t<int>(),
-      py::array_t<double> targetPoints = py::array_t<double>()) {
+      std::string         boundaryCondition,
+      KvlTransform        transform                 = KvlTransform(nullptr),
+      py::array_t<double> means                     = py::array_t<double>(),
+      py::array_t<double> variances                 = py::array_t<double>(),
+      py::array_t<float>  mixtureWeights            = py::array_t<float>(),
+      py::array_t<int>    numberOfGaussiansPerClass = py::array_t<int>(),
+      py::array_t<double> targetPoints              = py::array_t<double>()) {
     if (typeName == "AtlasMeshToIntensityImage") {
 
       py::buffer_info means_info = means.request();
@@ -170,7 +170,7 @@ public:
     // Apply positions and Ks
     kvl::AtlasMeshCollection::Pointer meshCollectionPtr =
         meshCollection.GetMeshCollection();
-    std::vector<double> Ks = {K0};
+    std::vector<double>                                        Ks        = {K0};
     std::vector<kvl::AtlasMesh::PointsContainer::ConstPointer> positions = {
         meshCollectionPtr->GetReferencePosition()};
     for (int meshNumber = 0;
@@ -191,8 +191,8 @@ public:
         calculator->GetPositionGradient();
 
     const size_t numberOfNodes = gradient->Size();
-    auto const data = new double[numberOfNodes * 3];
-    auto data_it = data;
+    auto const   data          = new double[numberOfNodes * 3];
+    auto         data_it       = data;
     for (kvl::AtlasPositionGradientContainerType::ConstIterator it =
              gradient->Begin();
          it != gradient->End(); ++it) {

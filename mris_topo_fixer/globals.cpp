@@ -1,17 +1,6 @@
-/**
- * @file  globals.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,9 +12,7 @@
  *
  */
 
-
 #include <iostream>
-using namespace std;
 
 #include "macros.h"
 
@@ -35,11 +22,11 @@ using namespace std;
 
 void check(bool exp) {
   if (exp == false)
-    cout << "e";
+    std::cout << "e";
 }
 
-void ErrorExit(string s) {
-  cout << endl << "ERROR: " << s << endl;
+void ErrorExit(std::string s) {
+  std::cout << std::endl << "ERROR: " << s << std::endl;
   exit(-1);
 }
 

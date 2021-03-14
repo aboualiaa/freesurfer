@@ -37,9 +37,9 @@ int main(int argc, char *argv[]) {
   if (mris_template->m_sras2vox)
     mris_in->m_sras2vox = MatrixCopy(mris_template->m_sras2vox, nullptr);
   strcpy(mris_in->subject_name, mris_template->subject_name);
-  *(&mris_in->vg) = *(&mris_template->vg);
+  *(&mris_in->vg)     = *(&mris_template->vg);
   mris_in->useRealRAS = mris_template->useRealRAS;
-  mris_in->ct = mris_template->ct;
+  mris_in->ct         = mris_template->ct;
 
   printf("writing new surface to %s\n", argv[3]);
   MRISwrite(mris_in, argv[3]);

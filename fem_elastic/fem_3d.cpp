@@ -2,8 +2,6 @@
 
 #include "fem_3d.h"
 
-using namespace std;
-
 #define CCS(str) (const_cast<char *>(str.c_str()))
 
 //-------------------------------
@@ -47,9 +45,9 @@ SmallMatrix Material3d::get_matrix() const {
   m.set(0);
 
   double dfactor = (get_E() / (1 + get_nu())) / (1 - 2.0 * get_nu());
-  double alpha = (1.0 - get_nu()) * dfactor;
-  double beta = (1 - 2 * get_nu()) / 2 * dfactor;
-  double dnu = dfactor * get_nu();
+  double alpha   = (1.0 - get_nu()) * dfactor;
+  double beta    = (1 - 2 * get_nu()) / 2 * dfactor;
+  double dnu     = dfactor * get_nu();
 
   m(0, 0) = alpha;
   m(0, 1) = dnu;
@@ -127,26 +125,26 @@ SmallMatrix Element3d::get_matrix() const {
                         dbeta * m_cd(i) * m_cd(j));
       m(0, 0) = dbuf;
 
-      dbuf = dfactor * (dnu * m_cb(i) * m_cc(j) + dbeta * m_cc(i) * m_cb(j));
+      dbuf    = dfactor * (dnu * m_cb(i) * m_cc(j) + dbeta * m_cc(i) * m_cb(j));
       m(0, 1) = dbuf;
 
-      dbuf = dfactor * (dnu * m_cb(i) * m_cd(j) + dbeta * m_cd(i) * m_cb(j));
+      dbuf    = dfactor * (dnu * m_cb(i) * m_cd(j) + dbeta * m_cd(i) * m_cb(j));
       m(0, 2) = dbuf;
 
-      dbuf = dfactor * (dnu * m_cb(j) * m_cc(i) + dbeta * m_cb(i) * m_cc(j));
+      dbuf    = dfactor * (dnu * m_cb(j) * m_cc(i) + dbeta * m_cb(i) * m_cc(j));
       m(1, 0) = dbuf;
 
       dbuf = dfactor * (dalpha * m_cc(i) * m_cc(j) + dbeta * m_cb(i) * m_cb(j) +
                         dbeta * m_cd(i) * m_cd(j));
       m(1, 1) = dbuf;
 
-      dbuf = dfactor * (dnu * m_cc(i) * m_cd(j) + dbeta * m_cd(i) * m_cc(j));
+      dbuf    = dfactor * (dnu * m_cc(i) * m_cd(j) + dbeta * m_cd(i) * m_cc(j));
       m(1, 2) = dbuf;
 
-      dbuf = dfactor * (dnu * m_cd(i) * m_cb(j) + dbeta * m_cb(i) * m_cd(j));
+      dbuf    = dfactor * (dnu * m_cd(i) * m_cb(j) + dbeta * m_cb(i) * m_cd(j));
       m(2, 0) = dbuf;
 
-      dbuf = dfactor * (dnu * m_cd(i) * m_cc(j) + dbeta * m_cc(i) * m_cd(j));
+      dbuf    = dfactor * (dnu * m_cd(i) * m_cc(j) + dbeta * m_cc(i) * m_cd(j));
       m(2, 1) = dbuf;
 
       dbuf = dfactor * (dalpha * m_cd(i) * m_cd(j) + dbeta * m_cc(i) * m_cc(j) +
@@ -335,7 +333,7 @@ tDblCoords Element3d::inv_img(const tDblCoords &c) const {
   double inv_sys_det = 1.0 / det(m_int_b, m_int_c, m_int_d);
 
   if (abs(inv_sys_det) > 1.0e+4) {
-    cerr << " Element3d::inv_img -> tiny det\n";
+    std::cerr << " Element3d::inv_img -> tiny det\n";
     exit(1);
   }
   tDblCoords csrc;
@@ -387,10 +385,10 @@ bool Element3d::contains(const tDblCoords &c1, const tDblCoords &c2,
       return false;
 
   double dvol_total = abs(vol(c1, c2, c3, c4));
-  double dvol_1 = abs(vol(c, c1, c2, c3));
-  double dvol_2 = abs(vol(c, c1, c2, c4));
-  double dvol_3 = abs(vol(c, c1, c3, c4));
-  double dvol_4 = abs(vol(c, c2, c3, c4));
+  double dvol_1     = abs(vol(c, c1, c2, c3));
+  double dvol_2     = abs(vol(c, c1, c2, c4));
+  double dvol_3     = abs(vol(c, c1, c3, c4));
+  double dvol_4     = abs(vol(c, c2, c3, c4));
 
   return (abs(dvol_total - dvol_1 - dvol_2 - dvol_3 - dvol_4) < 1.0e-5);
 }
@@ -475,7 +473,7 @@ double Element3d::vol(const tDblCoords &c1, const tDblCoords &c2,
 
 class ElementProxy : public toct::TCubicRegion<3> {
 public:
-  typedef TElement<3> Element;
+  typedef TElement<3>        Element;
   typedef TCoords<double, 3> Coords3d;
 
   ElementProxy(CMesh3d *pmesh, unsigned int elt_idx) {
@@ -519,7 +517,7 @@ int CMesh3d::build_index_src() {
     delete m_poctree;
   Coords3d cbuf = m_cmax - m_cmin;
   //  double ddelta = std::max( cbuf(0), std::max( cbuf(1), cbuf(2)));
-  cbuf = m_cmin + cbuf;
+  cbuf      = m_cmin + cbuf;
   m_poctree = new OctreeType(m_cmin, cbuf, 6, m_maxNodes);
   m_vpEltBlock.reserve(this->get_no_elts());
   for (unsigned int ui = 0, noItems = this->get_no_elts(); ui < noItems; ++ui)
@@ -527,7 +525,7 @@ int CMesh3d::build_index_src() {
 
   std::cout << " done building the list\n";
   unsigned int count = 0; //, oldPercentage = 0, percentage;
-  Timer timer;
+  Timer        timer;
   for (std::vector<ElementProxy>::const_iterator cit = m_vpEltBlock.begin();
        cit != m_vpEltBlock.end(); ++cit, ++count) {
     m_poctree->insertItem(&*cit);
@@ -566,14 +564,14 @@ const CMesh3d::tNode *CMesh3d::closest_node(const tCoords &c) const {
     return NULL;
 
   double dbuf, dMin = (m_cmax - m_cmin).norm();
-  tNode *pnode = NULL;
+  tNode *pnode   = NULL;
   tNode *pargmin = NULL;
   for (unsigned int ui = 0, nnodes = cpelt->no_nodes(); ui < nnodes; ++ui) {
     cpelt->get_node(ui, &pnode);
     dbuf = (c - pnode->coords()).norm();
     if (dbuf < dMin) {
       pargmin = pnode;
-      dMin = dbuf;
+      dMin    = dbuf;
     }
   } // next ui
 
@@ -588,14 +586,14 @@ CMesh3d::tNode *CMesh3d::closest_node(const tCoords &c) {
     return NULL;
 
   double dbuf, dMin = (m_cmax - m_cmin).norm();
-  tNode *pnode = NULL;
+  tNode *pnode   = NULL;
   tNode *pargmin = NULL;
   for (unsigned int ui = 0, nnodes = pelt->no_nodes(); ui < nnodes; ++ui) {
     pelt->get_node(ui, &pnode);
     dbuf = (c - pnode->coords()).norm();
     if (dbuf < dMin) {
       pargmin = pnode;
-      dMin = dbuf;
+      dMin    = dbuf;
     }
   } // next ui
 
@@ -614,14 +612,14 @@ DelaunayMesh::DelaunayMesh(PointsListType &sp, tDblCoords cmin, tDblCoords cmax,
       m_dnu(dnu) {}
 
 tetgenio *DelaunayMesh::createDelaunay() {
-  tetgenio in;
+  tetgenio  in;
   tetgenio *out = new tetgenio;
 
   // All indices start from 1
   in.firstnumber = 1;
 
   in.numberofpoints = 8 + surfPoints.size();
-  in.pointlist = new REAL[in.numberofpoints * 3];
+  in.pointlist      = new REAL[in.numberofpoints * 3];
 
   // fill in the points
   for (unsigned int pt = 0; pt < 4; ++pt)
@@ -636,7 +634,7 @@ tetgenio *DelaunayMesh::createDelaunay() {
   in.pointlist[10] = m_cmax(1);
 
   for (unsigned int ui = 4; ui < 8; ++ui) {
-    in.pointlist[ui * 3] = in.pointlist[(ui - 4) * 3];
+    in.pointlist[ui * 3]     = in.pointlist[(ui - 4) * 3];
     in.pointlist[ui * 3 + 1] = in.pointlist[(ui - 4) * 3 + 1];
     in.pointlist[ui * 3 + 2] = m_cmax(2);
   }
@@ -650,8 +648,8 @@ tetgenio *DelaunayMesh::createDelaunay() {
   }
 
   // setup facets
-  in.numberoffacets = 6;
-  in.facetlist = new tetgenio::facet[in.numberoffacets];
+  in.numberoffacets  = 6;
+  in.facetlist       = new tetgenio::facet[in.numberoffacets];
   in.facetmarkerlist = new int[in.numberoffacets];
 
   // Facet 1. The leftmost facet.
@@ -671,7 +669,7 @@ tetgenio *DelaunayMesh::createDelaunay() {
     in.facetmarkerlist[i] = 0;
 
   // tetrahedralize
-  double volConstraint = 3.0f;
+  double             volConstraint = 3.0f;
   std::ostringstream os;
   os << "a" << volConstraint;
   os.flush();
@@ -702,11 +700,11 @@ void DelaunayMesh::convertFormat(tetgenio *p) {
 
   // setup nodes
   int firstnumber = p->firstnumber;
-  int noPoints = p->numberofpoints;
+  int noPoints    = p->numberofpoints;
 
   tDblCoords tc, dcZero(.0);
-  REAL *pdbl = &p->pointlist[0];
-  bool is_active[3];
+  REAL *     pdbl = &p->pointlist[0];
+  bool       is_active[3];
   std::fill_n(is_active, 3, false);
 
   for (int index = 0; index < noPoints; ++index, pdbl += 3) {
@@ -719,8 +717,8 @@ void DelaunayMesh::convertFormat(tetgenio *p) {
   } // next index
 
   // setup elements
-  int numberoftetrahedra = p->numberoftetrahedra;
-  int *pint = &p->tetrahedronlist[0];
+  int  numberoftetrahedra = p->numberoftetrahedra;
+  int *pint               = &p->tetrahedronlist[0];
   for (int index = 0; index < numberoftetrahedra; ++index, pint += 4) {
     Element3d *pelt =
         Constructor::elt(index, m_pmesh->node(*pint - firstnumber),
@@ -755,14 +753,14 @@ void DelaunayMesh::setupFacet(tetgenio::facet *f, int a, int b, int c, int d) {
   tetgenio::polygon *p;
 
   f->numberofpolygons = 1;
-  f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
-  f->numberofholes = 0;
-  f->holelist = NULL;
+  f->polygonlist      = new tetgenio::polygon[f->numberofpolygons];
+  f->numberofholes    = 0;
+  f->holelist         = NULL;
 
-  p = &f->polygonlist[0];
+  p                   = &f->polygonlist[0];
   p->numberofvertices = 4;
 
-  p->vertexlist = new int[p->numberofvertices];
+  p->vertexlist    = new int[p->numberofvertices];
   p->vertexlist[0] = a;
   p->vertexlist[1] = b;
   p->vertexlist[2] = c;
@@ -940,7 +938,7 @@ MeshCreator::MeshCreator(tDblCoords cmin, tDblCoords cmax, tIntCoords ticks,
   for (int i = 0; i < 3; ++i)
     m_step(i) = (m_cmax(i) - m_cmin(i)) / (m_ticks(i) - 1.0) * .5;
 
-  m_pmesh = new CMesh3d;
+  m_pmesh         = new CMesh3d;
   m_pmesh->m_cmin = m_cmin;
   m_pmesh->m_cmax = m_cmax;
 }
@@ -1006,12 +1004,12 @@ void MeshCreator::setup_elt_group(int &id, TNode<3> *pcubeCenter,
 }
 
 void MeshCreator::setup_elts() {
-  int id = 0;
+  int                   id = 0;
   NodeMapType::iterator it;
   TNode<3> *pn0, *pn1, *pn2, *pn3, *pn4, *pn5, *pn6, *pn7, *pnij0, *pnik0,
       *pnjk0, *pnij1, *pnik1, *pnjk1, *pncenter;
 
-  vector<TNode<3> *> vpnodes;
+  std::vector<TNode<3> *> vpnodes;
 
   for (int k = 0; k < m_ticks(2) - 1; ++k)
     for (int j = 0; j < m_ticks(1) - 1; ++j)

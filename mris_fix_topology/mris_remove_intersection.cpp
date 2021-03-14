@@ -1,16 +1,11 @@
 /**
- * @file  mris_remove_intersection.c
  * @brief removes surface intersections
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:32 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,18 +17,17 @@
  *
  */
 
-#include "tags.h"
 #include "diag.h"
 #include "mrisurf.h"
+#include "tags.h"
 #include "timer.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mris_remove_intersection.c,v 1.6 2011/03/02 00:04:32 nicks Exp $";
+int main(int argc, char *argv[]);
 
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -42,18 +36,16 @@ static void print_version();
 const char *Progname;
 
 int main(int argc, char *argv[]) {
-  char **av, *in_surf_fname, *out_fname;
-  int ac, nargs, msec;
+  char **      av, *in_surf_fname, *out_fname;
+  int          ac, nargs, msec;
   MRI_SURFACE *mris;
-  Timer then;
-
+  Timer        then;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_remove_intersection");
 
   nargs = handleVersionOption(argc, argv, "mris_remove_intersection");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -77,7 +69,7 @@ int main(int argc, char *argv[]) {
   }
 
   in_surf_fname = argv[1];
-  out_fname = argv[2];
+  out_fname     = argv[2];
 
   mris = MRISread(in_surf_fname);
   if (!mris)
@@ -106,7 +98,7 @@ int main(int argc, char *argv[]) {
   Description:
   ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -118,7 +110,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'V':
       Gdiag_no = atoi(argv[2]);
-      nargs = 1;
+      nargs    = 1;
       break;
     case '?':
     case 'H':
@@ -151,7 +143,7 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

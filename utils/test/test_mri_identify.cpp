@@ -1,16 +1,11 @@
 /**
- * @file  test_mri_identify.cpp
  * @brief test routines
  *
  */
 /*
  * Original Author: Y. Tosa
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.4 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,24 +17,22 @@
  *
  */
 
-#include <stdexcept>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
-extern "C" {
-#include "mri_identify.h"
 #include "mri.h"
-}
-
-using namespace std;
+#include "mri_identify.h"
 
 const char *Progname = NULL;
+
+using namespace std;
 
 #define Assert(x, s)                                                           \
   if (!(x)) {                                                                  \
     stringstream ss;                                                           \
     ss << "Line " << __LINE__ << ": " << s;                                    \
-    throw runtime_error(ss.str());                                             \
+    throw std::runtime_error(ss.str());                                        \
   }
 
 class mri_identifyTester {
@@ -48,33 +41,35 @@ public:
 };
 
 void mri_identifyTester::Test() {
-  cerr << "Check that mri_identify() returns NRRD_FILE for a .nrrd...";
+  std::cerr << "Check that mri_identify() returns NRRD_FILE for a .nrrd...";
   Assert(mri_identify((char *)"test_mri_identify_data/nrrd_basic.nrrd") ==
              NRRD_FILE,
          "Failed to recognize NRRD file w/ correct extension.");
-  cerr << "passed." << endl;
+  std::cerr << "passed." << std::endl;
 
-  cerr << "Check that a .nrrd is recognized by is_nrrd()...";
+  std::cerr << "Check that a .nrrd is recognized by is_nrrd()...";
   Assert(is_nrrd((char *)"test_mri_identify_data/nrrd_basic.nrrd"),
          "Failed to recognize NRRD file w/ correct extension.");
-  cerr << "passed." << endl;
+  std::cerr << "passed." << std::endl;
 
-  cerr << "Check recognition of NRRD by magic number when extension is bad...";
+  std::cerr
+      << "Check recognition of NRRD by magic number when extension is bad...";
   Assert(is_nrrd((char *)"test_mri_identify_data/nrrd_bad_extension.something"),
          "Failed to identify NRRD w/ bad extension but correct magic.");
-  cerr << "passed." << endl;
+  std::cerr << "passed." << std::endl;
 
-  cerr << "Check recognition of not NRRD by magic number when extension is "
-          "bad...";
+  std::cerr
+      << "Check recognition of not NRRD by magic number when extension is "
+         "bad...";
   Assert(!is_nrrd((char *)"test_mri_identify_data/nrrd_bad_magic.something"),
          "Failed to identify bad magic NRRD as not a NRRD.");
-  cerr << "passed." << endl;
+  std::cerr << "passed." << std::endl;
 }
 
 int main(int argc, char **argv) {
   Progname = argv[0];
 
-  cerr << "Beginning tests..." << endl;
+  std::cerr << "Beginning tests..." << std::endl;
 
   try {
 
@@ -82,14 +77,15 @@ int main(int argc, char **argv) {
     tester.Test();
 
   } catch (runtime_error &e) {
-    cerr << "failed " << endl << "exception: " << e.what() << endl;
+    std::cerr << "failed " << std::endl
+              << "exception: " << e.what() << std::endl;
     exit(1);
   } catch (...) {
-    cerr << "failed" << endl;
+    std::cerr << "failed" << std::endl;
     exit(1);
   }
 
-  cerr << "Success" << endl;
+  std::cerr << "Success" << std::endl;
 
   exit(0);
 }

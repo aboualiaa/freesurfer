@@ -32,12 +32,12 @@ struct IoParams {
   std::string strMorph;
   std::string strInterp;
 
-  bool useBoundingBox;
-  int threshold;
+  bool         useBoundingBox;
+  int          threshold;
   unsigned int zlibBuffer;
-  int doTest;
+  int          doTest;
 
-  void parse(int ac, char** av);
+  void parse(int ac, char **av);
 };
 
 char *getChar(const std::string &str) {
@@ -54,9 +54,7 @@ void initOctree2(gmp::VolumeMorph &morph) {
   } // next it
 }
 
-int
-main(int ac, char** av)
-{
+int main(int ac, char **av) {
   Timer timer;
 
   IoParams params;
@@ -107,7 +105,7 @@ main(int ac, char** av)
 
   if (params.doTest) {
     std::cout << " Writing out some tests.\n";
-    Timer t1;
+    Timer    t1;
     VOL_GEOM vgLike;
     initVolGeom(&vgLike);
     getVolGeom(pmorph->m_template, &vgLike);
@@ -151,9 +149,7 @@ main(int ac, char** av)
 
 //---------------------------
 
-void
-IoParams::parse(int ac, char** av)
-{
+void IoParams::parse(int ac, char **av) {
   ArgumentParser parser;
   // required
   parser.addArgument("--fixed", 1, String, true);
@@ -169,10 +165,10 @@ IoParams::parse(int ac, char** av)
   parser.addHelp(exportGcam_help_xml, exportGcam_help_xml_len);
   parser.parse(ac, av);
 
-  strFixed = parser.retrieve<std::string>("fixed");
+  strFixed  = parser.retrieve<std::string>("fixed");
   strMoving = parser.retrieve<std::string>("moving");
-  strMorph = parser.retrieve<std::string>("morph");
-  strGcam = parser.retrieve<std::string>("out_gcam");
+  strMorph  = parser.retrieve<std::string>("morph");
+  strGcam   = parser.retrieve<std::string>("out_gcam");
   strInterp = parser.retrieve<std::string>("interp");
 
   doTest = 0;
@@ -185,10 +181,10 @@ IoParams::parse(int ac, char** av)
     zlibBuffer = parser.retrieve<int>("zlib_buffer");
   }
 
-  threshold = 0;
+  threshold      = 0;
   useBoundingBox = false;
   if (parser.exists("bbox_threshold")) {
-    threshold = parser.retrieve<int>("bbox_threshold");
+    threshold      = parser.retrieve<int>("bbox_threshold");
     useBoundingBox = true;
   }
 }

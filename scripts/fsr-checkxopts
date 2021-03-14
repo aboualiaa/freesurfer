@@ -8,12 +8,8 @@
 # Checks the xoptsfile to make sure that there are no errors in it.
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: nicks $
-#    $Date: 2011/03/02 20:16:39 $
-#    $Revision: 1.4 $
 #
-# Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+# Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 #
 # Terms and conditions for use, reproduction, distribution and contribution
 # are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,7 +21,7 @@
 #
 #
 
-set VERSION = '$Id: fsr-checkxopts,v 1.4 2011/03/02 20:16:39 nicks Exp $';
+set VERSION = 'fsr-checkxopts @FS_VERSION@';
 
 if($#argv < 1) exit 0;
 set xoptsfile = $argv[1];

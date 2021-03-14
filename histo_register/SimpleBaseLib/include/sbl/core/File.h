@@ -95,13 +95,13 @@ public:
       fprintf(m_file, "%lf ", val);
   }
   virtual void writeString(const String &s);
-  void writeRawString(const String &s);
+  void         writeRawString(const String &s);
 
   /// write formatted string; equivalent of fprintf (printf for files)
   void writeF(const char *str, ...);
 
   /// read various basic types
-  virtual inline bool readBool() { return readInt() ? true : false; }
+  virtual inline bool          readBool() { return readInt() ? true : false; }
   virtual inline unsigned char readUChar() {
     unsigned char val = 0;
     if (m_binary)
@@ -173,17 +173,17 @@ public:
   }
 
   /// write a vector, with length
-  template <typename T> void writeVector(const Vector<T> &v) {
+  template <typename T> void writeVector(const std::vector<T> &v) {
     assertAlways(binary());
     writeInt(v.length());
     writeBlock(v.dataPtr(), v.length() * sizeof(T));
   }
 
   /// read a vector, with length (returns copy)
-  template <typename T> Vector<T> readVector() {
+  template <typename T> std::vector<T> readVector() {
     assertAlways(binary());
-    Vector<T> v;
-    int len = readInt();
+    std::vector<T> v;
+    int            len = readInt();
     if (len < 0) {
       warning("invalid vector in file");
     } else {
@@ -194,7 +194,7 @@ public:
   }
 
   /// read a vector, with length (avoids copy)
-  template <typename T> void readVector(Vector<T> &v) {
+  template <typename T> void readVector(std::vector<T> &v) {
     assertAlways(binary());
     int len = readInt();
     if (len < 0) {

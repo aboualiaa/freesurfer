@@ -1,5 +1,6 @@
 #include "kvlAtlasParameterEstimationConsole.h"
 
+#include "FL/Fl.H"
 #include "FL/fl_ask.H"
 #include "itkCastImageFilter.h"
 #include "itkCommand.h"
@@ -17,7 +18,7 @@ AtlasParameterEstimationConsole ::AtlasParameterEstimationConsole() {
   m_Estimator = AtlasParameterEstimator::New();
 
   m_Interrupted = false;
-  m_Stepping = false;
+  m_Stepping    = false;
 
   // Add observers to the estimator
   typedef itk::MemberCommand<AtlasParameterEstimationConsole> MemberCommandType;
@@ -64,28 +65,32 @@ AtlasParameterEstimationConsole ::AtlasParameterEstimationConsole() {
 //
 //
 //
+AtlasParameterEstimationConsole ::~AtlasParameterEstimationConsole() {}
+
+//
+//
+//
 void AtlasParameterEstimationConsole ::SetLabelImages(
     const std::vector<std::string> &fileNames) {
   // Sanity checking
-  if (fileNames.empty()) {
+  if (fileNames.size() == 0)
     return;
-  }
 
   // Read the images
   typedef CompressionLookupTable::ImageType InputImageType;
   std::vector<InputImageType::ConstPointer> labelImages;
-  for (auto it = fileNames.begin(); it != fileNames.end(); ++it) {
+  for (std::vector<std::string>::const_iterator it = fileNames.begin();
+       it != fileNames.end(); ++it) {
     // Read the input image
-    using ReaderType = itk::ImageFileReader<InputImageType>;
-    ReaderType::Pointer reader = ReaderType::New();
-    reader->SetFileName(*it);
+    typedef itk::ImageFileReader<InputImageType> ReaderType;
+    ReaderType::Pointer                          reader = ReaderType::New();
+    reader->SetFileName((*it).c_str());
     reader->Update();
     InputImageType::ConstPointer labelImage = reader->GetOutput();
 
-    // Over-ride the spacing and origin since at this point we can't deal with
-    // that
+    // Over-ride the spacing and origin since at this point we can't deal with that
     const double spacing[] = {1, 1, 1};
-    const double origin[] = {0, 0, 0};
+    const double origin[]  = {0, 0, 0};
     const_cast<InputImageType *>(labelImage.GetPointer())->SetSpacing(spacing);
     const_cast<InputImageType *>(labelImage.GetPointer())->SetOrigin(origin);
 
@@ -127,14 +132,12 @@ void AtlasParameterEstimationConsole ::SetLabelImages(
 //
 void AtlasParameterEstimationConsole ::InitializeMesh() {
   // Don't build a mesh if no label images have been set
-  if (m_Estimator->GetNumberOfLabelImages() == 0) {
+  if (m_Estimator->GetNumberOfLabelImages() == 0)
     return;
-  }
 
   // Construct mesh
-  if (m_UseExplicitStartCollection->value() != 0) {
-    // We are using an explicit start collection, read it from file and start
-    // the estimator with it
+  if (m_UseExplicitStartCollection->value()) {
+    // We are using an explicit start collection, read it from file and start the estimator with it
     AtlasMeshCollection::Pointer explicitStartCollection =
         AtlasMeshCollection::New();
     if (!explicitStartCollection->Read(m_ExplicitStartCollection->value())) {
@@ -165,8 +168,7 @@ void AtlasParameterEstimationConsole ::InitializeMesh() {
 
     unsigned int numberOfMeshes = m_Estimator->GetNumberOfLabelImages();
 
-    // Create a mesh collection accordingly, and initialize the estimator with
-    // it
+    // Create a mesh collection accordingly, and initialize the estimator with it
     AtlasMeshCollection::Pointer meshCollection = AtlasMeshCollection::New();
     std::cout << "meshSize: " << meshSize[0] << " " << meshSize[1] << " "
               << meshSize[2] << std::endl;
@@ -199,13 +201,13 @@ void AtlasParameterEstimationConsole ::DisplayLabelImage(
     unsigned int labelImageNumber) {
   // Show the label image
   typedef ImageViewer::ImageType CompressedImageType;
-  CompressedImageType::Pointer compressedImage = CompressedImageType::New();
+  CompressedImageType::Pointer   compressedImage = CompressedImageType::New();
   compressedImage->SetRegions(
       m_Estimator->GetLabelImage(labelImageNumber)->GetLargestPossibleRegion());
   compressedImage->Allocate();
   compressedImage->FillBuffer(0);
   typedef CompressionLookupTable::ImageType ImageType;
-  itk::ImageRegionConstIterator<ImageType> origIt(
+  itk::ImageRegionConstIterator<ImageType>  origIt(
       m_Estimator->GetLabelImage(labelImageNumber),
       m_Estimator->GetLabelImage(labelImageNumber)->GetLargestPossibleRegion());
   itk::ImageRegionIterator<CompressedImageType> compIt(
@@ -227,7 +229,7 @@ void AtlasParameterEstimationConsole ::DisplayLabelImage(
 
   typedef itk::IntensityWindowingImageFilter<AtlasMeshAlphaDrawer::ImageType,
                                              ImageViewer::ImageType>
-      WindowerType;
+                        WindowerType;
   WindowerType::Pointer windower = WindowerType::New();
   windower->SetInput(alphaDrawer->GetImage());
   windower->SetWindowMinimum(0);
@@ -242,25 +244,25 @@ void AtlasParameterEstimationConsole ::DisplayLabelImage(
   m_LabelImageViewer->SetOverlayScale(1.0f);
 
   // Show the mesh overlaid
-  if (m_ShowMesh->value() != 0) {
+  if (m_ShowMesh->value()) {
     AtlasMesh::ConstPointer mesh =
         m_Estimator->GetCurrentMeshCollection()->GetMesh(labelImageNumber);
     m_LabelImageViewer->SetMesh(mesh);
     m_AlphaImageViewer->SetMesh(mesh);
   } else {
-    m_LabelImageViewer->SetMesh(nullptr);
-    m_AlphaImageViewer->SetMesh(nullptr);
+    m_LabelImageViewer->SetMesh(0);
+    m_AlphaImageViewer->SetMesh(0);
   }
 
   // Show the position gradient overlaid
-  if (m_ShowGradient->value() != 0) {
+  if (m_ShowGradient->value()) {
     AtlasPositionGradientContainerType::Pointer positionGradient =
         m_Estimator->GetCurrentPositionGradient(labelImageNumber);
     m_LabelImageViewer->SetPositionGradient(positionGradient);
     m_AlphaImageViewer->SetPositionGradient(positionGradient);
   } else {
-    m_LabelImageViewer->SetPositionGradient(nullptr);
-    m_AlphaImageViewer->SetPositionGradient(nullptr);
+    m_LabelImageViewer->SetPositionGradient(0);
+    m_AlphaImageViewer->SetPositionGradient(0);
   }
 
   // Redraw
@@ -274,13 +276,13 @@ void AtlasParameterEstimationConsole ::DisplayLabelImage(
 //
 void AtlasParameterEstimationConsole ::Estimate() {
   // Inform the estimator about the user-selected deformation optimizer
-  if (m_FixedStepGradientDescent->value() != 0) {
+  if (m_FixedStepGradientDescent->value()) {
     m_Estimator->SetPositionOptimizer(
         AtlasParameterEstimator::FIXED_STEP_GRADIENT_DESCENT);
-  } else if (m_GradientDescent->value() != 0) {
+  } else if (m_GradientDescent->value()) {
     m_Estimator->SetPositionOptimizer(
         AtlasParameterEstimator::GRADIENT_DESCENT);
-  } else if (m_ConjugateGradient->value() != 0) {
+  } else if (m_ConjugateGradient->value()) {
     m_Estimator->SetPositionOptimizer(
         AtlasParameterEstimator::CONJUGATE_GRADIENT);
   } else {
@@ -288,7 +290,7 @@ void AtlasParameterEstimationConsole ::Estimate() {
   }
 
   //
-  if (m_UseExplicitStartCollection->value() != 0) {
+  if (m_UseExplicitStartCollection->value()) {
     m_Estimator->Estimate();
   } else {
     // Retrieve number of upsampling steps from the GUI
@@ -374,7 +376,7 @@ void AtlasParameterEstimationConsole ::HandleEstimatorEvent(
     m_SubProgress->redraw();
 
     // Only update the viewers if we are asked for it
-    if (m_ShowAlphasEstimationIterations->value() != 0) {
+    if (m_ShowAlphasEstimationIterations->value()) {
       m_LabelImageNumber->do_callback();
     }
   } else if (typeid(event) == typeid(PositionEstimationEndEvent)) {
@@ -403,7 +405,7 @@ void AtlasParameterEstimationConsole ::HandleEstimatorEvent(
     m_SubProgress->redraw();
 
     // Only update the viewers if we are asked for it
-    // if ( m_ShowPositionEstimationIterations->value() )
+    //if ( m_ShowPositionEstimationIterations->value() )
     //  {
     m_LabelImageNumber->value(m_Estimator->GetLabelImageNumber());
     m_LabelImageNumber->do_callback();
@@ -412,9 +414,8 @@ void AtlasParameterEstimationConsole ::HandleEstimatorEvent(
 
   Fl::check();
 
-  while (m_Interrupted) {
+  while (m_Interrupted)
     Fl::wait();
-  }
 
   if (m_Stepping) {
     this->Interrupt();

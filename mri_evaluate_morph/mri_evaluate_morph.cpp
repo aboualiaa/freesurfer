@@ -1,17 +1,6 @@
-/**
- * @file  mri_evaluate_morph.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:15 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,17 +12,14 @@
  *
  */
 
-#include "error.h"
 #include "diag.h"
+#include "error.h"
 #include "transform.h"
 #include "version.h"
 
-static char vcid[] =
-    "$Id: mri_evaluate_morph.c,v 1.5 2011/03/02 00:04:15 nicks Exp $";
-
 int main(int argc, char *argv[]);
 
-static int get_option(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void usage_exit();
 static void print_usage();
 static void print_help();
@@ -46,13 +32,13 @@ static char sdir[STRLEN] = "";
 
 static float compute_overlap(MRI *mri_seg1, MRI *mri_seg2,
                              TRANSFORM *transform1, TRANSFORM *transform2);
-int main(int argc, char *argv[]) {
-  char **av, *xform_name, *out_fname, fname[STRLEN], *seg_name, *s1, *s2;
-  int ac, nargs, i, nsubjects, j, nvoxels;
-  MRI *mri_seg[MAX_SUBJECTS];
-  float overlap, total_overlap;
+int          main(int argc, char *argv[]) {
+  char **    av, *xform_name, *out_fname, fname[STRLEN], *seg_name, *s1, *s2;
+  int        ac, nargs, i, nsubjects, j, nvoxels;
+  MRI *      mri_seg[MAX_SUBJECTS];
+  float      overlap, total_overlap;
   TRANSFORM *transform1, *transform2;
-  FILE *fp;
+  FILE *     fp;
 
   nargs = handleVersionOption(argc, argv, "mri_evaluate_morph");
   if (nargs && argc - nargs == 1)
@@ -83,8 +69,8 @@ int main(int argc, char *argv[]) {
     usage_exit();
 
   xform_name = argv[1];
-  seg_name = argv[2];
-  out_fname = argv[argc - 1];
+  seg_name   = argv[2];
+  out_fname  = argv[argc - 1];
 
 #define FIRST_SUBJECT 3
   nsubjects = argc - (FIRST_SUBJECT + 1);
@@ -147,7 +133,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -193,21 +179,21 @@ static void print_help() {
   exit(1);
 }
 
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }
 
 static float compute_overlap(MRI *mri_seg1, MRI *mri_seg2,
                              TRANSFORM *transform1, TRANSFORM *transform2) {
-  int x, y, z, width, height, depth, l1, l2, x2, y2, z2;
+  int   x, y, z, width, height, depth, l1, l2, x2, y2, z2;
   float overlap, x1, y1, z1;
 
   TransformInvert(transform1, mri_seg1);
 
-  width = mri_seg1->width;
+  width  = mri_seg1->width;
   height = mri_seg1->height;
-  depth = mri_seg1->depth;
+  depth  = mri_seg1->depth;
   for (overlap = 0.0f, x = 0; x < width; x++) {
     for (y = 0; y < height; y++) {
       for (z = 0; z < depth; z++) {

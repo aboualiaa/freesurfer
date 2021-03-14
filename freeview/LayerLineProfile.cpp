@@ -1,27 +1,27 @@
 #include "LayerLineProfile.h"
-#include "LayerPointSet.h"
 #include "LayerMRI.h"
-#include <vtkActor.h>
-#include <vtkRenderer.h>
-#include <vtkPolyData.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkCellArray.h>
-#include <vtkPoints.h>
-#include <vtkTubeFilter.h>
-#include <vtkSplineFilter.h>
-#include <vtkCutter.h>
-#include <vtkStripper.h>
-#include <vtkTriangleFilter.h>
-#include <vtkPlane.h>
-#include <vtkProperty.h>
-#include <QFile>
-#include <QTextStream>
-#include <QDebug>
+#include "LayerPointSet.h"
 #include "LayerPropertyLineProfile.h"
 #include "LayerPropertyPointSet.h"
+#include "MyUtils.h"
+#include <QDebug>
+#include <QFile>
+#include <QTextStream>
+#include <vtkActor.h>
+#include <vtkCellArray.h>
+#include <vtkCutter.h>
 #include <vtkLookupTable.h>
 #include <vtkMath.h>
-#include "MyUtils.h"
+#include <vtkPlane.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkRenderer.h>
+#include <vtkSplineFilter.h>
+#include <vtkStripper.h>
+#include <vtkTriangleFilter.h>
+#include <vtkTubeFilter.h>
 
 LayerLineProfile::LayerLineProfile(int nPlane, QObject *parent,
                                    LayerPointSet *line1, LayerPointSet *line2)
@@ -34,7 +34,7 @@ LayerLineProfile::LayerLineProfile(int nPlane, QObject *parent,
 
   mProperty = new LayerPropertyLineProfile(this);
 
-  m_endLines = vtkSmartPointer<vtkActor>::New();
+  m_endLines     = vtkSmartPointer<vtkActor>::New();
   m_profileLines = vtkSmartPointer<vtkActor>::New();
   m_endLines->GetProperty()->SetColor(0.3, 0.3, 1.0);
   QColor c = GetProperty()->GetColor();
@@ -104,9 +104,9 @@ void LayerLineProfile::UpdateOpacity() {
 
 std::vector<std::vector<double>>
 LayerLineProfile::Points3DToSpline2D(std::vector<double> pts3d,
-                                     double distance) {
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+                                     double              distance) {
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
   lines->InsertNextCell(pts3d.size() / 3);
   for (size_t i = 0; i < pts3d.size(); i += 3) {
     points->InsertNextPoint(pts3d[i], pts3d[i + 1], pts3d[i + 2]);
@@ -126,11 +126,11 @@ LayerLineProfile::Points3DToSpline2D(std::vector<double> pts3d,
   spline->SetLength(distance);
   spline->Update();
   polydata = spline->GetOutput();
-  points = polydata->GetPoints();
+  points   = polydata->GetPoints();
   std::vector<std::vector<double>> points2d;
   for (int i = 0; i < points->GetNumberOfPoints(); i++) {
     std::vector<double> pt;
-    double x[3];
+    double              x[3];
     points->GetPoint(i, x);
     if (m_nPlane != 0)
       pt.push_back(x[0]);
@@ -145,9 +145,9 @@ LayerLineProfile::Points3DToSpline2D(std::vector<double> pts3d,
 
 std::vector<std::vector<double>>
 LayerLineProfile::Points2DToSpline3D(std::vector<std::vector<double>> pts2d,
-                                     int nSample) {
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+                                     int                              nSample) {
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
   lines->InsertNextCell(pts2d.size());
   for (size_t i = 0; i < pts2d.size(); i++) {
     if (m_nPlane == 0)
@@ -171,11 +171,11 @@ LayerLineProfile::Points2DToSpline3D(std::vector<std::vector<double>> pts2d,
   spline->SetNumberOfSubdivisions(nSample);
   spline->Update();
   polydata = spline->GetOutput();
-  points = polydata->GetPoints();
+  points   = polydata->GetPoints();
   std::vector<std::vector<double>> points3d;
   for (int i = 0; i < points->GetNumberOfPoints(); i++) {
     std::vector<double> pt;
-    double x[3];
+    double              x[3];
     points->GetPoint(i, x);
     pt.push_back(x[0]);
     pt.push_back(x[1]);
@@ -190,25 +190,25 @@ bool LayerLineProfile::Solve(double profileSpacing, double referenceSize,
   // double laplaceResolution = ;
   //  double referenceSize     = voxel_length; // smallest voxel lenth
   double resolution = laplaceResolution * referenceSize;
-  double spacing = profileSpacing * referenceSize;
+  double spacing    = profileSpacing * referenceSize;
   // double resolution        = spacing * 10.0;
   double distance = referenceSize / 3.0;
 
   m_dReferenceSize = referenceSize;
 
   std::vector<std::vector<double>> points2d;
-  std::vector<int> segment0;
-  std::vector<int> segment1;
-  std::vector<int> segmentL;
-  std::vector<int> segmentR;
+  std::vector<int>                 segment0;
+  std::vector<int>                 segment1;
+  std::vector<int>                 segmentL;
+  std::vector<int>                 segmentR;
 
-  std::vector<double> ctrl_pts0 = m_spline0->GetPoints();
+  std::vector<double>              ctrl_pts0 = m_spline0->GetPoints();
   std::vector<std::vector<double>> pts0 =
       Points3DToSpline2D(ctrl_pts0, distance);
   for (size_t i = 0; i < pts0.size(); i++)
     segment0.push_back(i);
 
-  std::vector<double> ctrl_pts1 = m_spline1->GetPoints();
+  std::vector<double>              ctrl_pts1 = m_spline1->GetPoints();
   std::vector<std::vector<double>> pts1 =
       Points3DToSpline2D(ctrl_pts1, distance);
   for (size_t i = 0; i < pts1.size(); i++)
@@ -250,8 +250,8 @@ bool LayerLineProfile::Solve(double profileSpacing, double referenceSize,
 
   LineProf LP(points2d, segment0, segment1, segmentL, segmentR);
   // Next we solve the Laplace on the domain
-  int paddingL = 10;
-  int paddingR = 10;
+  int paddingL    = 10;
+  int paddingR    = 10;
   int convergence = 8;
   LP.solveLaplace(paddingL, paddingR, resolution, convergence);
 
@@ -262,8 +262,8 @@ bool LayerLineProfile::Solve(double profileSpacing, double referenceSize,
   m_activeLine->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
 
   m_dResolution = laplaceResolution;
-  m_dSpacing = profileSpacing;
-  m_dOffset = offset;
+  m_dSpacing    = profileSpacing;
+  m_dOffset     = offset;
 
   UpdateActors();
   return true;
@@ -285,9 +285,9 @@ void LayerLineProfile::MakeFlatTube(vtkPoints *points, vtkCellArray *lines,
   tube->SetNumberOfSides(6);
   tube->SetRadius(radius);
 
-  vtkSmartPointer<vtkPlane> plane = vtkSmartPointer<vtkPlane>::New();
-  double origin[3] = {0, 0, 0};
-  origin[m_nPlane] = m_dSliceLocation;
+  vtkSmartPointer<vtkPlane> plane     = vtkSmartPointer<vtkPlane>::New();
+  double                    origin[3] = {0, 0, 0};
+  origin[m_nPlane]                    = m_dSliceLocation;
   plane->SetOrigin(origin);
   plane->SetNormal(m_nPlane == 0 ? 1 : 0, m_nPlane == 1 ? 1 : 0,
                    m_nPlane == 2 ? 1 : 0);
@@ -326,9 +326,9 @@ void LayerLineProfile::MakeFlatTube(vtkPoints *points, vtkCellArray *lines,
 
 void LayerLineProfile::UpdateActiveLine() {
   if (m_nActiveLineId >= 0) {
-    vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
-    int nCount = 0;
+    vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+    vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
+    int                           nCount = 0;
     for (int i = m_nActiveLineId; i < m_nActiveLineId + 1; i++) {
       std::vector<std::vector<double>> line = m_ptsProfile[i];
       lines->InsertNextCell(line.size());
@@ -365,8 +365,8 @@ void LayerLineProfile::UpdateActors() {
     return;
 
   // update boundary lines
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+  vtkSmartPointer<vtkPoints>    points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> lines  = vtkSmartPointer<vtkCellArray>::New();
   points->InsertNextPoint(pts1[0], pts1[1], pts1[2]);
   points->InsertNextPoint(pts2[0], pts2[1], pts2[2]);
   points->InsertNextPoint(pts1[pts1.size() - 3], pts1[pts1.size() - 2],
@@ -382,8 +382,8 @@ void LayerLineProfile::UpdateActors() {
   MakeFlatTube(points, lines, m_endLines, GetProperty()->GetRadius());
 
   // update profile lines
-  points = vtkSmartPointer<vtkPoints>::New();
-  lines = vtkSmartPointer<vtkCellArray>::New();
+  points     = vtkSmartPointer<vtkPoints>::New();
+  lines      = vtkSmartPointer<vtkCellArray>::New();
   int nCount = 0;
   for (size_t i = 0; i < m_ptsProfile.size(); i++) {
     std::vector<std::vector<double>> line = m_ptsProfile[i];
@@ -432,7 +432,7 @@ bool LayerLineProfile::Export(const QString &filename, LayerMRI *mri,
     std::vector<std::vector<double>> line3d =
         Points2DToSpline3D(m_ptsProfile[i], nSamples);
     std::vector<double> vals = mri->GetMeanSegmentValues(line3d);
-    double len = 0;
+    double              len  = 0;
     for (size_t j = 0; j < line3d.size() - 1; j++) {
       double pt0[3] = {line3d[j][0], line3d[j][1], line3d[j][2]};
       double pt1[3] = {line3d[j + 1][0], line3d[j + 1][1], line3d[j + 1][2]};
@@ -463,8 +463,8 @@ QList<double> LayerLineProfile::ComputeThicknessAlongLineProfile(
     const QList<LayerPointSet *> &splines, int nSample) {
   QList<double> thicknesses;
   //  double x0 = line2d[0][0], y0 = line2d[0][1];
-  double x, y, len = 0;
-  int n0 = 0, n;
+  double                           x, y, len = 0;
+  int                              n0 = 0, n;
   std::vector<std::vector<double>> line3d =
       Points2DToSpline3D(line2d_in, nSample);
   std::vector<std::vector<double>> line2d;
@@ -486,7 +486,7 @@ QList<double> LayerLineProfile::ComputeThicknessAlongLineProfile(
     line2d.push_back(point2d);
   }
   for (int i = 0; i < splines.size(); i++) {
-    std::vector<double> ctrl_pts0 = splines[i]->GetPoints();
+    std::vector<double>              ctrl_pts0 = splines[i]->GetPoints();
     std::vector<std::vector<double>> spline2d =
         Points3DToSpline2D(ctrl_pts0, m_dWorldVoxelSize[m_nPlane] / 3.0);
     if (MyUtils::FindIntersection(line2d, spline2d, &x, &y, &n)) {
@@ -502,11 +502,11 @@ QList<double> LayerLineProfile::ComputeThicknessAlongLineProfile(
       if (n + 1 < line2d.size()) {
         len = sqrt((line2d[n + 1][0] - x) * (line2d[n + 1][0] - x) +
                    (line2d[n + 1][1] - y) * (line2d[n + 1][1] - y));
-        n0 = n + 1;
+        n0  = n + 1;
       }
     } else {
       thicknesses << -1;
-      cerr << "Failed to find intersection point";
+      std::cerr << "Failed to find intersection point";
     }
   }
   n = line2d.size() - 1;
@@ -519,9 +519,9 @@ QList<double> LayerLineProfile::ComputeThicknessAlongLineProfile(
   return thicknesses;
 }
 
-bool LayerLineProfile::ExportThickness(const QString &filename,
+bool LayerLineProfile::ExportThickness(const QString &               filename,
                                        const QList<LayerPointSet *> &splines,
-                                       int nSample) {
+                                       int                           nSample) {
   QFile file(filename);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     return false;
@@ -567,14 +567,14 @@ bool LayerLineProfile::Save(const QString &filename) {
 }
 
 LayerLineProfile *LayerLineProfile::Load(const QString &filename,
-                                         LayerMRI *ref) {
+                                         LayerMRI *     ref) {
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     return NULL;
 
   QTextStream in(&file);
-  QString content = in.readAll();
-  QStringList slist = content.split("\n---\n", QString::SkipEmptyParts);
+  QString     content = in.readAll();
+  QStringList slist   = content.split("\n---\n", QString::SkipEmptyParts);
   if (slist.size() < 3)
     return NULL;
 
@@ -617,8 +617,8 @@ LayerLineProfile *LayerLineProfile::Load(const QString &filename,
   int nSamples = sublist[1].toInt();
 
   LayerLineProfile *lp = new LayerLineProfile(nPlane, NULL, ptset0, ptset1);
-  lp->m_dResolution = dResolution;
-  lp->m_nSamples = nSamples;
+  lp->m_dResolution    = dResolution;
+  lp->m_nSamples       = nSamples;
 
   if (ar.size() > 3) {
     sublist = ar[3].split(" ", QString::SkipEmptyParts);

@@ -1,16 +1,11 @@
 /**
- * @file  RenderView3D.h
  * @brief 3D view
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2017/02/08 21:01:00 $
- *    $Revision: 1.51 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,9 +20,9 @@
 #define RENDERVIEW3D_H
 
 #include "RenderView.h"
-#include <vtkSmartPointer.h>
-#include <QVariantMap>
 #include <QThread>
+#include <QVariantMap>
+#include <vtkSmartPointer.h>
 
 class vtkActor;
 class vtkProp;
@@ -166,37 +161,37 @@ protected:
   vtkProp *PickProp(int posX, int posY, double *pos_out = NULL);
 
 private:
-  int m_nPickCoord[2];
-  int m_nCursorCoord[2];
+  int  m_nPickCoord[2];
+  int  m_nCursorCoord[2];
   bool m_bToUpdateRASPosition;
   bool m_bToUpdateCursorPosition;
   bool m_bToUpdateConnectivity;
   bool m_bSlicePickOnly;
 
-  Cursor3D *m_cursor3D;
-  Cursor3D *m_cursorInflatedSurf;
-  bool m_bSliceVisibility[3];
-  vtkSmartPointer<vtkActor> m_actorSliceFrames[3];
-  vtkSmartPointer<vtkActor> m_actorSliceBoundingBox[3];
-  vtkSmartPointer<vtkCubeSource> m_cubeSliceBoundingBox[3];
+  Cursor3D *                             m_cursor3D;
+  Cursor3D *                             m_cursorInflatedSurf;
+  bool                                   m_bSliceVisibility[3];
+  vtkSmartPointer<vtkActor>              m_actorSliceFrames[3];
+  vtkSmartPointer<vtkActor>              m_actorSliceBoundingBox[3];
+  vtkSmartPointer<vtkCubeSource>         m_cubeSliceBoundingBox[3];
   vtkSmartPointer<vtkAnnotatedCubeActor> m_actorAnnotatedCube;
-  vtkSmartPointer<vtkCubeAxesActor> m_actorAxesActor;
+  vtkSmartPointer<vtkCubeAxesActor>      m_actorAxesActor;
 
   double m_dBounds[6];
   double m_dBoundingTolerance;
-  int m_nSliceHighlighted;
+  int    m_nSliceHighlighted;
 
   bool m_bShowSliceFrames;
   bool m_bShowAxes;
   bool m_bShowCursor;
   bool m_bFocalPointAtCursor;
 
-  double m_dIntersectPoint[3];
-  Interactor3DNavigate *m_interactorNavigate;
-  Interactor3DMeasure *m_interactorMeasure;
+  double                  m_dIntersectPoint[3];
+  Interactor3DNavigate *  m_interactorNavigate;
+  Interactor3DMeasure *   m_interactorMeasure;
   Interactor3DVolumeCrop *m_interactorVolumeCrop;
-  Interactor3DROIEdit *m_interactorROIEdit;
-  Interactor3DPathEdit *m_interactorPathEdit;
+  Interactor3DROIEdit *   m_interactorROIEdit;
+  Interactor3DPathEdit *  m_interactorPathEdit;
 
   vtkSmartPointer<vtkInteractorStyleMyTrackballCamera> m_interactorStyle;
 };

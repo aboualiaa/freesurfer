@@ -6,12 +6,8 @@ function r = swapview(varargin)
 % swapview.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:07 $
-%    $Revision: 1.12 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,7 +18,7 @@ function r = swapview(varargin)
 % Reporting: freesurfer@nmr.mgh.harvard.edu
 %
 
-version = '$Id: swapview.m,v 1.12 2011/03/02 00:04:07 nicks Exp $';
+version = 'swapview.m @FS_VERSION@';
 r = 1;
 
 %% Print usage if there are no arguments %%

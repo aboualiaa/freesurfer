@@ -11,12 +11,8 @@
 #  5. Apply KJW prior to kmeans?
 #
 # Original Author: Doug Greve
-# CVS Revision Info:
-#    $Author: zkaufman $
-#    $Date: 2015/12/10 22:51:29 $
-#    $Revision: 1.4 $
 #
-# Copyright (C) 2002-2007,
+# Copyright © 2021
 # The General Hospital Corporation (Boston, MA). 
 # All rights reserved.
 #
@@ -30,7 +26,7 @@
 #
 
 
-set VERSION = '$Id: fsf-kmracf,v 1.4 2015/12/10 22:51:29 zkaufman Exp $'
+set VERSION = 'fsf-kmracf @FS_VERSION@';
 set inputargs = ($argv);
 set racfstem = ();
 set xmatfile = ();

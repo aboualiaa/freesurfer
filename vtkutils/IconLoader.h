@@ -1,5 +1,4 @@
 /**
- * @file  IconLoader.h
  * @brief Loads TIF and GIF icons and sets KW Menus and Pushbuttons
  *
  * Allows you to load icons from a text file list or at run time from
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Kevin Teich
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:56 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -36,8 +31,8 @@
 #ifndef IconLoader_h
 #define IconLoader_h
 
-#include <string>
 #include <map>
+#include <string>
 class vtkKWApplication;
 class vtkKWCheckButton;
 class vtkKWMenu;
@@ -95,10 +90,10 @@ public:
 protected:
   static vtkKWApplication *mApp;
 
-  static std::map<std::string, bool> mabTkIconLoaded;
+  static std::map<std::string, bool>            mabTkIconLoaded;
   static std::map<std::string, unsigned char *> maTIFFData;
-  static std::map<std::string, int> maWidth;
-  static std::map<std::string, int> maHeight;
+  static std::map<std::string, int>             maWidth;
+  static std::map<std::string, int>             maHeight;
 };
 
 #endif

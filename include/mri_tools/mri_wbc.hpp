@@ -19,9 +19,9 @@
 
 //#include "banned.h" // always include last, otherwise you'll break the stl :D
 
-namespace po = boost::program_options;
-using podesc = po::options_description;
-using povm = po::variables_map;
+namespace po   = boost::program_options;
+using podesc   = po::options_description;
+using povm     = po::variables_map;
 namespace pocl = boost::program_options::command_line_style;
 
 static auto const cl_style =
@@ -31,98 +31,98 @@ static auto const cl_style =
     pocl::allow_long_disguise;
 
 // TODO(aboualiaa): Find out function and rename accordingly
-constexpr float half = 0.5;
-constexpr float fifth = 0.2;
-constexpr int five = 5;
-constexpr int max_rows = 2000;
-constexpr float two = 2.0;
-constexpr float defaultRes = 3.5;
-constexpr float zeroPointNine = 0.9;
-constexpr float onePointOne = 1.1;
-constexpr int defaultDim = 32;
-constexpr int defaultnshorttarg = 10;
-constexpr int defaultnlongtarg = 20;
-constexpr int defaultnshorttarg1 = 15;
-constexpr int defaultnlongtarg1 = 25;
-constexpr int defaultdistthresh = 10;
-constexpr int expectedErrs = 9;
-constexpr float tenToEighth = 1e8;
-constexpr float eightPointZero = 8.0;
+constexpr float half               = 0.5;
+constexpr float fifth              = 0.2;
+constexpr int   five               = 5;
+constexpr int   max_rows           = 2000;
+constexpr float two                = 2.0;
+constexpr float defaultRes         = 3.5;
+constexpr float zeroPointNine      = 0.9;
+constexpr float onePointOne        = 1.1;
+constexpr int   defaultDim         = 32;
+constexpr int   defaultnshorttarg  = 10;
+constexpr int   defaultnlongtarg   = 20;
+constexpr int   defaultnshorttarg1 = 15;
+constexpr int   defaultnlongtarg1  = 25;
+constexpr int   defaultdistthresh  = 10;
+constexpr int   expectedErrs       = 9;
+constexpr float tenToEighth        = 1e8;
+constexpr float eightPointZero     = 8.0;
 
 namespace wbc {
 
 // FIXME: not packed
 struct WBCSYNTH {
-  double distthresh;
-  float volres;
+  double              distthresh;
+  float               volres;
   std::vector<double> wf;
-  int nframes;
-  int voldim;
-  int nshortvol;
-  int nlongvol;
-  int v0;
-  int c0;
-  int r0;
-  int s0;
-  int c2;
-  std::array<int, 2> nshorttarg;
-  std::array<int, 2> nlongtarg;
-  std::array<int, 2> nshort;
-  std::array<int, 2> nlong;
-  int ForceFail;
+  int                 nframes;
+  int                 voldim;
+  int                 nshortvol;
+  int                 nlongvol;
+  int                 v0;
+  int                 c0;
+  int                 r0;
+  int                 s0;
+  int                 c2;
+  std::array<int, 2>  nshorttarg;
+  std::array<int, 2>  nlongtarg;
+  std::array<int, 2>  nshort;
+  std::array<int, 2>  nlong;
+  int                 ForceFail;
 };
 
 // FIXME: not packed
 struct WBC {
-  MRI *frh;                    // 8
-  MRI *fvol;                   // 8
-  MRI *flh;                    // 8
-  MRI *volmask;                // 8
-  MRI *lhmask;                 // 8
-  MRI *rhmask;                 // 8
-  MRI *lhvtxvol;               // 8
-  MRI *rhvtxvol;               // 8
-  MRI *volcon;                 // 8
-  MRI *lhcon;                  // 8
-  MRI *rhcon;                  // 8
-  MRI *volconS;                // 8
-  MRI *lhconS;                 // 8
-  MRI *rhconS;                 // 8
-  MRI *volconL;                // 8
-  MRI *lhconL;                 // 8
-  MRI *rhconL;                 // 8
-  MRI *volrhomean;             // 8
-  MRI *lhrhomean;              // 8
-  MRI *rhrhomean;              // 8
-  MRI *coordtype;              // 8
-  MRI *vertexno;               // 8
-  MRI *xyz;                    // 8
-  MRI *xyz2;                   // 8
-  MRI *vvol;                   // 8
-  MRI *f;                      // 8
-  MRI *fnorm;                  // 8
-  MRI *rhomean;                // 8
-  MRI *con;                    // 8
-  MRI *conS;                   // 8
-  MRI *conL;                   // 8
-  LABEL *lhlabel;              // 8
-  LABEL *rhlabel;              // 8
-  MRIS *lh;                    // 8
-  MRIS *rh2;                   // 8
-  MRIS *rh;                    // 8
-  MRIS *lh2;                   // 8
-  MATRIX *M;                   // 8
-  WBCSYNTH wbcsynth;           // how many bytes?
-  double distthresh;           // 8
-  int nvolmask;                // 4
-  int nlhmask;                 // 4
-  int nrhmask;                 // 4
-  int ntot;                    // 4
-  int nframes;                 // 4
-  bool DoDist;                 // 1
-  bool DoMat;                  // 1
-  bool DoTest;                 // 1
-  std::vector<double> rholist; // 24
+  MRI *               frh;        // 8
+  MRI *               fvol;       // 8
+  MRI *               flh;        // 8
+  MRI *               volmask;    // 8
+  MRI *               lhmask;     // 8
+  MRI *               rhmask;     // 8
+  MRI *               lhvtxvol;   // 8
+  MRI *               rhvtxvol;   // 8
+  MRI *               volcon;     // 8
+  MRI *               lhcon;      // 8
+  MRI *               rhcon;      // 8
+  MRI *               volconS;    // 8
+  MRI *               lhconS;     // 8
+  MRI *               rhconS;     // 8
+  MRI *               volconL;    // 8
+  MRI *               lhconL;     // 8
+  MRI *               rhconL;     // 8
+  MRI *               volrhomean; // 8
+  MRI *               lhrhomean;  // 8
+  MRI *               rhrhomean;  // 8
+  MRI *               coordtype;  // 8
+  MRI *               vertexno;   // 8
+  MRI *               xyz;        // 8
+  MRI *               xyz2;       // 8
+  MRI *               vvol;       // 8
+  MRI *               f;          // 8
+  MRI *               fnorm;      // 8
+  MRI *               rhomean;    // 8
+  MRI *               con;        // 8
+  MRI *               conS;       // 8
+  MRI *               conL;       // 8
+  LABEL *             lhlabel;    // 8
+  LABEL *             rhlabel;    // 8
+  MRIS *              lh;         // 8
+  MRIS *              rh2;        // 8
+  MRIS *              rh;         // 8
+  MRIS *              lh2;        // 8
+  MATRIX *            M;          // 8
+  WBCSYNTH            wbcsynth;   // how many bytes?
+  double              distthresh; // 8
+  int                 nvolmask;   // 4
+  int                 nlhmask;    // 4
+  int                 nrhmask;    // 4
+  int                 ntot;       // 4
+  int                 nframes;    // 4
+  bool                DoDist;     // 1
+  bool                DoMat;      // 1
+  bool                DoTest;     // 1
+  std::vector<double> rholist;    // 24
 };
 
 // FIXME: not packed
@@ -131,41 +131,41 @@ struct CMDARGS {
 
 public:
   gsl::multi_span<char *> raw;
-  std::string fvol;
-  std::string volmask;
-  std::string flh;
-  std::string lhsurface;
-  std::string lhsurface2;
-  std::string lhlabel;
-  std::string lhmask;
-  std::string frh;
-  std::string rhsurface;
-  std::string rhsurface2;
-  std::string rhlabel;
-  std::string rhmask;
-  std::string outdir;
-  std::string volcon;
-  std::string lhcon;
-  std::string rhcon;
-  std::string volconS;
-  std::string lhconS;
-  std::string rhconS;
-  std::string volconL;
-  std::string lhconL;
-  std::string rhconL;
-  std::string volrhomean;
-  std::string lhrhomean;
-  std::string rhrhomean;
-  std::string matfile; // read: matrix file
-  std::vector<double> rholist;
-  double distthresh;
-  int nthreads;
-  bool DoMat; // do matrix??
-  bool ForceFail;
-  bool SaveTest;
-  bool DoTest;
-  bool debug = false;
-  bool DoDist;
+  std::string             fvol;
+  std::string             volmask;
+  std::string             flh;
+  std::string             lhsurface;
+  std::string             lhsurface2;
+  std::string             lhlabel;
+  std::string             lhmask;
+  std::string             frh;
+  std::string             rhsurface;
+  std::string             rhsurface2;
+  std::string             rhlabel;
+  std::string             rhmask;
+  std::string             outdir;
+  std::string             volcon;
+  std::string             lhcon;
+  std::string             rhcon;
+  std::string             volconS;
+  std::string             lhconS;
+  std::string             rhconS;
+  std::string             volconL;
+  std::string             lhconL;
+  std::string             rhconL;
+  std::string             volrhomean;
+  std::string             lhrhomean;
+  std::string             rhrhomean;
+  std::string             matfile; // read: matrix file
+  std::vector<double>     rholist;
+  double                  distthresh;
+  int                     nthreads;
+  bool                    DoMat; // do matrix??
+  bool                    ForceFail;
+  bool                    SaveTest;
+  bool                    DoTest;
+  bool                    debug = false;
+  bool                    DoDist;
 };
 
 struct ENV {
@@ -260,7 +260,7 @@ inline static void print_help(podesc const &desc, ENV *env) {
 /// \param cmdargs
 /// \param vm
 /// \return
-inline static bool shouldSave(CMDARGS const *cmdargs,
+inline static bool shouldSave(CMDARGS const *          cmdargs,
                               po::variables_map const &vm) {
   return cmdargs->SaveTest || (vm.count("fvol") != 0U) ||
          (vm.count("lh") != 0U) || (vm.count("rh") != 0U);

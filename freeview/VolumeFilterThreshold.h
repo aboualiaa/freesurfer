@@ -1,16 +1,11 @@
 /**
- * @file  VolumeFilterThreshold.h
  * @brief Base VolumeFilterThreshold class.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/06/03 20:56:14 $
- *    $Revision: 1.1 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -53,8 +48,8 @@ public:
 protected:
   bool Execute();
 
-  bool m_bReplaceIn;
-  bool m_bReplaceOut;
+  bool   m_bReplaceIn;
+  bool   m_bReplaceOut;
   double m_dThreshold[2];
   double m_dInValue;
   double m_dOutValue;

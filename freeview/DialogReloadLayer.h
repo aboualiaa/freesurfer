@@ -17,7 +17,7 @@ public:
   explicit DialogReloadLayer(QWidget *parent = 0);
   ~DialogReloadLayer();
 
-  int Execute(const QList<Layer *> &layers);
+  int  Execute(const QList<Layer *> &layers);
   bool GetCloseLayerFirst();
 
 private:

@@ -1,17 +1,9 @@
-/**
- * @file  fs_cost_function.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
  *    $Author$
  *    $Date$
  *    $Revision$
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -41,7 +33,7 @@ fs_cost_function::fs_cost_function(float (*function)(float[]),
 }
 
 fs_cost_function::~fs_cost_function() {
-  mFunction = nullptr;
+  mFunction         = nullptr;
   mFunctionGradient = nullptr;
 }
 
@@ -69,7 +61,7 @@ double fs_cost_function::f(const vnl_vector<double> &x) {
 }
 
 void fs_cost_function::gradf(vnl_vector<double> const &x,
-                             vnl_vector<double> &gradient) {
+                             vnl_vector<double> &      gradient) {
   int numberOfParameters = static_cast<int>(x.size());
 
   float p[numberOfParameters + 1];
@@ -84,7 +76,7 @@ void fs_cost_function::gradf(vnl_vector<double> const &x,
   }
 }
 
-void fs_cost_function::copyFromVNLToFloat(float *floatVector,
+void fs_cost_function::copyFromVNLToFloat(float *                  floatVector,
                                           const vnl_vector<double> vnlVector,
                                           int numberOfParameters) {
   for (int i = 0; i < numberOfParameters; i++) {

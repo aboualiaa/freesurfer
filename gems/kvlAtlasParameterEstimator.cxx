@@ -1,14 +1,15 @@
 #include "kvlAtlasParameterEstimator.h"
 
+#include "itkCommand.h"
 #include "itkImageRegionConstIterator.h"
-#include "kvlAtlasMeshLabelImageStatisticsCollector.h"
-#include "kvlAtlasMeshToLabelImageCostAndGradientCalculator.h"
+#include "itkPlatformMultiThreader.h"
 #include "kvlAtlasMeshDeformationConjugateGradientOptimizer.h"
 #include "kvlAtlasMeshDeformationFixedStepGradientDescentOptimizer.h"
 #include "kvlAtlasMeshDeformationGradientDescentOptimizer.h"
 #include "kvlAtlasMeshDeformationLBFGSOptimizer.h"
+#include "kvlAtlasMeshLabelImageStatisticsCollector.h"
 #include "kvlAtlasMeshSmoother.h"
-#include "itkCommand.h"
+#include "kvlAtlasMeshToLabelImageCostAndGradientCalculator.h"
 
 namespace kvl {
 
@@ -17,22 +18,22 @@ namespace kvl {
 //
 AtlasParameterEstimator ::AtlasParameterEstimator() {
 
-  m_MeshCollection = nullptr;
-  m_CompressionLookupTable = nullptr;
-  m_IterationNumber = 0;
-  m_MaximumNumberOfIterations = 300;
-  m_LabelImageNumber = 0;
-  m_NumberOfLabelImages = 0;
-  m_AlphasEstimationIterationNumber = 0;
+  m_MeshCollection                            = 0;
+  m_CompressionLookupTable                    = 0;
+  m_IterationNumber                           = 0;
+  m_MaximumNumberOfIterations                 = 300;
+  m_LabelImageNumber                          = 0;
+  m_NumberOfLabelImages                       = 0;
+  m_AlphasEstimationIterationNumber           = 0;
   m_AlphasEstimationMaximumNumberOfIterations = 20;
-  m_PositionEstimationIterationNumber = 0;
+  m_PositionEstimationIterationNumber         = 0;
   m_PositionEstimationMaximumNumberOfIterations =
       0; // To be retrieved from optimizer
   m_PositionEstimationIterationEventResolution = 10;
-  m_CurrentMinLogLikelihoodTimesPrior = 0.0f;
-  m_AlphaEstimationStopCriterion = 0.0005f;
-  m_AlphasSmoothingFactor = 0.0f;
-  m_StopCriterion = 0.001f;
+  m_CurrentMinLogLikelihoodTimesPrior          = 0.0f;
+  m_AlphaEstimationStopCriterion               = 0.0005f;
+  m_AlphasSmoothingFactor                      = 0.0f;
+  m_StopCriterion                              = 0.001f;
 
   m_PositionOptimizer = LBFGS;
 
@@ -48,7 +49,7 @@ AtlasParameterEstimator ::~AtlasParameterEstimator() {}
 //
 //
 void AtlasParameterEstimator ::PrintSelf(std::ostream &os,
-                                         itk::Indent indent) const {}
+                                         itk::Indent   indent) const {}
 
 //
 //
@@ -57,7 +58,7 @@ const AtlasParameterEstimator::LabelImageType *
 AtlasParameterEstimator ::GetLabelImage(unsigned int labelImageNumber) const {
   // Sanity check
   if (labelImageNumber >= m_LabelImages.size()) {
-    return nullptr;
+    return 0;
   }
 
   return m_LabelImages[labelImageNumber];
@@ -68,14 +69,14 @@ AtlasParameterEstimator ::GetLabelImage(unsigned int labelImageNumber) const {
 //
 void AtlasParameterEstimator ::SetLabelImages(
     const std::vector<LabelImageType::ConstPointer> &labelImages,
-    const CompressionLookupTable *lookupTable) {
+    const CompressionLookupTable *                   lookupTable) {
 
   m_CompressionLookupTable = lookupTable;
 
   if (labelImages.size() == 0)
     return;
 
-  m_LabelImages = labelImages;
+  m_LabelImages         = labelImages;
   m_NumberOfLabelImages = m_LabelImages.size();
 }
 
@@ -97,7 +98,7 @@ void AtlasParameterEstimator ::Estimate(bool verbose) {
   // Main loop
   double previousMinLogLikelihoodTimesPrior = 1e15;
   m_CurrentMinLogLikelihoodTimesPrior = previousMinLogLikelihoodTimesPrior / 2;
-  m_IterationNumber = 0;
+  m_IterationNumber                   = 0;
   this->InvokeEvent(itk::StartEvent());
   while ((((previousMinLogLikelihoodTimesPrior -
             m_CurrentMinLogLikelihoodTimesPrior) /
@@ -109,9 +110,9 @@ void AtlasParameterEstimator ::Estimate(bool verbose) {
     // Smooth results
     this->SmoothAlphas();
 
-    // Register. This will also provide us with the minLogLikelihoodTimesPrior
-    // of the current parameter set
-    previousMinLogLikelihoodTimesPrior = m_CurrentMinLogLikelihoodTimesPrior;
+    // Register. This will also provide us with the minLogLikelihoodTimesPrior of
+    // the current parameter set
+    previousMinLogLikelihoodTimesPrior  = m_CurrentMinLogLikelihoodTimesPrior;
     m_CurrentMinLogLikelihoodTimesPrior = this->EstimatePositions();
 
     // Prepare for the next iteration
@@ -141,8 +142,8 @@ void AtlasParameterEstimator ::EstimateAlphas() {
   }
 
   // Allocate a container to sum the statistics over all label images
-  using StatisticsContainerType =
-      AtlasMeshLabelImageStatisticsCollector::StatisticsContainerType;
+  typedef AtlasMeshLabelImageStatisticsCollector::StatisticsContainerType
+                                   StatisticsContainerType;
   StatisticsContainerType::Pointer pooledStatistics =
       StatisticsContainerType::New();
   AtlasMesh::PointDataContainer::ConstIterator pointParamIt =
@@ -153,8 +154,8 @@ void AtlasParameterEstimator ::EstimateAlphas() {
     ++pointParamIt;
   }
 
-  double previousCost = 1e15;
-  double currentCost = previousCost / 2;
+  double previousCost               = 1e15;
+  double currentCost                = previousCost / 2;
   m_AlphasEstimationIterationNumber = 0;
   this->InvokeEvent(AlphasEstimationStartEvent());
   while ((((previousCost - currentCost) / fabsf(currentCost)) >
@@ -174,9 +175,8 @@ void AtlasParameterEstimator ::EstimateAlphas() {
       pooledIt++;
     }
 
-    // Loop over all label images, retrieve their statistics, and add those to
-    // the pooled statistics
-    currentCost = 0;
+    // Loop over all label images, retrieve their statistics, and add those to the pooled statistics
+    currentCost                    = 0;
     int numberOfLabelImagesToVisit = m_NumberOfLabelImages;
     AtlasMeshLabelImageStatisticsCollector::Pointer statisticsCollector =
         AtlasMeshLabelImageStatisticsCollector::New();
@@ -322,10 +322,9 @@ AtlasParameterEstimator ::EstimatePosition(unsigned int labelImageNumber) {
   optimizer->SetMesh(
       const_cast<AtlasMesh *>(m_MeshCollection->GetMesh(labelImageNumber)));
 
-  // Also make sure iteration events generated by the optimizer are forwarded to
-  // our own users
-  using MemberCommandType = itk::MemberCommand<Self>;
-  MemberCommandType::Pointer command = MemberCommandType::New();
+  // Also make sure iteration events generated by the optimizer are forwarded to our own users
+  typedef itk::MemberCommand<Self> MemberCommandType;
+  MemberCommandType::Pointer       command = MemberCommandType::New();
   command->SetCallbackFunction(this,
                                &AtlasParameterEstimator::HandleOptimizerEvent);
   optimizer->AddObserver(DeformationStartEvent(), command);
@@ -339,8 +338,7 @@ AtlasParameterEstimator ::EstimatePosition(unsigned int labelImageNumber) {
   // Start the optimization
   optimizer->Go();
 
-  // We've given the mesh a new position container, but the meshCollection
-  // doesn't know about this!
+  // We've given the mesh a new position container, but the meshCollection doesn't know about this!
   m_MeshCollection->GetPositions()[labelImageNumber] =
       const_cast<AtlasMesh::PointsContainer *>(
           optimizer->GetMesh()->GetPoints());

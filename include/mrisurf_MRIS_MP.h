@@ -1,7 +1,7 @@
 #pragma once
 
-#include "mrisurf_aaa.h"
 #include "mrisurf_MRIS_MPPropertiesInVectors.h"
+#include "mrisurf_aaa.h"
 
 // Just the information needed to compute the metric properties
 // Some read-only information is obtained from the underlyingMRIS
@@ -51,17 +51,18 @@
 #define MRIS_MP__LIST_V_IN                                                     \
   ELT(const, char, ripflag)                                                    \
   SEP ELTX(const, int, VSize) SEP /* following needed for SSE */               \
-  ELT(const, float, whitex) SEP                                                \
-  ELT(const, float, whitey) SEP                                                \
-  ELT(const, float, whitez) SEP                                                \
-  ELT(const, float, pialx) SEP                                                 \
-  ELT(const, float, pialy) SEP                                                 \
-  ELT(const, float, pialz) SEP                                                 \
-  ELT(const, float, wnx) SEP                                                   \
-  ELT(const, float, wny) SEP                                                   \
-  ELT(const, float, wnz) SEP                                                   \
-  ELTX(const, float *,                                                         \
-       dist_orig) /* note: these keep pointing to the original ones in the     \
+      ELT(const, float, whitex) SEP                                            \
+      ELT(const, float, whitey) SEP                                            \
+      ELT(const, float, whitez) SEP                                            \
+      ELT(const, float, pialx) SEP                                             \
+      ELT(const, float, pialy) SEP                                             \
+      ELT(const, float, pialz) SEP                                             \
+      ELT(const, float, wnx) SEP                                               \
+      ELT(const, float, wny) SEP                                               \
+      ELT(const, float, wnz) SEP                                               \
+      ELTX(                                                                    \
+          const, float *,                                                      \
+          dist_orig) /* note: these keep pointing to the original ones in the     \
                      MRIS - change if code wants to change these values */
 
 // In out
@@ -115,7 +116,7 @@ void MRISMP_copy(MRIS_MP *dst, MRIS_MP *src, bool only_inputs,
 
 void MRISMP_load(
     MRIS_MP *mp,                 // output
-    MRIS *mris,                  // input
+    MRIS *   mris,               // input
     bool loadOutputs = false,    // used when doing stuff based on the outputs -
                                  // see MRIScomputeSSE_asThoughGradientApplied
     float *dx_or_NULL = nullptr, // loaded if not nullptr. The dx,dy,dz for

@@ -1,5 +1,5 @@
-#include <map>
 #include <iomanip>
+#include <map>
 
 #include "mri2.h"
 
@@ -11,21 +11,21 @@ static void printHelp(int exit_val) {
 
 // structure to represent the centroid of each label
 struct Centroid {
-  int id;
+  int         id;
   std::string labelname;
-  float mass, x, y, z;
+  float       mass, x, y, z;
 };
 
 // command line inpute parser
 class InputParser {
 public:
-  std::string segfile, weightsfile, ltafile, outfile, ctabfile;
-  bool include_zero;
-  int precision;
+  std::string segfile, weightsfile, ltafile, outfile, pointset, ctabfile;
+  bool        include_zero;
+  int         precision;
 
   InputParser(int &argc, char **argv) {
-    include_zero = false;
-    int i = 1;
+    include_zero  = false;
+    int         i = 1;
     std::string opt;
     while (i < argc) {
       std::string opt(argv[i]);
@@ -52,6 +52,17 @@ public:
           exit(1);
         }
         outfile = argv[i];
+      }
+      // -----------------------
+      //           --p
+      // -----------------------
+      else if (opt == "--p") {
+        i++;
+        if ((i >= argc) || (ISOPTION(*argv[i]))) {
+          std::cerr << "ERROR: must specify pointset filename with '--p'\n";
+          exit(1);
+        }
+        pointset = argv[i];
       }
       // -----------------------
       //       --weights
@@ -178,19 +189,19 @@ int main(int argc, char **argv) {
   // -------------------- compute centroids --------------------
 
   std::map<int, Centroid> centroids;
-  int numids, label_chars, id_chars, valid_id;
-  char char_name[500];
-  double x, y, z, wx, wy, wz, weight;
-  float fx, fy, fz;
+  int                     numids, label_chars, id_chars, valid_id;
+  char                    char_name[500];
+  double                  x, y, z, wx, wy, wz, weight;
+  float                   fx, fy, fz;
   int max_id_chars = 2, max_label_chars = 10; // used for table formatting
 
-  int *idlist = MRIsegIdList(seg, &numids, 0);
+  int *            idlist = MRIsegIdList(seg, &numids, 0);
   std::vector<int> ids(idlist, idlist + numids);
 
   for (int i = 0; i < numids; i++) {
     // create centroid for each label
     Centroid centroid = Centroid();
-    centroid.id = ids[i];
+    centroid.id       = ids[i];
 
     if ((!input.include_zero) && (centroid.id == 0))
       continue;
@@ -220,7 +231,7 @@ int main(int argc, char **argv) {
     if (id_chars > max_id_chars)
       max_id_chars = id_chars;
 
-    centroid.mass = 0;
+    centroid.mass          = 0;
     centroids[centroid.id] = centroid;
   }
 
@@ -284,7 +295,7 @@ int main(int argc, char **argv) {
   std::cout << "writing results to " << input.outfile << std::endl;
 
   int precision = 4;
-  int cwidth = precision + 8;
+  int cwidth    = precision + 8;
 
   // table header
 
@@ -322,6 +333,19 @@ int main(int argc, char **argv) {
   }
 
   tablefile.close();
+
+  // pointset
+  if (!input.pointset.empty()) {
+    FILE *fp = fopen(input.pointset.c_str(), "w");
+    for (it = centroids.begin(); it != centroids.end(); it++) {
+      Centroid c = it->second;
+      fprintf(fp, "%7.4f %7.4f %7.4f\n", c.x, c.y, c.z);
+    }
+    fprintf(fp, "info\n");
+    fprintf(fp, "numpoints %d\n", (int)centroids.size());
+    fprintf(fp, "UseRealRAS 1\n");
+    fclose(fp);
+  }
 
   std::cout << "mri_segcentroids done" << std::endl;
 

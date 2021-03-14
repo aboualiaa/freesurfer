@@ -120,8 +120,8 @@
 #define NAMLEN(dp) ((int)((dp)->d_namlen))
 
 #elif defined(HAVE_SYS_DIR_H)
-#include <sys/types.h>
 #include <sys/dir.h>
+#include <sys/types.h>
 #ifndef dirent
 #define dirent direct
 #endif
@@ -223,9 +223,9 @@ typedef struct dirent {
  * essential for the operation of rewinndir() function.
  */
 typedef struct DIR {
-  char *dirname;     /* directory being scanned */
-  dirent current;    /* current entry */
-  int dirent_filled; /* is current un-processed? */
+  char * dirname;       /* directory being scanned */
+  dirent current;       /* current entry */
+  int    dirent_filled; /* is current un-processed? */
 
   /*** Operating system specific part ***/
 #if defined(DIRENT_WIN32_INTERFACE)
@@ -239,10 +239,10 @@ extern "C" {
 #endif
 
 /* prototypes of public dirent functions */
-static DIR *opendir(const char *dirname);
+static DIR *          opendir(const char *dirname);
 static struct dirent *readdir(DIR *dirp);
-static int closedir(DIR *dirp);
-static void rewinddir(DIR *dirp);
+static int            closedir(DIR *dirp);
+static void           rewinddir(DIR *dirp);
 
 /*
  * Implement dirent interface as static functions so that the user does not
@@ -250,29 +250,29 @@ static void rewinddir(DIR *dirp);
  * it is sufficient to include this very header from source modules using
  * dirent functions and the functions will be pulled in automatically.
  */
+#include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <errno.h>
 
 /* use ffblk instead of _find_t if requested */
 #if defined(DIRENT_USE_FFBLK)
-#define _A_ARCH (FA_ARCH)
-#define _A_HIDDEN (FA_HIDDEN)
-#define _A_NORMAL (0)
-#define _A_RDONLY (FA_RDONLY)
-#define _A_SUBDIR (FA_DIREC)
-#define _A_SYSTEM (FA_SYSTEM)
-#define _A_VOLID (FA_LABEL)
-#define _dos_findnext(dest) findnext(dest)
+#define _A_ARCH                           (FA_ARCH)
+#define _A_HIDDEN                         (FA_HIDDEN)
+#define _A_NORMAL                         (0)
+#define _A_RDONLY                         (FA_RDONLY)
+#define _A_SUBDIR                         (FA_DIREC)
+#define _A_SYSTEM                         (FA_SYSTEM)
+#define _A_VOLID                          (FA_LABEL)
+#define _dos_findnext(dest)               findnext(dest)
 #define _dos_findfirst(name, flags, dest) findfirst(name, dest, flags)
 #endif
 
 /* internal prototypes */
-static int _initdir(DIR *p);
+static int         _initdir(DIR *p);
 static const char *_getdirname(const struct dirent *dp);
-static void _setdirname(struct DIR *dirp);
+static void        _setdirname(struct DIR *dirp);
 
 /*
  * Open directory stream DIRNAME for read and return pointer to the
@@ -388,7 +388,7 @@ static struct dirent *readdir(DIR *dirp) {
       /* Last file has been processed or an error occured */
       FindClose(dirp->search_handle);
       dirp->search_handle = INVALID_HANDLE_VALUE;
-      errno = ENOENT;
+      errno               = ENOENT;
       return NULL;
     }
 
@@ -437,7 +437,7 @@ static int closedir(DIR *dirp) {
     if (FindClose(dirp->search_handle) == FALSE) {
       /* Unknown error */
       retcode = -1;
-      errno = EBADF;
+      errno   = EBADF;
     }
   }
 #endif

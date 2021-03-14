@@ -1,16 +1,11 @@
 /**
- * @file  mri_add_xform_to_header.c
  * @brief Just adds specified xform to the volume header
  *
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:13 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,27 +17,27 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
-#include "version.h"
+#include "error.h"
 #include "fio.h"
+#include "mri.h"
+#include "version.h"
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
+static int  get_option(int argc, char *argv[]);
 static void print_usage();
 static void usage_exit();
 
 const char *Progname;
 
-int verbose = 0;
+int verbose      = 0;
 int CopyNameOnly = 0;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs;
-  MRI *mri = nullptr;
-  char *xform_fname = nullptr, *in_fname = nullptr, *out_fname = nullptr;
+  int    ac, nargs;
+  MRI *  mri         = nullptr;
+  char * xform_fname = nullptr, *in_fname = nullptr, *out_fname = nullptr;
 
   nargs = handleVersionOption(argc, argv, "mri_add_xform_to_header");
 
@@ -144,7 +139,7 @@ int main(int argc, char *argv[]) {
   Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

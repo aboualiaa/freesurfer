@@ -27,11 +27,11 @@ public:
   // describing the element that was mouseovered.
   // BTX
   struct SelectedElementAndPoint {
-    char const *msLabel;         // Label of the element
-    int mnPointInElement;        // Index of the data point in the element
-    double mElementX, mElementY; // The graph x,y of the element
-    int mWindowX, mWindowY;      // The window x,y of the event
-    double mDistanceToElement;   // Distance from mouse to event in window
+    char const *msLabel;              // Label of the element
+    int         mnPointInElement;     // Index of the data point in the element
+    double      mElementX, mElementY; // The graph x,y of the element
+    int         mWindowX, mWindowY;   // The window x,y of the event
+    double      mDistanceToElement;   // Distance from mouse to event in window
   };
   // ETX
 
@@ -39,24 +39,24 @@ public:
   // describing the element of which the menu is in the context.
   // BTX
   struct ContextualMenuElement {
-    vtkKWMenu *mMenu;      // The menu to populate
+    vtkKWMenu * mMenu;     // The menu to populate
     char const *msElement; // The element
   };
   // ETX
 
   // Description:
   // Plot background color
-  virtual void GetPlotBackgroundColor(double *r, double *g, double *b);
+  virtual void    GetPlotBackgroundColor(double *r, double *g, double *b);
   virtual double *GetPlotBackgroundColor();
-  virtual void SetPlotBackgroundColor(double r, double g, double b);
-  virtual void SetPlotBackgroundColor(double rgb[3]) {
+  virtual void    SetPlotBackgroundColor(double r, double g, double b);
+  virtual void    SetPlotBackgroundColor(double rgb[3]) {
     this->SetPlotBackgroundColor(rgb[0], rgb[1], rgb[2]);
   };
 
   // Description:
   // Relief
   virtual void SetRelief(int);
-  virtual int GetRelief();
+  virtual int  GetRelief();
   virtual void SetReliefToRaised();
   virtual void SetReliefToSunken();
   virtual void SetReliefToFlat();
@@ -67,7 +67,7 @@ public:
   // Description:
   // Border
   virtual void SetBorderWidth(int);
-  virtual int GetBorderWidth();
+  virtual int  GetBorderWidth();
 
   // Description:
   // Show or hide the legend.
@@ -139,14 +139,14 @@ protected:
 
   // Description:
   // Default element attributes
-  char *DefaultElementSymbol;
+  char * DefaultElementSymbol;
   double DefaultElementColor[3];
 
   // Description:
   // Information about the currently moused-over element. This is set
   // when an element is moused over.
-  double mMouseoverDistanceToElement;
-  bool mbCurrentlyOverElement;
+  double      mMouseoverDistanceToElement;
+  bool        mbCurrentlyOverElement;
   std::string msCurrentMouseoverElement; // only valid if
                                          // mbCurrentlyOverElement is true
 
@@ -155,17 +155,17 @@ protected:
   class GraphElement {
   public:
     GraphElement();
-    std::string msLabel;
+    std::string         msLabel;
     std::vector<double> mPoints; // x, y, x, y, etc
-    int mLineWidth;
-    std::string msSymbol;
-    double mRed, mGreen, mBlue;
+    int                 mLineWidth;
+    std::string         msSymbol;
+    double              mRed, mGreen, mBlue;
   };
 
   // Description:
   // Our elements.
   typedef std::vector<vtkKWBltGraph::GraphElement> GraphElementList;
-  GraphElementList mElements;
+  GraphElementList                                 mElements;
   // ETX
 };
 

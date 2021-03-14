@@ -1,12 +1,11 @@
 #pragma once
 /*
- * @file utilities dealing with the topology
  *
  */
 /*
  * surfaces Author: Bruce Fischl, extracted from mrisurf.c by Bevin Brett
  *
- * $ © copyright-2014,2018 The General Hospital Corporation (Boston, MA) "MGH"
+ * $ Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -33,5 +32,5 @@ MRIS *MRISprojectOntoEllipsoid(MRIS *mris_src, MRIS *mris_dst, float a, float b,
 
 // Ones that are supported by MRIS and MRIS_MP
 //
-MRIS *MRISprojectOntoSphere(MRIS *mris, double r);
+MRIS *   MRISprojectOntoSphere(MRIS *mris, double r);
 MRIS_MP *MRISprojectOntoSphere(MRIS_MP *mris, double r);

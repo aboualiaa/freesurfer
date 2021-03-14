@@ -1,7 +1,5 @@
 six
 nibabel
-numpy
+numpy==1.16.*
 scipy
-sklearn
-matplotlib
 pyyaml

@@ -1,19 +1,13 @@
 /**
- * @file  mri_hausdorff_dist.c
  * @brief Computes the modified (mean) Hausdorff distance
+ *    
  *
- *
- * Computes the modified (mean) Hausdorff distance in an arbitrary set of
- * volumes.
+ * Computes the modified (mean) Hausdorff distance in an arbitrary set of volumes.
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: lzollei $
- *    $Date: 2014/07/18 20:19:23 $
- *    $Revision: 1.14 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,43 +19,62 @@
  *
  */
 
+#include "analyze.h"
 #include "cma.h"
+#include "cmdargs.h"
+#include "const.h"
 #include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "gcamorph.h"
+#include "machine.h"
+#include "macros.h"
+#include "mghendian.h"
+#include "minc.h"
+#include "mri.h"
+#include "mri_identify.h"
+#include "utils.h"
 #include "version.h"
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>
 
-static int get_option(int argc, char *argv[]);
-static void print_version();
-static void print_usage();
-static void usage_exit();
-static void print_help();
+static int    get_option(int argc, char *argv[]);
+static void   print_version(void);
+static void   print_usage(void);
+static void   usage_exit(void);
+static void   print_help(void);
 static double compute_hdist(MRI **mri, int nvolumes, int index, double *hdists,
                             int which);
-static char vcid[] =
-    "$Id: mri_hausdorff_dist.c,v 1.14 2014/07/18 20:19:23 lzollei Exp $";
-static int fromFile = 0;
+static int    fromFile = 0;
 
 const char *Progname;
 
+static int use_vox = 0;
+
 #define MAX_VOLUMES 100
 
-static int binarize = 0;
-static float binarize_thresh = 0;
-static int target_label = 1;
-static double blur_sigma = 0;
+static int    binarize        = 0;
+static float  binarize_thresh = 0;
+static int    target_label    = 1;
+static double blur_sigma      = 0;
 
 #define MEAN_HDIST 0
-#define MAX_HDIST 1
+#define MAX_HDIST  1
 
 static int which = MEAN_HDIST;
 
 /***-------------------------------------------------------****/
 int main(int argc, char *argv[]) {
-  int nargs, nvolumes = 0, n, ac, filecount;
-  char *name = nullptr, fname[STRLEN], *out_fname, **av, *list_fname,
+  int   nargs, nvolumes = 0, n, ac, filecount;
+  char *name = NULL, fname[STRLEN], *out_fname, **av, *list_fname,
        in_fname[STRLEN];
-  MRI *mri[MAX_VOLUMES], *mri_tmp;
+  MRI *  mri[MAX_VOLUMES], *mri_tmp;
   double hdist, hdists[MAX_VOLUMES];
-  FILE *fp;
+  FILE * fp;
 
   nargs = handleVersionOption(argc, argv, "mri_hausdorff_dist");
   if (nargs && argc - nargs == 1)
@@ -70,7 +83,7 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
   if (argc == 0)
     usage_exit();
 
@@ -119,10 +132,24 @@ int main(int argc, char *argv[]) {
         fscanf(fp, "%s", in_fname);
         fprintf(stderr, "reading input volume %d from %s\n", n + 1, in_fname);
         mri_tmp = MRIread(in_fname);
-        if (mri_tmp == nullptr)
+        if (mri_tmp == NULL)
           ErrorExit(ERROR_BADPARM,
                     "%s: could not read %dth input volume from %s", Progname, n,
                     in_fname);
+        if (mri_tmp->depth == 1) {
+          MRI_REGION reg;
+          MRI *      mri_tmp2;
+          reg.x = reg.y = reg.z = 0;
+          reg.dx                = mri_tmp->width;
+          reg.dy                = mri_tmp->height;
+          reg.dz                = mri_tmp->depth;
+          mri_tmp2 = MRIextractRegionAndPad(mri_tmp, NULL, &reg, 1);
+          MRIfree(&mri_tmp);
+          mri_tmp = mri_tmp2;
+        }
+        if (use_vox)
+          mri_tmp->xsize = mri_tmp->ysize = mri_tmp->zsize = 1;
+
         if (mri_tmp->type != MRI_FLOAT) {
           MRI *m;
           m = MRIchangeType(mri_tmp, MRI_FLOAT, 0, 1, 1);
@@ -132,7 +159,7 @@ int main(int argc, char *argv[]) {
         if (blur_sigma > 0) {
           MRI *mri_kernel, *mri_smooth;
           mri_kernel = MRIgaussian1d(blur_sigma, 100);
-          mri_smooth = MRIconvolveGaussian(mri_tmp, nullptr, mri_kernel);
+          mri_smooth = MRIconvolveGaussian(mri_tmp, NULL, mri_kernel);
           MRIfree(&mri_kernel);
           MRIfree(&mri_tmp);
           mri_tmp = mri_smooth;
@@ -144,14 +171,14 @@ int main(int argc, char *argv[]) {
         if (binarize) {
           MRI *mri_tmp2;
           mri_tmp2 =
-              MRIbinarize(mri_tmp, nullptr, binarize_thresh, 0, target_label);
+              MRIbinarize(mri_tmp, NULL, binarize_thresh, 0, target_label);
           MRIfree(&mri_tmp);
           mri_tmp = mri_tmp2;
         }
-        mri[n] = MRIdistanceTransform(mri_tmp, nullptr, target_label,
+        mri[n] = MRIdistanceTransform(mri_tmp, NULL, target_label,
                                       mri_tmp->width + mri_tmp->height +
                                           mri_tmp->depth,
-                                      DTRANS_MODE_SIGNED, nullptr);
+                                      DTRANS_MODE_SIGNED, NULL);
         MRIfree(&mri_tmp);
         //    MRIwrite(mri[n], fname) ;
 #else
@@ -179,9 +206,23 @@ int main(int argc, char *argv[]) {
       name = argv[n + 1];
       fprintf(stderr, "reading input volume %d from %s\n", n + 1, name);
       mri_tmp = MRIread(name);
-      if (mri_tmp == nullptr)
+      if (mri_tmp == NULL)
         ErrorExit(ERROR_BADPARM, "%s: could not read %dth input volume from %s",
                   Progname, n, name);
+      if (mri_tmp->depth == 1) {
+        MRI_REGION reg;
+        MRI *      mri_tmp2;
+        reg.x = reg.y = reg.z = 0;
+        reg.dx                = mri_tmp->width;
+        reg.dy                = mri_tmp->height;
+        reg.dz                = mri_tmp->depth;
+        mri_tmp2              = MRIextractRegionAndPad(mri_tmp, NULL, &reg, 1);
+        MRIfree(&mri_tmp);
+        mri_tmp = mri_tmp2;
+      }
+
+      if (use_vox)
+        mri_tmp->xsize = mri_tmp->ysize = mri_tmp->zsize = 1;
       if (mri_tmp->type != MRI_FLOAT) {
         MRI *m;
         m = MRIchangeType(mri_tmp, MRI_FLOAT, 0, 1, 1);
@@ -191,7 +232,7 @@ int main(int argc, char *argv[]) {
       if (blur_sigma > 0) {
         MRI *mri_kernel, *mri_smooth;
         mri_kernel = MRIgaussian1d(blur_sigma, 100);
-        mri_smooth = MRIconvolveGaussian(mri_tmp, nullptr, mri_kernel);
+        mri_smooth = MRIconvolveGaussian(mri_tmp, NULL, mri_kernel);
         MRIfree(&mri_kernel);
         MRIfree(&mri_tmp);
         mri_tmp = mri_smooth;
@@ -202,15 +243,14 @@ int main(int argc, char *argv[]) {
 #if USE_DISTANCE_TRANSFORM
       if (binarize) {
         MRI *mri_tmp2;
-        mri_tmp2 =
-            MRIbinarize(mri_tmp, nullptr, binarize_thresh, 0, target_label);
+        mri_tmp2 = MRIbinarize(mri_tmp, NULL, binarize_thresh, 0, target_label);
         MRIfree(&mri_tmp);
         mri_tmp = mri_tmp2;
       }
-      mri[n] = MRIdistanceTransform(mri_tmp, nullptr, target_label,
+      mri[n] = MRIdistanceTransform(mri_tmp, NULL, target_label,
                                     mri_tmp->width + mri_tmp->height +
                                         mri_tmp->depth,
-                                    DTRANS_MODE_SIGNED, nullptr);
+                                    DTRANS_MODE_SIGNED, NULL);
       MRIfree(&mri_tmp);
       //    MRIwrite(mri[n], fname) ;
 #else
@@ -220,7 +260,7 @@ int main(int argc, char *argv[]) {
   }
 
   fp = fopen(out_fname, "w");
-  if (fp == nullptr)
+  if (fp == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not open %s", Progname, out_fname);
 
 #if 1
@@ -245,7 +285,7 @@ int main(int argc, char *argv[]) {
 } /* end main() */
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("USAGE: %s <options> <vol1> <vol2> ... <output text file> \n",
          Progname);
   printf("\twhere options are:\n");
@@ -260,7 +300,7 @@ static void print_usage() {
   printf("\n");
 }
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("\n"
          "Computes the mean of the min distances between point sets\n");
@@ -268,7 +308,7 @@ static void print_help() {
   exit(1);
 }
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
@@ -276,26 +316,26 @@ static void usage_exit() {
 #if USE_DISTANCE_TRANSFORM
 static double compute_hdist(MRI **mri, int nvolumes, int index, double *hdists,
                             int which) {
-  int x, y, z, width, depth, height, nvox, n, xk, yk, zk, xi, yi, zi;
-  float d, d2, dist, dx, dy, dz;
-  MRI *mri_src;
+  int    x, y, z, width, depth, height, nvox, n, xk, yk, zk, xi, yi, zi;
+  float  d, d2, dist, dx, dy, dz;
+  MRI *  mri_src;
   double hdists_sigma[MAX_VOLUMES], hdist, max_vox, xf, yf, zf, zval, max_hdist,
       max_hdists[MAX_VOLUMES];
   //  FILE   *fp ;
   static int i = 0;
-  char fname[STRLEN];
+  char       fname[STRLEN];
 
   sprintf(fname, "hdists%d.txt", i++);
   //  fp = fopen(fname, "w") ;
 
   mri_src = mri[index];
 
-  width = mri_src->width;
+  width  = mri_src->width;
   height = mri_src->height;
-  depth = mri_src->depth;
+  depth  = mri_src->depth;
 
   max_hdist = 0.0;
-  max_vox = MAX(mri_src->xsize, MAX(mri_src->ysize, mri_src->zsize));
+  max_vox   = MAX(mri_src->xsize, MAX(mri_src->ysize, mri_src->zsize));
   for (hdist = 0.0, n = 0; n < nvolumes; n++) {
     if (n == index)
       continue;
@@ -323,9 +363,9 @@ static double compute_hdist(MRI **mri, int nvolumes, int index, double *hdists,
                   continue; // not on either side of 0
 
                 // compute dist in mm to nbr voxel
-                dx = (xi - x) * mri_src->xsize;
-                dy = (yi - y) * mri_src->ysize;
-                dz = (zi - z) * mri_src->zsize;
+                dx   = (xi - x) * mri_src->xsize;
+                dy   = (yi - y) * mri_src->ysize;
+                dz   = (zi - z) * mri_src->zsize;
                 dist = sqrt(dx * dx + dy * dy + dz * dz);
 
                 // convert to voxel coords of 0-crossing
@@ -335,13 +375,12 @@ static double compute_hdist(MRI **mri, int nvolumes, int index, double *hdists,
                 xf = x + dx * fabs(d2) / dist;
                 yf = y + dy * fabs(d2) / dist;
                 zf = z + dz * fabs(d2) / dist;
-                // printf("mri_hausdorff: dist = %f\n", dist);
+                //printf("mri_hausdorff: dist = %f\n", dist);
                 MRIsampleVolume(mri[n], xf, yf, zf, &zval);
                 if (zval < 0)
                   DiagBreak();
                 zval = fabs(zval);
-                //                fprintf(fp, "%d %d %d %d %2.3f\n", n, x, y, z,
-                //                d) ;
+                //                fprintf(fp, "%d %d %d %d %2.3f\n", n, x, y, z, d) ;
                 if (zval > 40)
                   DiagBreak();
                 if (zval > max_hdists[n])
@@ -432,7 +471,7 @@ static double compute_hdist(MRI **mri, int nvolumes, int index) {
 }
 #endif
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -447,7 +486,7 @@ static int get_option(int argc, char *argv[]) {
     switch (toupper(*option)) {
     case 'G':
       blur_sigma = atof(argv[2]);
-      nargs = 1;
+      nargs      = 1;
       printf("blurring input image with sigma = %2.2f\n", blur_sigma);
       break;
     case 'L':
@@ -457,7 +496,7 @@ static int get_option(int argc, char *argv[]) {
       nargs = 1;
       break;
     case 'B':
-      binarize = 1;
+      binarize        = 1;
       binarize_thresh = atof(argv[2]);
       printf("binarizing input data with threshold %2.2f\n", binarize_thresh);
       nargs = 1;
@@ -471,6 +510,10 @@ static int get_option(int argc, char *argv[]) {
       print_usage();
       exit(1);
       break;
+    case 'V':
+      use_vox = 1;
+      printf("ignoring voxel sizes to compute distances in voxel coords");
+      break;
     default:
       fprintf(stderr, "unknown option %s\n", argv[1]);
       exit(1);
@@ -478,7 +521,7 @@ static int get_option(int argc, char *argv[]) {
     }
   return (nargs);
 }
-static void print_version() {
-  fprintf(stderr, "%s\n", vcid);
+static void print_version(void) {
+  fprintf(stderr, "%s\n", getVersion().c_str());
   exit(1);
 }

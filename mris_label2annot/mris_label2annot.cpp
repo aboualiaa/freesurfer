@@ -1,17 +1,12 @@
 /**
- * @file  mris_label2annot.c
  * @brief rogram to convert one or more labels into an annotation
  *
  * Converts a set of surface labels to an annotation file.
  */
 /*
  * Original Author: Doug Greve
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2016/01/07 23:28:11 $
- *    $Revision: 1.20 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -56,7 +51,7 @@ unhit vertices are not mapped.
 
 --dilate_into_unknown label
 
-dilates <label> into bordering vertices labeled unknown
+dilates <label> into bordering vertices labeled unknown 
 
 --ldir labeldir
 
@@ -89,7 +84,7 @@ vertices (ie, vertices without a label) to 0.
 
 --thresh threshold
 
-Require that the stat field of the vertex in the label be greather
+Require that the stat field of the vertex in the label be greather 
 than threshold.
 
 EXAMPLE:
@@ -108,7 +103,7 @@ tksurfer bert lh inflated -overlay nhits.mgh -fthresh 1.5
 
 Then File->Label->ImportAnnotation and select lh.myaparc.annot.
 
-EXAMPLE:
+EXAMPLE: 
 
 To create an annotation with a few labels from the aparc, run
 
@@ -128,66 +123,85 @@ rm -r deletme
   ENDUSAGE
 */
 
-// double round(double x);
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+double round(double x);
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
+#include <unistd.h>
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
 #include "annotation.h"
 #include "cmdargs.h"
+#include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "fmriutils.h"
+#include "fsgdf.h"
+#include "fsglm.h"
+#include "label.h"
+#include "macros.h"
+#include "matfile.h"
+#include "matrix.h"
+#include "mri.h"
+#include "mri2.h"
+#include "mrisurf.h"
+#include "mrisutils.h"
+#include "pdf.h"
+#include "surfcluster.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
+#include "volcluster.h"
 
-static int parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static int  parse_commandline(int argc, char **argv);
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mris_label2annot.c,v 1.20 2016/01/07 23:28:11 greve Exp $";
-
-static int dilate_label_into_unknown(MRI_SURFACE *mris, int annot);
-static char *dilate_label_name = nullptr;
-static int dilate_label_index = -1;
-static int dilate_label_annot = 0;
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
-int verbose = 1; // print overlap warnings and maxstat overrides
+static int     dilate_label_into_unknown(MRI_SURFACE *mris, int annot);
+static char *  dilate_label_name  = NULL;
+static int     dilate_label_index = -1;
+static int     dilate_label_annot = 0;
+const char *   Progname           = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
+int            verbose = 1; // print overlap warnings and maxstat overrides
 struct utsname uts;
 
-char tmpstr[1000];
-char *subject, *hemi, *SUBJECTS_DIR;
-char *LabelFiles[1000];
-int nlabels = 0;
-char *CTabFile;
-char *AnnotName = nullptr, *AnnotPath = nullptr;
-MRIS *mris;
-LABEL *label;
-COLOR_TABLE *ctab = nullptr, *ctab2 = nullptr;
-MRI *nhits;
-char *NHitsFile = nullptr;
-MRI *maxstat;
-int maxstatwinner = 0;
-int MapUnhitToUnknown = 1;
-char *labeldir = nullptr;
-int labeldirdefault = 0;
-int DoLabelThresh = 0;
-double LabelThresh = 0;
-char *surfname = "orig";
-int IndexOffset = 0;
+char         tmpstr[1000];
+char *       subject, *hemi, *SUBJECTS_DIR;
+char *       LabelFiles[1000];
+int          nlabels = 0;
+char *       CTabFile;
+char *       AnnotName = NULL, *AnnotPath = NULL;
+MRIS *       mris;
+LABEL *      label;
+COLOR_TABLE *ctab = NULL, *ctab2 = NULL;
+MRI *        nhits;
+char *       NHitsFile = NULL;
+MRI *        maxstat;
+int          maxstatwinner     = 0;
+int          MapUnhitToUnknown = 1;
+const char * labeldir          = NULL;
+int          labeldirdefault   = 0;
+int          DoLabelThresh     = 0;
+double       LabelThresh       = 0;
+const char * surfname          = "orig";
+int          IndexOffset       = 0;
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
   int nargs, nthlabel, n, vtxno, ano, index, nunhit;
 
   nargs = handleVersionOption(argc, argv, "mris_label2annot");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -197,7 +211,7 @@ int main(int argc, char *argv[]) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
   if (argc == 0)
     usage_exit();
   parse_commandline(argc, argv);
@@ -213,7 +227,7 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (AnnotPath == nullptr) {
+  if (AnnotPath == NULL) {
     // Get path to annot, make sure it does not exist
     sprintf(tmpstr, "%s/%s/label/%s.%s.annot", SUBJECTS_DIR, subject, hemi,
             AnnotName);
@@ -228,7 +242,7 @@ int main(int argc, char *argv[]) {
   sprintf(tmpstr, "%s/%s/surf/%s.%s", SUBJECTS_DIR, subject, hemi, surfname);
   printf("Loading %s\n", tmpstr);
   mris = MRISread(tmpstr);
-  if (mris == nullptr)
+  if (mris == NULL)
     exit(1);
 
   // Set up color table
@@ -245,7 +259,7 @@ int main(int argc, char *argv[]) {
   // Go thru each label
   for (nthlabel = 0; nthlabel < nlabels; nthlabel++) {
     label = LabelRead(subject, LabelFiles[nthlabel]);
-    if (label == nullptr) {
+    if (label == NULL) {
       printf("ERROR: reading %s\n", LabelFiles[nthlabel]);
       exit(1);
     }
@@ -288,7 +302,7 @@ int main(int argc, char *argv[]) {
                    MRIgetVoxVal(nhits, vtxno, 0, 0, 0) + 1);
 
       mris->vertices[vtxno].annotation = ano;
-      // printf("%5d %2d %2d %s\n",vtxno,segid,ano,index_to_name(segid));
+      //printf("%5d %2d %2d %s\n",vtxno,segid,ano,index_to_name(segid));
     } // label ponts
     LabelFree(&label);
   } // Label
@@ -298,7 +312,7 @@ int main(int argc, char *argv[]) {
     printf("Mapping unhit to unknown\n");
     for (vtxno = 0; vtxno < mris->nvertices; vtxno++) {
       if (MRIgetVoxVal(nhits, vtxno, 0, 0, 0) == 0) {
-        ano = index_to_annotation(0);
+        ano                              = index_to_annotation(0);
         mris->vertices[vtxno].annotation = ano;
         nunhit++;
       }
@@ -312,7 +326,7 @@ int main(int argc, char *argv[]) {
   printf("Writing annot to %s\n", AnnotPath);
   MRISwriteAnnotation(mris, AnnotPath);
 
-  if (NHitsFile != nullptr)
+  if (NHitsFile != NULL)
     MRIwrite(nhits, NHitsFile);
 
   return 0;
@@ -320,7 +334,7 @@ int main(int argc, char *argv[]) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -364,12 +378,12 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--s") || !strcmp(option, "--subject")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--h") || !strcmp(option, "--hemi")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      hemi = pargv[0];
+      hemi      = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--ctab")) {
       if (nargc < 1)
@@ -378,7 +392,7 @@ static int parse_commandline(int argc, char **argv) {
         printf("ERROR: cannot find or read %s\n", pargv[0]);
         exit(1);
       }
-      CTabFile = pargv[0];
+      CTabFile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--l")) {
       if (nargc < 1)
@@ -395,13 +409,13 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &LabelThresh);
       DoLabelThresh = 1;
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--offset")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &IndexOffset);
       DoLabelThresh = 1;
-      nargsused = 1;
+      nargsused     = 1;
     } else if (!strcmp(option, "--sd")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -410,12 +424,12 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--ldir")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      labeldir = pargv[0];
+      labeldir  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      surfname = pargv[0];
+      surfname  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--a") || !strcmp(option, "--annot")) {
       if (nargc < 1)
@@ -445,13 +459,13 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("USAGE: %s \n", Progname);
   printf("\n");
   printf("   --s subject : FreeSurfer subject \n");
@@ -475,12 +489,12 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("\n");
   printf("Converts a set of surface labels to an annotation file.\n");
@@ -600,24 +614,24 @@ static void print_help() {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void check_options() {
+static void check_options(void) {
   int n;
 
-  if (subject == nullptr) {
+  if (subject == NULL) {
     printf("ERROR: need to specify subject\n");
     exit(1);
   }
-  if (hemi == nullptr) {
+  if (hemi == NULL) {
     printf("ERROR: need to specify hemi\n");
     exit(1);
   }
-  if (CTabFile == nullptr) {
+  if (CTabFile == NULL) {
     printf("ERROR: need to specify color table file\n");
     exit(1);
   }
@@ -625,13 +639,13 @@ static void check_options() {
     printf("ERROR: cannot spec both --annot and --annot-path\n");
     exit(1);
   }
-  if (AnnotName == nullptr && AnnotPath == nullptr) {
+  if (AnnotName == NULL && AnnotPath == NULL) {
     printf("ERROR: need to specify annotation name\n");
     exit(1);
   }
 
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-  if (SUBJECTS_DIR == nullptr) {
+  if (SUBJECTS_DIR == NULL) {
     printf("ERROR: SUBJECTS_DIR not defined in environment\n");
     exit(1);
   }
@@ -639,7 +653,7 @@ static void check_options() {
   // Read the color table
   printf("Reading ctab %s\n", CTabFile);
   ctab = CTABreadASCII(CTabFile);
-  if (ctab == nullptr) {
+  if (ctab == NULL) {
     printf("ERROR: reading %s\n", CTabFile);
     exit(1);
   }
@@ -652,20 +666,28 @@ static void check_options() {
   printf("Number of ctab entries %d\n", ctab->nentries);
   if (nlabels == 0) {
     printf("INFO: no labels specified, generating from ctab\n");
-    if (labeldir == nullptr)
+    if (labeldir == NULL)
       labeldir = ".";
     if (labeldirdefault) {
       sprintf(tmpstr, "%s/%s/label", SUBJECTS_DIR, subject);
       labeldir = strcpyalloc(tmpstr);
     }
-    ctab2 = CTABalloc(ctab->nentries);
+    ctab2   = CTABalloc(ctab->nentries);
     nlabels = 0;
-    for (n=0; n<ctab->nentries; n++) {
-      if(ctab->entries[n] == NULL) continue;
-      if (strlen(ctab->entries[n]->name) == 0) continue;
-      sprintf(tmpstr,"%s/%s.%s.label",labeldir,hemi,ctab->entries[n]->name);
-      if(!fio_FileExistsReadable(tmpstr)) continue;
-      printf("%2d %s\n",n,tmpstr);
+    for (n = 0; n < ctab->nentries; n++) {
+      if (ctab->entries[n] == NULL)
+        continue;
+      if (strlen(ctab->entries[n]->name) == 0)
+        continue;
+      int req = snprintf(tmpstr, 1000, "%s/%s.%s.label", labeldir, hemi,
+                         ctab->entries[n]->name);
+      if (req >= 1000) {
+        std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+                  << std::endl;
+      }
+      if (!fio_FileExistsReadable(tmpstr))
+        continue;
+      printf("%2d %s\n", n, tmpstr);
       LabelFiles[nlabels] = strcpyalloc(tmpstr);
       strcpy(ctab2->entries[nlabels]->name, ctab->entries[n]->name);
       ctab2->entries[nlabels]->ri = ctab->entries[n]->ri;
@@ -680,7 +702,7 @@ static void check_options() {
     }
     CTABfree(&ctab);
     ctab = ctab2;
-    // CTABwriteFileASCII(ctab, "new.ctab");
+    //CTABwriteFileASCII(ctab, "new.ctab");
   }
   return;
 }
@@ -688,7 +710,7 @@ static void check_options() {
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);
@@ -719,7 +741,7 @@ static int dilate_label_into_unknown(MRI_SURFACE *mris, int annot) {
 
     for (vno = 0; vno < mris->nvertices; vno++) {
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
-      VERTEX const *const v = &mris->vertices[vno];
+      VERTEX const *const          v  = &mris->vertices[vno];
       if (v->ripflag || v->annotation != annot)
         continue;
       for (n = 0; n < vt->vnum; n++) {

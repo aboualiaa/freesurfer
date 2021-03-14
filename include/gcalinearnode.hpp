@@ -1,16 +1,11 @@
 /**
- * @file  gcalinearnode.hpp
  * @brief Class to hold a volume of GCA nodes in linear memory
  *
  */
 /*
  * Original Authors: Richard Edgar
- * CVS Revision Info:
- *    $Author: zkaufman $
- *    $Date: 2016/02/26 20:01:43 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011-2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,8 +21,8 @@
 
 #include <vector>
 
-#include "timer.h"
 #include "gca.h"
+#include "timer.h"
 
 // Forward declaration
 namespace GPU {
@@ -298,9 +293,9 @@ private:
   long long xDim;
   long long yDim;
   long long zDim;
-  size_t n4D;
-  size_t n5D;
-  size_t n6D;
+  size_t    n4D;
+  size_t    n5D;
+  size_t    n6D;
   const int gc1dNeighbourDim;
 
   //! Stores offsets of (variable length) 4th dimension

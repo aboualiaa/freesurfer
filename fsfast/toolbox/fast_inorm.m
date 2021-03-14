@@ -1,19 +1,14 @@
 function r = fast_inorm(varargin)
 % r = fast_inorm(varargin)
 % Intensity normalizes and does some simple data hygene analysis.
-% '$Id'
 
 
 %
 % fast_inorm.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:04 $
-%    $Revision: 1.8 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,7 +19,7 @@ function r = fast_inorm(varargin)
 % Reporting: freesurfer@nmr.mgh.harvard.edu
 %
 
-version = '$Id';
+version = 'fast_inorm.m @FS_VERSION@';
 fprintf(1,'%s\n',version);
 r = 1;
 

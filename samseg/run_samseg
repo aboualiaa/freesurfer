@@ -24,6 +24,8 @@ parser.add_argument('--reg-only', action='store_true', default=False, help='Only
 parser.add_argument('-r', '--reg', metavar='FILE', help='Skip initial affine registration and read transform from file.')
 parser.add_argument('--init-reg', metavar='FILE', help='Initial affine registration.')
 parser.add_argument('-a', '--atlas', metavar='DIR', help='Point to an alternative atlas directory.')
+parser.add_argument('--gmm', metavar='FILE', help='Point to an alternative GMM file.')
+parser.add_argument('--ignore-unknown', action='store_true', help='Ignore final priors corresponding to unknown class.')
 parser.add_argument('--options', metavar='FILE', help='Override advanced options via a json file.')
 parser.add_argument('--pallidum-separate', action='store_true', default=False, help='Move pallidum outside of global white matter class. Use this flag when T2/flair is used.')
 # optional lesion options
@@ -31,11 +33,14 @@ parser.add_argument('--lesion', action='store_true', default=False, help='Enable
 parser.add_argument('--threshold', type=float, default=0.3, help='Lesion threshold for final segmentation. Lesion segmentation must be enabled.')
 parser.add_argument('--samples', type=int, default=50, help='Number of samples for lesion segmentation. Lesion segmentation must be enabled.')
 parser.add_argument('--burnin', type=int, default=50, help='Number of burn-in samples for lesion segmentation. Lesion segmentation must be enabled.')
+parser.add_argument('--lesion-pseudo-samples', nargs=2, type=float, default=[500, 500], help='Lesion pseudo samples mean and variance.')
+parser.add_argument('--lesion-rho', type=float, default=50, help='Lesion ratio.')
 parser.add_argument('--lesion-mask-structure', default='Cortex', help='Intensity mask brain structure. Lesion segmentation must be enabled.')
-parser.add_argument('--lesion-mask-pattern', type=int, nargs='+', help='Lesion mask (1 for each input): -1 below WM mean, +1 above, 0 no mask. Lesion segmentation must be enabled.')
+parser.add_argument('--lesion-mask-pattern', type=int, nargs='+', help='Lesion mask list (set value for each input volume): -1 below lesion mask structure mean, +1 above, 0 no mask. Lesion segmentation must be enabled.')
 # optional debugging options
 parser.add_argument('--history', action='store_true', default=False, help='Save history.')
 parser.add_argument('--save-posteriors', nargs='*', help='Save posterior volumes to the "posteriors" subdirectory.')
+parser.add_argument('--save-probabilities', action='store_true', help='Save final modal class probabilities to "probabilities" subdirectory.')
 parser.add_argument('--showfigs', action='store_true', default=False, help='Show figures during run.')
 parser.add_argument('--save-mesh', action='store_true', help='Save the final mesh in template space.')
 parser.add_argument('--save-warp', action='store_true', help='Save the image->template warp field.')
@@ -82,23 +87,6 @@ if not atlasDir:
 # Setup the visualization tool
 visualizer = samseg.initVisualizer(args.showfigs, args.movie)
 
-# Initialization transform for affine registration
-initTransform = None
-if args.init_reg:
-    matrix = fs.LinearTransform.read(args.init_reg).as_ras().matrix
-    initTransform = samseg.convertRASTransformToLPS(matrix)
-
-# Affine transform used to skip registration skip
-worldToWorldTransformMatrix = None
-if args.reg:
-    if args.reg.endswith('.mat'):
-        worldToWorldTransformMatrix = scipy.io.loadmat(args.reg).get('worldToWorldTransformMatrix')
-    else:
-        matrix = fs.LinearTransform.read(args.reg).as_ras().matrix
-        worldToWorldTransformMatrix = samseg.convertRASTransformToLPS(matrix)
-
-print(worldToWorldTransformMatrix)
-
 # ------ Prepare Samseg Parameters ------
 
 # Load user options from a JSON file
@@ -134,18 +122,28 @@ samseg_kwargs = dict(
     savePosteriors=savePosteriors,
     saveWarp=args.save_warp,
     modeNames=args.mode,
-    pallidumAsWM=(not args.pallidum_separate)
+    pallidumAsWM=(not args.pallidum_separate),
+    saveModelProbabilities=args.save_probabilities,
+    gmmFileName=args.gmm,
+    ignoreUnknownPriors=args.ignore_unknown,
 )
 
 if args.lesion:
-    if args.lesion_mask_pattern is None:
-        fs.fatal('Lesion mask pattern must be set when using the lesion segmentation option.')
+
+    # If lesion mask pattern is not specified, assume inputs are T1-contrast
+    lesion_mask_pattern = args.lesion_mask_pattern
+    if lesion_mask_pattern is None:
+        lesion_mask_pattern = [0] * len(args.inputFileNames)
+        print('Defaulting lesion mask pattern to %s' % str(lesion_mask_pattern))
 
     # Delay import until here so that tensorflow doesn't get loaded unless needed
     from freesurfer.samseg.SamsegLesion import SamsegLesion
     samseg = SamsegLesion(**samseg_kwargs,
+        numberOfPseudoSamplesMean=args.lesion_pseudo_samples[0],
+        numberOfPseudoSamplesVariance=args.lesion_pseudo_samples[1],
+        rho=args.lesion_rho,
         intensityMaskingSearchString=args.lesion_mask_structure,
-        intensityMaskingPattern=args.lesion_mask_pattern,
+        intensityMaskingPattern=lesion_mask_pattern,
         numberOfBurnInSteps=args.burnin,
         numberOfSamplingSteps=args.samples,
         threshold=args.threshold
@@ -154,11 +152,13 @@ if args.lesion:
 else:
     samseg = samseg.Samseg(**samseg_kwargs)
 
-_, _, _, optimizationSummary = samseg.segment(costfile=costfile,
-                                              timer=timer,
-                                              worldToWorldTransformMatrix=worldToWorldTransformMatrix,
-                                              initTransform=initTransform,
-                                              reg_only=args.reg_only)
+_, _, _, optimizationSummary = samseg.segment(
+    costfile=costfile,
+    timer=timer,
+    transformFile=args.reg,
+    initTransformFile=args.init_reg,
+    reg_only=args.reg_only
+)
 
 # Save a summary of the optimization process
 with open(costfile, 'a') as file:

@@ -1,16 +1,7 @@
-/**
- * @file  DialogPreferences.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:47 $
- *    $Revision: 1.16 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,9 +15,9 @@
 #ifndef DIALOGPREFERENCES_H
 #define DIALOGPREFERENCES_H
 
+#include "UIUpdateHelper.h"
 #include <QDialog>
 #include <QVariantMap>
-#include "UIUpdateHelper.h"
 
 namespace Ui {
 class DialogPreferences;
@@ -45,11 +36,11 @@ public:
   void SetSettings(const QVariantMap &map);
 
   QVariantMap GetSettings();
+  static void SetActionShortcut(QAction *act, const QString &text);
 
 protected slots:
   void OnClicked(QAbstractButton *btn);
   void OnComboShortcutChanged(const QString &text);
-  void SetActionShortcut(QAction *act, const QString &text);
 
 private:
   void SetCurrentComboText(QComboBox *combo, const QString &text);

@@ -27,18 +27,13 @@ function [csort isort ksort rhosort spair zrhoabs] = fast_corsort(rho,Nps)
 %   yn = fast_fnorm(y,2,1); % Normalize across space
 %   rho = yn*yn'; % Cor Coeff across component
 %
-% $Id: fast_corsort.m,v 1.5 2011/03/02 00:04:03 nicks Exp $
 
 %
 % fast_corsort.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:03 $
-%    $Revision: 1.5 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

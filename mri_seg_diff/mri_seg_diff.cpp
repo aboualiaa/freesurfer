@@ -1,5 +1,4 @@
 /**
- * @file  mri_seg_diff.c
  * @brief Computes and merge differences in segmentation.
  *
  * This program computes and merges differences in segmentation volumes
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: greve
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:24 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -65,45 +60,44 @@
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
+#include "cmdargs.h"
 #include "diag.h"
 #include "mri2.h"
+#include "mrisutils.h"
 #include "version.h"
-#include "cmdargs.h"
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
 static void print_help();
 static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
-static char vcid[] =
-    "$Id: mri_seg_diff.c,v 1.5 2011/03/02 00:04:24 nicks Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *   Progname = NULL;
+char *         cmdline, cwd[2000];
+int            debug         = 0;
+int            checkoptsonly = 0;
 struct utsname uts;
 
-char *Seg1File = nullptr;
-char *Seg2File = nullptr;
-char *DiffFile = nullptr;
+char *Seg1File   = nullptr;
+char *Seg2File   = nullptr;
+char *DiffFile   = nullptr;
 char *InDiffFile = nullptr;
 char *MergedFile = nullptr;
-int ForceDiff = 0;
+int   ForceDiff  = 0;
 
 char *subject, *SUBJECTS_DIR;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, DiffFlag = 0;
+  int  nargs, DiffFlag = 0;
   MRI *seg1, *seg2, *diff;
 
   nargs = handleVersionOption(argc, argv, "mri_seg_diff");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -169,7 +163,7 @@ int main(int argc, char *argv[]) {
 }
 /*-------------------------------------------------------*/
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -203,28 +197,28 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcasecmp(option, "--seg1") || !strcasecmp(option, "--seg")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      Seg1File = pargv[0];
+      Seg1File  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--seg2")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      Seg2File = pargv[0];
+      Seg2File  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--diff")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      DiffFile = pargv[0];
+      DiffFile  = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--diff-in")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       InDiffFile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcasecmp(option, "--merged")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       MergedFile = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))
@@ -261,7 +255,7 @@ static void print_usage() {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 /*-------------------------------------------------------*/
@@ -303,8 +297,8 @@ static void print_help() {
   exit(1);
 }
 /*-------------------------------------------------------*/
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /*-------------------------------------------------------*/
@@ -347,7 +341,7 @@ static void check_options() {
 /*-------------------------------------------------------*/
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);

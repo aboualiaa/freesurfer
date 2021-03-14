@@ -1,16 +1,11 @@
 /**
- * @file  base.h
  * @brief common definitions we want to be widely available
  *
  */
 /*
  * Original Author: Bevin Brett
- * CVS Revision Info:
- *    $Author: bbrett $
- *    $Date: 2018/03/14 18:28:00 $
- *    $Revision: 1.0 $
  *
- * Copyright © 2018 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -35,9 +30,9 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <sys/types.h>
-#include <sys/timeb.h>
 #include <ctime>
+#include <sys/timeb.h>
+#include <sys/types.h>
 
 #include "proto.h" // malloc   is needed from here
 
@@ -97,7 +92,7 @@ typedef enum LogicProblemResponse {
 
 bool spendTimeCheckingForLogicProblem(const char *file, int line);
 LogicProblemResponse copeWithLogicProblem2(
-    bool *wasReported,       // set to whether reported
+    bool *      wasReported, // set to whether reported
     const char *envvarFixer, // user told to set this env var to fix, as part of
                              // the report
     const char *msg,         // the report
@@ -116,17 +111,17 @@ LogicProblemResponse copeWithLogicProblem2(
 #if defined(DEBUG_MEMLEAK)
 
 void *mallocHere(size_t size, const char *file, const char *function, int line);
-void freeHere(void *ptr, const char *file, const char *function, int line);
+void  freeHere(void *ptr, const char *file, const char *function, int line);
 void *callocHere(size_t nmemb, size_t size, const char *file,
                  const char *function, int line);
 void *reallocHere(void *ptr, size_t size, const char *file,
                   const char *function, int line);
-int posix_memalignHere(void **memptr, size_t alignment, size_t size,
-                       const char *file, const char *function, int line);
+int   posix_memalignHere(void **memptr, size_t alignment, size_t size,
+                         const char *file, const char *function, int line);
 // implemented in mgh_malloc.c but defined here to get them widely used
 
 #define malloc(SIZE) mallocHere((SIZE), __FILE__, __MYFUNCTION__, __LINE__)
-#define free(PTR) freeHere((PTR), __FILE__, __MYFUNCTION__, __LINE__)
+#define free(PTR)    freeHere((PTR), __FILE__, __MYFUNCTION__, __LINE__)
 #define calloc(NMEMB, SIZE)                                                    \
   callocHere((NMEMB), (SIZE), __FILE__, __MYFUNCTION__, __LINE__)
 #define realloc(PTR, SIZE)                                                     \
@@ -155,23 +150,23 @@ using ptr_to_const_float = const float *;
 // Some trivial math functions needed lots
 //
 #pragma GCC diagnostic ignored "-Wunused-function"
-static float squaref(float x) { return x * x; }
+static float           squaref(float x) { return x * x; }
 
 #pragma GCC diagnostic ignored "-Wunused-function"
-static double squared(double x) { return x * x; }
+static double          squared(double x) { return x * x; }
 
 typedef struct FloatXYZ {
   float x, y, z;
 } FloatXYZ;
 
 template <typename T, size_t SIZE> struct FixedSizeArray {
-  T &operator[](size_t i) { return v[i]; }
+  T &      operator[](size_t i) { return v[i]; }
   T const &operator[](size_t i) const { return v[i]; }
 
   operator T *() { return v; }
   operator T const *() const { return v; }
 
-  T *data() { return v; }
+  T *      data() { return v; }
   T const *data() const { return v; }
 
 private:

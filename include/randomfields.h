@@ -1,17 +1,6 @@
-/**
- * @file  randomfields.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2016/12/06 20:25:48 $
- *    $Revision: 1.12 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,48 +12,45 @@
  *
  */
 
-// $Id: randomfields.h,v 1.12 2016/12/06 20:25:48 greve Exp $
-
 #ifndef RANDOMFIELDS_H
 #define RANDOMFIELDS_H
 
-#include "numerics.h"
 #include "mri.h"
+#include "numerics.h"
 
-#define RF_UNIFORM 1
+#define RF_UNIFORM  1
 #define RF_GAUSSIAN 2
-#define RF_Z 3
-#define RF_T 4
-#define RF_F 5
-#define RF_CHI2 6
+#define RF_Z        3
+#define RF_T        4
+#define RF_F        5
+#define RF_CHI2     6
 
 typedef struct {
-  char *name;
-  int code;
-  int nparams;
-  double params[20];
-  double mean, stddev;
-  sc_rng *rng;
+  char *             name;
+  int                code;
+  int                nparams;
+  double             params[20];
+  double             mean, stddev;
+  sc_rng *           rng;
   const sc_rng_type *rngtype;
-  unsigned long int seed;
+  unsigned long int  seed;
 } RANDOM_FIELD_SPEC, RFS;
 
-const char *RFSrcVersion();
-RFS *RFspecInit(unsigned long int seed, sc_rng_type *rngtype);
-int RFspecFree(RFS **prfs);
-int RFname2Code(RFS *rfs);
+RFS *       RFspecInit(unsigned long int seed, sc_rng_type *rngtype);
+int         RFspecFree(RFS **prfs);
+int         RFname2Code(RFS *rfs);
 const char *RFcode2Name(RFS *rfs);
-int RFprint(FILE *fp, RFS *rfs);
-int RFspecSetSeed(RFS *rfs, unsigned long int seed);
-int RFnparams(RFS *rfs);
-int RFexpectedMeanStddev(RFS *rfs);
-int RFsynth(MRI *rf, RFS *rfs, MRI *binmask);
-MRI *RFstat2P(MRI *rf, RFS *rfs, MRI *binmask, int TwoSided, MRI *p);
-MRI *RFz2p(MRI *z, MRI *mask, int TwoSided, MRI *p);
-MRI *RFp2Stat(MRI *rf, RFS *rfs, MRI *binmask, MRI *p);
+int         RFprint(FILE *fp, RFS *rfs);
+int         RFspecSetSeed(RFS *rfs, unsigned long int seed);
+int         RFnparams(RFS *rfs);
+int         RFexpectedMeanStddev(RFS *rfs);
+int         RFsynth(MRI *rf, RFS *rfs, MRI *binmask);
+MRI *       RFstat2P(MRI *rf, RFS *rfs, MRI *binmask, int TwoSided, MRI *p);
+MRI *       RFz2p(MRI *z, MRI *mask, int TwoSided, MRI *p);
+MRI *       RFp2Stat(MRI *rf, RFS *rfs, MRI *binmask, MRI *p);
 MRI *RFstat2Stat(MRI *rfin, RFS *rfsin, RFS *rfsout, MRI *binmask, MRI *rfout);
-int RFglobalStats(MRI *rf, MRI *binmask, double *gmean, double *gstddev,
-                  double *max);
+int  RFglobalStats(MRI *rf, MRI *binmask, double *gmean, double *gstddev,
+                   double *max);
 MRI *RFrescale(MRI *rf, RFS *rfs, MRI *binmask, MRI *rfout);
 
 double RFdrawVal(RFS *rfs);

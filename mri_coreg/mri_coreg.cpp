@@ -1,17 +1,11 @@
 /**
- * @file  mri_coreg.c
  * @brief Computes registration between two volumes
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
  * Original Author: Douglas N. Greve
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2016/04/30 15:11:49 $
- *    $Revision: 1.27 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -29,142 +23,168 @@
 \author Douglas Greve
 */
 
-#include <sys/resource.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/utsname.h>
+#include <unistd.h>
 
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
 #include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "macros.h"
+#include "mri.h"
 #include "mri2.h"
+#include "mrisurf.h"
+#include "utils.h"
+#include "version.h"
+#include <sys/resource.h>
+#include <sys/time.h>
 
 #include "romp_support.h"
 
+#include "cpputils.h"
+#include "fmriutils.h"
 #include "fsenv.h"
-#include "randomfields.h"
+#include "icosahedron.h"
+#include "matfile.h"
 #include "mri_conform.h"
+#include "mrimorph.h"
+#include "numerics.h"
+#include "randomfields.h"
+#include "timer.h"
 
 double round(double x);
 
-static int parse_commandline(int argc, char **argv);
-static void check_options();
-static void print_usage();
-static void usage_exit();
-static void print_help();
-static void print_version();
+static int  parse_commandline(int argc, char **argv);
+static void check_options(void);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
+static void print_version(void);
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]);
+int         main(int argc, char *argv[]);
 
 static char vcid[] = "$Id: mri_coreg.c,v 1.27 2016/04/30 15:11:49 greve Exp $";
-const char *Progname = nullptr;
-char *cmdline, cwd[2000];
-int debug = 0;
-int checkoptsonly = 0;
+const char *Progname = NULL;
+char *      cmdline, cwd[2000];
+int         debug         = 0;
+int         checkoptsonly = 0;
 struct utsname uts;
 
 typedef struct {
-  char *mov;
-  char *ref;
-  char *refmask;
-  char *movmask;
-  char *outreg;
-  char *regdat;
-  char *subject;
-  int DoCoordDither;
-  int DoIntensityDither;
-  int dof;
-  double params[12];
-  int nsep, seplist[10];
-  int DoInitCostOnly;
-  int DoSmoothing;
-  int cras0;
-  double ftol, linmintol;
-  int nitersmax;
-  int refconf;
-  char *logcost;
-  int DoBF;
-  double BFLim;
-  int BFNSamp;
-  char *outparamfile;
-  double fwhmc, fwhmr, fwhms;
-  int SmoothRef;
-  double SatPct;
-  int MovOOBFlag;
-  char *rusagefile;
-  int optschema;
+  char *      mov;
+  const char *ref;
+  const char *refmask;
+  char *      movmask;
+  char *      outreg;
+  char *      regdat;
+  char *      subject;
+  int         DoCoordDither;
+  int         DoIntensityDither;
+  char *      moviditherfile = NULL;
+  int         dof;
+  double      params[12];
+  int         nsep, seplist[10];
+  int         DoInitCostOnly;
+  int         DoSmoothing;
+  int         cras0;
+  int         AlignCentroids = 0;
+  double      ftol, linmintol;
+  int         nitersmax;
+  int         refconf;
+  char *      logcost;
+  int         DoBF;
+  double      BFLim;
+  int         BFNSamp;
+  char *      outparamfile;
+  double      fwhmc, fwhmr, fwhms;
+  int         SmoothRef;
+  double      SatPct;
+  int         MovOOBFlag;
+  const char *rusagefile;
+  int         optschema;
+  int         seed       = 53;
+  char *      movoutfile = NULL;
 } CMDARGS;
 
 CMDARGS *cmdargs;
 
-MRI *MRIrescaleToUChar(MRI *mri, MRI *ucmri, double sat);
-unsigned char *MRItoUCharVect(MRI *mri, RFS *rfs);
-MATRIX *MRIgetVoxelToVoxelXformBase(MRI *mri_src, MRI *mri_dst,
-                                    MATRIX *SrcRAS2DstRAS,
-                                    MATRIX *SrcVox2DstVox, int base);
+MRI *          MRIrescaleToUChar(MRI *mri, MRI *ucmri, double sat);
+unsigned char *MRItoUCharVect(MRI *mri, RFS *rfs, MRI *dither);
+MATRIX *       MRIgetVoxelToVoxelXformBase(MRI *mri_src, MRI *mri_dst,
+                                           MATRIX *SrcRAS2DstRAS,
+                                           MATRIX *SrcVox2DstVox, int base);
 
 double **conv1dmat(double **M, int rows, int cols, double *v, int nv, int dim,
                    double **C, int *pcrows, int *pcols);
-int conv1dmatTest();
-double *conv1d(double *v1, int n1, double *v2, int n2, double *vc);
+int      conv1dmatTest(void);
+double * conv1d(double *v1, int n1, double *v2, int n2, double *vc);
 
 double **AllocDoubleMatrix(int rows, int cols);
-int FreeDoubleMatrix(double **M, int rows, int cols);
-int WriteDoubleMatrix(char *fname, char *fmt, double **M, int rows, int cols);
-int PrintDoubleMatrix(FILE *fp, char *fmt, double **M, int rows, int cols);
+int      FreeDoubleMatrix(double **M, int rows, int cols);
+int WriteDoubleMatrix(const char *fname, const char *fmt, double **M, int rows,
+                      int cols);
+int PrintDoubleMatrix(FILE *fp, const char *fmt, double **M, int rows,
+                      int cols);
 double *SumVectorDoubleMatrix(double **M, int rows, int cols, int dim,
                               double *sumvect, int *nv);
 
 typedef struct {
-  MRI *ref, *mov, *refmask, *movmask;
-  int seplist[10], nsep, sep, sepmin;
-  double SatPct, refsat, movsat;
+  MRI *          ref, *mov, *refmask, *movmask;
+  int            seplist[10], nsep, sep, sepmin;
+  double         SatPct, refsat, movsat;
   unsigned char *g, *f;
-  MATRIX *M, *V2V;
-  double reffwhm[3], refgstd[3];
-  double movfwhm[3], movgstd[3];
-  double histfwhm[2];
-  double params[12];
-  int nparams;
-  double H01d[256 * 256];
-  double **H0;
-  double cost;
-  int nCostEvaluations;
-  double tLastEval;
-  double ftol, linmintol;
-  float fret;
-  int nitersmax, niters;
-  int startmin;
-  int nhits, nvoxref;
-  double pcthits;
-  int DoCoordDither;
-  RFS *crfs;
-  MRI *cdither;
-  int DoIntensityDither;
-  RFS *refirfs, *movirfs;
-  int DoSmoothing;
-  FILE *fplogcost;
-  int MovOOBFlag;
-  int optschema;
-  int debug;
+  MATRIX *       M, *V2V;
+  double         reffwhm[3], refgstd[3];
+  double         movfwhm[3], movgstd[3];
+  double         histfwhm[2];
+  double         params[12];
+  int            nparams;
+  double         H01d[256 * 256];
+  double **      H0;
+  double         cost;
+  int            nCostEvaluations;
+  double         tLastEval;
+  double         ftol, linmintol;
+  float          fret;
+  int            nitersmax, niters;
+  int            startmin;
+  int            nhits, nvoxref;
+  double         pcthits;
+  int            DoCoordDither;
+  RFS *          crfs;
+  MRI *          cdither;
+  int            DoIntensityDither;
+  RFS *          refirfs, *movirfs;
+  MRI *          movidither = NULL;
+  int            DoSmoothing;
+  FILE *         fplogcost;
+  int            MovOOBFlag;
+  int            optschema;
+  int            debug;
+  int            seed;
 } COREG;
 
-double COREGcost(COREG *coreg);
-float COREGcostPowell(float *pPowel);
-int COREGMinPowell();
-float MRIgetPercentile(MRI *mri, double Pct, int frame);
-int COREGfwhm(MRI *mri, double sep, double fwhm[3]);
-int COREGpreproc(COREG *coreg);
-LTA *LTAcreate(MRI *src, MRI *dst, MATRIX *T, int type);
-int COREGhist(COREG *coreg);
-long COREGvolIndex(int ncols, int nrows, int nslices, int c, int r, int s);
-double COREGsamp(unsigned char *f, const double c, const double r,
-                 const double s, const int ncols, const int nrows,
-                 const int nslices);
-double NMICost(double **H, int cols, int rows);
-MATRIX *COREGmatrix(double *p, MATRIX *M);
-double *COREGparams9(MATRIX *M9, double *p);
-int COREGprint(FILE *fp, COREG *coreg);
-MRI *MRIconformNoScale(MRI *mri, MRI *mric);
-int COREGoptBruteForce(COREG *coreg, double lim0, int niters, int n1d);
+double  COREGcost(COREG *coreg);
+float   COREGcostPowell(float *pPowel);
+int     COREGMinPowell();
+float   MRIgetPercentile(MRI *mri, double Pct, int frame);
+int     COREGfwhm(MRI *mri, double sep, double fwhm[3]);
+int     COREGpreproc(COREG *coreg);
+LTA *   LTAcreate(MRI *src, MRI *dst, MATRIX *T, int type);
+int     COREGhist(COREG *coreg);
+long    COREGvolIndex(int ncols, int nrows, int nslices, int c, int r, int s);
+double  COREGsamp(unsigned char *f, const double c, const double r,
+                  const double s, const int ncols, const int nrows,
+                  const int nslices);
+double  NMICost(double **H, int cols, int rows);
+int     COREGprint(FILE *fp, COREG *coreg);
+MRI *   MRIconformNoScale(MRI *mri, MRI *mric);
+int     COREGoptBruteForce(COREG *coreg, double lim0, int niters, int n1d);
 double *COREGoptSchema2MatrixPar(COREG *coreg, double *par);
 
 COREG *coreg;
@@ -172,44 +192,46 @@ FSENV *fsenv;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, err, n;
-  LTA *lta;
+  int   nargs, err, n;
+  LTA * lta;
   Timer timer;
 
   timer.reset();
 
-  cmdargs = (CMDARGS *)calloc(sizeof(CMDARGS), 1);
-  cmdargs->mov = nullptr;
-  cmdargs->ref = nullptr;
-  cmdargs->outreg = nullptr;
-  cmdargs->regdat = nullptr;
-  cmdargs->subject = nullptr;
-  cmdargs->DoCoordDither = 1;
+  cmdargs                    = (CMDARGS *)calloc(sizeof(CMDARGS), 1);
+  cmdargs->mov               = NULL;
+  cmdargs->ref               = NULL;
+  cmdargs->outreg            = NULL;
+  cmdargs->regdat            = NULL;
+  cmdargs->subject           = NULL;
+  cmdargs->DoCoordDither     = 1;
   cmdargs->DoIntensityDither = 1;
-  cmdargs->dof = 6;
+  cmdargs->dof               = 6;
   for (n = 0; n < 12; n++)
     cmdargs->params[n] = 0;
   for (n = 6; n < 9; n++)
     cmdargs->params[n] = 1;
-  cmdargs->nsep = 0;
+  cmdargs->nsep           = 0;
   cmdargs->DoInitCostOnly = 0;
-  cmdargs->DoSmoothing = 1;
-  cmdargs->cras0 = 1;
-  cmdargs->nitersmax = 4;
-  cmdargs->ftol = 10e-8;
-  cmdargs->linmintol = .001;
-  cmdargs->refconf = 0;
-  cmdargs->DoBF = 1;
-  cmdargs->BFLim = 30;
-  cmdargs->BFNSamp = 30;
-  cmdargs->SmoothRef = 0;
-  cmdargs->SatPct = 99.99;
-  cmdargs->MovOOBFlag = 0;
-  cmdargs->optschema = 1;
-  cmdargs->rusagefile = "";
+  cmdargs->DoSmoothing    = 1;
+  cmdargs->cras0          = 1;
+  cmdargs->nitersmax      = 4;
+  cmdargs->ftol           = 10e-8;
+  cmdargs->linmintol      = .001;
+  cmdargs->refconf        = 0;
+  cmdargs->DoBF           = 1;
+  cmdargs->BFLim          = 30;
+  cmdargs->BFNSamp        = 30;
+  cmdargs->SmoothRef      = 0;
+  cmdargs->SatPct         = 99.99;
+  cmdargs->MovOOBFlag     = 0;
+  cmdargs->optschema      = 1;
+  cmdargs->seed           = 53;
+  cmdargs->rusagefile     = "";
 
   nargs = handleVersionOption(argc, argv, "mri_coreg");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -219,7 +241,7 @@ int main(int argc, char *argv[]) {
   argc--;
   argv++;
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
   if (argc == 0)
     usage_exit();
   parse_commandline(argc, argv);
@@ -229,7 +251,9 @@ int main(int argc, char *argv[]) {
     return (0);
   dump_options(stdout);
 
-  coreg = (COREG *)calloc(sizeof(COREG), 1);
+  coreg       = (COREG *)calloc(sizeof(COREG), 1);
+  coreg->seed = cmdargs->seed;
+  printf("Seed %d\n", coreg->seed);
 
   printf("Reading in mov %s\n", cmdargs->mov);
   coreg->mov = MRIread(cmdargs->mov);
@@ -243,11 +267,18 @@ int main(int argc, char *argv[]) {
   if (cmdargs->refconf) {
     MRI *mritmp;
     printf("Conforming ref (no scaling or rehistogramming)\n");
-    mritmp = MRIconformNoScale(coreg->ref, nullptr);
+    mritmp = MRIconformNoScale(coreg->ref, NULL);
     MRIfree(&coreg->ref);
     coreg->ref = mritmp;
   }
   coreg->nvoxref = coreg->ref->width * coreg->ref->height * coreg->ref->depth;
+
+  if (cmdargs->moviditherfile) {
+    printf("Reading mov intensity dither file %s\n", cmdargs->moviditherfile);
+    coreg->movidither = MRIread(cmdargs->moviditherfile);
+    if (!coreg->movidither)
+      exit(1);
+  }
 
   if (cmdargs->refmask) {
     printf("Reading in and applying refmask %s\n", cmdargs->refmask);
@@ -293,27 +324,48 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (cmdargs->cras0) {
-    printf("Setting cras translation parameters to align centers\n");
+  if (cmdargs->cras0 || cmdargs->AlignCentroids) {
     MATRIX *Vref, *Vmov, *Imidref, *Imidmov, *Pmidref, *Pmidmov;
 
-    // Compute the location of the middle voxel in ref
-    Vref = MRIxfmCRS2XYZ(coreg->ref, 0);
-    Imidref = MatrixAlloc(4, 1, MATRIX_REAL);
-    Imidref->rptr[1][1] = (coreg->ref->width - 1) / 2.0;
-    Imidref->rptr[2][1] = (coreg->ref->height - 1) / 2.0;
-    Imidref->rptr[3][1] = (coreg->ref->depth - 1) / 2.0;
-    Imidref->rptr[4][1] = 1;
-    Pmidref = MatrixMultiply(Vref, Imidref, NULL);
+    double xc;
+    double yc;
+    double zc;
 
-    // Compute the location of the middle voxel in mov
-    Vmov = MRIxfmCRS2XYZ(coreg->mov, 0);
-    Imidmov = MatrixAlloc(4, 1, MATRIX_REAL);
-    Imidmov->rptr[1][1] = (coreg->mov->width - 1) / 2.0;
-    Imidmov->rptr[2][1] = (coreg->mov->height - 1) / 2.0;
-    Imidmov->rptr[3][1] = (coreg->mov->depth - 1) / 2.0;
+    // Compute the location of the voxel in ref
+    if (cmdargs->AlignCentroids) {
+      printf("Setting cras translation parameters to align centroids\n");
+      MRIcomputeCentroid(coreg->ref, &xc, &yc, &zc);
+      printf("Ref CRS centroid %g %g %g\n", xc, yc, zc);
+    } else {
+      printf("Setting cras translation parameters to align volume centers\n");
+      xc = (coreg->ref->width - 1) / 2.0;
+      yc = (coreg->ref->height - 1) / 2.0;
+      zc = (coreg->ref->depth - 1) / 2.0;
+    }
+    Vref                = MRIxfmCRS2XYZ(coreg->ref, 0);
+    Imidref             = MatrixAlloc(4, 1, MATRIX_REAL);
+    Imidref->rptr[1][1] = xc;
+    Imidref->rptr[2][1] = yc;
+    Imidref->rptr[3][1] = zc;
+    Imidref->rptr[4][1] = 1;
+    Pmidref             = MatrixMultiply(Vref, Imidref, NULL);
+
+    // Compute the location of the voxel in mov
+    if (cmdargs->AlignCentroids) {
+      MRIcomputeCentroid(coreg->mov, &xc, &yc, &zc);
+      printf("Mov CRS centroid %g %g %g\n", xc, yc, zc);
+    } else {
+      xc = (coreg->mov->width - 1) / 2.0;
+      yc = (coreg->mov->height - 1) / 2.0;
+      zc = (coreg->mov->depth - 1) / 2.0;
+    }
+    Vmov                = MRIxfmCRS2XYZ(coreg->mov, 0);
+    Imidmov             = MatrixAlloc(4, 1, MATRIX_REAL);
+    Imidmov->rptr[1][1] = xc;
+    Imidmov->rptr[2][1] = yc;
+    Imidmov->rptr[3][1] = zc;
     Imidmov->rptr[4][1] = 1;
-    Pmidmov = MatrixMultiply(Vmov, Imidmov, NULL);
+    Pmidmov             = MatrixMultiply(Vmov, Imidmov, NULL);
 
     // Set translation to make them equal
     cmdargs->params[0] = Pmidmov->rptr[1][1] - Pmidref->rptr[1][1];
@@ -327,42 +379,49 @@ int main(int argc, char *argv[]) {
     MatrixFree(&Pmidmov);
   }
 
-  coreg->histfwhm[0] = 7;
-  coreg->histfwhm[1] = 7;
-  coreg->nparams = cmdargs->dof;
-  coreg->nitersmax = cmdargs->nitersmax;
-  coreg->ftol = cmdargs->ftol;
-  coreg->linmintol = cmdargs->linmintol;
-  coreg->SatPct = cmdargs->SatPct;
-  coreg->DoCoordDither = cmdargs->DoCoordDither;
+  coreg->histfwhm[0]       = 7;
+  coreg->histfwhm[1]       = 7;
+  coreg->nparams           = cmdargs->dof;
+  coreg->nitersmax         = cmdargs->nitersmax;
+  coreg->ftol              = cmdargs->ftol;
+  coreg->linmintol         = cmdargs->linmintol;
+  coreg->SatPct            = cmdargs->SatPct;
+  coreg->DoCoordDither     = cmdargs->DoCoordDither;
   coreg->DoIntensityDither = cmdargs->DoIntensityDither;
-  coreg->refirfs = nullptr;
-  coreg->movirfs = nullptr;
-  coreg->DoSmoothing = cmdargs->DoSmoothing;
-  coreg->MovOOBFlag = cmdargs->MovOOBFlag;
-  coreg->optschema = cmdargs->optschema;
-  coreg->debug = debug;
+  coreg->refirfs           = NULL;
+  coreg->movirfs           = NULL;
+  coreg->DoSmoothing       = cmdargs->DoSmoothing;
+  coreg->MovOOBFlag        = cmdargs->MovOOBFlag;
+  coreg->optschema         = cmdargs->optschema;
+  coreg->debug             = debug;
 
   if (coreg->DoCoordDither) {
     // Creating a dither volume is needed for thread safety
     printf("Creating random numbers for coordinate dithering\n");
-    coreg->crfs = RFspecInit(53, nullptr);
-    coreg->crfs->name = strcpyalloc("uniform");
+    coreg->crfs            = RFspecInit(coreg->seed, NULL);
+    coreg->crfs->name      = strcpyalloc("uniform");
     coreg->crfs->params[0] = 0;
     coreg->crfs->params[1] = 1;
     coreg->cdither = MRIallocSequence(coreg->ref->width, coreg->ref->height,
                                       coreg->ref->depth, MRI_FLOAT, 3);
-    RFsynth(coreg->cdither, coreg->crfs, nullptr);
+    RFsynth(coreg->cdither, coreg->crfs, NULL);
   } else
     printf("NOT Creating random numbers for coordinate dithering\n");
   if (coreg->DoIntensityDither) {
     printf("Performing intensity dithering\n");
-    coreg->refirfs = RFspecInit(53, nullptr);
-    coreg->refirfs->name = strcpyalloc("uniform");
+    coreg->refirfs            = RFspecInit(coreg->seed, NULL);
+    coreg->refirfs->name      = strcpyalloc("uniform");
     coreg->refirfs->params[0] = 0;
     coreg->refirfs->params[1] = 1;
-    coreg->movirfs = RFspecInit(53, nullptr);
-    coreg->movirfs->name = strcpyalloc("uniform");
+    if (coreg->movidither) {
+      printf(
+          "Performing intensity dithering on mov with input dither volume\n");
+      coreg->movirfs = NULL;
+    } else {
+      printf("Performing intensity dithering on mov with computed dither\n");
+      coreg->movirfs       = RFspecInit(coreg->seed, NULL);
+      coreg->movirfs->name = strcpyalloc("uniform");
+    }
   } else
     printf("NOT Performing intensity dithering\n");
   fflush(stdout);
@@ -375,7 +434,7 @@ int main(int argc, char *argv[]) {
     printf("%7.4lf ", coreg->params[n]);
   printf("\n");
 
-  coreg->nsep = cmdargs->nsep;
+  coreg->nsep   = cmdargs->nsep;
   coreg->sepmin = 100;
   for (n = 0; n < cmdargs->nsep; n++) {
     coreg->seplist[n] = cmdargs->seplist[n];
@@ -386,10 +445,14 @@ int main(int argc, char *argv[]) {
   COREGprint(stdout, coreg);
 
   COREGpreproc(coreg);
+  if (cmdargs->movoutfile) {
+    printf("Saving mov to %s\n", cmdargs->movoutfile);
+    MRIwrite(coreg->mov, cmdargs->movoutfile);
+  }
 
   if (cmdargs->logcost) {
     coreg->fplogcost = fopen(cmdargs->logcost, "w");
-    if (coreg->fplogcost == nullptr) {
+    if (coreg->fplogcost == NULL) {
       printf("ERROR: could not open %s for writing\n", cmdargs->logcost);
       exit(1);
     }
@@ -424,14 +487,14 @@ int main(int argc, char *argv[]) {
     fclose(coreg->fplogcost);
 
   MATRIX *invV2V;
-  invV2V = MatrixInverse(coreg->V2V, nullptr);
-  lta = LTAcreate(coreg->mov, coreg->ref, invV2V, LINEAR_VOX_TO_VOX);
+  invV2V = MatrixInverse(coreg->V2V, NULL);
+  lta    = LTAcreate(coreg->mov, coreg->ref, invV2V, LINEAR_VOX_TO_VOX);
   if (cmdargs->subject)
     strncpy(lta->subject, cmdargs->subject, sizeof(lta->subject) - 1);
   else
     strncpy(lta->subject, "unknown", sizeof(lta->subject) - 1);
   lta->subject[sizeof(lta->subject) - 1] = 0;
-  err = LTAwrite(lta, cmdargs->outreg);
+  err                                    = LTAwrite(lta, cmdargs->outreg);
   if (err)
     exit(1);
 
@@ -441,11 +504,6 @@ int main(int argc, char *argv[]) {
     if (err)
       exit(1);
   }
-
-  // Print usage stats to the terminal (and a file is specified)
-  PrintRUsage(RUSAGE_SELF, "mri_coreg ", stdout);
-  if (cmdargs->rusagefile)
-    WriteRUsage(RUSAGE_SELF, "", cmdargs->rusagefile);
 
   printf("Final  RefRAS-to-MovRAS\n");
   MatrixPrint(stdout, coreg->M);
@@ -482,7 +540,7 @@ int main(int argc, char *argv[]) {
 
 /* -------------------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -514,9 +572,13 @@ static int parse_commandline(int argc, char **argv) {
       cmdargs->DoInitCostOnly = 1;
     else if (!strcasecmp(option, "--no-smooth"))
       cmdargs->DoSmoothing = 0;
-    else if (!strcasecmp(option, "--cras0"))
-      cmdargs->cras0 = 1;
-    else if (!strcasecmp(option, "--no-cras0"))
+    else if (!strcasecmp(option, "--cras0")) {
+      cmdargs->cras0          = 1;
+      cmdargs->AlignCentroids = 0;
+    } else if (!strcasecmp(option, "--centroid")) {
+      cmdargs->AlignCentroids = 1;
+      cmdargs->cras0          = 0;
+    } else if (!strcasecmp(option, "--no-cras0"))
       cmdargs->cras0 = 0;
     else if (!strcasecmp(option, "--regheader"))
       cmdargs->cras0 = 0;
@@ -535,55 +597,70 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->rusagefile = pargv[0];
+      nargsused           = 1;
+    } else if (!strcasecmp(option, "--seed")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &cmdargs->seed);
       nargsused = 1;
     } else if (!strcasecmp(option, "--mov")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->mov = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
+    } else if (!strcasecmp(option, "--movout")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      cmdargs->movoutfile = pargv[0];
+      nargsused           = 1;
+    } else if (!strcasecmp(option, "--mov-idither")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      cmdargs->moviditherfile = pargv[0];
+      nargsused               = 1;
     } else if (!strcasecmp(option, "--ref") || !strcasecmp(option, "--targ")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->ref = pargv[0];
-      nargsused = 1;
+      nargsused    = 1;
     } else if (!strcasecmp(option, "--ref-mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->refmask = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcasecmp(option, "--no-ref-mask"))
-      cmdargs->refmask = nullptr;
+      cmdargs->refmask = NULL;
     else if (!strcasecmp(option, "--mov-mask")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->movmask = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcasecmp(option, "--reg") || !strcasecmp(option, "--lta")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->outreg = pargv[0];
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcasecmp(option, "--regdat")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->regdat = pargv[0];
-      nargsused = 1;
+      nargsused       = 1;
     } else if (!strcasecmp(option, "--params")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->outparamfile = pargv[0];
-      nargsused = 1;
+      nargsused             = 1;
     } else if (!strcasecmp(option, "--log-cost")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->logcost = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcasecmp(option, "--s")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       cmdargs->subject = pargv[0];
       cmdargs->refmask = "aparc+aseg.mgz";
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcmp(option, "--sd") || !strcmp(option, "-SDIR")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -599,17 +676,17 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%d", &cmdargs->dof);
       cmdargs->optschema = 1;
-      nargsused = 1;
+      nargsused          = 1;
     } else if (!strcasecmp(option, "--xztrans+yrot") ||
                !strcasecmp(option, "--2dz")) {
       cmdargs->optschema = 2;
-      cmdargs->dof = 3;
+      cmdargs->dof       = 3;
     } else if (!strcasecmp(option, "--xytrans+zrot")) {
       cmdargs->optschema = 4;
-      cmdargs->dof = 3;
+      cmdargs->dof       = 3;
     } else if (!strcasecmp(option, "--zscale")) {
       cmdargs->optschema = 3;
-      cmdargs->dof = 7;
+      cmdargs->dof       = 7;
     } else if (!strcasecmp(option, "--bf-lim")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -638,20 +715,59 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       LTA *lta;
       lta = LTAread(pargv[0]);
-      if (lta == nullptr)
+      if (lta == NULL)
         exit(1);
       LTAchangeType(lta, LINEAR_RAS_TO_RAS);
       LTAinvert(lta, lta);
-      COREGparams9(lta->xforms[0].m_L, nullptr);
+      double p[12];
+      TranformExtractAffineParams(lta->xforms[0].m_L, p);
+      for (int k = 0; k < 12; k++)
+        printf("%g ", p[k]);
+      printf("\n");
       nargsused = 1;
       exit(0);
+    } else if (!strcasecmp(option, "--mat2rot")) {
+      if (nargc < 2)
+        CMDargNErr(option, 2);
+      LTA *lta;
+      lta = LTAread(pargv[0]);
+      if (lta == NULL)
+        exit(1);
+      LTAmat2RotMat(lta);
+      int err   = LTAwrite(lta, pargv[1]);
+      nargsused = 2;
+      exit(err);
+    } else if (!strcasecmp(option, "--par2mat")) {
+      if (nargc < 12)
+        CMDargNErr(option, 15);
+      double par[12];
+      int    k;
+      for (k = 0; k < 12; k++)
+        sscanf(pargv[k], "%lf", &par[k]);
+      //for(k=0; k<12; k++) printf("%lf\n",par[k]);
+      MRI *mrisrc, *mritarg;
+      mrisrc = MRIread(pargv[12]);
+      if (mrisrc == NULL)
+        exit(1);
+      mritarg = MRIread(pargv[13]);
+      if (mritarg == NULL)
+        exit(1);
+      MATRIX *T = TranformAffineParams2Matrix(par, NULL);
+      MatrixInverse(T, T);
+      LTA *lta = LTAcreate(mrisrc, mritarg, T, LINEAR_RAS_TO_RAS);
+      int  err = LTAwrite(lta, pargv[14]);
+      MRIfree(&mrisrc);
+      MRIfree(&mritarg);
+      MatrixFree(&T);
+      LTAfree(&lta);
+      exit(err);
     } else if (!strcasecmp(option, "--rms")) {
       if (nargc < 2)
         CMDargNErr(option, 4);
       double rms, RMSDiffRad;
-      FILE *fp;
-      LTA *lta1, *lta2;
-      char *RMSDiffFile;
+      FILE * fp;
+      LTA *  lta1, *lta2;
+      char * RMSDiffFile;
       if (isalpha(pargv[0][0])) {
         printf("ERROR: first arg to --rms must be the radius\n");
         exit(1);
@@ -662,12 +778,12 @@ static int parse_commandline(int argc, char **argv) {
         exit(1);
       }
       RMSDiffFile = pargv[1];
-      lta1 = LTAread(pargv[2]);
-      if (lta1 == nullptr)
+      lta1        = LTAread(pargv[2]);
+      if (lta1 == NULL)
         exit(1);
       LTAchangeType(lta1, REGISTER_DAT);
       lta2 = LTAread(pargv[3]);
-      if (lta2 == nullptr)
+      if (lta2 == NULL)
         exit(1);
       LTAchangeType(lta2, REGISTER_DAT);
       rms = RMSregDiffMJ(lta1->xforms[0].m_L, lta2->xforms[0].m_L, RMSDiffRad);
@@ -698,11 +814,11 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &cmdargs->fwhmc);
-      cmdargs->fwhmr = cmdargs->fwhmc;
-      cmdargs->fwhms = cmdargs->fwhmc;
-      cmdargs->SmoothRef = 1;
+      cmdargs->fwhmr       = cmdargs->fwhmc;
+      cmdargs->fwhms       = cmdargs->fwhmc;
+      cmdargs->SmoothRef   = 1;
       cmdargs->DoSmoothing = 0;
-      nargsused = 1;
+      nargsused            = 1;
     } else if (!strcasecmp(option, "--trans")) {
       if (nargc < 3)
         CMDargNErr(option, 3);
@@ -710,7 +826,7 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[1], "%lf", &cmdargs->params[1]);
       sscanf(pargv[2], "%lf", &cmdargs->params[2]);
       cmdargs->cras0 = 0;
-      nargsused = 3;
+      nargsused      = 3;
     } else if (!strcasecmp(option, "--rot")) {
       if (nargc < 3)
         CMDargNErr(option, 3);
@@ -732,12 +848,24 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[1], "%lf", &cmdargs->params[10]);
       sscanf(pargv[2], "%lf", &cmdargs->params[11]);
       nargsused = 3;
+    } else if (!strcasecmp(option, "--init-reg")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      LTA *lta;
+      lta = LTAread(pargv[0]);
+      if (lta == NULL)
+        exit(1);
+      LTAchangeType(lta, LINEAR_RAS_TO_RAS);
+      LTAinvert(lta, lta);
+      TranformExtractAffineParams(lta->xforms[0].m_L, cmdargs->params);
+      cmdargs->cras0 = 0;
+      nargsused      = 1;
     } else if (!strcmp(option, "--no-coord-dither"))
       cmdargs->DoCoordDither = 0;
     else if (!strcmp(option, "--no-intensity-dither"))
       cmdargs->DoIntensityDither = 0;
     else if (!strcmp(option, "--no-dither")) {
-      cmdargs->DoCoordDither = 0;
+      cmdargs->DoCoordDither     = 0;
       cmdargs->DoIntensityDither = 0;
     } else if (!strcasecmp(option, "--threads") ||
                !strcasecmp(option, "--nthreads")) {
@@ -770,12 +898,12 @@ static int parse_commandline(int argc, char **argv) {
   return (0);
 }
 /* -------------------------------------------------------- */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 /* -------------------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("USAGE: %s \n", Progname);
   printf("\n");
   printf("   --mov movvol : source volume\n");
@@ -805,13 +933,16 @@ static void print_usage() {
   printf("   --rot   Rx Ry Rz : initial rotation in deg\n");
   printf("   --scale Sx Sy Sz : initial scale\n");
   printf("   --shear Hxy Hxz Hyz : initial shear\n");
+  printf("   --init-reg reg0.lta : initialize with given registration file\n");
   printf("   --params outparamfile : save parameters in this file\n");
-  printf("   --no-cras0 : do not Sett translation parameters to align centers "
+  printf("   --no-cras0 : do not set translation parameters to align centers "
          "of mov and ref\n");
+  printf("   --centroid : intialize by aligning centeroids of mov and ref\n");
   printf("   --regheader : same as no-cras0\n");
   printf("   --nitersmax n : default is %d\n", cmdargs->nitersmax);
   printf("   --ftol ftol : default is %5.3le\n", cmdargs->ftol);
   printf("   --linmintol linmintol : default is %5.3le\n", cmdargs->linmintol);
+  printf("   --seed seed : set random seed for dithering\n");
   printf("   --sat SatPct : saturation threshold, default %5.3le\n",
          cmdargs->SatPct);
   printf("   --conf-ref : conform the refernece without rescaling (good for "
@@ -825,10 +956,17 @@ static void print_usage() {
   printf("   --no-mov-oob : do not count mov voxels that are out-of-bounds as "
          "0 (default)\n");
   printf("   --mat2par reg.lta : extract parameters out of registration\n");
+  printf("   --mat2rot reg.lta rotreg.lta: convert registration to a pure "
+         "rotation\n");
+  printf("   --par2mat par1-par12 srcvol trgvol reg.lta : convert parameters "
+         "to a  registration\n");
   printf("   --rms radius filename reg1 reg2 : compute RMS diff between two "
          "registrations using MJ's method (rad ~= 50mm)\n");
   printf("      The rms will be written to filename; if filename == nofile, "
          "then no file is created\n");
+  printf("   --movout movout volume : save the mov after all preprocessing\n");
+  printf("   --mov-idither intensity dither volume : save the mov intensity "
+         "dither volume\n");
   printf("\n");
   printf("   --debug     turn on debugging\n");
   printf("   --checkopts don't run anything, just check options and exit\n");
@@ -839,7 +977,7 @@ static void print_usage() {
   printf("\n");
 }
 /* -------------------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("This is a program that performs a linear registration between\n");
   printf(
@@ -848,19 +986,19 @@ static void print_help() {
   exit(1);
 }
 /* -------------------------------------------------------- */
-static void print_version() {
+static void print_version(void) {
   printf("%s\n", vcid);
   exit(1);
 }
 /* -------------------------------------------------------- */
-static void check_options() {
+static void check_options(void) {
   char tmpstr[3000];
-  if (cmdargs->mov == nullptr) {
+  if (cmdargs->mov == NULL) {
     printf("ERROR: must spec --mov\n");
     exit(1);
   }
   if (cmdargs->subject) {
-    if (cmdargs->ref == nullptr)
+    if (cmdargs->ref == NULL)
       cmdargs->ref = "brainmask.mgz";
     if (!fio_FileExistsReadable(cmdargs->ref)) {
       sprintf(tmpstr, "%s/%s/mri/%s", fsenv->SUBJECTS_DIR, cmdargs->subject,
@@ -873,16 +1011,16 @@ static void check_options() {
       cmdargs->refmask = strcpyalloc(tmpstr);
     }
   }
-  if (cmdargs->ref == nullptr) {
+  if (cmdargs->ref == NULL) {
     printf("ERROR: must spec --ref\n");
     exit(1);
   }
-  if (cmdargs->outreg == nullptr) {
+  if (cmdargs->outreg == NULL) {
     printf("ERROR: must spec --reg\n");
     exit(1);
   }
   if (cmdargs->nsep == 0) {
-    cmdargs->nsep = 2;
+    cmdargs->nsep       = 2;
     cmdargs->seplist[0] = 4;
     cmdargs->seplist[1] = 2;
   }
@@ -921,14 +1059,14 @@ long COREGvolIndex(int ncols, int nrows, int nslices, int c, int r, int s) {
 }
 
 /*!
-  \fn double COREGsamp(unsigned char *f, const double c, const double r, const
-  double s, const int ncols, const int nrows, const int nslices) \brief
-  Trilinear interpolation
+  \fn double COREGsamp(unsigned char *f, const double c, const double r, const double s, 
+                       const int ncols, const int nrows, const int nslices)
+  \brief Trilinear interpolation		       
  */
 double COREGsamp(unsigned char *f, const double c, const double r,
                  const double s, const int ncols, const int nrows,
                  const int nslices) {
-  int cm, rm, sm, cp, rp, sp;
+  int    cm, rm, sm, cp, rp, sp;
   double val, cmd, rmd, smd, cpd, rpd, spd;
 
   cm = floor(c);
@@ -969,16 +1107,16 @@ int COREGhist(COREG *coreg) {
   //
   double V2V[16];
 
-  V2V[0] = coreg->V2V->rptr[1][1];
-  V2V[1] = coreg->V2V->rptr[2][1];
-  V2V[2] = coreg->V2V->rptr[3][1];
-  V2V[3] = 0;
-  V2V[4] = coreg->V2V->rptr[1][2];
-  V2V[5] = coreg->V2V->rptr[2][2];
-  V2V[6] = coreg->V2V->rptr[3][2];
-  V2V[7] = 0;
-  V2V[8] = coreg->V2V->rptr[1][3];
-  V2V[9] = coreg->V2V->rptr[2][3];
+  V2V[0]  = coreg->V2V->rptr[1][1];
+  V2V[1]  = coreg->V2V->rptr[2][1];
+  V2V[2]  = coreg->V2V->rptr[3][1];
+  V2V[3]  = 0;
+  V2V[4]  = coreg->V2V->rptr[1][2];
+  V2V[5]  = coreg->V2V->rptr[2][2];
+  V2V[6]  = coreg->V2V->rptr[3][2];
+  V2V[7]  = 0;
+  V2V[8]  = coreg->V2V->rptr[1][3];
+  V2V[9]  = coreg->V2V->rptr[2][3];
   V2V[10] = coreg->V2V->rptr[3][3];
   V2V[11] = 0;
   V2V[12] = coreg->V2V->rptr[1][4];
@@ -996,10 +1134,9 @@ int COREGhist(COREG *coreg) {
   long nhits = 0;
 
   // Calculate the number of iterations the original loop did
-  // Do in chunks in parallel to get deterministic results independent of the
-  // number of threads used
+  // Do in chunks in parallel to get deterministic results independent of the number of threads used
   //
-  int const niters = (coreg->ref->width + coreg->sep - 1) / coreg->sep;
+  int const niters    = (coreg->ref->width + coreg->sep - 1) / coreg->sep;
   int const chunkSize = (niters + nchunks - 1) / nchunks;
 
   int chunk;
@@ -1011,7 +1148,7 @@ int COREGhist(COREG *coreg) {
     ROMP_PFLB_begin
 
         int const crefBegin = (chunk + 0) * chunkSize * coreg->sep;
-    int crefEnd = (chunk + 1) * chunkSize * coreg->sep;
+    int           crefEnd   = (chunk + 1) * chunkSize * coreg->sep;
     if (crefEnd > coreg->ref->width)
       crefEnd = coreg->ref->width;
 
@@ -1104,7 +1241,7 @@ int COREGhist(COREG *coreg) {
     for (n = 0; n < nchunks; n++)
       free(HH[n]);
     free(HH);
-    HH = nullptr;
+    HH = NULL;
   }
 
   // Repackage Histogram into a 2D array
@@ -1122,7 +1259,7 @@ int COREGhist(COREG *coreg) {
   }
 
   // This is good for computing whether and how much the mov and ref overlap
-  coreg->nhits = nhits;
+  coreg->nhits   = nhits;
   coreg->pcthits = pow(coreg->sep, 3) * (double)100.0 * nhits / coreg->nvoxref;
 
   return (nhits);
@@ -1133,11 +1270,11 @@ int COREGhist(COREG *coreg) {
   \brief rescales to uchar range , but ucmri is actually a FLOAT
  */
 MRI *MRIrescaleToUChar(MRI *mri, MRI *ucmri, double sat) {
-  int c, r, s;
-  double min, max, v;
+  int           c, r, s;
+  double        min, max, v;
   unsigned char ucv;
 
-  if (ucmri == nullptr) {
+  if (ucmri == NULL) {
     ucmri = MRIalloc(mri->width, mri->height, mri->depth, MRI_FLOAT);
     MRIcopyHeader(mri, ucmri);
   }
@@ -1155,7 +1292,7 @@ MRI *MRIrescaleToUChar(MRI *mri, MRI *ucmri, double sat) {
       }
     }
   }
-  // printf("min = %lf max = %lf\n",min,max);
+  //printf("min = %lf max = %lf\n",min,max);
   if (max > sat)
     max = sat;
 
@@ -1174,23 +1311,25 @@ MRI *MRIrescaleToUChar(MRI *mri, MRI *ucmri, double sat) {
 }
 
 /*!
-  \fn unsigned char *MRItoUCharVect(MRI *mri)
+  \fn unsigned char *MRItoUCharVect(MRI *mri, RFS *rfs, MRI *dither)
   Converts mri values to a uchar vector.
   Important! Must be consistent withh COREGvolIndex()
 */
-unsigned char *MRItoUCharVect(MRI *mri, RFS *rfs) {
-  int c, r, s, nvox;
+unsigned char *MRItoUCharVect(MRI *mri, RFS *rfs, MRI *dither) {
+  int            c, r, s, nvox;
   unsigned char *a, *pa;
-  float val, dval = 0.0;
+  float          val, dval = 0.0;
 
   nvox = mri->width * mri->height * mri->depth;
-  a = (unsigned char *)calloc(sizeof(unsigned char), nvox);
-  pa = a;
+  a    = (unsigned char *)calloc(sizeof(unsigned char), nvox);
+  pa   = a;
   for (s = 0; s < mri->depth; s++) {
     for (r = 0; r < mri->height; r++) {
       for (c = 0; c < mri->width; c++) {
         if (rfs)
           dval = RFdrawVal(rfs);
+        if (dither)
+          dval = MRIgetVoxVal(dither, c, r, s, 0);
         val = MRIgetVoxVal(mri, c, r, s, 0) + dval;
         if (val < 0)
           val = 0;
@@ -1210,7 +1349,7 @@ MATRIX *MRIgetVoxelToVoxelXformBase(MRI *mri_src, MRI *mri_dst,
   MATRIX *m_ras2vox_dst, *m_vox2ras_src, *m_vox2ras_dst;
   m_vox2ras_src = MRIxfmCRS2XYZ(mri_src, base);
   m_vox2ras_dst = MRIxfmCRS2XYZ(mri_dst, base);
-  m_ras2vox_dst = MatrixInverse(m_vox2ras_dst, nullptr);
+  m_ras2vox_dst = MatrixInverse(m_vox2ras_dst, NULL);
   if (SrcRAS2DstRAS) {
     SrcVox2DstVox =
         MatrixMultiplyD(m_ras2vox_dst, SrcRAS2DstRAS, SrcVox2DstVox);
@@ -1231,7 +1370,7 @@ MATRIX *MRIgetVoxelToVoxelXformBase(MRI *mri_src, MRI *mri_dst,
 */
 double **AllocDoubleMatrix(int rows, int cols) {
   double **M;
-  int r;
+  int      r;
   M = (double **)calloc(rows, sizeof(double *));
   for (r = 0; r < rows; r++)
     M[r] = (double *)calloc(cols, sizeof(double));
@@ -1245,16 +1384,18 @@ int FreeDoubleMatrix(double **M, int rows, int cols) {
   free(M);
   return (0);
 }
-int WriteDoubleMatrix(char *fname, char *fmt, double **M, int rows, int cols) {
+int WriteDoubleMatrix(const char *fname, const char *fmt, double **M, int rows,
+                      int cols) {
   FILE *fp;
   fp = fopen(fname, "w");
   PrintDoubleMatrix(fp, fmt, M, rows, cols);
   fclose(fp);
   return (0);
 }
-int PrintDoubleMatrix(FILE *fp, char *fmt, double **M, int rows, int cols) {
+int PrintDoubleMatrix(FILE *fp, const char *fmt, double **M, int rows,
+                      int cols) {
   int r, c;
-  if (fmt == nullptr)
+  if (fmt == NULL)
     fmt = "%20.10lf";
   for (r = 0; r < rows; r++) {
     for (c = 0; c < cols; c++)
@@ -1265,9 +1406,8 @@ int PrintDoubleMatrix(FILE *fp, char *fmt, double **M, int rows, int cols) {
 }
 
 /*!
-  \fn double *SumVectorDoubleMatrix(double **M, int rows, int cols, int dim,
-  double *sumvect, int *nv) Compute a vector that is the sum of either the rows
-  or he columns of the given matrix
+  \fn double *SumVectorDoubleMatrix(double **M, int rows, int cols, int dim, double *sumvect, int *nv)
+  Compute a vector that is the sum of either the rows or he columns of the given matrix
 */
 double *SumVectorDoubleMatrix(double **M, int rows, int cols, int dim,
                               double *sumvect, int *nv) {
@@ -1297,10 +1437,10 @@ double *SumVectorDoubleMatrix(double **M, int rows, int cols, int dim,
 
 double *conv1d(double *v1, int n1, double *v2, int n2, double *vc) {
   int n, ntot = n1 + n2 - 1;
-  if (vc == nullptr)
+  if (vc == NULL)
     vc = (double *)calloc(ntot, sizeof(double));
 
-  // To OMP this code, must make vc thread safe
+  //To OMP this code, must make vc thread safe
   for (n = 0; n < ntot; n++) {
     int k, kmin, kmax;
     if (n >= n2 - 1)
@@ -1315,29 +1455,29 @@ double *conv1d(double *v1, int n1, double *v2, int n2, double *vc) {
     for (k = kmin; k <= kmax; k++)
       vc[n] += v1[k] * v2[n - k];
   }
-  // for(n=0; n < ntot; n++)  printf("%3d  %10.8lf\n",n,vc[n]);
+  //for(n=0; n < ntot; n++)  printf("%3d  %10.8lf\n",n,vc[n]);
 
   return (vc);
 }
 
 double **conv1dmat(double **M, int rows, int cols, double *v, int nv, int dim,
                    double **C, int *pcrows, int *pccols) {
-  int crows, ccols, c, r, ntot;
+  int     crows, ccols, c, r, ntot;
   double *vc, *Mv;
 
   if (dim == 1) {
     // convolve with column vector
     crows = rows + nv - 1;
     ccols = cols;
-    ntot = crows;
+    ntot  = crows;
   } else {
     // convolve with row vector
     crows = rows;
     ccols = cols + nv - 1;
-    ntot = ccols;
+    ntot  = ccols;
   }
-  // printf("M size %d,%d, nv=%d, C size %d %d\n",rows,cols,nv,crows,cols);
-  if (C == nullptr)
+  //printf("M size %d,%d, nv=%d, C size %d %d\n",rows,cols,nv,crows,cols);
+  if (C == NULL)
     C = AllocDoubleMatrix(crows, ccols);
 
   if (dim == 1) {
@@ -1380,12 +1520,12 @@ double **conv1dmat(double **M, int rows, int cols, double *v, int nv, int dim,
     d2 = max(abs(c2(:)-c2a(:)));
     % d1 and d2 should be very small < 10e-7
  */
-int conv1dmatTest() {
+int conv1dmatTest(void) {
   double **M, **C1, **C2, *v;
-  int rows = 30, cols = 200, nv = 40;
-  int C1rows, C1cols, C2rows, C2cols;
-  int c, r;
-  FILE *fp;
+  int      rows = 30, cols = 200, nv = 40;
+  int      C1rows, C1cols, C2rows, C2cols;
+  int      c, r;
+  FILE *   fp;
 
   M = AllocDoubleMatrix(rows, cols);
   for (r = 0; r < rows; r++)
@@ -1409,10 +1549,10 @@ int conv1dmatTest() {
     fprintf(fp, "%20.10lf\n", v[c]);
   fclose(fp);
 
-  C1 = conv1dmat(M, rows, cols, v, nv, 2, nullptr, &C1rows, &C1cols);
+  C1 = conv1dmat(M, rows, cols, v, nv, 2, NULL, &C1rows, &C1cols);
   WriteDoubleMatrix("c1.dat", "%20.10lf", C1, C1rows, C1cols);
 
-  C2 = conv1dmat(C1, C1rows, C1cols, v, nv, 1, nullptr, &C2rows, &C2cols);
+  C2 = conv1dmat(C1, C1rows, C1cols, v, nv, 1, NULL, &C2rows, &C2cols);
   WriteDoubleMatrix("c2.dat", "%20.10lf", C2, C2rows, C2cols);
 
   return (0);
@@ -1420,11 +1560,11 @@ int conv1dmatTest() {
 
 double NMICost(double **H, int cols, int rows) {
   double *s1, *s2;
-  int ns1, ns2, n, c, r;
-  double den, cost, s1sum, s2sum;
+  int     ns1, ns2, n, c, r;
+  double  den, cost, s1sum, s2sum;
 
-  s1 = SumVectorDoubleMatrix(H, rows, cols, 1, nullptr, &ns1);
-  s2 = SumVectorDoubleMatrix(H, rows, cols, 2, nullptr, &ns2);
+  s1 = SumVectorDoubleMatrix(H, rows, cols, 1, NULL, &ns1);
+  s2 = SumVectorDoubleMatrix(H, rows, cols, 2, NULL, &ns2);
 
   den = 0;
   for (c = 0; c < cols; c++) {
@@ -1441,12 +1581,12 @@ double NMICost(double **H, int cols, int rows) {
     s2sum += (s2[n] * log2(s2[n]));
 
   cost = -(s1sum + s2sum) / (den + FLT_EPSILON);
-  // printf("%20.15lf %20.15lf %20.15lf \n",s1sum,s2sum,cost);
+  //printf("%20.15lf %20.15lf %20.15lf \n",s1sum,s2sum,cost);
 
   free(s1);
-  s1 = nullptr;
+  s1 = NULL;
   free(s2);
-  s2 = nullptr;
+  s2 = NULL;
   return (cost);
 }
 
@@ -1459,7 +1599,7 @@ double NMICost(double **H, int cols, int rows) {
 double *COREGoptSchema2MatrixPar(COREG *coreg, double *par) {
   int n;
 
-  if (par == nullptr)
+  if (par == NULL)
     par = (double *)calloc(12, sizeof(double));
 
   switch (coreg->optschema) {
@@ -1476,10 +1616,10 @@ double *COREGoptSchema2MatrixPar(COREG *coreg, double *par) {
     // schema 2 is for a 2D image (3dof: x and z trans with rot about y)
     for (n = 0; n < 12; n++)
       par[n] = 0;
-    par[6] = par[7] = par[8] = 1; // scaling
-    par[0] = coreg->params[0];    // x trans
-    par[2] = coreg->params[1];    // z trans
-    par[4] = coreg->params[2];    // rotation about y
+    par[6] = par[7] = par[8] = 1;                // scaling
+    par[0]                   = coreg->params[0]; // x trans
+    par[2]                   = coreg->params[1]; // z trans
+    par[4]                   = coreg->params[2]; // rotation about y
     break;
   case 3:
     // schema 3 is 7 dof (xyz shift, xyz rot, and z scale)
@@ -1494,143 +1634,25 @@ double *COREGoptSchema2MatrixPar(COREG *coreg, double *par) {
     // schema 4 is for a 2D image (3dof: x and y trans with rot about z)
     for (n = 0; n < 12; n++)
       par[n] = 0;
-    par[6] = par[7] = par[8] = 1; // scaling
-    par[0] = coreg->params[0];    // x trans
-    par[1] = coreg->params[1];    // y trans
-    par[5] = coreg->params[2];    // rotation about z
+    par[6] = par[7] = par[8] = 1;                // scaling
+    par[0]                   = coreg->params[0]; // x trans
+    par[1]                   = coreg->params[1]; // y trans
+    par[5]                   = coreg->params[5]; // rotation about z
     break;
   }
   return (par);
 }
-/*!
-  \fn MATRIX *COREGmatrix(double *p, MATRIX *M)
-  \brief Computes a RAS-to-RAS transformation matrix given
-  the parameters. p[0-2] translation, p[3-5] rotation
-  in degrees, p[6-8] scale, p[9-11] shear.
-  M = T*R1*R2*R3*SCALE*SHEAR
-  Consistent with COREGparams9()
- */
-MATRIX *COREGmatrix(double *p, MATRIX *M) {
-  MATRIX *T, *R1, *R2, *R3, *R, *ZZ, *S;
-  // int n;
-  // printf("p = [");
-  // for(n=0; n<np; n++) printf("%10.3lf ",p[n]);
-  // printf("];\n");
-
-  // translations
-  T = MatrixIdentity(4, nullptr);
-  T->rptr[1][4] = p[0];
-  T->rptr[2][4] = p[1];
-  T->rptr[3][4] = p[2];
-
-  // rotations
-  R1 = MatrixIdentity(4, nullptr);
-  R1->rptr[2][2] = cos(p[3] * M_PI / 180);
-  R1->rptr[2][3] = sin(p[3] * M_PI / 180);
-  R1->rptr[3][2] = -sin(p[3] * M_PI / 180);
-  R1->rptr[3][3] = cos(p[3] * M_PI / 180);
-
-  R2 = MatrixIdentity(4, nullptr);
-  R2->rptr[1][1] = cos(p[4] * M_PI / 180);
-  R2->rptr[1][3] = sin(p[4] * M_PI / 180);
-  R2->rptr[3][1] = -sin(p[4] * M_PI / 180);
-  R2->rptr[3][3] = cos(p[4] * M_PI / 180);
-
-  R3 = MatrixIdentity(4, nullptr);
-  R3->rptr[1][1] = cos(p[5] * M_PI / 180);
-  R3->rptr[1][2] = sin(p[5] * M_PI / 180);
-  R3->rptr[2][1] = -sin(p[5] * M_PI / 180);
-  R3->rptr[2][2] = cos(p[5] * M_PI / 180);
-
-  R = MatrixMultiplyD(R1, R2, nullptr);
-  MatrixMultiplyD(R, R3, R);
-
-  // scale, use ZZ because some idiot #defined Z
-  ZZ = MatrixIdentity(4, nullptr);
-  ZZ->rptr[1][1] = p[6];
-  ZZ->rptr[2][2] = p[7];
-  ZZ->rptr[3][3] = p[8];
-  ZZ->rptr[4][4] = 1;
-
-  // shear
-  S = MatrixIdentity(4, nullptr);
-  S->rptr[1][2] = p[9];
-  S->rptr[1][3] = p[10];
-  S->rptr[2][3] = p[11];
-
-  // M = T*R*ZZ*S
-  M = MatrixMultiplyD(T, R, M);
-  MatrixMultiplyD(M, ZZ, M);
-  MatrixMultiplyD(M, S, M);
-  // MatrixPrint(stdout,M);
-
-  MatrixFree(&T);
-  MatrixFree(&R1);
-  MatrixFree(&R2);
-  MatrixFree(&R3);
-  MatrixFree(&R);
-  MatrixFree(&ZZ);
-  MatrixFree(&S);
-
-  return (M);
-}
-
-/*!
-  \fn double *COREGparams9(MATRIX *M9, double *p)
-  \brief Extracts parameter from a 9 dof transformation matrix.
-  This is consistent with COREGmatrix(). Still need to figure
-  out how to do 12 dof. Note: p will be alloced to 12.
-  Angles are in degrees.
- */
-double *COREGparams9(MATRIX *M9, double *p) {
-  double sum;
-  int n, c, r;
-  MATRIX *R;
-
-  if (p == nullptr)
-    p = (double *)calloc(12, sizeof(double));
-
-  // translation
-  for (r = 0; r < 3; r++)
-    p[r] = M9->rptr[r + 1][4];
-
-  // R is the rotation matrix
-  R = MatrixAlloc(3, 3, MATRIX_REAL);
-  for (c = 0; c < 3; c++) {
-    sum = 0;
-    for (r = 0; r < 3; r++)
-      sum += (M9->rptr[r + 1][c + 1] * M9->rptr[r + 1][c + 1]);
-    p[c + 6] = sqrt(sum); // scale
-    for (r = 0; r < 3; r++)
-      R->rptr[r + 1][c + 1] = M9->rptr[r + 1][c + 1] / sqrt(sum);
-  }
-
-  // extract rotation params
-  p[3] = atan2(R->rptr[2][3], R->rptr[3][3]) * 180 / M_PI;
-  p[4] = atan2(R->rptr[1][3],
-               sqrt(pow(R->rptr[2][3], 2) + pow(R->rptr[3][3], 2))) *
-         180 / M_PI;
-  p[5] = atan2(R->rptr[1][2], R->rptr[1][1]) * 180 / M_PI;
-
-  MatrixFree(&R);
-
-  for (n = 0; n < 9; n++)
-    printf("%10.8lf ", p[n]);
-  printf("\n");
-
-  return (p);
-}
 
 double COREGcost(COREG *coreg) {
-  double **H1, **H;
-  double *g1, *g2, sum, std1, std2;
-  int r, c, n, lim1, lim2, ng1, ng2;
-  int H1rows, H1cols, Hrows, Hcols;
-  static double *params = nullptr;
+  double **      H1, **H;
+  double *       g1, *g2, sum, std1, std2;
+  int            r, c, n, lim1, lim2, ng1, ng2;
+  int            H1rows, H1cols, Hrows, Hcols;
+  static double *params = NULL;
 
   // RefRAS-to-MovRAS
-  params = COREGoptSchema2MatrixPar(coreg, params);
-  coreg->M = COREGmatrix(params, coreg->M);
+  params   = COREGoptSchema2MatrixPar(coreg, params);
+  coreg->M = TranformAffineParams2Matrix(params, coreg->M);
 
   // AnatVox-to-FuncVox
   coreg->V2V = MRIgetVoxelToVoxelXformBase(coreg->ref, coreg->mov, coreg->M,
@@ -1639,15 +1661,14 @@ double COREGcost(COREG *coreg) {
   // Compute joint histogram
   COREGhist(coreg);
 
-  // printf("M  %20.18f %20.18f %20.18f
-  // \n",coreg->M->rptr[1][1],coreg->V2V->rptr[1][1],coreg->H0[0][0]);
+  //printf("M  %20.18f %20.18f %20.18f \n",coreg->M->rptr[1][1],coreg->V2V->rptr[1][1],coreg->H0[0][0]);
 
   // filter for the column vectors
   std1 = coreg->histfwhm[0] / sqrt(log(256.0));
   lim1 = ceil(2 * coreg->histfwhm[0]);
-  ng1 = 2 * lim1 + 1;
-  g1 = (double *)calloc(ng1, sizeof(double));
-  sum = 0;
+  ng1  = 2 * lim1 + 1;
+  g1   = (double *)calloc(ng1, sizeof(double));
+  sum  = 0;
   for (n = -lim1; n <= lim1; n++) {
     g1[n + lim1] =
         exp(-(n * n) / (2 * (std1 * std1))) / (std1 * sqrt(2 * M_PI));
@@ -1655,15 +1676,15 @@ double COREGcost(COREG *coreg) {
   }
   for (n = 0; n < ng1; n++) {
     g1[n] /= sum;
-    // printf("%3d  %lf\n",n,g1[n]);
+    //printf("%3d  %lf\n",n,g1[n]);
   }
 
   // filter for the row vectors
   std2 = coreg->histfwhm[1] / sqrt(log(256.0));
   lim2 = ceil(2 * coreg->histfwhm[1]);
-  ng2 = 2 * lim2 + 1;
-  g2 = (double *)calloc(2 * lim2 + 1, sizeof(double));
-  sum = 0;
+  ng2  = 2 * lim2 + 1;
+  g2   = (double *)calloc(2 * lim2 + 1, sizeof(double));
+  sum  = 0;
   for (n = -lim2; n <= lim2; n++) {
     g2[n + lim2] =
         exp(-(n * n) / (2 * (std2 * std2))) / (std2 * sqrt(2 * M_PI));
@@ -1673,8 +1694,8 @@ double COREGcost(COREG *coreg) {
     g2[n] /= sum;
 
   // Apply filters
-  H1 = conv1dmat(coreg->H0, 256, 256, g2, ng2, 2, nullptr, &H1rows, &H1cols);
-  H = conv1dmat(H1, H1rows, H1cols, g1, ng1, 1, nullptr, &Hrows, &Hcols);
+  H1 = conv1dmat(coreg->H0, 256, 256, g2, ng2, 2, NULL, &H1rows, &H1cols);
+  H  = conv1dmat(H1, H1rows, H1cols, g1, ng1, 1, NULL, &Hrows, &Hcols);
 
   for (c = 0; c < Hcols; c++)
     for (r = 0; r < Hrows; r++)
@@ -1691,13 +1712,13 @@ double COREGcost(COREG *coreg) {
   coreg->cost = NMICost(H, Hcols, Hrows);
 
   FreeDoubleMatrix(H1, H1rows, H1cols);
-  H1 = nullptr;
+  H1 = NULL;
   FreeDoubleMatrix(H, Hrows, Hcols);
-  H = nullptr;
+  H = NULL;
   free(g1);
-  g1 = nullptr;
+  g1 = NULL;
   free(g2);
-  g2 = nullptr;
+  g2 = NULL;
 
   if (coreg->fplogcost) {
     FILE *fp;
@@ -1716,10 +1737,10 @@ double COREGcost(COREG *coreg) {
 /*--------------------------------------------------------------------------*/
 float COREGcostPowell(float *pPowel) {
   extern COREG *coreg;
-  int n, newmin;
-  float curcost;
-  static float initcost = -1, mincost = -1, ppmin[100];
-  FILE *fp;
+  int           n, newmin;
+  float         curcost;
+  static float  initcost = -1, mincost = -1, ppmin[100];
+  FILE *        fp;
 
   for (n = 0; n < coreg->nparams; n++)
     coreg->params[n] = pPowel[n + 1];
@@ -1729,9 +1750,9 @@ float COREGcostPowell(float *pPowel) {
 
   newmin = 0;
   if (coreg->startmin) {
-    newmin = 1;
+    newmin   = 1;
     initcost = curcost;
-    mincost = curcost;
+    mincost  = curcost;
     for (n = 0; n < coreg->nparams; n++)
       ppmin[n] = coreg->params[n];
     printf("InitialCost %20.10lf \n", initcost);
@@ -1739,13 +1760,13 @@ float COREGcostPowell(float *pPowel) {
   }
 
   if (mincost > curcost) {
-    newmin = 1;
+    newmin  = 1;
     mincost = curcost;
     for (n = 0; n < coreg->nparams; n++)
       ppmin[n] = coreg->params[n];
   }
 
-  if (false) {
+  if (0) {
     fp = stdout;
     fprintf(fp, "%4d  ", coreg->nCostEvaluations);
     for (n = 0; n < coreg->nparams; n++)
@@ -1768,9 +1789,9 @@ float COREGcostPowell(float *pPowel) {
 /*---------------------------------------------------------*/
 int COREGMinPowell() {
   extern COREG *coreg;
-  float *pPowel, **xi;
-  int r, c, n, dof;
-  Timer timer;
+  float *       pPowel, **xi;
+  int           r, c, n, dof;
+  Timer         timer;
 
   timer.reset();
   dof = coreg->nparams;
@@ -1780,6 +1801,9 @@ int COREGMinPowell() {
   pPowel = vector(1, dof);
   for (n = 0; n < dof; n++)
     pPowel[n + 1] = coreg->params[n];
+  for (n = 0; n < dof; n++)
+    printf("%f ", coreg->params[n]);
+  printf("\n");
 
   xi = matrix(1, dof, 1, dof);
   for (r = 1; r <= dof; r++) {
@@ -1794,8 +1818,7 @@ int COREGMinPowell() {
   printf("OptTimeSec %4.1f sec\n", timer.seconds());
   printf("OptTimeMin %5.2f min\n", timer.minutes());
   printf("nEvals %d\n", coreg->nCostEvaluations);
-  // printf("EvalTimeSec %4.1f
-  // sec\n",(timer.seconds())/coreg->nCostEvaluations);
+  //printf("EvalTimeSec %4.1f sec\n",(timer.seconds())/coreg->nCostEvaluations);
   fflush(stdout);
 
   printf("Final parameters ");
@@ -1815,13 +1838,13 @@ int COREGMinPowell() {
 }
 
 int COREGpreproc(COREG *coreg) {
-  int n, DoSmooth;
+  int  n, DoSmooth;
   MRI *mritmp;
 
   // Rescale and maybe smooth the moveable
   coreg->movsat = MRIgetPercentile(coreg->mov, coreg->SatPct, 0);
   printf("movsat = %6.4lf\n", coreg->movsat);
-  mritmp = MRIrescaleToUChar(coreg->mov, nullptr, coreg->movsat);
+  mritmp = MRIrescaleToUChar(coreg->mov, NULL, coreg->movsat);
   COREGfwhm(coreg->mov, coreg->sepmin, coreg->movfwhm);
   DoSmooth = 0;
   for (n = 0; n < 3; n++) {
@@ -1839,14 +1862,14 @@ int COREGpreproc(COREG *coreg) {
     printf("NOT Smoothing mov\n");
   if (coreg->f)
     free(coreg->f);
-  coreg->f = MRItoUCharVect(mritmp, coreg->movirfs);
+  coreg->f = MRItoUCharVect(mritmp, coreg->movirfs, coreg->movidither);
   MRIfree(&mritmp);
   fflush(stdout);
 
   // Rescale and maybe smooth the reference
   coreg->refsat = MRIgetPercentile(coreg->ref, coreg->SatPct, 0);
   printf("refsat = %6.4lf\n", coreg->refsat);
-  mritmp = MRIrescaleToUChar(coreg->ref, nullptr, coreg->refsat);
+  mritmp = MRIrescaleToUChar(coreg->ref, NULL, coreg->refsat);
   COREGfwhm(coreg->ref, coreg->sepmin, coreg->reffwhm);
   DoSmooth = 0;
   for (n = 0; n < 3; n++) {
@@ -1860,12 +1883,12 @@ int COREGpreproc(COREG *coreg) {
     printf("Smoothing ref\n");
     MRIgaussianSmoothNI(mritmp, coreg->refgstd[0], coreg->refgstd[1],
                         coreg->refgstd[2], mritmp);
-    // MRIwrite(mritmp,"ref.smoothed.mgh");
+    //MRIwrite(mritmp,"ref.smoothed.mgh");
   } else
     printf("NOT Smoothing ref\n");
   if (coreg->g)
     free(coreg->g);
-  coreg->g = MRItoUCharVect(mritmp, coreg->refirfs);
+  coreg->g = MRItoUCharVect(mritmp, coreg->refirfs, NULL);
   MRIfree(&mritmp);
   fflush(stdout);
 
@@ -1879,7 +1902,7 @@ int COREGpreproc(COREG *coreg) {
   Compute fwhm for smoothing to take into account the separation
  */
 int COREGfwhm(MRI *mri, double sep, double fwhm[3]) {
-  int n;
+  int    n;
   double voxsize[3], val;
   voxsize[0] = mri->xsize;
   voxsize[1] = mri->ysize;
@@ -1890,7 +1913,7 @@ int COREGfwhm(MRI *mri, double sep, double fwhm[3]) {
       fwhm[n] = 1.15 * sqrt(val);
     else
       fwhm[n] = 0;
-    // fwhm[n] = 0;
+    //fwhm[n] = 0;
   }
   return (0);
 }
@@ -1901,7 +1924,7 @@ int COREGfwhm(MRI *mri, double sep, double fwhm[3]) {
  */
 float MRIgetPercentile(MRI *mri, double Pct, int frame) {
   float *vect, val;
-  int nvox, c, r, s, n;
+  int    nvox, c, r, s, n;
 
   nvox = mri->width * mri->height * mri->depth;
   vect = (float *)calloc(nvox, sizeof(float));
@@ -1923,7 +1946,7 @@ float MRIgetPercentile(MRI *mri, double Pct, int frame) {
   else
     val = (vect[n] + vect[n - 1] + vect[n + 1]) / 3.0;
   free(vect);
-  vect = nullptr;
+  vect = NULL;
   return (val);
 }
 
@@ -1956,7 +1979,7 @@ MRI *MRIconformNoScale(MRI *mri, MRI *mric) {
   mritmp = MRIconform(mri);
   // This does not generate exactly the same as mri_convert
 
-  if (mric == nullptr) {
+  if (mric == NULL) {
     mric = MRIallocSequence(mritmp->width, mritmp->height, mritmp->depth,
                             MRI_FLOAT, mritmp->nframes);
     MRIcopyHeader(mritmp, mric);
@@ -1965,19 +1988,23 @@ MRI *MRIconformNoScale(MRI *mri, MRI *mric) {
   // Map input to geometry template
   mric = MRIresample(mri, mritmp, SAMPLE_NEAREST);
 
-  sprintf(mric->fname, "%s/Conformed", mri->fname);
+  int req = snprintf(mric->fname, STRLEN, "%s/Conformed", mri->fname);
+  if (req >= STRLEN) {
+    std::cerr << __FUNCTION__ << ": Truncation on line " << __LINE__
+              << std::endl;
+  }
   MRIfree(&mritmp);
 
   return (mric);
 }
 
 int COREGoptBruteForce(COREG *coreg, double lim0, int niters, int n1d) {
-  int iter, nthp, nth1d, n, newmin;
+  int    iter, nthp, nth1d, n, newmin;
   double curcost, mincost;
   double p, pmin, pmax, pdelta = 0, popt;
   double lim;
-  FILE *fp;
-  int dof, BakMovOOBFlag;
+  FILE * fp;
+  int    dof, BakMovOOBFlag;
 
   printf("COREGoptBruteForce() %g %d %d\n", lim0, niters, n1d);
 
@@ -1992,23 +2019,23 @@ int COREGoptBruteForce(COREG *coreg, double lim0, int niters, int n1d) {
   }
 
   mincost = 10e10;
-  lim = lim0;
+  lim     = lim0;
   for (iter = 0; iter < niters; iter++) {
     for (nthp = 0; nthp < dof; nthp++) {
-      pmin = coreg->params[nthp] - lim;
-      pmax = coreg->params[nthp] + lim;
+      pmin   = coreg->params[nthp] - lim;
+      pmax   = coreg->params[nthp] + lim;
       pdelta = (pmax - pmin) / n1d;
 
-      nth1d = 0;
-      popt = coreg->params[nthp];
+      nth1d  = 0;
+      popt   = coreg->params[nthp];
       newmin = 0;
       for (p = pmin; p <= pmax; p += pdelta) {
         coreg->params[nthp] = p;
-        curcost = COREGcost(coreg);
+        curcost             = COREGcost(coreg);
         if (mincost > curcost) {
           mincost = curcost;
-          popt = p;
-          newmin = 1;
+          popt    = p;
+          newmin  = 1;
         }
         if (coreg->debug) {
           printf("%2d %2d %3d", iter, nthp, nth1d);

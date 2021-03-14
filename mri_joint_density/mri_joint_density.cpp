@@ -1,17 +1,6 @@
-/**
- * @file  mri_joint_density.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:20 $
- *    $Revision: 1.6 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,31 +12,31 @@
  *
  */
 
-#include "mri.h"
-#include "error.h"
 #include "diag.h"
+#include "error.h"
+#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static int erode = 0;
+static int    erode = 0;
 static double cfmin = 10;
 static double cfmax = 5000;
-static double step = 10;
+static double step  = 10;
 
 int main(int argc, char *argv[]) {
   char **av;
-  int ac, nargs, i, j, nbins;
-  int msec, minutes, seconds, x, y, z, **joint_density;
-  Timer start;
-  MRI *mri1, *mri2, *mri_nonbrain, *mri_tmp;
-  FILE *fp;
-  float fmin1, fmax1, fmin2, fmax2;
+  int    ac, nargs, i, j, nbins;
+  int    msec, minutes, seconds, x, y, z, **joint_density;
+  Timer  start;
+  MRI *  mri1, *mri2, *mri_nonbrain, *mri_tmp;
+  FILE * fp;
+  float  fmin1, fmax1, fmin2, fmax2;
   double val1, val2;
 
   nargs = handleVersionOption(argc, argv, "mri_joint_density");
@@ -150,7 +139,7 @@ int main(int argc, char *argv[]) {
   fprintf(fp, "];\n");
   fclose(fp);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -165,12 +154,12 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "step")) {
-    step = atof(argv[2]);
+    step  = atof(argv[2]);
     nargs = 1;
     printf("using step size %2.2f in histogram\n", step);
   } else if (!stricmp(option, "max")) {

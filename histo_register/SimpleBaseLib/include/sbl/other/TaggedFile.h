@@ -102,17 +102,17 @@ public:
 
   /// write a vector
   // fix(later): use writeRawData
-  template <typename T> void writeVector(const Vector<T> &v) {
+  template <typename T> void writeVector(const std::vector<T> &v) {
     writeTagInfo(v.length() * sizeof(T));
     writeBlock(v.dataPtr(), v.length() * sizeof(T));
   }
 
   /// read a vector
   // fix(later): use readRawData
-  template <typename T> Vector<T> readVector() {
-    Vector<T> v;
-    int size = readTagInfo();
-    int len = size / sizeof(T);
+  template <typename T> std::vector<T> readVector() {
+    std::vector<T> v;
+    int            size = readTagInfo();
+    int            len  = size / sizeof(T);
     if (len < 0) {
       warning("invalid vector in file");
     } else {
@@ -180,9 +180,9 @@ public:
   /// write raw data of a particular type (length is number of elements not
   /// number of bytes)
   template <typename T> T *readRawData(int &length) {
-    T *data = NULL;
+    T * data = NULL;
     int size = readTagInfo();
-    int len = size / sizeof(T);
+    int len  = size / sizeof(T);
     if (len < 0) {
       warning("invalid raw data in file");
       length = 0;

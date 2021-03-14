@@ -1,6 +1,6 @@
 // OWN
-#include "solver.h"
 #include "pbmesh_crop.h"
+#include "solver.h"
 
 #include "untangler.h"
 
@@ -16,16 +16,16 @@ void solve_topology_problems(TMesh3d &mesh, unsigned int neighborhood,
 
   // typedefs
   // typedef CMesh3d::ElementIndexContainer EltIndexContainer;
-  typedef TPbMeshCrop<Constructor, 3> MeshCrop;
-  typedef MeshCrop::MapType MapType;
-  typedef MeshCrop::IndexSetType IndexSetType;
-  typedef std::vector<unsigned int> VectorType;
-  typedef TDirectSolver<Constructor, 3> SolverType;
+  typedef TPbMeshCrop<Constructor, 3>        MeshCrop;
+  typedef MeshCrop::MapType                  MapType;
+  typedef MeshCrop::IndexSetType             IndexSetType;
+  typedef std::vector<unsigned int>          VectorType;
+  typedef TDirectSolver<Constructor, 3>      SolverType;
   typedef CMesh3d::MaterialConstIteratorType MaterialConstIteratorType;
-  typedef CMesh3d::tNode NodeType;
+  typedef CMesh3d::tNode                     NodeType;
 
   // declarations
-  VectorType vecContainer;
+  VectorType                       vecContainer;
   std::insert_iterator<VectorType> ii(vecContainer, vecContainer.begin());
   // search for orientation problems in the destination (dst) frame
   try {
@@ -42,16 +42,16 @@ void solve_topology_problems(TMesh3d &mesh, unsigned int neighborhood,
   std::sort(vecContainer.begin(), vecContainer.end());
   VectorType vecPreContainer = vecContainer;
 
-  MeshCrop crop(&mesh);
+  MeshCrop                  crop(&mesh);
   MaterialConstIteratorType materialBegin, materialEnd;
   mesh.get_material_iterators(materialBegin, materialEnd);
-  double de = materialBegin->second->get_E();
+  double de  = materialBegin->second->get_E();
   double dnu = materialBegin->second->get_nu();
   std::cout << " using Lame constants given by " << std::endl
             << " E = " << de << std::endl
             << " nu = " << dnu << std::endl;
 
-  NodeType *pnode = NULL;
+  NodeType *pnode     = NULL;
   NodeType *pInitNode = NULL;
   /*
     in the following, problems are clustered and eliminated until nothing
@@ -70,8 +70,8 @@ void solve_topology_problems(TMesh3d &mesh, unsigned int neighborhood,
     INSERT ITERATOR.
   */
   while (!vecContainer.empty()) {
-    CMesh3d cropMesh;
-    MapType nodeMap, elementMap;
+    CMesh3d      cropMesh;
+    MapType      nodeMap, elementMap;
     IndexSetType boundaryNodes;
 
     crop.Crop(&cropMesh, nodeMap, elementMap, boundaryNodes,
@@ -82,7 +82,7 @@ void solve_topology_problems(TMesh3d &mesh, unsigned int neighborhood,
     // equivalent to ++ in normal for loop
     //
     // remove problem nodes from the original container
-    VectorType vecCrop;
+    VectorType                       vecCrop;
     std::insert_iterator<VectorType> orientation_ii(vecCrop, vecCrop.begin());
     /*
     determine local problems
@@ -95,7 +95,7 @@ void solve_topology_problems(TMesh3d &mesh, unsigned int neighborhood,
          itIndex != vecCrop.end(); ++itIndex)
       *itIndex = elementMap[*itIndex];
 
-    VectorType deltaContainer;
+    VectorType                       deltaContainer;
     std::insert_iterator<VectorType> cropii(deltaContainer,
                                             deltaContainer.begin());
     std::set_difference(vecContainer.begin(), vecContainer.end(),
@@ -132,7 +132,7 @@ void solve_topology_problems(TMesh3d &mesh, unsigned int neighborhood,
 
     // commit delta back to the original mesh
     VectorType::const_iterator findCit;
-    bool btest = false;
+    bool                       btest = false;
     for (unsigned int ui(0), nnodes(cropMesh.get_no_nodes()); ui < nnodes;
          ++ui) {
       cropMesh.get_node(ui, &pnode);
@@ -154,7 +154,7 @@ void solve_topology_problems(TMesh3d &mesh, unsigned int neighborhood,
   }
 
   // check no NEW orientation pbs appeared
-  VectorType vecAfter;
+  VectorType                       vecAfter;
   std::insert_iterator<VectorType> after_ii(vecAfter, vecAfter.begin());
 
   std::cout << " before \n";
@@ -166,7 +166,7 @@ void solve_topology_problems(TMesh3d &mesh, unsigned int neighborhood,
               << " post = " << vecAfter.size() << std::endl;
     std::sort(vecAfter.begin(), vecAfter.end());
 
-    VectorType deltaContainer;
+    VectorType                       deltaContainer;
     std::insert_iterator<VectorType> iiDelta(deltaContainer,
                                              deltaContainer.begin());
     std::set_difference(vecAfter.begin(), vecAfter.end(),

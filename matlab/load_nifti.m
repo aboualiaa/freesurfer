@@ -31,12 +31,8 @@ function hdr = load_nifti(niftifile,hdronly)
 % load_nifti.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: greve $
-%    $Date: 2016/01/19 21:18:27 $
-%    $Revision: 1.21 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained
@@ -136,6 +132,7 @@ switch(hdr.datatype)
  case   8, dtype = 'int' ;
  case  16, dtype = 'float' ;
  case  64, dtype = 'double' ;
+ case 256, dtype = 'int8' ;
  case 512, dtype = 'ushort' ;
  case 768, dtype = 'uint' ;
  otherwise

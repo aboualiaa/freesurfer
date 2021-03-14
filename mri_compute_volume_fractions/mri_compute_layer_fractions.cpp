@@ -1,18 +1,12 @@
 /**
- * @file  mri_compute_layer_fraction.c
  * @brief compute the % of gm layers 1-6, wm and CSF in each voxel in a volume
  *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: fischl $
- *    $Date: 2012/04/11 17:52:45 $
- *    $Revision: 1.4 $
  *
- * Copyright (C) 2002-2007,
- * The General Hospital Corporation (Boston, MA).
+ * Copyright © 2021
+ * The General Hospital Corporation (Boston, MA). 
  * All rights reserved.
  *
  * Distribution, usage and copying of this software is covered under the
@@ -25,54 +19,68 @@
  *
  */
 
-#include "diag.h"
-#include "timer.h"
-#include "version.h"
-#include "registerio.h"
-#include "cma.h"
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#define WM_VAL 1
-#define CSF_VAL (nlayers + 1)
+#include "cma.h"
+#include "const.h"
+#include "diag.h"
+#include "error.h"
+#include "macros.h"
+#include "mri.h"
+#include "mri_conform.h"
+#include "mrimorph.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "registerio.h"
+#include "timer.h"
+#include "utils.h"
+#include "version.h"
+
+#define WM_VAL         1
+#define CSF_VAL        (nlayers + 1)
 #define SUBCORT_GM_VAL (nlayers + 2)
 
 #define NLAYERS 6
 #define NLABELS (nlayers + 3) // wm + cortical layers + csf + subcortical gray
 
-static int nlayers = NLAYERS;
-static char *LAMINAR_NAME = "gwdist";
-static char *aseg_name = "aseg.mgz";
+static int         nlayers      = NLAYERS;
+static const char *LAMINAR_NAME = "gwdist";
+static const char *aseg_name    = "aseg.mgz";
 
-static int noaseg = 0;
-static char *subject_name = nullptr;
-static char *hemi = "lh";
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
+static int         noaseg       = 0;
+static char *      subject_name = NULL;
+static const char *hemi         = "lh";
+int                main(int argc, char *argv[]);
+static int         get_option(int argc, char *argv[]);
 
 const char *Progname;
 static void usage_exit(int code);
 
-static int cortex_only = 1;
-static char sdir[STRLEN] = "";
-static double resolution = .5;
+static int    cortex_only  = 1;
+static char   sdir[STRLEN] = "";
+static double resolution   = .5;
 
 static int FS_names = 0;
 
 MRI *add_aseg_structures_outside_ribbon(MRI *mri_src, MRI *mri_aseg,
                                         MRI *mri_dst, int wm_val, int gm_val,
                                         int csf_val);
-int MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
-                                     MRI *mri_seg, MRI *mri_fractions);
-int main(int argc, char *argv[]) {
+int  MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
+                                      MRI *mri_seg, MRI *mri_fractions);
+int  main(int argc, char *argv[]) {
   char **av, fname[STRLEN];
-  int ac, nargs, i;
-  char *subject, *reg_fname, *in_fname, *out_fname, *cp;
-  int msec, minutes, seconds, nvox, float2int, layer, width, height, depth;
-  Timer start;
+  int    ac, nargs, i;
+  char * subject, *reg_fname, *in_fname, *out_fname, *cp;
+  int    msec, minutes, seconds, nvox, float2int, layer, width, height, depth;
+  Timer  start;
   MRI_SURFACE *mris;
-  MRI *mri_aseg, *mri_layers, *mri_tmp, *mri_in, *mri_interior_bottom,
+  MRI *        mri_aseg, *mri_layers, *mri_tmp, *mri_in, *mri_interior_bottom,
       *mri_interior_top, *mri_fractions;
   MATRIX *m_regdat;
-  float intensity, betplaneres, inplaneres;
+  float   intensity, betplaneres, inplaneres;
 
   nargs = handleVersionOption(argc, argv, "mri_compute_layer_fractions");
   if (nargs && argc - nargs == 1)
@@ -80,8 +88,8 @@ int main(int argc, char *argv[]) {
   argc -= nargs;
 
   Progname = argv[0];
-  ac = argc;
-  av = argv;
+  ac       = argc;
+  av       = argv;
   for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
     nargs = get_option(argc, argv);
     argc -= nargs;
@@ -98,27 +106,27 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
   reg_fname = argv[1];
-  in_fname = argv[2];
+  in_fname  = argv[2];
   out_fname = argv[3];
-  Progname = argv[0];
+  Progname  = argv[0];
   ErrorInit(NULL, NULL, NULL);
-  DiagInit(nullptr, nullptr, nullptr);
+  DiagInit(NULL, NULL, NULL);
 
   start.reset();
 
   printf("reading registration file %s\n", reg_fname);
   if (stricmp(reg_fname, "identity.nofile") == 0) {
     printf("using identity transform\n");
-    m_regdat = nullptr;
+    m_regdat   = NULL;
     inplaneres = betplaneres = intensity = 1;
-    float2int = 0;
-    subject = "unknown";
+    float2int                            = 0;
+    subject = const_cast<char *>("unknown"); // Not nice....
   } else {
     regio_read_register(reg_fname, &subject, &inplaneres, &betplaneres,
                         &intensity, &m_regdat, &float2int);
 
     m_regdat = regio_read_registermat(reg_fname);
-    if (m_regdat == nullptr)
+    if (m_regdat == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load registration file from %s",
                 Progname, reg_fname);
   }
@@ -128,7 +136,7 @@ int main(int argc, char *argv[]) {
   sprintf(fname, "%s/%s/mri/%s", sdir, subject, aseg_name);
   printf("reading volume %s\n", fname);
   mri_aseg = MRIread(fname);
-  if (mri_aseg == nullptr)
+  if (mri_aseg == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not load aseg volume from %s", Progname,
               fname);
 
@@ -142,36 +150,36 @@ int main(int argc, char *argv[]) {
   mri_layers->yend = resolution*mri_layers->height/2.0 ;
   mri_layers->zstart = -resolution*mri_layers->depth/2.0 ;
   mri_layers->zend = resolution*mri_layers->depth/2 ;
-  mri_layers->c_r = mri_aseg->c_r ; mri_layers->c_a = mri_aseg->c_a ;
+  mri_layers->c_r = mri_aseg->c_r ; mri_layers->c_a = mri_aseg->c_a ; 
   mri_layers->c_s = mri_aseg->c_s ;
 #else
   mri_in = MRIreadHeader(in_fname, MRI_VOLUME_TYPE_UNKNOWN);
-  if (mri_in == nullptr)
+  if (mri_in == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not load input volume from %s", Progname,
               in_fname);
-  width = (int)ceil(mri_in->width * (mri_in->xsize / resolution));
-  height = (int)ceil(mri_in->height * (mri_in->ysize / resolution));
-  depth = (int)ceil(mri_in->depth * (mri_in->zsize / resolution));
+  width      = (int)ceil(mri_in->width * (mri_in->xsize / resolution));
+  height     = (int)ceil(mri_in->height * (mri_in->ysize / resolution));
+  depth      = (int)ceil(mri_in->depth * (mri_in->zsize / resolution));
   mri_layers = MRIalloc(width, height, depth, MRI_UCHAR);
   MRIsetResolution(mri_layers, resolution, resolution, resolution);
   mri_layers->xstart = mri_in->xstart;
-  mri_layers->xend = mri_in->xend;
+  mri_layers->xend   = mri_in->xend;
   mri_layers->ystart = mri_in->ystart;
-  mri_layers->yend = mri_in->yend;
+  mri_layers->yend   = mri_in->yend;
   mri_layers->zstart = mri_in->zstart;
-  mri_layers->zend = mri_in->zend;
-  mri_layers->x_r = mri_in->x_r;
-  mri_layers->x_a = mri_in->x_a;
-  mri_layers->x_s = mri_in->x_s;
-  mri_layers->y_r = mri_in->y_r;
-  mri_layers->y_a = mri_in->y_a;
-  mri_layers->y_s = mri_in->y_s;
-  mri_layers->z_r = mri_in->z_r;
-  mri_layers->z_a = mri_in->z_a;
-  mri_layers->z_s = mri_in->z_s;
-  mri_layers->c_r = mri_in->c_r;
-  mri_layers->c_a = mri_in->c_a;
-  mri_layers->c_s = mri_in->c_s;
+  mri_layers->zend   = mri_in->zend;
+  mri_layers->x_r    = mri_in->x_r;
+  mri_layers->x_a    = mri_in->x_a;
+  mri_layers->x_s    = mri_in->x_s;
+  mri_layers->y_r    = mri_in->y_r;
+  mri_layers->y_a    = mri_in->y_a;
+  mri_layers->y_s    = mri_in->y_s;
+  mri_layers->z_r    = mri_in->z_r;
+  mri_layers->z_a    = mri_in->z_a;
+  mri_layers->z_s    = mri_in->z_s;
+  mri_layers->c_r    = mri_in->c_r;
+  mri_layers->c_a    = mri_in->c_a;
+  mri_layers->c_s    = mri_in->c_s;
   MRIfree(&mri_in);
 #endif
 
@@ -196,11 +204,11 @@ int main(int argc, char *argv[]) {
     }
     printf("reading surface %s\n", fname);
     mris = MRISread(fname);
-    if (mris == nullptr)
+    if (mris == NULL)
       ErrorExit(ERROR_NOFILE, "%s: could not load %s surface %d from %s",
                 Progname, hemi, i, fname);
 
-    mri_interior_top = MRIclone(mri_layers, nullptr);
+    mri_interior_top = MRIclone(mri_layers, NULL);
     MRISfillInterior(mris, resolution, mri_interior_top);
 
     if (Gdiag & DIAG_WRITE) {
@@ -210,13 +218,13 @@ int main(int argc, char *argv[]) {
     }
     if (i == 0) // fill white matter
     {
-      mri_tmp = MRIclone(mri_interior_top, nullptr);
+      mri_tmp = MRIclone(mri_interior_top, NULL);
       MRIreplaceValuesOnly(mri_interior_top, mri_tmp, 1, WM_VAL);
       MRIcopyLabel(mri_tmp, mri_layers, WM_VAL);
       MRIfree(&mri_tmp);
     } else // fill cortical layer
     {
-      mri_tmp = MRInot(mri_interior_bottom, nullptr);
+      mri_tmp = MRInot(mri_interior_bottom, NULL);
       MRIfree(&mri_interior_bottom);
       MRIand(mri_interior_top, mri_tmp, mri_tmp, 1);
       layer = nlayers - (i - 1);
@@ -240,7 +248,7 @@ int main(int argc, char *argv[]) {
                                        SUBCORT_GM_VAL + 1, CSF_VAL + 1);
   printf("reading movable volume %s\n", in_fname);
   mri_in = MRIread(in_fname);
-  if (mri_in == nullptr)
+  if (mri_in == NULL)
     ErrorExit(ERROR_NOFILE, "%s: could not load input volume from %s", Progname,
               in_fname);
 
@@ -248,10 +256,9 @@ int main(int argc, char *argv[]) {
     MATRIX *m_conformed_to_epi_vox2vox, *m_seg_to_conformed_vox2vox,
         *m_seg_to_epi_vox2vox;
 
-    if (m_regdat == nullptr) // assume identity transform
+    if (m_regdat == NULL) // assume identity transform
       m_seg_to_epi_vox2vox = MRIgetVoxelToVoxelXform(mri_layers, mri_in);
-    else // a register.dat was specified between mri_in and the aseg/surface
-         // space
+    else // a register.dat was specified between mri_in and the aseg/surface space
     {
       m_conformed_to_epi_vox2vox =
           MRIvoxToVoxFromTkRegMtx(mri_in, mri_aseg, m_regdat);
@@ -281,7 +288,7 @@ int main(int argc, char *argv[]) {
   printf("writing layer labeling to %s\n", out_fname);
   MRIwrite(mri_fractions, out_fname);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -297,7 +304,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */
@@ -323,7 +330,7 @@ static int get_option(int argc, char *argv[]) {
     printf("not computing subcortical components\n");
   } else if (!stricmp(option, "nlayers")) {
     nlayers = atoi(argv[2]);
-    nargs = 1;
+    nargs   = 1;
     printf("using %d input layers for laminar analysis\n", nlayers);
   } else if (!stricmp(option, "rh") || !stricmp(option, "lh")) {
     hemi = option;
@@ -341,12 +348,12 @@ static int get_option(int argc, char *argv[]) {
       break;
     case 'S':
       subject_name = argv[2];
-      nargs = 1;
+      nargs        = 1;
       printf("overriding subject name in .dat file with %s\n", subject_name);
       break;
     case 'A':
       aseg_name = argv[2];
-      nargs = 1;
+      nargs     = 1;
       printf("using aseg named %s\n", aseg_name);
       break;
     case 'R':
@@ -381,14 +388,14 @@ static void usage_exit(int code) {
 
 int MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
                                      MRI *mri_seg, MRI *mri_fractions) {
-  int x, y, z, xs, ys, zs, label;
+  int     x, y, z, xs, ys, zs, label;
   VECTOR *v1, *v2;
-  MRI *mri_counts;
-  float val, count;
+  MRI *   mri_counts;
+  float   val, count;
   MATRIX *m_inv;
 
-  m_inv = MatrixInverse(m_vox2vox, nullptr);
-  if (m_inv == nullptr) {
+  m_inv = MatrixInverse(m_vox2vox, NULL);
+  if (m_inv == NULL) {
     MatrixPrint(stdout, m_vox2vox);
     ErrorExit(
         ERROR_BADPARM,
@@ -396,8 +403,8 @@ int MRIcomputePartialVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
   }
   mri_counts = MRIcloneDifferentType(mri_src, MRI_INT);
 
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
   VECTOR_ELT(v2, 4) = 1.0;
   for (x = 0; x < mri_seg->width; x++) {
@@ -476,15 +483,15 @@ MRI *add_aseg_structures_outside_ribbon(MRI *mri_src, MRI *mri_aseg,
                                         int csf_val) {
   VECTOR *v1, *v2;
   MATRIX *m_vox2vox;
-  int x, y, z, xa, ya, za, label, seg_label;
+  int     x, y, z, xa, ya, za, label, seg_label;
 
-  if (mri_dst == nullptr)
-    mri_dst = MRIcopy(mri_src, nullptr);
-  v1 = VectorAlloc(4, MATRIX_REAL);
-  v2 = VectorAlloc(4, MATRIX_REAL);
+  if (mri_dst == NULL)
+    mri_dst = MRIcopy(mri_src, NULL);
+  v1                = VectorAlloc(4, MATRIX_REAL);
+  v2                = VectorAlloc(4, MATRIX_REAL);
   VECTOR_ELT(v1, 4) = 1.0;
   VECTOR_ELT(v2, 4) = 1.0;
-  m_vox2vox = MRIgetVoxelToVoxelXform(mri_src, mri_aseg);
+  m_vox2vox         = MRIgetVoxelToVoxelXform(mri_src, mri_aseg);
 
   for (x = 0; x < mri_dst->width; x++) {
     V3_X(v1) = x;

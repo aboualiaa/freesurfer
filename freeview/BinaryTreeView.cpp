@@ -1,10 +1,10 @@
 #include "BinaryTreeView.h"
 #include "BinaryTreeEdge.h"
 #include "BinaryTreeNode.h"
-#include <QMouseEvent>
+#include "math.h"
 #include <QDebug>
 #include <QDir>
-#include "math.h"
+#include <QMouseEvent>
 
 TreeDataLoader::TreeDataLoader(QObject *parent) : QObject(parent) {
   connect(this, SIGNAL(LoadRequested(QString, BinaryTreeView *)),
@@ -21,7 +21,7 @@ void TreeDataLoader::DoLoad(const QString &dirPath, BinaryTreeView *view) {
   mDir.setSorting(QDir::Name);
 
   QFileInfoList info_list = mDir.entryInfoList();
-  QStringList tract_list;
+  QStringList   tract_list;
   foreach (QFileInfo fn, info_list) {
     if (!fn.baseName().contains(QRegExp("[^0-1]")))
       tract_list << fn.fileName();
@@ -67,9 +67,9 @@ void TreeDataLoader::DoLoad(const QString &dirPath, BinaryTreeView *view) {
 
   QVariantMap data;
   if (!tract_map.isEmpty()) {
-    data["tree_map"] = tract_map;
+    data["tree_map"]  = tract_map;
     data["max_level"] = max_level;
-    data["path"] = dirPath;
+    data["path"]      = dirPath;
   }
   emit DataLoaded(data);
 }
@@ -111,7 +111,7 @@ void BinaryTreeView::mousePressEvent(QMouseEvent *event) {
                                                   // position
   if (item) // if there is a node at that position
   {
-    QString tract_name = m_mapNode.key(item);
+    QString     tract_name = m_mapNode.key(item);
     QStringList list =
         m_mapData.value("tree_map").toMap().value(tract_name).toStringList();
     qDebug() << "\nNode" << tract_name; // print the tract name for the node
@@ -227,18 +227,18 @@ void BinaryTreeView::OnDataLoaded(const QVariantMap &data) {
           << QFileInfo(QDir(m_strDataDir), fn + ".trk").absoluteFilePath();
     }
   }
-  QVariantMap map = m_mapData;
+  QVariantMap map  = m_mapData;
   map["filenames"] = filenames;
   emit TreeDataLoaded(map);
 }
 
 void BinaryTreeView::SetData(const QVariantMap &data) {
   m_selectedNode = NULL;
-  m_mapData = data;
+  m_mapData      = data;
   if (m_mapData.contains("path"))
     m_strDataDir = m_mapData["path"].toString();
-  QVariantMap mapTract = data["tree_map"].toMap();
-  int max_level = data["max_level"].toInt();
+  QVariantMap mapTract  = data["tree_map"].toMap();
+  int         max_level = data["max_level"].toInt();
 
   double max_dist;
   // summation 2^n is 2^(n)-1

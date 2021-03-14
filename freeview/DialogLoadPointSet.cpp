@@ -1,16 +1,7 @@
-/**
- * @file  DialogLoadPointSet.cpp
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2011/03/22 21:21:26 $
- *    $Revision: 1.9 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,12 +13,12 @@
  *
  */
 #include "DialogLoadPointSet.h"
-#include "ui_DialogLoadPointSet.h"
 #include "LayerPropertyPointSet.h"
 #include "MyUtils.h"
-#include <QMessageBox>
+#include "ui_DialogLoadPointSet.h"
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 
 DialogLoadPointSet::DialogLoadPointSet(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogLoadPointSet) {

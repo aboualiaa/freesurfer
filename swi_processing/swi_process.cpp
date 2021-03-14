@@ -1,15 +1,11 @@
 /**
- * @file swi_process.cpp
  * @brief Processing for Susceptibility Weighted Imaging Pipeline
  *
  */
 /*
  * Original Author: Krish Subramaniam
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2013/02/21 19:17:23 $
  *
- * Copyright © 2013 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -21,16 +17,16 @@
  *
  */
 
-#include "mri.h"
 #include "DICOMRead.h"
 #include "cmd_line_interface.h"
+#include "mri.h"
 
 const char *Progname;
 
 // static function declarations
 // forward declaration
 struct IoParams;
-using namespace std;
+
 // std::numeric_limits
 
 /*
@@ -40,14 +36,14 @@ struct IoParams {
   std::string magfile;
   std::string phasefile;
   std::string swioutput;
-  float stddev;
+  float       stddev;
   std::string phasemethod;
-  int phasemult;
-  float phasecutoff;
-  float phasercutoff;
-  float sigmoid_a;
-  float sigmoid_b;
-  int miplevel;
+  int         phasemult;
+  float       phasecutoff;
+  float       phasercutoff;
+  float       sigmoid_a;
+  float       sigmoid_b;
+  int         miplevel;
 
   IoParams();
   void parse(int ac, char *av[]);
@@ -250,9 +246,9 @@ int main(int argc, char *argv[]) {
   }
 
   float vmin, vmax;
-  MRI *outimg = MRIclone(mriphase, nullptr);
+  MRI * outimg = MRIclone(mriphase, nullptr);
   // the following are the various intermediary images
-  MRI *_hpimg = MRIclone(mriphase, nullptr);
+  MRI *_hpimg  = MRIclone(mriphase, nullptr);
   MRI *_tmpimg = MRIclone(mriphase, nullptr);
 
   std::cout << "Performing Gaussian smoothing with stddev " << params.stddev
@@ -283,9 +279,9 @@ int main(int argc, char *argv[]) {
   std::cout << "Performing Minimum Intensity Projection along y direction with "
                "levels="
             << params.miplevel << " ..\n";
-  int tmp_idx;
+  int                tmp_idx;
   std::vector<float> vals(params.miplevel);
-  float mip_val;
+  float              mip_val;
   for (int i = 0; i < _hpimg->width; i++)
     for (int j = 0; j < _hpimg->height; j++)
       for (int k = 0; k < _hpimg->depth; k++) {
@@ -317,14 +313,14 @@ int main(int argc, char *argv[]) {
 
 // These are the default values for the command line arguments
 IoParams::IoParams() {
-  stddev = 2.0;
-  phasemethod = "negative";
-  phasecutoff = -std::numeric_limits<float>::max();
+  stddev       = 2.0;
+  phasemethod  = "negative";
+  phasecutoff  = -std::numeric_limits<float>::max();
   phasercutoff = std::numeric_limits<float>::max();
-  sigmoid_a = 1.0;
-  sigmoid_b = 0.0;
-  phasemult = 4;
-  miplevel = 4;
+  sigmoid_a    = 1.0;
+  sigmoid_b    = 0.0;
+  phasemult    = 4;
+  miplevel     = 4;
 }
 
 void IoParams::parse(int argc, char *argv[]) {

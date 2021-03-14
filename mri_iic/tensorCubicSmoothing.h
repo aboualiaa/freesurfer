@@ -1,16 +1,7 @@
-/**
- * @file  tensorCubicSmoothing.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Benjamin Lewin
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2014/09/03 20:31:32 $
- *    $Revision: 1.3 $
  *
- * Copyright © 2014 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -75,7 +66,7 @@ public:
 
   // helper function for  constructAtWA and construct AtWr
   // will be private once testing is done
-  Matrix3d doBasisMultiplications(const Matrix3d &data,
+  Matrix3d doBasisMultiplications(const Matrix3d &         data,
                                   const vnl_matrix<float> &Bx,
                                   const vnl_matrix<float> &By,
                                   const vnl_matrix<float> &Bz);

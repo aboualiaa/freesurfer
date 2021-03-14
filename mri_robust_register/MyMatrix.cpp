@@ -1,17 +1,12 @@
 /**
- * @file MyMatrix.cpp
  * @brief A static class with Matrix operations
  *
  */
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2014/03/20 20:22:27 $
- *    $Revision: 1.30 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,19 +19,27 @@
  */
 #include "MyMatrix.h"
 #include "Quaternion.h"
+#include "utils.h" //nint
+#include <algorithm>
+#include <cassert>
 
 #define export // obsolete feature 'export template' used in these headers
-#include <vnl/vnl_inverse.h>
-#include <vnl/algo/vnl_matrix_inverse.h>
-#include <vnl/algo/vnl_determinant.h>
+#include <iostream>
 #include <vnl/algo/vnl_complex_eigensystem.h>
-#include <vnl/algo/vnl_symmetric_eigensystem.h>
-#include <vnl/vnl_real.h>
-#include <vnl/vnl_imag.h>
+#include <vnl/algo/vnl_determinant.h>
+#include <vnl/algo/vnl_matrix_inverse.h>
 #include <vnl/algo/vnl_qr.h>
+#include <vnl/algo/vnl_symmetric_eigensystem.h>
 #include <vnl/vnl_complexify.h>
+#include <vnl/vnl_imag.h>
+#include <vnl/vnl_inverse.h>
 #include <vnl/vnl_matlab_print.h>
+#include <vnl/vnl_matrix_fixed.h>
+#include <vnl/vnl_real.h>
+#include <vnl/vnl_vector_fixed.h>
 #undef export
+
+#include "matrix.h"
 
 #define sign(x) ((x > 0) - (x < 0))
 
@@ -59,7 +62,7 @@ extern void ztrsen_(char *job, char *compq, int *select, long *n,
                     long *info);
 }
 
-// void PrintComplex (const vnl_matrix < vcl_complex < double > > &M)
+// void PrintComplex (const vnl_matrix < complex < double > > &M)
 // {
 //
 //   char signum[2]={ '+','-'};
@@ -69,8 +72,7 @@ extern void ztrsen_(char *job, char *compq, int *select, long *n,
 //   for (unsigned int r=0;r<M.rows();r++)
 //   {
 //     for (unsigned int c=0;c<M.cols();c++)
-//       cout << " ( " << M[r][c].real() << " " << signum[(M[r][c].imag()<0)]<<
-//       " " << M[r][c].imag() << "i ) " ;
+//       cout << " ( " << M[r][c].real() << " " << signum[(M[r][c].imag()<0)]<< " " << M[r][c].imag() << "i ) " ;
 //     if (r < M.rows() -1 ) cout << " ; " << endl;
 //   }
 //   cout << " ] " << endl;
@@ -101,7 +103,7 @@ extern void ztrsen_(char *job, char *compq, int *select, long *n,
 ////// conversion stuff  (note vnl stuff is double, MATRIX is float !!!)
 
 MATRIX *MyMatrix::convertVNL2MATRIX(const vnl_vector<double> &v, MATRIX *outM) {
-  if (outM == nullptr)
+  if (outM == NULL)
     outM = MatrixAlloc(v.size(), 1, MATRIX_REAL);
   assert((int)v.size() == outM->rows);
   assert(1 == outM->cols);
@@ -112,7 +114,7 @@ MATRIX *MyMatrix::convertVNL2MATRIX(const vnl_vector<double> &v, MATRIX *outM) {
 }
 
 MATRIX *MyMatrix::convertVNL2MATRIX(const vnl_matrix<double> &m, MATRIX *outM) {
-  if (outM == nullptr)
+  if (outM == NULL)
     outM = MatrixAlloc(m.rows(), m.cols(), MATRIX_REAL);
   assert((int)m.rows() == outM->rows);
   assert((int)m.cols() == outM->cols);
@@ -145,8 +147,8 @@ vnl_matrix<double> MyMatrix::convertMATRIX2VNL(MATRIX *m) {
 
 std::pair<vnl_matrix<double>, vnl_matrix<double>>
 MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
-// Compute sqrt(R) with
-// Denman and Beavers square root iteration
+//Compute sqrt(R) with
+//Denman and Beavers square root iteration
 {
   assert(m.rows() == 4 && m.cols() == 4);
 
@@ -162,18 +164,18 @@ MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
   T[2] = m[2][3];
   // compute rotation and translation of M^{-1}:
   vnl_matrix_fixed<double, 3, 3> Ri = vnl_inverse(R);
-  vnl_vector_fixed<double, 3> Ti = -Ri * T;
+  vnl_vector_fixed<double, 3>    Ti = -Ri * T;
   // T, Ri and Ti are needed later
 
-  // Compute sqrt(R) with
-  // Denman and Beavers square root iteration
+  //Compute sqrt(R) with
+  //Denman and Beavers square root iteration
 
-  int imax = 100;
-  double eps = 0.00001; // important to be small to guarantee symmetry,
-                        // but even adding two zeros did not show any
-                        // differences in tests
+  int    imax = 100;
+  double eps  = 0.00001; // important to be small to guarantee symmetry,
+                         // but even adding two zeros did not show any
+                         // differences in tests
   double err = 1000;
-  // cout << "using square root iteartion (" << imax << ")"<< endl;
+  //cout << "using square root iteartion (" << imax << ")"<< endl;
   vnl_matrix_fixed<double, 3, 3> Yn(R);
   vnl_matrix_fixed<double, 3, 3> Zn;
   Zn.set_identity();
@@ -184,7 +186,7 @@ MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
   while (count < imax && err > eps) {
     count++;
 
-    // store invrse here (we change Yn below)
+    //store invrse here (we change Yn below)
     Yni = vnl_inverse(Yn);
     Zni = vnl_inverse(Zn);
 
@@ -198,7 +200,7 @@ MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
     Ysq = Yn * Yn;
     Ysq -= R;
     err = Ysq.absolute_value_max();
-    // cout << " iteration " << count << "  err: "<< err << endl;
+    //cout << " iteration " << count << "  err: "<< err << endl;
   }
   // now Yn is sqrt(R) AND Zn is sqrt(R)^-1
 
@@ -217,7 +219,7 @@ MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
   Rh1[2][2] += 1;
   // solve T = Rh1 * Th   <=>   Th = Rh1^-1 * T
   vnl_vector_fixed<double, 3> Th =
-      vnl_inverse(Rh1) * T; // vnl_svd<double>(Rh1).solve(T);
+      vnl_inverse(Rh1) * T; //vnl_svd<double>(Rh1).solve(T);
   // put everything together:
   vnl_matrix<double> msqrt(4, 4);
   msqrt[0][3] = Th[0];
@@ -240,7 +242,7 @@ MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
   Rhi1[2][2] += 1;
   // solve T = Rh1 * Th   <=>   Th = Rh1^-1 * T
   vnl_vector_fixed<double, 3> Thi =
-      vnl_inverse(Rhi1) * Ti; // vnl_svd<double>(Rh1).solve(T);
+      vnl_inverse(Rhi1) * Ti; //vnl_svd<double>(Rh1).solve(T);
   // put everything together:
   vnl_matrix<double> msqrti(4, 4);
   msqrti[0][3] = Thi[0];
@@ -274,14 +276,14 @@ MyMatrix::MatrixSqrtAndInvIter(const vnl_matrix<double> &m)
 
 vnl_matrix<double>
 MyMatrix::PadeApproximantOfDegree(const vnl_matrix<double> &A, unsigned int m)
-// PADEAPPROXIMANTOFDEGREE  Pade approximant to exponential.
+//PADEAPPROXIMANTOFDEGREE  Pade approximant to exponential.
 //   F = PADEAPPROXIMANTOFDEGREE(A,m) is the degree m diagonal
 //   Pade approximant to EXP(A), where m = 3, 5, 7, 9 or 13.
 //   Series are evaluated in decreasing order of powers, which is
 //   in approx. increasing order of maximum norms of the terms.
 {
   assert(A.cols() == A.rows());
-  int n = A.cols();
+  int                 n = A.cols();
   std::vector<double> c = getPadeCoefficients(m);
 
   vnl_matrix<double> F(n, n);
@@ -293,7 +295,7 @@ MyMatrix::PadeApproximantOfDegree(const vnl_matrix<double> &A, unsigned int m)
   case 5:
   case 7:
   case 9: {
-    int s = (int)ceil((m + 1.0) / 2.0);
+    int                             s = (int)ceil((m + 1.0) / 2.0);
     std::vector<vnl_matrix<double>> Apowers(s, vnl_matrix<double>(n, n));
     Apowers[0].set_identity();
     Apowers[1] = A * A;
@@ -339,29 +341,29 @@ std::vector<double> MyMatrix::getPadeCoefficients(unsigned int m)
 //    C = GETPADECOEFFICIENTS returns coefficients of numerator
 //    of [m/m] Pade approximant, where m = 3,5,7,9,13.
 {
-  double *c = nullptr;
+  double *c = NULL;
   switch (m) {
   case 3: {
     double d[] = {120.0, 60.0, 12.0, 1.0};
-    c = d;
+    c          = d;
     break;
   }
   case 5: {
     double d[] = {30240.0, 15120.0, 3360.0, 420.0, 30.0, 1.0};
-    c = d;
+    c          = d;
     break;
   }
   case 7: {
     double d[] = {17297280.0, 8648640.0, 1995840.0, 277200.0,
                   25200.0,    1512.0,    56.0,      1.0};
-    c = d;
+    c          = d;
     break;
   }
   case 9: {
     double d[] = {17643225600.0, 8821612800.0, 2075673600.0, 302702400.0,
                   30270240.0,    2162160.0,    110880.0,     3960.0,
                   90.0,          1.0};
-    c = d;
+    c          = d;
     break;
   }
   case 13: {
@@ -379,19 +381,19 @@ std::vector<double> MyMatrix::getPadeCoefficients(unsigned int m)
                   16380.0,
                   182.0,
                   1.0};
-    c = d;
+    c          = d;
     break;
   }
   }
   std::vector<double> cvec(c, c + m + 1);
-  // delete(c); ??
+  //delete(c); ??
   return cvec;
 }
 
-void MyMatrix::expmchk(const vnl_matrix<double> &A,
+void MyMatrix::expmchk(const vnl_matrix<double> & A,
                        std::vector<unsigned int> &m_vals,
-                       std::vector<double> &theta)
-// EXPMCHK Check the class of input A and
+                       std::vector<double> &      theta)
+//EXPMCHK Check the class of input A and
 //    initialize m_vals and theta accordingly.
 {
   //        classA = class(A);
@@ -401,18 +403,18 @@ void MyMatrix::expmchk(const vnl_matrix<double> &A,
   m_vals.assign(i, i + 5);
 
   // theta_m for m=1:13.
-  double d[] = {// 3.650024139523051e-008
-                // 5.317232856892575e-004
-                1.495585217958292e-002,  // m_vals = 3
-                                         // 8.536352760102745e-002
-                2.539398330063230e-001,  // m_vals = 5
-                                         // 5.414660951208968e-001
-                9.504178996162932e-001,  // m_vals = 7
-                                         // 1.473163964234804e+000
-                2.097847961257068e+000,  // m_vals = 9
-                                         // 2.811644121620263e+000
-                                         // 3.602330066265032e+000
-                                         // 4.458935413036850e+000
+  double d[] = {                        //3.650024139523051e-008
+                                        //5.317232856892575e-004
+                1.495585217958292e-002, // m_vals = 3
+                //8.536352760102745e-002
+                2.539398330063230e-001, // m_vals = 5
+                //5.414660951208968e-001
+                9.504178996162932e-001, // m_vals = 7
+                //1.473163964234804e+000
+                2.097847961257068e+000, // m_vals = 9
+                //2.811644121620263e+000
+                //3.602330066265032e+000
+                //4.458935413036850e+000
                 5.371920351148152e+000}; // m_vals = 13
   theta.assign(d, d + 5);
 
@@ -427,13 +429,12 @@ void MyMatrix::expmchk(const vnl_matrix<double> &A,
   //                          %2.854332750593825e+000
   //                           3.925724783138660e+000];% m_vals = 7
   //             otherwise
-  //                 error('MATLAB:expm:inputType','Input must be single or
-  //                 double.')
+  //                 error('MATLAB:expm:inputType','Input must be single or double.')
   //         end
 }
 
 vnl_matrix<double> MyMatrix::MatrixExp(const vnl_matrix<double> &m)
-// EXPM   Matrix exponential.
+//EXPM   Matrix exponential.
 //  EXPM(X) is the matrix exponential of X.  EXPM is computed using
 //   a scaling and squaring algorithm with a Pade approximation.
 //
@@ -453,7 +454,7 @@ vnl_matrix<double> MyMatrix::MatrixExp(const vnl_matrix<double> &m)
   int n = m.cols();
 
   std::vector<unsigned int> m_vals;
-  std::vector<double> theta;
+  std::vector<double>       theta;
   expmchk(m, m_vals, theta); // Initialization
   double normA = m.operator_one_norm();
 
@@ -467,12 +468,12 @@ vnl_matrix<double> MyMatrix::MatrixExp(const vnl_matrix<double> &m)
         break;
       }
   } else {
-    int s;
+    int    s;
     double t =
         frexp(normA / theta.back(), &s); //[t s] = log2(normA/theta(end));
     s = s - (t == 0.5); // adjust s if normA/theta(end) is a power of 2.
-    double ss = 1.0 / pow(2.0, s);
-    vnl_matrix<double> A(ss * m); // scaling
+    double             ss = 1.0 / pow(2.0, s);
+    vnl_matrix<double> A(ss * m); //scaling
     F = PadeApproximantOfDegree(A, m_vals.back());
     for (int i = 0; i < s; i++)
       F = F * F; // Squaring
@@ -481,11 +482,10 @@ vnl_matrix<double> MyMatrix::MatrixExp(const vnl_matrix<double> &m)
   return F;
 }
 
-// =========================================== MATRIX LOG
-// =================================================
+// =========================================== MATRIX LOG =================================================
 
 vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
-                                       int maxlogiter)
+                                       int                       maxlogiter)
 // LOGM   Matrix logarithm.
 //   L = LOGM(A) is the principal matrix logarithm of A, the inverse of EXPM(A).
 //   L is the unique logarithm for which every eigenvalue has imaginary part
@@ -494,10 +494,9 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
 //   a non-principal logarithm is computed, and a warning message is printed.
 {
 
-  // cout << endl << "======================================================="<<
-  // endl << endl;
+  //cout << endl << "======================================================="<< endl << endl;
 
-  // cout<< " MyMatrix::MatrixLog " << endl;
+  //cout<< " MyMatrix::MatrixLog " << endl;
 
   assert(A.cols() == A.rows());
   int n = A.cols();
@@ -505,16 +504,15 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
   if (n == 1)
     return vnl_matrix<double>(1, 1, log(A[0][0]));
 
-  // First form complex Schur form (if m not already upper triangular, maybe
-  // check?)
-  vnl_matrix<std::complex<double>> U(n, n);
-  vnl_matrix<std::complex<double>> T(n, n);
+  // First form complex Schur form (if m not already upper triangular, maybe check?)
+  vnl_matrix<complex<double>> U(n, n);
+  vnl_matrix<complex<double>> T(n, n);
   //  if isequal(A,triu(A))
   //    T = A; U = eye(n);
   //  else
   SchurComplex(A, U, T);
-  // cout << " First Schur U: " << U << endl;
-  // cout << " First Schur T: " << T << endl;
+  //cout << " First Schur U: " << U << endl;
+  //cout << " First Schur T: " << T << endl;
 
   // Check eigenvalues
   double eps = 0.000000001;
@@ -535,59 +533,58 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
   //
 
   // Determine reordering of Schur form into block form.
-  double delta = 0.1;
+  double           delta = 0.1;
   std::vector<int> ord1(blocking(T, delta));
-  // cout << " ord1: "; Print(ord1);
-  std::vector<int> ord;
+  //cout << " ord1: "; Print(ord1);
+  std::vector<int>              ord;
   std::vector<std::vector<int>> ind;
   swapping(ord1, ord, ind); // Gives the blocking in ord and ind.
-  // cout << " ord: "; Print(ord);
-  // cout << " ind: "<< endl;
-  // for (unsigned int iii = 0;iii<ind.size(); iii++)
+  //cout << " ord: "; Print(ord);
+  //cout << " ind: "<< endl;
+  //for (unsigned int iii = 0;iii<ind.size(); iii++)
   //{
   //  cout << " " << iii << " " ; Print (ind[iii]);
   //}
   // Since ORDSCHUR puts highest index top left.
   int mord = *std::max_element(ord.begin(), ord.end());
-  // cout << " mord : " << mord << endl;
+  //cout << " mord : " << mord << endl;
   for (unsigned int i = 0; i < ord.size(); i++)
     ord[i] = mord - ord[i];
-  // cout << " ord new: " ; Print(ord);
+  //cout << " ord new: " ; Print(ord);
   OrdSchurComplex(U, T, ord, U, T);
 
   // Calculate F(T)
-  vnl_matrix<std::complex<double>> F(n, n, 0.0);
-  int m = ind.size();
+  vnl_matrix<complex<double>> F(n, n, 0.0);
+  int                         m = ind.size();
   for (int col = 0; col < m; col++) {
-    // cout << "==================col: " << col << endl;
+    //cout << "==================col: " << col << endl;
     std::vector<int> jj = ind[col];
-    // cout << " jj: "; Print(jj);
+    //cout << " jj: "; Print(jj);
     //    if prnt == 2 && max(j) > min(j)
     //       fprintf('Evaluating function of block (%g:%g)\n', min(j), max(j))
     //    end
     //    if isequal(fun,@fun_log)
 
-    // cout << " submatrix t(jj,jj): "<< endl << getSubMatrix(T,jj,jj) << endl;
-    // cout << " mlog_isst: " << endl <<
-    // MatrixLog_isst(getSubMatrix(T,jj,jj),maxlogiter) << endl;
+    //cout << " submatrix t(jj,jj): "<< endl << getSubMatrix(T,jj,jj) << endl;
+    //cout << " mlog_isst: " << endl << MatrixLog_isst(getSubMatrix(T,jj,jj),maxlogiter) << endl;
     setSubMatrix(F, jj, jj,
                  MatrixLog_isst(getSubMatrix(T, jj, jj), maxlogiter));
-    // cout << " F " << F << endl;
+    //cout << " F " << F << endl;
     //    else
     //       [F(j,j), terms(col)] = funm_atom(T(j,j),fun,tol,maxterms,prnt>1,...
     //                                        varargin{:});
     //    end
     //
     for (int row = col - 1; row >= 0; row--) {
-      // cout << "=======row : " << row << endl;
+      //cout << "=======row : " << row << endl;
       std::vector<int> ii = ind[row];
-      // cout << " ii: "; Print(ii);
+      //cout << " ii: "; Print(ii);
       if (ii.size() == 1 && jj.size() == 1) {
         // Scalar case.
         int i = ii[0];
         int j = jj[0];
-        // cout << " scalar case ( " << i << " , " << j << " )" << endl;
-        // k = i+1:j-1;
+        //cout << " scalar case ( " << i << " , " << j << " )" << endl;
+        //k = i+1:j-1;
         //          if (i+1 > j-1)  // empty k below
         //          {
         //            //cout << " !!! empty k  !! "  << endl;
@@ -597,14 +594,13 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
         //          {
         //            for (int k = i+1; k<= j-1; k++)
         //            {
-        //              std::complex < double > temp = T[i][j]*(F[i][i] -
-        //              F[j][j]) + F[i][k]*T[k][j] - T[i][k]*F[k][j]; F[i][j] =
-        //              temp/(T(i,i)-T(j,j));
+        //              complex < double > temp = T[i][j]*(F[i][i] - F[j][j]) + F[i][k]*T[k][j] - T[i][k]*F[k][j];
+        //              F[i][j] = temp/(T(i,i)-T(j,j));
         //            }
         //          }
 
-        std::complex<double> temp1(0);
-        std::complex<double> temp2(0);
+        complex<double> temp1(0);
+        complex<double> temp2(0);
         for (int k = i + 1; k <= j - 1; k++) {
           temp1 += F[i][k] * T[k][j];
           temp2 += T[i][k] * F[k][j];
@@ -613,30 +609,30 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
                   (T(i, i) - T(j, j));
 
       } else {
-        // cout << " matrix case  " << endl;
+        //cout << " matrix case  " << endl;
 
         // concatenate indices: (matlab) k = cat(2,ind{row+1:col-1});
         std::vector<int> kk;
         for (int k = row + 1; k < col; k++)
           kk.insert(kk.end(), ind[k].begin(), ind[k].end());
-        // cout << " kk : " ; Print(kk);
+        //cout << " kk : " ; Print(kk);
 
-        // rhs = F(i,i)*T(i,j) - T(i,j)*F(j,j) + F(i,k)*T(k,j) - T(i,k)*F(k,j);
-        vnl_matrix<std::complex<double>> rhs(getSubMatrix(F, ii, ii) *
-                                             getSubMatrix(T, ii, jj));
+        //rhs = F(i,i)*T(i,j) - T(i,j)*F(j,j) + F(i,k)*T(k,j) - T(i,k)*F(k,j);
+        vnl_matrix<complex<double>> rhs(getSubMatrix(F, ii, ii) *
+                                        getSubMatrix(T, ii, jj));
         rhs -= getSubMatrix(T, ii, jj) * getSubMatrix(F, jj, jj);
-        // cout << " rhs1 : " << rhs << endl;
+        //cout << " rhs1 : " << rhs << endl;
         if (kk.size() > 0) {
           rhs += getSubMatrix(F, ii, kk) * getSubMatrix(T, kk, jj);
           rhs -= getSubMatrix(T, ii, kk) * getSubMatrix(F, kk, jj);
         }
-        // cout << " rhs2 : " << rhs << endl;
+        //cout << " rhs2 : " << rhs << endl;
 
-        // F(i,j) = sylv_tri(T(i,i),-T(j,j),rhs);
+        //F(i,j) = sylv_tri(T(i,i),-T(j,j),rhs);
         setSubMatrix(
             F, ii, jj,
             sylv_tri(getSubMatrix(T, ii, ii), -getSubMatrix(T, jj, jj), rhs));
-        // cout << " F " << F << endl;
+        //cout << " F " << F << endl;
       }
     } // rows in upper triangle
   }
@@ -649,10 +645,10 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
 
   F = U * F * U.conjugate_transpose();
 
-  // cout << " log(A) ? " << F << endl;
+  //cout << " log(A) ? " << F << endl;
 
   double eps_matlab = pow(2.0, -52);
-  double imagone = vnl_imag(F).operator_one_norm();
+  double imagone    = vnl_imag(F).operator_one_norm();
   if (imagone > 10 * n * eps_matlab * F.operator_one_norm()) {
     cerr << " MatrixLog Error: " << endl;
     cerr << "  Result too imaginary to ignore! ( " << imagone << " )" << endl;
@@ -674,11 +670,11 @@ vnl_matrix<double> MyMatrix::MatrixLog(const vnl_matrix<double> &A,
   return vnl_real(F);
 }
 
-void MyMatrix::OrdSchurComplexLogical(const vnl_matrix<std::complex<double>> &U,
-                                      const vnl_matrix<std::complex<double>> &T,
-                                      const std::vector<int> &select,
-                                      vnl_matrix<std::complex<double>> &US,
-                                      vnl_matrix<std::complex<double>> &TS)
+void MyMatrix::OrdSchurComplexLogical(const vnl_matrix<complex<double>> &U,
+                                      const vnl_matrix<complex<double>> &T,
+                                      const std::vector<int> &           select,
+                                      vnl_matrix<complex<double>> &      US,
+                                      vnl_matrix<complex<double>> &      TS)
 // wrapping ZTRSEN from LAPACk:
 //  reorders the Schur factorization of a complex matrix
 //  A = Q*T*Q**H, so that a selected cluster of eigenvalues appears in
@@ -687,27 +683,26 @@ void MyMatrix::OrdSchurComplexLogical(const vnl_matrix<std::complex<double>> &U,
 //  corresponding right invariant subspace.
 {
 
-  // cout << " MyMatrix::OrdSchurComplex ( logical select )  NOT TESTED
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+  //cout << " MyMatrix::OrdSchurComplex ( logical select )  NOT TESTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 
   assert(T.rows() == T.cols());
   assert(U.rows() == U.cols());
   assert(U.rows() == T.rows());
 
-  // cout << " T before : " << T << endl;
+  //cout << " T before : " << T << endl;
 
   int *selecti = new int[select.size()];
   for (unsigned int i = 0; i < select.size(); i++)
     selecti[i] = select[i];
 
   long n = T.rows();
-  TS = T.transpose(); // transpose for fortran
-  US = U.transpose(); // transpose for fortran
-  vnl_vector<std::complex<double>> W(n);
-  long m;
-  long lwork = n;
-  vnl_vector<std::complex<double>> work(lwork);
-  long info = 100;
+  TS     = T.transpose(); // transpose for fortran
+  US     = U.transpose(); // transpose for fortran
+  vnl_vector<complex<double>> W(n);
+  long                        m;
+  long                        lwork = n;
+  vnl_vector<complex<double>> work(lwork);
+  long                        info = 100;
   ztrsen_((char *)"N",     // JOB (no condition numbers)
           (char *)"V",     // COMPQ (update the schur vectors also)
           selecti,         // SELECT (logical array)
@@ -717,17 +712,17 @@ void MyMatrix::OrdSchurComplexLogical(const vnl_matrix<std::complex<double>> &U,
           US.data_block(), // Q (input/output)
           &n,              // LDQ
           W.data_block(),  // W (output) reordered eigenvalues
-          &m,      // m (output) dimension of specified invariant subspace
-          nullptr, // S
-          nullptr, // SEP
+          &m, // m (output) dimension of specified invariant subspace
+          0,  // S
+          0,  // SEP
           work.data_block(), // WORK
           &lwork,            // LWORK
           &info);
   delete[] selecti;
   TS.inplace_transpose(); // switch back ..
   US.inplace_transpose(); // from fortran ordering
-  // cout << " info: " << info << endl;
-  // cout << " T after " << TS << endl;
+  //cout << " info: " << info << endl;
+  //cout << " T after " << TS << endl;
 
   if (info != 0) {
     // These return codes are taken from ztrsen.f:
@@ -746,11 +741,11 @@ void MyMatrix::OrdSchurComplexLogical(const vnl_matrix<std::complex<double>> &U,
   }
 }
 
-void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
-                               const vnl_matrix<std::complex<double>> &T,
-                               const std::vector<int> &clusters,
-                               vnl_matrix<std::complex<double>> &US,
-                               vnl_matrix<std::complex<double>> &TS)
+void MyMatrix::OrdSchurComplex(const vnl_matrix<complex<double>> &U,
+                               const vnl_matrix<complex<double>> &T,
+                               const std::vector<int> &           clusters,
+                               vnl_matrix<complex<double>> &      US,
+                               vnl_matrix<complex<double>> &      TS)
 // Reorders the Schur factorization
 //    X = U*T*U' of a matrix X so that a selected cluster of eigenvalues
 //    appears in the leading (upper left) diagonal of the
@@ -769,23 +764,23 @@ void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
   assert(U.cols() == T.cols());
   assert(clusters.size() == T.cols());
 
-  // cout << " U " << endl << U << endl;
-  // cout << " T " << endl << T << endl;
+  //cout << " U " << endl << U << endl;
+  //cout << " T " << endl << T << endl;
 
   int n = T.cols();
 
   US = U;
   TS = T;
 
-  int maxi = *std::max_element(clusters.begin(), clusters.end());
+  int              maxi = *std::max_element(clusters.begin(), clusters.end());
   std::vector<int> myclusters(clusters);
-  // cout << " mycluster before "; Print(myclusters);
-  // bool reorder = false;
+  //cout << " mycluster before "; Print(myclusters);
+  //bool reorder = false;
   for (int i = 0; i <= maxi; i++) {
 
     // create logical 'select' vector of all elelemts where
     //  mycluster == i
-    int foundi = 0;
+    int              foundi = 0;
     std::vector<int> select(n);
     for (int j = 0; j < n; j++) {
       if (myclusters[j] == i) // found one
@@ -796,8 +791,8 @@ void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
         select[j] = 0; // don't reorder this one
     }
 
-    // cout << "select " ; Print(select);
-    // cout << "foundi " << foundi << endl;
+    //cout << "select " ; Print(select);
+    //cout << "foundi " << foundi << endl;
 
     if (foundi == 0)
       continue; // if there was a gap in clusters idx, continue with next
@@ -805,18 +800,18 @@ void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
     int startvals = 0;
     while (startvals < n && select[startvals])
       startvals++;
-    // cout << "startvals " << startvals << endl;
+    //cout << "startvals " << startvals << endl;
     if (foundi == startvals)
       continue; // all selected are allready the first values
 
-    // cout << " doing schur reorder... " << endl;
+    //cout << " doing schur reorder... " << endl;
     // here we have found at least one value to reorder
-    // reorder = true;
+    //reorder = true;
     OrdSchurComplexLogical(US, TS, select, US, TS);
 
     // also reorder myclusters accordingly:
     std::vector<int> my2(myclusters);
-    int count = 0;
+    int              count = 0;
     for (int j = 0; j < n; j++) {
       // setting i cluster to the front:
       if (j < foundi)
@@ -832,23 +827,23 @@ void MyMatrix::OrdSchurComplex(const vnl_matrix<std::complex<double>> &U,
       }
     }
 
-    // cout << "mycluster after: " ; Print(myclusters);
+    //cout << "mycluster after: " ; Print(myclusters);
   }
 
   // returning parameters US and TS
-  // cout << " US " << endl << US << endl;
-  // cout << " TS " << endl << TS << endl;
-  // if (reorder)   exit(1);
+  //cout << " US " << endl << US << endl;
+  //cout << " TS " << endl << TS << endl;
+  //if (reorder)   exit(1);
 }
 
-vnl_matrix<std::complex<double>>
-MyMatrix::getSubMatrix(const vnl_matrix<std::complex<double>> &A,
-                       const std::vector<int> &rows,
-                       const std::vector<int> &cols)
+vnl_matrix<complex<double>>
+MyMatrix::getSubMatrix(const vnl_matrix<complex<double>> &A,
+                       const std::vector<int> &           rows,
+                       const std::vector<int> &           cols)
 // returns the submatrix of A consising of rows x cols (where these are indices)
 {
 
-  vnl_matrix<std::complex<double>> M(rows.size(), cols.size());
+  vnl_matrix<complex<double>> M(rows.size(), cols.size());
 
   for (unsigned int r = 0; r < rows.size(); r++)
     for (unsigned int c = 0; c < cols.size(); c++)
@@ -857,10 +852,10 @@ MyMatrix::getSubMatrix(const vnl_matrix<std::complex<double>> &A,
   return M;
 }
 
-void MyMatrix::setSubMatrix(vnl_matrix<std::complex<double>> &A,
-                            const std::vector<int> &rows,
-                            const std::vector<int> &cols,
-                            const vnl_matrix<std::complex<double>> &B)
+void MyMatrix::setSubMatrix(vnl_matrix<complex<double>> &      A,
+                            const std::vector<int> &           rows,
+                            const std::vector<int> &           cols,
+                            const vnl_matrix<complex<double>> &B)
 // sets the submatrix of A specified by rows and cols to B
 {
   assert(B.rows() == rows.size());
@@ -875,9 +870,8 @@ void MyMatrix::setSubMatrix(vnl_matrix<std::complex<double>> &A,
     }
 }
 
-vnl_matrix<std::complex<double>>
-MyMatrix::MatrixLog_isst(const vnl_matrix<std::complex<double>> &A,
-                         int maxlogiter)
+vnl_matrix<complex<double>>
+MyMatrix::MatrixLog_isst(const vnl_matrix<complex<double>> &A, int maxlogiter)
 // Log of triangular matrix by inverse scaling and squaring method.
 //   X = LOGM_ISST(m, MAXLOGITER) computes the (principal) logarithm of an
 //   upper triangular matrix m, for a matrix with no nonpositive real
@@ -897,15 +891,15 @@ MyMatrix::MatrixLog_isst(const vnl_matrix<std::complex<double>> &A,
   int n = A.cols();
 
   if (n == 1)
-    return vnl_matrix<std::complex<double>>(1, 1, log(A[0][0]));
+    return vnl_matrix<complex<double>>(1, 1, log(A[0][0]));
 
-  vnl_matrix<std::complex<double>> T(A), R(A);
+  vnl_matrix<complex<double>> T(A), R(A);
 
   double phi;
-  bool prnt = false; // true;
-  int iter, j, i, k;
-  //  std::complex < double > s;
-  vnl_diag_matrix<std::complex<double>> I(n, 1); //  I.set_identity();
+  bool   prnt = false; // true;
+  int    iter, j, i, k;
+  //  complex < double > s;
+  vnl_diag_matrix<complex<double>> I(n, 1); //  I.set_identity();
 
   for (iter = 0; iter < maxlogiter; iter++) {
 
@@ -936,9 +930,9 @@ MyMatrix::MatrixLog_isst(const vnl_matrix<std::complex<double>> &A,
         //             R[i][j] = (T[i][j] - s)/(R[i][i] + R[j][j]);
         //           }
 
-        std::complex<double> s(0);
+        complex<double> s(0);
         for (k = i + 1; k < j; k++) {
-          // cout << i << " " << j << " " << k << endl;
+          //cout << i << " " << j << " " << k << endl;
           s += R[i][k] * R[k][j];
         }
         R[i][j] = (T[i][j] - s) / (R[i][i] + R[j][j]);
@@ -947,41 +941,40 @@ MyMatrix::MatrixLog_isst(const vnl_matrix<std::complex<double>> &A,
 
     T = R;
   }
-  // cout << " T in logisst: " << endl << T << endl;
-  // cout << " iter : " << iter << endl;
-  // cout << " log pf : " << MatrixLog_pf(T-I,8) << endl;
-  return std::complex<double>(pow(2.0, iter), 0) * MatrixLog_pf(T - I, 8);
+  //cout << " T in logisst: " << endl << T << endl;
+  //cout << " iter : " << iter << endl;
+  //cout << " log pf : " << MatrixLog_pf(T-I,8) << endl;
+  return complex<double>(pow(2.0, iter), 0) * MatrixLog_pf(T - I, 8);
 }
 
-vnl_matrix<std::complex<double>>
-MyMatrix::MatrixLog_pf(const vnl_matrix<std::complex<double>> &A,
-                       unsigned int m)
-// LOGM_PF   Pade approximation to matrix log by partial fraction expansion.
+vnl_matrix<complex<double>>
+MyMatrix::MatrixLog_pf(const vnl_matrix<complex<double>> &A, unsigned int m)
+//LOGM_PF   Pade approximation to matrix log by partial fraction expansion.
 //          Y = LOGM_PF(A,m) approximates LOG(EYE(SIZE(A))+A) by an [m/m]
 //          Pade approximation.
 {
-  int n = A.cols();
+  int                n = A.cols();
   vnl_vector<double> nodes(n);
   vnl_vector<double> wts(n);
   gauss_legendre(m, nodes, wts);
-  // cout << " nodes   " << nodes << endl;
-  // cout << " weights "  << wts << endl;
+  //cout << " nodes   " << nodes << endl;
+  //cout << " weights "  << wts << endl;
 
   // Convert from [-1,1] to [0,1].
   nodes = (nodes + 1) / 2.0;
-  wts = wts / 2.0;
+  wts   = wts / 2.0;
 
-  vnl_matrix<std::complex<double>> S(n, n, 0.0);
-  vnl_matrix<std::complex<double>> id(n, n);
+  vnl_matrix<complex<double>> S(n, n, 0.0);
+  vnl_matrix<complex<double>> id(n, n);
   id.set_identity();
 
-  vnl_matrix<std::complex<double>> At(A.transpose());
+  vnl_matrix<complex<double>> At(A.transpose());
   for (unsigned int j = 0; j < m; j++) {
-    S = S + std::complex<double>(wts[j], 0.0) *
-                (vnl_svd<std::complex<double>>(
-                     id + std::complex<double>(nodes[j], 0.0) * At)
-                     .solve(At));
-    // S = S + wts[j]*(A/(id + nodes[j]*A)); //!!! rightsolv requires transpose
+    S = S +
+        complex<double>(wts[j], 0.0) *
+            (vnl_svd<complex<double>>(id + complex<double>(nodes[j], 0.0) * At)
+                 .solve(At));
+    //S = S + wts[j]*(A/(id + nodes[j]*A)); //!!! rightsolv requires transpose
   }
 
   return S.transpose();
@@ -989,7 +982,7 @@ MyMatrix::MatrixLog_pf(const vnl_matrix<std::complex<double>> &A,
 
 void MyMatrix::gauss_legendre(int n, vnl_vector<double> &x,
                               vnl_vector<double> &w)
-// GAUSS_LEGENDRE  Nodes and weights for Gauss-Legendre quadrature.
+//GAUSS_LEGENDRE  Nodes and weights for Gauss-Legendre quadrature.
 //                [X,W] = GAUSS_LEGENDRE(N) computes the nodes X and weights W
 //                for n-point Gauss-Legendre quadrature.
 //
@@ -998,17 +991,17 @@ void MyMatrix::gauss_legendre(int n, vnl_vector<double> &x,
 // Math. Comp., 23(106):221-230, 1969.
 {
   vnl_matrix<double> M(n, n, 0.0);
-  double d;
+  double             d;
   for (int i = 1; i < n; i++) {
-    d = i / sqrt(4.0 * i * i - 1);
+    d           = i / sqrt(4.0 * i * i - 1);
     M[i - 1][i] = d;
     M[i][i - 1] = d;
   }
-  // cout << " offidag : " << M << endl;
+  //cout << " offidag : " << M << endl;
   vnl_symmetric_eigensystem<double> eigs(M);
 
-  // cout << " V : " << eigs.V << endl;
-  // cout << " D : " << eigs.D << endl;
+  //cout << " V : " << eigs.V << endl;
+  //cout << " D : " << eigs.D << endl;
 
   x = eigs.D.diagonal();
   w = eigs.V.get_row(0);
@@ -1022,9 +1015,9 @@ void MyMatrix::gauss_legendre(int n, vnl_vector<double> &x,
   //  w = 2*(V(1,:)'.^2);
 }
 
-std::vector<int> MyMatrix::blocking(const vnl_matrix<std::complex<double>> &A,
-                                    double delta)
-// BLOCKING  Produce blocking pattern for block Parlett recurrence in FUNM.
+std::vector<int> MyMatrix::blocking(const vnl_matrix<complex<double>> &A,
+                                    double                             delta)
+//BLOCKING  Produce blocking pattern for block Parlett recurrence in FUNM.
 //   M = BLOCKING(A, DELTA) accepts an upper triangular matrix
 //   A and produces a blocking pattern, specified by the vector M,
 //   for the block Parlett recurrence.
@@ -1037,14 +1030,14 @@ std::vector<int> MyMatrix::blocking(const vnl_matrix<std::complex<double>> &A,
 {
   int n = A.cols();
 
-  vnl_vector<std::complex<double>> a(n);
+  vnl_vector<complex<double>> a(n);
   for (int i = 0; i < n; i++)
     a[i] = A[i][i];
 
-  // cout << " A diag: " << a << endl;
+  //cout << " A diag: " << a << endl;
 
   std::vector<int> m(n, -1);
-  int maxM = 0;
+  int              maxM = 0;
 
   for (int i = 0; i < n; i++) {
 
@@ -1089,7 +1082,7 @@ std::vector<int> MyMatrix::blocking(const vnl_matrix<std::complex<double>> &A,
 
 void MyMatrix::swapping(const std::vector<int> &m, std::vector<int> &mm,
                         std::vector<std::vector<int>> &ind)
-// SWAPPING  Choose confluent permutation ordered by average index.
+//SWAPPING  Choose confluent permutation ordered by average index.
 //   [MM,IND] = SWAPPING(M) takes a vector M containing the integers
 //   1:K (some repeated if K < LENGTH(M)), where M(J) is the index of
 //   the block into which the element T(J,J) of a Schur form T
@@ -1106,12 +1099,12 @@ void MyMatrix::swapping(const std::vector<int> &m, std::vector<int> &mm,
   mm.clear();
   mm.resize(m.size());
   std::vector<std::pair<double, int>> g(mmax);
-  std::vector<int> h(mmax);
+  std::vector<int>                    h(mmax);
 
   int lengthp, sump;
   for (int i = 0; i < mmax; i++) {
     lengthp = 0;
-    sump = 0;
+    sump    = 0;
     for (unsigned int j = 0; j < m.size(); j++) {
       if (m[j] == i) {
         lengthp++;
@@ -1119,13 +1112,13 @@ void MyMatrix::swapping(const std::vector<int> &m, std::vector<int> &mm,
       }
     }
 
-    h[i] = lengthp;
-    g[i].first = ((double)sump) / h[i];
+    h[i]        = lengthp;
+    g[i].first  = ((double)sump) / h[i];
     g[i].second = i;
 
-    // p = find(m==i);
-    // h(i) = length(p);
-    // g(i) = sum(p)/h(i);
+    //p = find(m==i);
+    //h(i) = length(p);
+    //g(i) = sum(p)/h(i);
   }
 
   //   cout << " g(pre): " ; Print(g);
@@ -1136,7 +1129,7 @@ void MyMatrix::swapping(const std::vector<int> &m, std::vector<int> &mm,
   // h = [0 cumsum(h(y))];
   h = cumsum0(h, g);
 
-  // cout << " h " ; Print(h);
+  //cout << " h " ; Print(h);
 
   ind.clear();
   ind.resize(mmax);
@@ -1155,7 +1148,7 @@ void MyMatrix::swapping(const std::vector<int> &m, std::vector<int> &mm,
   // returning paramters mm and ind
 }
 
-std::vector<int> MyMatrix::cumsum0(const std::vector<int> &v,
+std::vector<int> MyMatrix::cumsum0(const std::vector<int> &                   v,
                                    const std::vector<std::pair<double, int>> &w)
 // helper for swapping
 // computes the cumulative sum of v with the following modifications:
@@ -1163,26 +1156,25 @@ std::vector<int> MyMatrix::cumsum0(const std::vector<int> &v,
 // 2. the second parameter of vector w is used for reordering the array first
 // so if y is the array of all w.second this is equiv to matlab:
 // cumsum0 = [0 cumsum(v(y))];
-// note that w.first values are ignored, the pair is passed to make calling
-// easier
+// note that w.first values are ignored, the pair is passed to make calling easier
 {
-  int n = (int)v.size();
+  int              n = (int)v.size();
   std::vector<int> cs(n + 1);
   cs[0] = 0;
 
   int sum = 0;
   for (int i = 0; i < n; i++) {
-    sum = sum + v[w[i].second];
+    sum       = sum + v[w[i].second];
     cs[i + 1] = sum;
   }
   return cs;
 }
 
-vnl_matrix<std::complex<double>>
-MyMatrix::sylv_tri(const vnl_matrix<std::complex<double>> &T,
-                   const vnl_matrix<std::complex<double>> &U,
-                   const vnl_matrix<std::complex<double>> &B)
-// SYLV_TRI    Solve triangular Sylvester equation.
+vnl_matrix<complex<double>>
+MyMatrix::sylv_tri(const vnl_matrix<complex<double>> &T,
+                   const vnl_matrix<complex<double>> &U,
+                   const vnl_matrix<complex<double>> &B)
+//SYLV_TRI    Solve triangular Sylvester equation.
 //   X = SYLV_TRI(T,U,B) solves the Sylvester equation
 //   T*X + X*U = B, where T and U are square upper triangular matrices.
 {
@@ -1191,25 +1183,25 @@ MyMatrix::sylv_tri(const vnl_matrix<std::complex<double>> &T,
   int m = T.cols();
   int n = U.cols();
 
-  // cout << " sylv_tri " << endl;
-  // cout << " T " << T << endl;
-  // cout << " U " << U << endl;
-  // cout << " B " << B << endl;
+  //cout << " sylv_tri " << endl;
+  //cout << " T " << T << endl;
+  //cout << " U " << U << endl;
+  //cout << " B " << B << endl;
 
-  vnl_matrix<std::complex<double>> M(m, n);
+  vnl_matrix<complex<double>> M(m, n);
 
   // Forward substitution
   for (int i = 0; i < n; i++) {
-    // cout << " col " << i << endl;
+    //cout << " col " << i << endl;
 
-    vnl_diag_matrix<std::complex<double>> Uii(m, U[i][i]);
-    vnl_matrix<std::complex<double>> A(T + Uii);
-    // cout << " A " << A << endl;
-    vnl_vector<std::complex<double>> y(B.get_column(i));
+    vnl_diag_matrix<complex<double>> Uii(m, U[i][i]);
+    vnl_matrix<complex<double>>      A(T + Uii);
+    //cout << " A " << A << endl;
+    vnl_vector<complex<double>> y(B.get_column(i));
     if (i > 0)
       y -= M.get_n_columns(0, i - 1) * U.get_n_rows(0, i - 1).get_column(i);
-    // cout << " y " << Y << endl;
-    M.set_column(i, vnl_svd<std::complex<double>>(A).solve(y));
+    //cout << " y " << Y << endl;
+    M.set_column(i, vnl_svd<complex<double>>(A).solve(y));
     // matlab:
     // X(:,i) = (T + U[i][i]*Id) \ (B(:,i) - X(:,1:i-1)*U(1:i-1,i));
   }
@@ -1217,8 +1209,7 @@ MyMatrix::sylv_tri(const vnl_matrix<std::complex<double>> &T,
   return M;
 }
 
-// ==================================== MATRIX POWER
-// ============================================================
+// ==================================== MATRIX POWER ============================================================
 
 /**
  Uses matrix log and exp to compute the matrix power
@@ -1232,16 +1223,15 @@ vnl_matrix<double> MyMatrix::MatrixPow(const vnl_matrix<double> &A, double d)
   return MatrixExp(d * MatrixLog(A));
 }
 
-// ==================================== MATRIX SQUAREROOT
-// ============================================================
+// ==================================== MATRIX SQUAREROOT ============================================================
 
 /**
  Computes the squareroot of a matrix \f$M = \sqrt{M} * \sqrt{M}\f$
  using complex SCHUR decomposition (same as matlab,
- although they seem to use slightly different LAPACK routines for the SCHUR
- decomposition) Note: there exists also a completely REAL algorithm (not
- implemented here), see Computing Real Square Roots of a Real Matrix by Nicholas
- J. Higham
+ although they seem to use slightly different LAPACK routines for the SCHUR decomposition)
+ Note: there exists also a completely REAL algorithm (not implemented here), see
+ Computing Real Square Roots of a Real Matrix
+ by Nicholas J. Higham
 
  @param[in]     A The input matrix needs to be a square matrix.
  @return Square root of A.
@@ -1272,20 +1262,20 @@ vnl_matrix<double> MyMatrix::MatrixSqrt(const vnl_matrix<double> &A) {
   //
   //   cout.precision(5);
 
-  // return MatrixPow(A,0.5); // for testing log and exp
+  //return MatrixPow(A,0.5); // for testing log and exp
 
   assert(A.cols() == A.rows());
   int n = A.cols();
 
-  vnl_matrix<std::complex<double>> U(n, n);
-  vnl_matrix<std::complex<double>> T(n, n);
+  vnl_matrix<complex<double>> U(n, n);
+  vnl_matrix<complex<double>> T(n, n);
   SchurComplex(A, U, T);
 
-  vnl_matrix<std::complex<double>> Asqrt(n, n);
+  vnl_matrix<complex<double>> Asqrt(n, n);
 
   if (isDiag(vnl_real(T)) && isDiag(vnl_imag(T))) {
-    // cout << " isDiagonal ! " << endl;
-    vnl_diag_matrix<std::complex<double>> R(n);
+    //cout << " isDiagonal ! " << endl;
+    vnl_diag_matrix<complex<double>> R(n);
     for (int i = 0; i < n; i++)
       R[i] = sqrt(T[i][i]); // Square root always exists.
 
@@ -1293,15 +1283,15 @@ vnl_matrix<double> MyMatrix::MatrixSqrt(const vnl_matrix<double> &A) {
   } else {
 
     // Compute upper triangular square root R of T, a column at a time.
-    // cout << " upper triangular ! " << endl;
+    //cout << " upper triangular ! " << endl;
 
-    vnl_matrix<std::complex<double>> R(n, n, 0.0);
-    // std::complex < double > s;
+    vnl_matrix<complex<double>> R(n, n, 0.0);
+    // complex < double > s;
     for (int j = 0; j < n; j++) // column
     {
       R[j][j] = sqrt(T[j][j]);
       for (int i = j - 1; i >= 0; i--) {
-        std::complex<double> s(0);
+        complex<double> s(0);
         for (int k = i + 1; k < j; k++) {
           s += R[i][k] * R[k][j];
         }
@@ -1315,36 +1305,36 @@ vnl_matrix<double> MyMatrix::MatrixSqrt(const vnl_matrix<double> &A) {
     //     cout << " R = ";PrintComplex(R);
     //     cout << " R*R = ";PrintComplex(R*R);
     //     cout << " R*R - T = ";PrintComplex(R*R-T);
-    //     cout << " fro(R*R-T) = " << (R*R-T).frobenius_norm() << endl << endl
-    //     ; cout.precision(6);
+    //     cout << " fro(R*R-T) = " << (R*R-T).frobenius_norm() << endl << endl ;
+    //     cout.precision(6);
 
     Asqrt = U * R * U.conjugate_transpose();
 
-    // cout << " sqrt " << endl << Asqrt << endl;
+    //cout << " sqrt " << endl << Asqrt << endl;
   }
 
   bool test = true;
   if (test) {
     // test if imaginary values too large:
     double eps_matlab = pow(2.0, -52);
-    double imagone = vnl_imag(Asqrt).operator_one_norm();
+    double imagone    = vnl_imag(Asqrt).operator_one_norm();
     if (imagone > 10 * n * eps_matlab * Asqrt.operator_one_norm())
-    // if ( imagone > 0.000000001 )
+    //if ( imagone > 0.000000001 )
     {
       cerr << "MyMatrix::MatrixSqrt Internal Error: " << endl;
       cerr << " Result too imaginary to ignore! ( " << imagone << " )" << endl;
       cerr << " Debug Info: " << endl;
-      vnl_matlab_print(std::cerr, A, "A", vnl_matlab_print_format_long);
+      vnl_matlab_print(cerr, A, "A", vnl_matlab_print_format_long);
       cerr << endl;
-      vnl_matlab_print(std::cerr, T, "T", vnl_matlab_print_format_long);
+      vnl_matlab_print(cerr, T, "T", vnl_matlab_print_format_long);
       cerr << endl;
-      vnl_matlab_print(std::cerr, U, "U", vnl_matlab_print_format_long);
+      vnl_matlab_print(cerr, U, "U", vnl_matlab_print_format_long);
       cerr << endl;
       cerr << " fro( real(U * T * U^*) - A) = "
            << (vnl_real(U * T * U.conjugate_transpose()) - A).frobenius_norm()
            << endl
            << endl;
-      vnl_matlab_print(std::cerr, Asqrt, "Asqrt", vnl_matlab_print_format_long);
+      vnl_matlab_print(cerr, Asqrt, "Asqrt", vnl_matlab_print_format_long);
       cerr << endl;
       cerr << " fro( real(sqrt(A)) ^2 - A)  = "
            << (vnl_real(Asqrt) * vnl_real(Asqrt) - A).frobenius_norm() << endl
@@ -1353,29 +1343,28 @@ vnl_matrix<double> MyMatrix::MatrixSqrt(const vnl_matrix<double> &A) {
     }
     // double fnorm = vnl_imag(T).frobenius_norm();
     ////cout << " fnorm (img) = " << fnorm << endl;
-    // if (fnorm > eps)
+    //if (fnorm > eps)
     //{
-    //   cout << " Warning complex result?: " << fnorm << endl << vnl_imag(T) <<
-    //   endl;
+    //   cout << " Warning complex result?: " << fnorm << endl << vnl_imag(T) << endl;
     //     assert(1==2);
     //  }
 
     // test if sqrt^2==A
-    double eps = 1e-10;
+    double             eps   = 1e-10;
     vnl_matrix<double> msqrt = vnl_real(Asqrt);
-    vnl_matrix<double> ms2 = msqrt * msqrt;
+    vnl_matrix<double> ms2   = msqrt * msqrt;
     ms2 -= A;
-    // double sum = ms2.absolute_value_max();
+    //double sum = ms2.absolute_value_max();
     double fnorm = ms2.frobenius_norm();
     if (fnorm > eps) {
       cerr << "MyMatrix::MatrixSqrt Internal Error: " << endl;
       cerr << "  Result not close enough to square root!" << endl;
       cerr << "  Frobenius norm of difference: " << fnorm << endl;
-      vnl_matlab_print(std::cerr, A, "A", vnl_matlab_print_format_long);
+      vnl_matlab_print(cerr, A, "A", vnl_matlab_print_format_long);
       cerr << endl;
-      vnl_matlab_print(std::cerr, msqrt, "Asqrt", vnl_matlab_print_format_long);
+      vnl_matlab_print(cerr, msqrt, "Asqrt", vnl_matlab_print_format_long);
       cerr << endl;
-      vnl_matlab_print(std::cerr, ms2, "Diff", vnl_matlab_print_format_long);
+      vnl_matlab_print(cerr, ms2, "Diff", vnl_matlab_print_format_long);
       cerr << endl;
       exit(1);
     }
@@ -1413,8 +1402,8 @@ bool MyMatrix::isDiag(const vnl_matrix<double> &A, double eps) {
  Computes the squareroot of a matrix \f$M = \sqrt{M} * \sqrt{M}\f$
  using its eigen-decomposition (here via svd).
  This works only if the matrix is diagonalizable.
- For now separate the translation, else we easily get defective m (not
- diagonalizable) (where we cannot do the eigendecomposition trick).
+ For now separate the translation, else we easily get defective m (not diagonalizable)
+ (where we cannot do the eigendecomposition trick).
 
  @param[in]     m The input matrix needs to be a 4x4 affine matrix.
  @return Square root of m.
@@ -1428,32 +1417,32 @@ vnl_matrix<double> MyMatrix::MatrixSqrtEigs(const vnl_matrix<double> &m) {
       R[rr][cc] = m[rr][cc];
     }
 
-  // cout << endl << endl;
-  // cout << " M: " << endl << m << endl;
-  // cout << " R: " << endl << R << endl;
+  //cout << endl << endl;
+  //cout << " M: " << endl << m << endl;
+  //cout << " R: " << endl << R << endl;
 
-  vnl_matrix<double> rsqrt(3, 3, 0.0);
-  vnl_complex_eigensystem esys(R, rsqrt); // complex part is zero
+  vnl_matrix<double>      rsqrt(3, 3, 0.0);
+  vnl_complex_eigensystem esys(R, rsqrt); //complex part is zero
 
-  // cout << " V' " << endl << esys.R << endl;
-  // cout << " D " << endl << esys.W << endl;
+  //cout << " V' " << endl << esys.R << endl;
+  //cout << " D " << endl << esys.W << endl;
 
-  vnl_diag_matrix<std::complex<double>> Wsqrt(3);
+  vnl_diag_matrix<complex<double>> Wsqrt(3);
   for (unsigned int i = 0; i < 3; i++) {
     Wsqrt[i] = sqrt(esys.W[i]);
   }
-  // cout << " Wsqrt " << endl << Wsqrt << endl;
+  //cout << " Wsqrt " << endl << Wsqrt << endl;
 
-  vnl_matrix<std::complex<double>> Rcomp(3, 3);
+  vnl_matrix<complex<double>> Rcomp(3, 3);
 
   //  esys.R.inplace_transpose(); // store evec in columns
-  //  vnl_matrix_fixed < std::complex < double >, 4, 4 > Rt = esys.R;
+  //  vnl_matrix_fixed < complex < double >, 4, 4 > Rt = esys.R;
   //  Rcomp = (esys.R * Wsqrt) * vnl_inverse(Rt);
-  vnl_qr<std::complex<double>> QR(esys.R);
+  vnl_qr<complex<double>> QR(esys.R);
   Rcomp = QR.solve(Wsqrt * esys.R);
   Rcomp.inplace_transpose();
 
-  // cout << " Rcomp " << endl << Rcomp << endl;
+  //cout << " Rcomp " << endl << Rcomp << endl;
 
   rsqrt = vnl_real(Rcomp);
 
@@ -1471,7 +1460,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrtEigs(const vnl_matrix<double> &m) {
 
   // solve T = Rh1 * Th   <=>   Th = Rh1^-1 * T
   vnl_vector_fixed<double, 3> Th =
-      vnl_inverse(Rh1) * T; // vnl_svd<double>(Rh1).solve(T);
+      vnl_inverse(Rh1) * T; //vnl_svd<double>(Rh1).solve(T);
 
   // put everything together:
   vnl_matrix<double> msqrt(4, 4);
@@ -1486,24 +1475,24 @@ vnl_matrix<double> MyMatrix::MatrixSqrtEigs(const vnl_matrix<double> &m) {
     for (int r = 0; r < 3; r++)
       msqrt[r][c] = rsqrt[r][c];
 
-  // cout << " msqrt " << endl << msqrt << endl;
+  //cout << " msqrt " << endl << msqrt << endl;
 
-  bool test = true;
-  double eps = 0.00000000000001;
+  bool   test = true;
+  double eps  = 0.00000000000001;
   if (test) {
     double fnorm = vnl_imag(Rcomp).frobenius_norm();
-    // cout << " fnorm (img) = " << fnorm << endl;
+    //cout << " fnorm (img) = " << fnorm << endl;
     if (fnorm > eps) {
       cout << " Warning complex result?: " << fnorm << endl
            << vnl_imag(Rcomp) << endl;
       return MatrixSqrtIter(m);
-      // assert(1==2);
+      //assert(1==2);
     }
 
     vnl_matrix<double> ms2 = msqrt * msqrt;
     ms2 -= m;
     double sum = ms2.absolute_value_max();
-    // cout << " max = " << sum << endl;
+    //cout << " max = " << sum << endl;
     if (sum > eps) {
       cout << " Warning : " << sum << endl;
       cout << " sqrt(M): " << endl << msqrt << endl;
@@ -1516,8 +1505,8 @@ vnl_matrix<double> MyMatrix::MatrixSqrtEigs(const vnl_matrix<double> &m) {
 
 /**
  Computes the sqrt of a matrix \f$M = \sqrt{M} * \sqrt{M}\f$
- using Schur decomposition on the 3x3 linear map after splitting off the
- translation. Note, [smith:01] say that sqrt(affine) is not necessarily affine
+ using Schur decomposition on the 3x3 linear map after splitting off the translation.
+ Note, [smith:01] say that sqrt(affine) is not necessarily affine
 
  @param[in]     m The input matrix needs to be a 4x4 affine matrix.
  @return Square root of m.
@@ -1546,7 +1535,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrtAffine(const vnl_matrix<double> &m) {
   // solve T = Rh1 * Th   <=>   Th = Rh1^-1 * T
   // can Rh1 always be inverted ??? not sure...
   vnl_vector_fixed<double, 3> Th =
-      vnl_inverse(Rh1) * T; // vnl_svd<double>(Rh1).solve(T);
+      vnl_inverse(Rh1) * T; //vnl_svd<double>(Rh1).solve(T);
 
   // put everything together:
   vnl_matrix<double> msqrt(4, 4);
@@ -1565,16 +1554,16 @@ vnl_matrix<double> MyMatrix::MatrixSqrtAffine(const vnl_matrix<double> &m) {
 }
 
 /**
- Computes the matrix square root using an iterative algorithm by Denman and
- Beavers. The square root here is defined so that \f$M = \sqrt{M} * \sqrt{M}\f$.
- Note that symmetry cannot be guaranteed (termination may be before reaching
- optimum at machine precision).
+ Computes the matrix square root using an iterative algorithm by Denman and Beavers.
+ The square root here is defined so that \f$M = \sqrt{M} * \sqrt{M}\f$.
+ Note that symmetry cannot be guaranteed (termination may be before reaching optimum at
+ machine precision).
 
  @param[in]     m The input matrix needs to be 4x4.
  @return Approximated square root of m.
  */
 vnl_matrix<double> MyMatrix::MatrixSqrtIter(const vnl_matrix<double> &m)
-// Denman and Beavers square root iteration
+//Denman and Beavers square root iteration
 {
   assert(m.rows() == 4 && m.cols() == 4);
 
@@ -1584,14 +1573,14 @@ vnl_matrix<double> MyMatrix::MatrixSqrtIter(const vnl_matrix<double> &m)
       R[rr][cc] = m[rr][cc];
     }
 
-  // Denman and Beavers square root iteration
+  //Denman and Beavers square root iteration
 
-  int imax = 100;
-  double eps = 0.00001; // important to be small to guarantee symmetry,
-                        // but even adding two zeros did not show any
-                        // differences in tests
+  int    imax = 100;
+  double eps  = 0.00001; // important to be small to guarantee symmetry,
+                         // but even adding two zeros did not show any
+                         // differences in tests
   double err = 1000;
-  // cout << "using square root iteartion (" << imax << ")"<< endl;
+  //cout << "using square root iteartion (" << imax << ")"<< endl;
   vnl_matrix_fixed<double, 3, 3> Yn(R);
   vnl_matrix_fixed<double, 3, 3> Zn;
   Zn.set_identity();
@@ -1602,7 +1591,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrtIter(const vnl_matrix<double> &m)
   while (count < imax && err > eps) {
     count++;
 
-    // store invrse here (we change Yn below)
+    //store invrse here (we change Yn below)
     Yni = vnl_inverse(Yn);
     Zni = vnl_inverse(Zn);
 
@@ -1616,7 +1605,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrtIter(const vnl_matrix<double> &m)
     Ysq = Yn * Yn;
     Ysq -= R;
     err = Ysq.absolute_value_max();
-    // cout << " iteration " << count << "  err: "<< err << endl;
+    //cout << " iteration " << count << "  err: "<< err << endl;
   }
 
   if (count > imax) {
@@ -1639,7 +1628,7 @@ vnl_matrix<double> MyMatrix::MatrixSqrtIter(const vnl_matrix<double> &m)
 
   // solve T = Rh1 * Th   <=>   Th = Rh1^-1 * T
   vnl_vector_fixed<double, 3> Th =
-      vnl_inverse(Rh1) * T; // vnl_svd<double>(Rh1).solve(T);
+      vnl_inverse(Rh1) * T; //vnl_svd<double>(Rh1).solve(T);
 
   // put everything together:
   vnl_matrix<double> msqrt(4, 4);
@@ -1672,26 +1661,26 @@ vnl_matrix<double> MyMatrix::MatrixSqrtIter(const vnl_matrix<double> &m)
   return msqrt;
 }
 
-void MyMatrix::SchurComplex(const vnl_matrix<double> &M,
-                            vnl_matrix<std::complex<double>> &U,
-                            vnl_matrix<std::complex<double>> &T) {
+void MyMatrix::SchurComplex(const vnl_matrix<double> &   M,
+                            vnl_matrix<complex<double>> &U,
+                            vnl_matrix<complex<double>> &T) {
   assert(M.rows() == M.cols());
-  long n = M.rows();
-  long sdim = 0;
-  long lwork = 10 * n;
-  vnl_vector<std::complex<double>> work(lwork);
-  vnl_vector<double> rwork(n);
-  long info = 0;
+  long                        n     = M.rows();
+  long                        sdim  = 0;
+  long                        lwork = 10 * n;
+  vnl_vector<complex<double>> work(lwork);
+  vnl_vector<double>          rwork(n);
+  long                        info = 0;
 
-  // vnl_matrix<std::complex<double> > A(vnl_complexify(M));
+  //vnl_matrix<complex<double> > A(vnl_complexify(M));
   T = vnl_complexify(M);
-  vnl_vector<std::complex<double>> W(n);
+  vnl_vector<complex<double>> W(n);
   U.set_size(n, n);
 
   T.inplace_transpose();            // for fortran call switch col and rows
   zgees_((char *)"V",               // JOBVS
          (char *)"N",               // SORT
-         nullptr,                   // SELECT
+         0,                         // SELECT
          &n,                        // N
          T.data_block(), &n,        // T, LDA
          &sdim,                     // SDIM
@@ -1699,7 +1688,7 @@ void MyMatrix::SchurComplex(const vnl_matrix<double> &M,
          U.data_block(), &n,        // U, LDVS
          work.data_block(), &lwork, // WORK, LWORK
          rwork.data_block(),        // RWORK
-         nullptr,                   // BWORK
+         0,                         // BWORK
          &info);                    // info
 
   T.inplace_transpose(); // switch back ..
@@ -1751,7 +1740,7 @@ MyMatrix::RotationMean(const std::vector<vnl_matrix_fixed<double, 3, 3>> &vm) {
     Id[1][1] -= 1.0;
     Id[2][2] -= 1.0;
     double fn = Id.frobenius_norm();
-    // std::cout << " matrix " << i << "  frobenius norm: " <<  fn<<std::endl;
+    //std::cout << " matrix " << i << "  frobenius norm: " <<  fn<<std::endl;
     if (fn > maxnorm)
       maxnorm = fn;
   }
@@ -1773,8 +1762,7 @@ MyMatrix::RotationMean(const std::vector<vnl_matrix_fixed<double, 3, 3>> &vm) {
                    vm[i][1][1], vm[i][1][2], vm[i][2][0], vm[i][2][1],
                    vm[i][2][2]);
     std::vector<double> v = Q.getRotVec();
-    // std::cout << "RotVec " << i << " = " << v[0] <<" "<< v[1] << " " << v[2]
-    // << std::endl;
+    //std::cout << "RotVec " << i << " = " << v[0] <<" "<< v[1] << " " << v[2] << std::endl;
     meanRV[0] += v[0];
     meanRV[1] += v[1];
     meanRV[2] += v[2];
@@ -1782,33 +1770,31 @@ MyMatrix::RotationMean(const std::vector<vnl_matrix_fixed<double, 3, 3>> &vm) {
   meanRV[0] /= vm.size();
   meanRV[1] /= vm.size();
   meanRV[2] /= vm.size();
-  // std::cout << "Mean Rot Vec " << meanRV[0] <<" " << meanRV[1] << " "<<
-  // meanRV[2] << std::endl;
+  //std::cout << "Mean Rot Vec " << meanRV[0] <<" " << meanRV[1] << " "<< meanRV[2] << std::endl;
   Quaternion Q;
   Q.importRotVec(meanRV[0], meanRV[1], meanRV[2]);
   std::vector<double> rmat = Q.getRotMatrix3d();
-  meanr[0][0] = rmat[0];
-  meanr[0][1] = rmat[1];
-  meanr[0][2] = rmat[2];
-  meanr[1][0] = rmat[3];
-  meanr[1][1] = rmat[4];
-  meanr[1][2] = rmat[5];
-  meanr[2][0] = rmat[6];
-  meanr[2][1] = rmat[7];
-  meanr[2][2] = rmat[8];
-  // vnl_matlab_print(std::cout,meanr,"meanr",vnl_matlab_print_format_long);std::cout
-  // << std::endl;
+  meanr[0][0]              = rmat[0];
+  meanr[0][1]              = rmat[1];
+  meanr[0][2]              = rmat[2];
+  meanr[1][0]              = rmat[3];
+  meanr[1][1]              = rmat[4];
+  meanr[1][2]              = rmat[5];
+  meanr[2][0]              = rmat[6];
+  meanr[2][1]              = rmat[7];
+  meanr[2][2]              = rmat[8];
+  //vnl_matlab_print(vcl_cout,meanr,"meanr",vnl_matlab_print_format_long);std::cout << std::endl;
   return meanr;
 
-  // This older version only averages the rot matrices (mean is minimizer of
-  // Frobenius norm in embedding space) and then maps the result back to a
-  // rotation matrix using polar decomposition. This is similar to averaging
-  // points on a sphere in Euclidean space and then projecting the average back.
+  // This older version only averages the rot matrices (mean is minimizer of Frobenius norm
+  // in embedding space) and then maps the result back to a rotation matrix
+  // using polar decomposition. This is similar to averaging points on a sphere
+  // in Euclidean space and then projecting the average back.
   for (unsigned int i = 0; i < vm.size(); i++)
     meanr += vm[i];
   // Project meanr back to SO(3) via polar decomposition:
   meanr = (1.0 / vm.size()) * meanr;
-  vnl_matlab_print(std::cout, meanr, "meanr", vnl_matlab_print_format_long);
+  vnl_matlab_print(cout, meanr, "meanr", vnl_matlab_print_format_long);
   std::cout << std::endl;
   vnl_matrix<double> PolR(3, 3), PolS(3, 3);
   MyMatrix::PolarDecomposition(meanr, PolR, PolS);
@@ -1820,8 +1806,9 @@ MyMatrix::RotationMean(const std::vector<vnl_matrix_fixed<double, 3, 3>> &vm) {
 /**
  Computes geometric mean of matrices in vector vm.
   If n=-1 set n number of elements in vm (default)
-  else use n for the division (usefull, if some elements are the identity matrix
- and not passed in the array). geo = exp ( sum_i log(mv[i]) / n )
+  else use n for the division (usefull, if some elements are the identity matrix and not
+  passed in the array).
+  geo = exp ( sum_i log(mv[i]) / n )
  */
 vnl_matrix<double>
 MyMatrix::GeometricMean(const std::vector<vnl_matrix<double>> &vm, int n) {
@@ -1838,12 +1825,13 @@ MyMatrix::GeometricMean(const std::vector<vnl_matrix<double>> &vm, int n) {
 /**
  Computes geometric mean of matrices in vector vm.
   If n=-1 set n number of elements in vm (default)
-  else use n for the division (usefull, if some elements are the identity matrix
- and not passed in the array). geo = exp ( sum_i log(mv[i]) / n )
+  else use n for the division (usefull, if some elements are the identity matrix and not
+  passed in the array).
+  geo = exp ( sum_i log(mv[i]) / n )
  */
 vnl_matrix<double>
 MyMatrix::GeometricMean(const std::vector<vnl_matrix_fixed<double, 3, 3>> &vm,
-                        int n) {
+                        int                                                n) {
   assert(vm.size() > 0);
   if (n == -1)
     n = (int)vm.size();
@@ -1854,18 +1842,15 @@ MyMatrix::GeometricMean(const std::vector<vnl_matrix_fixed<double, 3, 3>> &vm,
   return geo;
 }
 
-// vnl_matrix < double > MyMatrix::GeometricMean(const std::vector < vnl_matrix
-// < double > > & vm, int n)
+// vnl_matrix < double > MyMatrix::GeometricMean(const std::vector < vnl_matrix < double > > & vm, int n)
 // // Computes ( mv[0] * mv[1] ... * mv[m] )^{1/n}
-// // by first computing the n-th square root of each factor and then
-// multiplying,
+// // by first computing the n-th square root of each factor and then multiplying,
 // // to ensure the solution is the one that lies between the inputs
 // // (imagine n=7 with six pos 45 degree rotations and one identity,
 // // the result X should be 0 < X < 45 degree rotation, not negative,
 // // which happens by multiplying first)
 // // If n=-1 set n number of elements in vm (default)
-// // else use n for the squareroot (usefull, if some elements are the identity
-// matrix and not
+// // else use n for the squareroot (usefull, if some elements are the identity matrix and not
 // // passed in the array).
 // {
 //   assert(vm.size() > 0);
@@ -1883,23 +1868,22 @@ MyMatrix::GeometricMean(const std::vector<vnl_matrix_fixed<double, 3, 3>> &vm,
 // }
 
 /**
- Computes polar decomposition of sqyare matrix A (using singular value
- decomposition): A = R S into a rotation matrix R and a symmetric matrix S
+ Computes polar decomposition of sqyare matrix A (using singular value decomposition):
+ A = R S into a rotation matrix R and a symmetric matrix S
  @param[in]  A  Matrix to be decomposed
  @param[out] R  Rotation Matrix
  @param[out] S  Symmetric Matrix
  */
 void MyMatrix::PolarDecomposition(const vnl_matrix<double> &A,
-                                  vnl_matrix<double> &R,
-                                  vnl_matrix<double> &S) {
+                                  vnl_matrix<double> &      R,
+                                  vnl_matrix<double> &      S) {
   assert(A.cols() == A.rows());
   vnl_svd<double> svd(A);
   if (svd.valid()) {
     R = svd.U() * svd.V().transpose();
     S = svd.V() * svd.W() * svd.V().transpose();
-    // vnl_matlab_print(std::cout,R,"R",vnl_matlab_print_format_long);cout <<
-    // endl; vnl_matlab_print(std::cout,S,"S",vnl_matlab_print_format_long);cout
-    // << endl;
+    //vnl_matlab_print(vcl_cout,R,"R",vnl_matlab_print_format_long);cout << endl;
+    //vnl_matlab_print(vcl_cout,S,"S",vnl_matlab_print_format_long);cout << endl;
   } else {
     cerr << "MyMatrix PolarDecomposition ERROR: SVD not possible?" << endl;
     exit(1);
@@ -1907,9 +1891,8 @@ void MyMatrix::PolarDecomposition(const vnl_matrix<double> &A,
 }
 
 /**
- Computes polar decomposition of sqyare matrix A (using singular value
- decomposition): A = R S D into a rotation matrix R and a shear matrix S and
- diagonal matrix D
+ Computes polar decomposition of sqyare matrix A (using singular value decomposition):
+ A = R S D into a rotation matrix R and a shear matrix S and diagonal matrix D
  @param[in]  A  Matrix to be decomposed
  @param[out] R  Rotation Matrix
  @param[out] S  Shear Matrix
@@ -1927,12 +1910,9 @@ void MyMatrix::Polar2Decomposition(const vnl_matrix<double> &A,
     D[c] = S[c][c];
     S.set_column(c, S.get_column(c) / D[c]);
   }
-  // vnl_matlab_print(std::cout,R,"Rot",vnl_matlab_print_format_long);cout <<
-  // endl;
-  // vnl_matlab_print(std::cout,S,"Shear",vnl_matlab_print_format_long);cout
-  // << endl;
-  // vnl_matlab_print(std::cout,D,"Scale",vnl_matlab_print_format_long);cout <<
-  // endl;
+  //vnl_matlab_print(vcl_cout,R,"Rot",vnl_matlab_print_format_long);cout << endl;
+  //vnl_matlab_print(vcl_cout,S,"Shear",vnl_matlab_print_format_long);cout << endl;
+  //vnl_matlab_print(vcl_cout,D,"Scale",vnl_matlab_print_format_long);cout << endl;
 }
 
 /**
@@ -1962,8 +1942,8 @@ double MyMatrix::AffineTransDistSq(const vnl_matrix<double> &a,
   assert(fabs(drigid[3][1]) < 0.000001);
   assert(fabs(drigid[3][2]) < 0.000001);
 
-  // cout << " drigid: " << endl;
-  // MatrixPrintFmt(stdout,"% 2.8f",drigid);
+  //cout << " drigid: " << endl;
+  //MatrixPrintFmt(stdout,"% 2.8f",drigid);
 
   // translation norm quadrat:
   double tdq = 0;
@@ -1974,7 +1954,7 @@ double MyMatrix::AffineTransDistSq(const vnl_matrix<double> &a,
   }
   drigid[3][3] = 0.0;
 
-  // cout << " trans dist2: " << tdq << endl;
+  //cout << " trans dist2: " << tdq << endl;
 
   drigid = drigid.transpose() * drigid;
 
@@ -2010,8 +1990,8 @@ double MyMatrix::RigidTransDistSq(const vnl_matrix<double> &a,
   assert(fabs(drigid[3][2]) < 0.000001);
   assert(fabs(drigid[3][3] - 1) < 0.000001);
 
-  // cout << " drigid: " << endl;
-  // MatrixPrintFmt(stdout,"% 2.8f",drigid);
+  //cout << " drigid: " << endl;
+  //MatrixPrintFmt(stdout,"% 2.8f",drigid);
 
   // translation norm quadrat:
   double tdq = 0;
@@ -2019,11 +1999,11 @@ double MyMatrix::RigidTransDistSq(const vnl_matrix<double> &a,
     tdq += drigid[r][3] * drigid[r][3];
   }
 
-  // cout << " trans dist2: " << tdq << endl;
+  //cout << " trans dist2: " << tdq << endl;
 
   // rotation norm:
   double rd = RotMatrixLogNorm(drigid);
-  // cout << " rd: " << rd << endl;
+  //cout << " rd: " << rd << endl;
 
   return rd * rd + tdq;
 }
@@ -2053,7 +2033,7 @@ double MyMatrix::RotMatrixLogNorm(const vnl_matrix_fixed<double, 4, 4> &m) {
 
   // assert we have no stretching only rot (and trans)
   double det = vnl_determinant(m);
-  // cout << " det: " << det << endl;
+  //cout << " det: " << det << endl;
   if (fabs(det - 1.0) > 0.001) {
     cerr << "There is streching! det: " << det << endl;
     assert(fabs(det - 1.0) < 0.001);
@@ -2062,13 +2042,13 @@ double MyMatrix::RotMatrixLogNorm(const vnl_matrix_fixed<double, 4, 4> &m) {
   double trace = 0.0;
   for (int n = 0; n < 3; n++)
     trace += m[n][n];
-  // cout << " trace : " << trace << endl;
+  //cout << " trace : " << trace << endl;
   trace = 0.5 * (trace - 1.0);
   if (trace > 1.0)
     trace = 1.0;
   if (trace < -1.0)
     trace = -1.0;
-  // cout << "  0.5*(trace-1): " << trace << endl;
+  //cout << "  0.5*(trace-1): " << trace << endl;
   double theta = acos(trace); // gives [0..pi]
 
   return sqrt(2.0) * theta;
@@ -2084,9 +2064,9 @@ double MyMatrix::getResampSmoothing(const LTA *lta) {
   MATRIX *V2V;
 
   if (lta->type == LINEAR_VOX_TO_VOX)
-    V2V = MatrixCopy(lta->xforms[0].m_L, nullptr);
+    V2V = MatrixCopy(lta->xforms[0].m_L, NULL);
   else if (lta->type == LINEAR_RAS_TO_RAS) {
-    V2V = MatrixCopy(lta->xforms[0].m_L, nullptr);
+    V2V = MatrixCopy(lta->xforms[0].m_L, NULL);
     //           sI2R
     //     src -------> RAS
     //      |?           | mod (input)
@@ -2095,8 +2075,8 @@ double MyMatrix::getResampSmoothing(const LTA *lta) {
     //           dR2I
     MATRIX *sI2R = vg_i_to_r(&lta->xforms[0].src);
     MATRIX *dR2I = vg_r_to_i(&lta->xforms[0].dst);
-    MATRIX *tmp = nullptr;
-    if (sI2R == nullptr || dR2I == nullptr) {
+    MATRIX *tmp  = 0;
+    if (sI2R == 0 || dR2I == 0) {
       cerr << "MyMatrix::getResampSmoothing: passed volumes did not have the "
               "info on i_to_r or r_to_i."
            << endl;
@@ -2115,38 +2095,36 @@ double MyMatrix::getResampSmoothing(const LTA *lta) {
 
   // convert to double:
   vnl_matrix<double> V = convertMATRIX2VNL(V2V);
-  // vnl_matlab_print(std::cout,V,"V",vnl_matlab_print_format_long);cout <<
-  // endl;
+  //vnl_matlab_print(vcl_cout,V,"V",vnl_matlab_print_format_long);cout << endl;
   vnl_matrix<double> Vinv = vnl_inverse(V);
-  // vnl_matlab_print(std::cout,Vinv,"Vinv",vnl_matlab_print_format_long);cout
-  // << endl;
+  //vnl_matlab_print(vcl_cout,Vinv,"Vinv",vnl_matlab_print_format_long);cout << endl;
 
   assert(Vinv.rows() == 4 && Vinv.cols() == 4);
 
   MatrixFree(&V2V);
 
-  int width = lta->xforms[0].dst.width;
-  int height = lta->xforms[0].dst.height;
-  int depth = lta->xforms[0].dst.depth;
+  int                width  = lta->xforms[0].dst.width;
+  int                height = lta->xforms[0].dst.height;
+  int                depth  = lta->xforms[0].dst.depth;
   vnl_vector<double> x(4), y(4);
-  x[3] = 1.0;
-  y[3] = 1.0;
+  x[3]       = 1.0;
+  y[3]       = 1.0;
   double row = 0.0, slice = 0.0, full = 0.0;
   for (int d = 0; d < depth; d++) {
-    y[2] = d;
+    y[2]  = d;
     slice = 0.0;
     for (int h = 0; h < height; h++) {
       y[1] = h;
-      row = 0.0;
+      row  = 0.0;
       for (int w = 0; w < width; w++) {
         y[0] = w;
-        x = Vinv * y;
+        x    = Vinv * y;
 
         row += fabs(nint(x[0]) - x[0]) + fabs(nint(x[1]) - x[1]) +
                fabs(nint(x[2]) - x[2]);
-        // cout << " Y " << y << " X " << x << endl;
-        // cout << " err " << row << endl;
-        // exit(1);
+        //cout << " Y " << y << " X " << x << endl;
+        //cout << " err " << row << endl;
+        //exit(1);
       }
       slice += row / width;
     }
@@ -2154,7 +2132,7 @@ double MyMatrix::getResampSmoothing(const LTA *lta) {
   }
 
   full /= depth;
-  // full /= 1.5; // the maximum
+  //full /= 1.5; // the maximum
 
   return full;
 }
@@ -2178,15 +2156,15 @@ vnl_matrix<double> MyMatrix::getVNLMatrix(std::vector<double> d, int r)
 }
 
 void MyMatrix::getRTfromM(const vnl_matrix_fixed<double, 4, 4> &m,
-                          vnl_matrix_fixed<double, 3, 3> &r,
-                          vnl_vector_fixed<double, 3> &t) {
+                          vnl_matrix_fixed<double, 3, 3> &      r,
+                          vnl_vector_fixed<double, 3> &         t) {
   r = m.extract(3, 3);
   t = m.extract(3, 1, 0, 3).get_column(0);
 }
 
 vnl_matrix_fixed<double, 4, 4>
 MyMatrix::getMfromRT(const vnl_matrix_fixed<double, 3, 3> &r,
-                     const vnl_vector_fixed<double, 3> &t) {
+                     const vnl_vector_fixed<double, 3> &   t) {
   vnl_matrix_fixed<double, 4, 4> m;
   m.set_identity();
   for (unsigned int rr = 0; rr < 3; rr++) {
@@ -2226,8 +2204,8 @@ vnl_matrix_fixed<double, 4, 4> MyMatrix::getRot(int i, int j, int k) {
 }
 
 /**
- Parametrizes all 24 possible rotations (multiples of 90 degrees in all
- directions) so i = 0..23
+ Parametrizes all 24 possible rotations (multiples of 90 degrees in all directions)
+ so i = 0..23
  */
 vnl_matrix_fixed<double, 4, 4> MyMatrix::getRot(int i) {
 
@@ -2266,7 +2244,7 @@ vnl_matrix_fixed<double, 4, 4> MyMatrix::getRot(int i) {
   }
 
   switch (k) {
-  // case 0: a= a; b= b; c= c; break;
+  //case 0: a= a; b= b; c= c; break;
   case 1:
     b = -b;
     c = -c;
@@ -2286,11 +2264,10 @@ vnl_matrix_fixed<double, 4, 4> MyMatrix::getRot(int i) {
 
 LTA *MyMatrix::VOXmatrix2LTA(const vnl_matrix_fixed<double, 4, 4> &m, MRI *src,
                              MRI *dst) {
-  LTA *ret = LTAalloc(1, src);
+  LTA *ret           = LTAalloc(1, src);
   ret->xforms[0].m_L = convertVNL2MATRIX(m, ret->xforms[0].m_L);
-  //  ret->xforms[0].m_L = MRIvoxelXformToRasXform
-  //  (src,dst,ret->xforms[0].m_L,ret->xforms[0].m_L) ; ret->type =
-  //  LINEAR_RAS_TO_RAS ;
+  //  ret->xforms[0].m_L = MRIvoxelXformToRasXform (src,dst,ret->xforms[0].m_L,ret->xforms[0].m_L) ;
+  //  ret->type = LINEAR_RAS_TO_RAS ;
   ret->type = LINEAR_VOX_TO_VOX;
   getVolGeom(src, &ret->xforms[0].src);
   getVolGeom(dst, &ret->xforms[0].dst);
@@ -2300,9 +2277,9 @@ LTA *MyMatrix::VOXmatrix2LTA(const vnl_matrix_fixed<double, 4, 4> &m, MRI *src,
 
 LTA *MyMatrix::RASmatrix2LTA(const vnl_matrix_fixed<double, 4, 4> &m, MRI *src,
                              MRI *dst) {
-  LTA *ret = LTAalloc(1, src);
+  LTA *ret           = LTAalloc(1, src);
   ret->xforms[0].m_L = convertVNL2MATRIX(m, ret->xforms[0].m_L);
-  ret->type = LINEAR_RAS_TO_RAS;
+  ret->type          = LINEAR_RAS_TO_RAS;
   getVolGeom(src, &ret->xforms[0].src);
   getVolGeom(dst, &ret->xforms[0].dst);
 
@@ -2313,8 +2290,8 @@ vnl_matrix<double> MyMatrix::LTA2VOXmatrix(LTA *lta) {
 
   vnl_matrix<double> M;
   if (lta->type == LINEAR_RAS_TO_RAS) {
-    LINEAR_TRANSFORM *lt = &lta->xforms[0];
-    MATRIX *m_L = MatrixCopy(lt->m_L, nullptr);
+    LINEAR_TRANSFORM *lt  = &lta->xforms[0];
+    MATRIX *          m_L = MatrixCopy(lt->m_L, NULL);
     //           sI2R
     //     src -------> RAS
     //      |?           | mod (input)
@@ -2323,8 +2300,8 @@ vnl_matrix<double> MyMatrix::LTA2VOXmatrix(LTA *lta) {
     //           dR2I
     MATRIX *sI2R = vg_i_to_r(&lt->src);
     MATRIX *dR2I = vg_r_to_i(&lt->dst);
-    MATRIX *tmp = nullptr;
-    if (sI2R == nullptr || dR2I == nullptr) {
+    MATRIX *tmp  = 0;
+    if (sI2R == 0 || dR2I == 0) {
       cout << "MyMatrix::LTA2VOXmatrix ERROR : passed volumes did not have the "
               "info on i_to_r or r_to_i."
            << endl;
@@ -2351,8 +2328,8 @@ vnl_matrix<double> MyMatrix::LTA2RASmatrix(LTA *lta) {
 
   vnl_matrix<double> M;
   if (lta->type == LINEAR_VOX_TO_VOX) {
-    LINEAR_TRANSFORM *lt = &lta->xforms[0];
-    MATRIX *m_L = MatrixCopy(lt->m_L, nullptr);
+    LINEAR_TRANSFORM *lt  = &lta->xforms[0];
+    MATRIX *          m_L = MatrixCopy(lt->m_L, NULL);
     //           sR2I
     //     src <------- RAS
     //      | mod        | ?
@@ -2361,8 +2338,8 @@ vnl_matrix<double> MyMatrix::LTA2RASmatrix(LTA *lta) {
     //           dI2R
     MATRIX *sR2I = vg_r_to_i(&lt->src);
     MATRIX *dI2R = vg_i_to_r(&lt->dst);
-    MATRIX *tmp = nullptr;
-    if (sR2I == nullptr || dI2R == nullptr) {
+    MATRIX *tmp  = 0;
+    if (sR2I == 0 || dI2R == 0) {
       cout << "MyMatrix::LTA2RASmatrix ERROR: passed volumes did not have the "
               "info on i_to_r or r_to_i."
            << endl;
@@ -2398,12 +2375,12 @@ double MyMatrix::AffineTransDistSq(MATRIX *a, MATRIX *b, double r)
 // the center of the brain should be at the origin
 {
 
-  MATRIX *drigid = MatrixCopy(a, nullptr);
+  MATRIX *drigid = MatrixCopy(a, NULL);
   if (b)
     drigid = MatrixSubtract(drigid, b, drigid);
   else {
-    MATRIX *id = MatrixIdentity(4, nullptr);
-    drigid = MatrixSubtract(drigid, id, drigid);
+    MATRIX *id = MatrixIdentity(4, NULL);
+    drigid     = MatrixSubtract(drigid, id, drigid);
     MatrixFree(&id);
   }
 
@@ -2412,8 +2389,8 @@ double MyMatrix::AffineTransDistSq(MATRIX *a, MATRIX *b, double r)
   assert(fabs(drigid->rptr[4][2]) < 0.000001);
   assert(fabs(drigid->rptr[4][3]) < 0.000001);
 
-  // cout << " drigid: " << endl;
-  // MatrixPrintFmt(stdout,"% 2.8f",drigid);
+  //cout << " drigid: " << endl;
+  //MatrixPrintFmt(stdout,"% 2.8f",drigid);
 
   // translation norm quadrat:
   double tdq = 0;
@@ -2424,9 +2401,9 @@ double MyMatrix::AffineTransDistSq(MATRIX *a, MATRIX *b, double r)
   }
   drigid->rptr[4][4] = 0.0;
 
-  // cout << " trans dist2: " << tdq << endl;
-  MATRIX *dt = MatrixTranspose(drigid, nullptr);
-  drigid = MatrixMultiply(dt, drigid, drigid);
+  //cout << " trans dist2: " << tdq << endl;
+  MATRIX *dt = MatrixTranspose(drigid, NULL);
+  drigid     = MatrixMultiply(dt, drigid, drigid);
   MatrixFree(&dt);
 
   // Trace of A^t A
@@ -2449,9 +2426,9 @@ double MyMatrix::RigidTransDistSq(MATRIX *a, MATRIX *b)
 
   MATRIX *drigid;
   if (!b)
-    drigid = MatrixCopy(a, nullptr);
+    drigid = MatrixCopy(a, NULL);
   else {
-    drigid = MatrixInverse(a, nullptr);
+    drigid = MatrixInverse(a, NULL);
     drigid = MatrixMultiply(b, drigid, drigid);
   }
 
@@ -2461,8 +2438,8 @@ double MyMatrix::RigidTransDistSq(MATRIX *a, MATRIX *b)
   assert(fabs(drigid->rptr[4][3]) < 0.000001);
   assert(fabs(drigid->rptr[4][4] - 1) < 0.000001);
 
-  // cout << " drigid: " << endl;
-  // MatrixPrintFmt(stdout,"% 2.8f",drigid);
+  //cout << " drigid: " << endl;
+  //MatrixPrintFmt(stdout,"% 2.8f",drigid);
 
   // translation norm quadrat:
   double tdq = 0;
@@ -2470,11 +2447,11 @@ double MyMatrix::RigidTransDistSq(MATRIX *a, MATRIX *b)
     tdq += drigid->rptr[r][4] * drigid->rptr[r][4];
   }
 
-  // cout << " trans dist2: " << tdq << endl;
+  //cout << " trans dist2: " << tdq << endl;
 
   // rotation norm:
   double rd = RotMatrixLogNorm(drigid);
-  // cout << " rd: " << rd << endl;
+  //cout << " rd: " << rd << endl;
 
   MatrixFree(&drigid);
 
@@ -2498,25 +2475,25 @@ double MyMatrix::getFrobeniusDiff(MATRIX *m1, MATRIX *m2) {
 
 MATRIX *MyMatrix::MatrixSqrtIter(MATRIX *m, MATRIX *msqrt) {
   assert(m->rows == 4 && m->cols == 4);
-  msqrt = MatrixIdentity(4, msqrt);
+  msqrt     = MatrixIdentity(4, msqrt);
   MATRIX *R = MatrixAlloc(3, 3, MATRIX_REAL);
   for (int rr = 1; rr <= 3; rr++)
     for (int cc = 1; cc <= 3; cc++) {
       *MATRIX_RELT(R, rr, cc) = *MATRIX_RELT(m, rr, cc);
     }
 
-  // Denman and Beavers square root iteration
+  //Denman and Beavers square root iteration
 
-  int imax = 100;
-  double eps = 0.0001;
-  double err = 1000;
-  // cout << "using square root iteartion (" << imax << ")"<< endl;
-  MATRIX *Yn = MatrixCopy(R, nullptr);
-  MATRIX *Zn = MatrixIdentity(3, nullptr);
-  MATRIX *Zni = nullptr;
-  MATRIX *Yni = nullptr;
-  MATRIX *Ysq = nullptr;
-  int count = 0;
+  int    imax = 100;
+  double eps  = 0.0001;
+  double err  = 1000;
+  //cout << "using square root iteartion (" << imax << ")"<< endl;
+  MATRIX *Yn    = MatrixCopy(R, NULL);
+  MATRIX *Zn    = MatrixIdentity(3, NULL);
+  MATRIX *Zni   = NULL;
+  MATRIX *Yni   = NULL;
+  MATRIX *Ysq   = NULL;
+  int     count = 0;
   while (count < imax && err > eps) {
     count++;
     Yni = MatrixInverse(Yn, Yni);
@@ -2528,9 +2505,9 @@ MATRIX *MyMatrix::MatrixSqrtIter(MATRIX *m, MATRIX *msqrt) {
 
     Yn = MatrixScalarMul(Yn, 0.5, Yn);
     Zn = MatrixScalarMul(Zn, 0.5, Zn);
-    // cout << " matrix " << i << endl;
-    // MatrixPrintFmt(stdout,"% 2.8f",Yn);
-    // cout << endl;
+    //cout << " matrix " << i << endl;
+    //MatrixPrintFmt(stdout,"% 2.8f",Yn);
+    //cout << endl;
 
     Ysq = MatrixMultiply(Yn, Yn, Ysq);
     Ysq = MatrixSubtract(Ysq, R, Ysq);
@@ -2547,26 +2524,26 @@ MATRIX *MyMatrix::MatrixSqrtIter(MATRIX *m, MATRIX *msqrt) {
   }
 
   MATRIX *Rh = Yn;
-  // cout << "rh : " << endl;
-  // MatrixPrintFmt(stdout,"% 2.8f",Rh);
-  // cout << endl;
+  //cout << "rh : " << endl;
+  //MatrixPrintFmt(stdout,"% 2.8f",Rh);
+  //cout << endl;
   MatrixFree(&Zni);
   MatrixFree(&Yni);
   MatrixFree(&Zn);
   MatrixFree(&Ysq);
 
   // compute new T
-  MATRIX *Rh1 = MatrixCopy(Rh, nullptr);
+  MATRIX *Rh1             = MatrixCopy(Rh, NULL);
   *MATRIX_RELT(Rh1, 1, 1) = *MATRIX_RELT(Rh1, 1, 1) + 1;
   *MATRIX_RELT(Rh1, 2, 2) = *MATRIX_RELT(Rh1, 2, 2) + 1;
   *MATRIX_RELT(Rh1, 3, 3) = *MATRIX_RELT(Rh1, 3, 3) + 1;
 
-  VECTOR *T = MatrixAlloc(3, 1, MATRIX_REAL);
+  VECTOR *T             = MatrixAlloc(3, 1, MATRIX_REAL);
   *MATRIX_RELT(T, 1, 1) = *MATRIX_RELT(m, 1, 4);
   *MATRIX_RELT(T, 2, 1) = *MATRIX_RELT(m, 2, 4);
   *MATRIX_RELT(T, 3, 1) = *MATRIX_RELT(m, 3, 4);
 
-  MATRIX *Rh1i = MatrixInverse(Rh1, nullptr);
+  MATRIX *Rh1i = MatrixInverse(Rh1, NULL);
   assert(Rh1i);
 
   VECTOR *Th = MatrixMultiply(Rh1i, T, NULL);
@@ -2635,11 +2612,10 @@ MATRIX *MyMatrix::getMatrix(std::vector<double> d, int r, int c, MATRIX *m) {
 }
 
 /**
- Converts affine vector (12x1) into an affine matrix (homogeneous coord) 4x4 (FS
- MATRIX)
+ Converts affine vector (12x1) into an affine matrix (homogeneous coord) 4x4 (FS MATRIX)
  */
 MATRIX *MyMatrix::aff2mat(MATRIX *aff, MATRIX *outM) {
-  if (outM == nullptr)
+  if (outM == NULL)
     outM = MatrixAlloc(4, 4, MATRIX_REAL);
   MatrixIdentity(4, outM);
 
@@ -2663,7 +2639,7 @@ MATRIX *MyMatrix::getHalfRT(MATRIX *m, MATRIX *mhalf) {
     MatrixFree(&mhalf);
 
   float d = MatrixDeterminant(m);
-  d = fabs(d - 1);
+  d       = fabs(d - 1);
   assert(d < 0.000001);
 
   Quaternion q;
@@ -2671,25 +2647,25 @@ MATRIX *MyMatrix::getHalfRT(MATRIX *m, MATRIX *mhalf) {
       *MATRIX_RELT(m, 1, 1), *MATRIX_RELT(m, 1, 2), *MATRIX_RELT(m, 1, 3),
       *MATRIX_RELT(m, 2, 1), *MATRIX_RELT(m, 2, 2), *MATRIX_RELT(m, 2, 3),
       *MATRIX_RELT(m, 3, 1), *MATRIX_RELT(m, 3, 2), *MATRIX_RELT(m, 3, 3));
-  // cout << "q: "<< q << endl;
+  //cout << "q: "<< q << endl;
   Quaternion qh = q.getHalfRotation();
-  // cout << "qh: " << qh << endl;
-  mhalf = getMatrix(qh.getRotMatrix3dh(), 4, 4);
-  MATRIX *Rh1 = MatrixIdentity(3, nullptr);
+  //cout << "qh: " << qh << endl;
+  mhalf       = getMatrix(qh.getRotMatrix3dh(), 4, 4);
+  MATRIX *Rh1 = MatrixIdentity(3, NULL);
   for (int rr = 1; rr < 4; rr++)
     for (int cc = 1; cc < 4; cc++)
       *MATRIX_RELT(Rh1, rr, cc) =
           *MATRIX_RELT(Rh1, rr, cc) + *MATRIX_RELT(mhalf, rr, cc);
 
-  VECTOR *T = MatrixAlloc(3, 1, MATRIX_REAL);
+  VECTOR *T             = MatrixAlloc(3, 1, MATRIX_REAL);
   *MATRIX_RELT(T, 1, 1) = *MATRIX_RELT(m, 1, 4);
   *MATRIX_RELT(T, 2, 1) = *MATRIX_RELT(m, 2, 4);
   *MATRIX_RELT(T, 3, 1) = *MATRIX_RELT(m, 3, 4);
 
-  // cout << " rh1" << endl;
-  // MatrixPrintFmt(stdout,"% 2.8f",Rh1);
+  //cout << " rh1" << endl;
+  //MatrixPrintFmt(stdout,"% 2.8f",Rh1);
 
-  MATRIX *Rh1i = MatrixInverse(Rh1, nullptr);
+  MATRIX *Rh1i = MatrixInverse(Rh1, NULL);
   assert(Rh1i);
 
   VECTOR *Th = MatrixMultiply(Rh1i, T, NULL);
@@ -2718,7 +2694,7 @@ MATRIX *MyMatrix::getHalfRT(MATRIX *m, MATRIX *mhalf) {
 double MyMatrix::RotMatrixLogNorm(MATRIX *m) {
   // assert we have no stretching only rot (and trans)
   float det = MatrixDeterminant(m);
-  // cout << " det: " << det << endl;
+  //cout << " det: " << det << endl;
   if (fabs(det - 1.0) > 0.001) {
     cerr << "There is streching! det: " << det << endl;
     assert(fabs(det - 1.0) < 0.001);
@@ -2727,13 +2703,13 @@ double MyMatrix::RotMatrixLogNorm(MATRIX *m) {
   double trace = 0.0;
   for (int n = 1; n <= 3; n++)
     trace += m->rptr[n][n];
-  // cout << " trace : " << trace << endl;
+  //cout << " trace : " << trace << endl;
   trace = 0.5 * (trace - 1.0);
   if (trace > 1.0)
     trace = 1.0;
   if (trace < -1.0)
     trace = -1.0;
-  // cout << "  0.5*(trace-1): " << trace << endl;
+  //cout << "  0.5*(trace-1): " << trace << endl;
   double theta = acos(trace); // gives [0..pi]
 
   return sqrt(2.0) * theta;
@@ -2746,13 +2722,13 @@ double MyMatrix::RotMatrixGeoDist(MATRIX *a, MATRIX *b) {
 
   // if not 3x3, fetch first 3x3
   // and construct a^T b
-  MATRIX *at = MatrixAlloc(3, 3, MATRIX_REAL);
+  MATRIX *at     = MatrixAlloc(3, 3, MATRIX_REAL);
   MATRIX *blocal = MatrixAlloc(3, 3, MATRIX_REAL);
   assert(a->rows >= 3 && a->cols >= 3);
   assert(b->rows >= 3 && b->cols >= 3);
   for (int r = 1; r <= 3; r++)
     for (int c = 1; c <= 3; c++) {
-      at->rptr[r][c] = a->rptr[c][r];
+      at->rptr[r][c]     = a->rptr[c][r];
       blocal->rptr[r][c] = b->rptr[r][c];
     }
 
@@ -2770,9 +2746,9 @@ pair<MATRIX *, VECTOR *> MyMatrix::getRTfromM(MATRIX *M, MATRIX *R, VECTOR *T) {
   // check dimenstions:
   assert(M->rows == 4);
   assert(M->cols == 4);
-  if (R == nullptr)
+  if (R == NULL)
     R = MatrixAlloc(3, 3, M->type);
-  if (T == nullptr)
+  if (T == NULL)
     T = VectorAlloc(3, M->type);
   assert(R->rows == 3);
   assert(R->cols == 3);
@@ -2797,19 +2773,19 @@ pair<MATRIX *, VECTOR *> MyMatrix::getRTfromM(MATRIX *M, MATRIX *R, VECTOR *T) {
 
 MATRIX *MyMatrix::getMfromRT(MATRIX *R, VECTOR *T, MATRIX *M) {
   int type = 0;
-  if (R != nullptr)
+  if (R != NULL)
     type = R->type;
-  else if (T != nullptr)
+  else if (T != NULL)
     type = T->type;
   else
-    assert(R != nullptr || T != nullptr);
+    assert(R != NULL || T != NULL);
 
-  if (M == nullptr)
+  if (M == NULL)
     M = MatrixAlloc(4, 4, type);
-  if (R == nullptr)
-    R = MatrixIdentity(3, nullptr);
-  if (T == nullptr)
-    T = MatrixZero(3, 1, nullptr);
+  if (R == NULL)
+    R = MatrixIdentity(3, NULL);
+  if (T == NULL)
+    T = MatrixZero(3, 1, NULL);
 
   // check dimensions:
   assert(M->rows == 4);
@@ -2832,9 +2808,9 @@ MATRIX *MyMatrix::getMfromRT(MATRIX *R, VECTOR *T, MATRIX *M) {
 }
 
 LTA *MyMatrix::VOXmatrix2LTA(MATRIX *m, MRI *src, MRI *dst) {
-  LTA *ret = LTAalloc(1, src);
-  ret->xforms[0].m_L = MRIvoxelXformToRasXform(src, dst, m, nullptr);
-  ret->type = LINEAR_RAS_TO_RAS;
+  LTA *ret           = LTAalloc(1, src);
+  ret->xforms[0].m_L = MRIvoxelXformToRasXform(src, dst, m, NULL);
+  ret->type          = LINEAR_RAS_TO_RAS;
   getVolGeom(src, &ret->xforms[0].src);
   getVolGeom(dst, &ret->xforms[0].dst);
 
@@ -2842,9 +2818,9 @@ LTA *MyMatrix::VOXmatrix2LTA(MATRIX *m, MRI *src, MRI *dst) {
 }
 
 LTA *MyMatrix::RASmatrix2LTA(MATRIX *m, MRI *src, MRI *dst) {
-  LTA *ret = LTAalloc(1, src);
+  LTA *ret           = LTAalloc(1, src);
   ret->xforms[0].m_L = MatrixCopy(m, ret->xforms[0].m_L);
-  ret->type = LINEAR_RAS_TO_RAS;
+  ret->type          = LINEAR_RAS_TO_RAS;
   getVolGeom(src, &ret->xforms[0].src);
   getVolGeom(dst, &ret->xforms[0].dst);
 

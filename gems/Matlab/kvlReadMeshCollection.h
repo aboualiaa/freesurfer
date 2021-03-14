@@ -9,9 +9,9 @@ namespace kvl {
 class ReadMeshCollection : public MatlabRunner {
 public:
   /** Smart pointer typedef support. */
-  typedef ReadMeshCollection Self;
-  typedef itk::Object Superclass;
-  typedef itk::SmartPointer<Self> Pointer;
+  typedef ReadMeshCollection            Self;
+  typedef itk::Object                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
   typedef itk::SmartPointer<const Self> ConstPointer;
 
   /** Method for creation through the object factory. */
@@ -20,12 +20,11 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(ReadMeshCollection, itk::Object);
 
-  void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) override {
-    // std::cout << "I am " << this->GetNameOfClass()
+  virtual void Run(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    //std::cout << "I am " << this->GetNameOfClass()
     //          << " and I'm running! " << std::endl;
 
-    // meshCollection = kvlReadMeshCollection( meshCollectionFileName,
-    // transform, K )
+    // meshCollection = kvlReadMeshCollection( meshCollectionFileName, transform, K )
 
     // Retrieve the input arguments
     if (nrhs < 1) {
@@ -37,8 +36,8 @@ public:
     const std::string meshCollectionFileName = mxArrayToString(prhs[0]);
 
     typedef CroppedImageReader::TransformType TransformType;
-    TransformType::ConstPointer transform = nullptr;
-    float K = -1.0f;
+    TransformType::ConstPointer               transform = nullptr;
+    float                                     K         = -1.0f;
 
     if (nrhs > 1) {
       if (!mxIsInt64(prhs[1])) {
@@ -51,7 +50,7 @@ public:
 
       // if ( typeid( *object ) != typeid( TransformType ) )
       if (strcmp(typeid(*object).name(),
-                 typeid(TransformType).name()) != 0) // Eugenio: MAC compatibility
+                 typeid(TransformType).name())) // Eugenio: MAC compatibility
       {
         mexErrMsgTxt("transform doesn't refer to the correct ITK object type");
       }
@@ -63,9 +62,9 @@ public:
       K = static_cast<float>(*(mxGetPr(prhs[2])));
     }
 
-    // std::cout << "meshCollectionFileName: " << meshCollectionFileName <<
-    // std::endl; std::cout << "transform: " << transform.GetPointer() <<
-    // std::endl; std::cout << "K: " << K << std::endl;
+    //std::cout << "meshCollectionFileName: " << meshCollectionFileName << std::endl;
+    //std::cout << "transform: " << transform.GetPointer() << std::endl;
+    //std::cout << "K: " << K << std::endl;
 
     // Read the mesh collection
     kvl::AtlasMeshCollection::Pointer meshCollection =
@@ -78,13 +77,13 @@ public:
 
     // Change K if user has specified a value
     if (K > 0) {
-      // std::cout << "Setting K of mesh collection to: " << K << std::endl;
+      //std::cout << "Setting K of mesh collection to: " << K << std::endl;
       meshCollection->SetK(K);
     }
 
     // Apply the correct transform
-    if (transform != nullptr) {
-      // std::cout << "Applying transform: " << std::endl;
+    if (transform) {
+      //std::cout << "Applying transform: " << std::endl;
       meshCollection->Transform(-1, transform);
       for (unsigned int i = 0; i < meshCollection->GetNumberOfMeshes(); i++) {
         meshCollection->Transform(i, transform);
@@ -92,36 +91,35 @@ public:
 
       const float determinant = vnl_det(transform->GetMatrix().GetVnlMatrix());
       if (determinant < 0) {
-        // std::cout << "Careful here: the applied transformation will turn
-        // positive tetrahedra into negative ones." << std::endl; std::cout <<
-        // transform->GetMatrix().GetVnlMatrix() << std::endl; std::cout << "
-        // determinant: " << determinant << std::endl; std::cout << "Starting to
-        // swap the point assignments of each tetrahedron..." << std::endl;
+        //std::cout << "Careful here: the applied transformation will turn positive tetrahedra into negative ones." << std::endl;
+        //std::cout << transform->GetMatrix().GetVnlMatrix() << std::endl;
+        //std::cout << " determinant: " << determinant << std::endl;
+        //std::cout << "Starting to swap the point assignments of each tetrahedron..." << std::endl;
 
         for (kvl::AtlasMesh::CellsContainer::Iterator cellIt =
                  meshCollection->GetCells()->Begin();
              cellIt != meshCollection->GetCells()->End(); ++cellIt) {
           kvl::AtlasMesh::CellType *cell = cellIt.Value();
 
-          if (cell->GetType() != kvl::AtlasMesh::CellType::TETRAHEDRON_CELL) {
+          if (cell->GetType() !=
+              itk::CommonEnums::CellGeometry::TETRAHEDRON_CELL) {
             continue;
           }
 
-          // Swap points assigned to first two vertices. This will readily turn
-          // negative tetrahedra
-          // into positives ones.
+          // Swap points assigned to first two vertices. This will readily turn negative tetrahedra
+          //into positives ones.
           kvl::AtlasMesh::CellType::PointIdIterator pit = cell->PointIdsBegin();
-          const kvl::AtlasMesh::PointIdentifier p0Id = *pit;
+          const kvl::AtlasMesh::PointIdentifier     p0Id = *pit;
           ++pit;
           const kvl::AtlasMesh::PointIdentifier p1Id = *pit;
 
-          pit = cell->PointIdsBegin();
+          pit  = cell->PointIdsBegin();
           *pit = p1Id;
           ++pit;
           *pit = p0Id;
         } // End loop over all tetrahedra
 
-        // std::cout << "...done!" << std::endl;
+        //std::cout << "...done!" << std::endl;
       }
 
     } // End test if a transform is given
@@ -138,11 +136,11 @@ public:
   }
 
 protected:
-  ReadMeshCollection()= default;;
-  ~ReadMeshCollection() override= default;;
+  ReadMeshCollection(){};
+  virtual ~ReadMeshCollection(){};
 
-  ReadMeshCollection(const Self &); // purposely not implemented
-  void operator=(const Self &);     // purposely not implemented
+  ReadMeshCollection(const Self &); //purposely not implemented
+  void operator=(const Self &);     //purposely not implemented
 
 private:
 };

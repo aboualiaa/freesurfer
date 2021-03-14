@@ -3,7 +3,7 @@
 template <typename MeshSupplier, typename ArgType, typename InvertType>
 class SimpleSharedTetrahedron {
 public:
-  static const unsigned int nDims = 3;
+  static const unsigned int nDims     = 3;
   static const unsigned int nVertices = 4;
 
   __device__ SimpleSharedTetrahedron(const MeshSupplier &srcMesh,
@@ -14,7 +14,7 @@ public:
     // are actually in shared memory
   }
 
-  __device__ void LoadAndBoundingBox(const size_t iTet,
+  __device__ void LoadAndBoundingBox(const size_t   iTet,
                                      unsigned short min[nDims],
                                      unsigned short max[nDims]) {
     this->tetId = iTet;
@@ -142,8 +142,7 @@ public:
     } else {
       // Have to handle case where one of the barycentric co-ordinates is zero
 
-      // This comes down to seeing what would happen if the voxel were moved a
-      // little to the right, or up etc.
+      // This comes down to seeing what would happen if the voxel were moved a little to the right, or up etc.
       ArgType nxtRowAdd[nVertices];
       nxtRowAdd[0] =
           -(this->transf[(0 * nDims) + 0] + this->transf[(1 * nDims) + 0] +
@@ -206,7 +205,7 @@ public:
 
   template <typename AlphasType>
   __device__ void
-  LoadAlphas(AlphasType alphas[nVertices],
+  LoadAlphas(AlphasType                               alphas[nVertices],
              const typename MeshSupplier::MeshIdxType iAlpha) const {
     for (unsigned int iVert = 0; iVert < nVertices; iVert++) {
       alphas[iVert] = this->mesh.GetAlpha(this->tetId, iVert, iAlpha);
@@ -231,7 +230,7 @@ public:
 
 private:
   const MeshSupplier &mesh;
-  ArgType *tet;
-  ArgType *transf;
-  size_t tetId;
+  ArgType *           tet;
+  ArgType *           transf;
+  size_t              tetId;
 };

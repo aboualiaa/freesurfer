@@ -1,17 +1,12 @@
 /**
- * @file  mris_mesh_subdivide.c
  * @brief
  *
  *
  */
 /*
  * Original Author: jonathan polimeni
- * CVS Revision Info:
- *    $Author: jonp $
- *    $Date: 2013/02/07 16:04:07 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011-2012 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,20 +18,21 @@
  *
  */
 
-#include "version.h"
 #include "diag.h"
-#include "timer.h"
 #include "mrisurf.h"
+#include "timer.h"
+#include "version.h"
 
+#include <vtkButterflySubdivisionFilter.h>
+#include <vtkCellArray.h>
 #include <vtkCellData.h>
 #include <vtkDoubleArray.h>
-#include <vtkTriangle.h>
-#include <vtkPointData.h>
-#include <vtkButterflySubdivisionFilter.h>
-#include <vtkLoopSubdivisionFilter.h>
 #include <vtkLinearSubdivisionFilter.h>
+#include <vtkLoopSubdivisionFilter.h>
+#include <vtkPointData.h>
+#include <vtkTriangle.h>
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void print_usage();
 static void usage_exit();
 static void print_help();
@@ -45,9 +41,6 @@ static void print_version();
 static void argnerr(char *, int);
 
 static int debug = 0;
-
-static char vcid[] =
-    "$Id: mris_mesh_subdivide.cxx,v 1.5 2013/02/07 16:04:07 jonp Exp $";
 
 int mris_mesh_subdivide__VTK(MRI_SURFACE *mris, int iter);
 int mris_mesh_subdivide__convert_mris_VTK(MRI_SURFACE *mris, vtkPolyData *mesh);
@@ -63,15 +56,15 @@ static int subdividemethod = -1;
 enum subdividemethod_type {
   SUBDIVIDE_UNDEFINED = 0,
   SUBDIVIDE_BUTTERFLY = 1,
-  SUBDIVIDE_LOOP = 2,
-  SUBDIVIDE_LINEAR = 3
+  SUBDIVIDE_LOOP      = 2,
+  SUBDIVIDE_LINEAR    = 3
 };
 
 MRI_SURFACE *mris_subdivide = nullptr;
 
 int iter = -1;
 
-static char *surf_filename = nullptr;
+static char *surf_filename    = nullptr;
 static char *newsurf_filename = nullptr;
 
 char *fs_basename(char *path) {
@@ -85,14 +78,13 @@ int main(int argc, char *argv[]) {
 
   MRI_SURFACE *mris = nullptr;
 
-  int msec, minutes, seconds;
+  int   msec, minutes, seconds;
   Timer start;
 
   std::string cmdline = getAllInfo(argc, argv, "mris_mesh_subdivide");
 
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
@@ -111,7 +103,7 @@ int main(int argc, char *argv[]) {
 
   // set defaults
   subdividemethod = SUBDIVIDE_BUTTERFLY;
-  iter = 1;
+  iter            = 1;
 
   parse_commandline(argc, argv);
 
@@ -163,10 +155,10 @@ int main(int argc, char *argv[]) {
 
   double totvtxarea, totvtxarea_subdivide, avgvtxarea, avgvtxarea_subdivide;
 
-  totvtxarea = mris->total_area;
+  totvtxarea           = mris->total_area;
   totvtxarea_subdivide = mris_subdivide->total_area;
 
-  avgvtxarea = mris->total_area / mris->nvertices;
+  avgvtxarea           = mris->total_area / mris->nvertices;
   avgvtxarea_subdivide = mris_subdivide->total_area / mris_subdivide->nvertices;
 
   printf("    original surface total area: %2.2f\n subdivision surface total "
@@ -192,7 +184,7 @@ int main(int argc, char *argv[]) {
   MRISfree(&mris);
   MRISfree(&mris_subdivide);
 
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -289,7 +281,7 @@ int mris_mesh_subdivide__VTK(MRI_SURFACE *mris, int iter) {
  */
 int mris_mesh_subdivide__convert_mris_VTK(MRI_SURFACE *mris,
                                           vtkPolyData *mesh) {
-  vtkPoints *points;
+  vtkPoints *   points;
   vtkCellArray *faces;
 
   points = vtkPoints::New();
@@ -326,10 +318,10 @@ int mris_mesh_subdivide__convert_mris_VTK(MRI_SURFACE *mris,
 int mris_mesh_subdivide__convert_VTK_mris(vtkPolyData *mesh,
                                           MRI_SURFACE *mris_dst) {
 
-  int vno, fno;
+  int          vno, fno;
   unsigned int uvno;
-  VERTEX *v;
-  double p[3];
+  VERTEX *     v;
+  double       p[3];
 
   vtkSmartPointer<vtkIdList> pointIdList = vtkSmartPointer<vtkIdList>::New();
 
@@ -372,17 +364,17 @@ int mris_mesh_subdivide__mris_clone_header(MRI_SURFACE *mris_src,
   mris_dst->type = mris_src->type;
 
   mris_dst->hemisphere = mris_src->hemisphere;
-  mris_dst->xctr = mris_src->xctr;
-  mris_dst->yctr = mris_src->yctr;
-  mris_dst->zctr = mris_src->zctr;
-  mris_dst->xlo = mris_src->xlo;
-  mris_dst->ylo = mris_src->ylo;
-  mris_dst->zlo = mris_src->zlo;
-  mris_dst->xhi = mris_src->xhi;
-  mris_dst->yhi = mris_src->yhi;
-  mris_dst->zhi = mris_src->zhi;
+  mris_dst->xctr       = mris_src->xctr;
+  mris_dst->yctr       = mris_src->yctr;
+  mris_dst->zctr       = mris_src->zctr;
+  mris_dst->xlo        = mris_src->xlo;
+  mris_dst->ylo        = mris_src->ylo;
+  mris_dst->zlo        = mris_src->zlo;
+  mris_dst->xhi        = mris_src->xhi;
+  mris_dst->yhi        = mris_src->yhi;
+  mris_dst->zhi        = mris_src->zhi;
 
-  mris_dst->lta = mris_src->lta;
+  mris_dst->lta            = mris_src->lta;
   mris_dst->SRASToTalSRAS_ = mris_src->SRASToTalSRAS_;
   mris_dst->TalSRASToSRAS_ = mris_src->TalSRASToSRAS_;
   mris_dst->free_transform = 0;
@@ -406,11 +398,11 @@ int mris_mesh_subdivide__mris_clone_header(MRI_SURFACE *mris_src,
 /* ---------------------------------------------------------------------------
  */
 int mris_mesh_subdivide__VTK_delete(vtkPolyData *mesh) {
-  vtkPoints *points;
+  vtkPoints *   points;
   vtkCellArray *faces;
 
   points = mesh->GetPoints();
-  faces = mesh->GetPolys();
+  faces  = mesh->GetPolys();
 
   mesh->Delete();
   faces->Delete();
@@ -422,9 +414,9 @@ int mris_mesh_subdivide__VTK_delete(vtkPolyData *mesh) {
 /* ---------------------------------------------------------------------------
  */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
-  char *tmpstr = nullptr;
+  char * tmpstr = nullptr;
 
   if (argc < 1) {
     usage_exit();
@@ -469,18 +461,18 @@ static int parse_commandline(int argc, char **argv) {
         argnerr(option, 1);
       }
       newsurf_filename = pargv[0];
-      nargsused = 1;
+      nargsused        = 1;
     } else if (!strcmp(option, "--iter")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      iter = atoi(pargv[0]);
+      iter      = atoi(pargv[0]);
       nargsused = 1;
     } else if (!strcmp(option, "--method")) {
       if (nargc < 1) {
         argnerr(option, 1);
       }
-      tmpstr = pargv[0];
+      tmpstr    = pargv[0];
       nargsused = 1;
 
       if (!tmpstr) {
@@ -539,7 +531,7 @@ static void print_usage() {
   printf("   --help        print out information on how to use this program\n");
   printf("   --version     print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
 }
 
@@ -566,9 +558,8 @@ static void print_help() {
   exit(1);
 }
 
-/* ---------------------------------------------------------------------------
- */
-static void print_version() {
-  printf("%s\n", vcid);
+/* --------------------------------------------------------------------------- */
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }

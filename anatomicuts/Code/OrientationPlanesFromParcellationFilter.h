@@ -1,67 +1,55 @@
 #ifndef OrientationPlanesFromParcellationFilter_h
 #define OrientationPlanesFromParcellationFilter_h
 
-#include "itkImageToImageFilter.h"
-#include "vtkSmartPointer.h"
-#include "vtkPoints.h"
 #include "itkConstNeighborhoodIterator.h"
-#include "vtkPlane.h"
-#include "vtkMath.h"
-#include "vtkPolyData.h"
-#include "vtkPointSet.h"
-#include "vtkCenterOfMass.h"
-#include "vtkPlaneSource.h"
-#include <vnl/vnl_vector.h>
-#include <vnl/vnl_cross.h>
+#include "itkImageToImageFilter.h"
 #include "mri.h"
+#include "vtkCenterOfMass.h"
+#include "vtkMath.h"
+#include "vtkPlane.h"
+#include "vtkPlaneSource.h"
+#include "vtkPointSet.h"
+#include "vtkPoints.h"
+#include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
+#include <vnl/vnl_cross.h>
+#include <vnl/vnl_vector.h>
 
 template <class TInputImage, class TOutputImage>
 class OrientationPlanesFromParcellationFilter
     : public itk::ImageToImageFilter<TInputImage, TOutputImage> {
 public:
-	using Self= OrientationPlanesFromParcellationFilter;
-	using Superclass = itk::ImageToImageFilter<TInputImage, TOutputImage>;
+  using Self       = OrientationPlanesFromParcellationFilter;
+  using Superclass = itk::ImageToImageFilter<TInputImage, TOutputImage>;
 
-	using Pointer =  itk::SmartPointer<Self>;
-	using ConstPointer = itk::SmartPointer  <const Self>;
+  using Pointer      = itk::SmartPointer<Self>;
+  using ConstPointer = itk::SmartPointer<const Self>;
 
-	using InputImageType = TInputImage;
-	using OutputImageType = TOutputImage;
- 	
-	itkNewMacro(Self);
-	using VectorType = itk::Vector<float,3>;
-	VectorType GetLeftRight()
-	{
-		return m_LeftRight;
-	}
+  using InputImageType  = TInputImage;
+  using OutputImageType = TOutputImage;
 
-	VectorType GetUpDown()
-	{
-		return m_UpDown;
-	}
+  itkNewMacro(Self);
+  using VectorType = itk::Vector<float, 3>;
+  VectorType GetLeftRight() { return m_LeftRight; }
 
-	VectorType GetFrontBack()
-	{
-		return m_FrontBack;
-	}
+  VectorType GetUpDown() { return m_UpDown; }
 
-	void SetBabyMode(bool bb)
-	{
-		this->m_baby = bb;
-	}
+  VectorType GetFrontBack() { return m_FrontBack; }
 
-	float DistanceToMidline(double x, double y, double z);
-	void GeneratePlanes(MRI* image);
-	
+  void SetBabyMode(bool bb) { this->m_baby = bb; }
+
+  float DistanceToMidline(double x, double y, double z);
+  void  GeneratePlanes(MRI *image);
+
 protected:
   void GenerateData() override;
 
 private:
-	bool m_baby=false;
-	itk::Vector<float, 3> m_LeftRight;
-	itk::Vector<float, 3> m_UpDown;
-	itk::Vector<float, 3> m_FrontBack;
-	itk::Vector<float, 3> m_centerLR;
+  bool                  m_baby = false;
+  itk::Vector<float, 3> m_LeftRight;
+  itk::Vector<float, 3> m_UpDown;
+  itk::Vector<float, 3> m_FrontBack;
+  itk::Vector<float, 3> m_centerLR;
 };
 #include "OrientationPlanesFromParcellationFilter.txx"
 #endif

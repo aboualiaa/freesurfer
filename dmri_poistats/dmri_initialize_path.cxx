@@ -54,12 +54,12 @@ public:
   MRI *ReadMRI(const char *fileName);
 
 private:
-  const char *m_EigenVectorFileName;
-  const char *m_SeedVolumeFileName;
+  const char *     m_EigenVectorFileName;
+  const char *     m_SeedVolumeFileName;
   std::vector<int> m_SeedValues;
-  const char *m_OutputDir;
-  int m_NumberOfReplicas;
-  int m_Radius;
+  const char *     m_OutputDir;
+  int              m_NumberOfReplicas;
+  int              m_Radius;
 };
 
 const std::string InitializePathExe::FLAG_DELIMITER = "--";
@@ -86,10 +86,10 @@ InitializePathExe::InitializePathExe(int inArgs, char **iaArgs)
     : FreeSurferExecutable(inArgs, iaArgs) {
 
   m_EigenVectorFileName = NULL;
-  m_SeedVolumeFileName = NULL;
-  m_OutputDir = NULL;
-  m_NumberOfReplicas = 1;
-  m_Radius = 1;
+  m_SeedVolumeFileName  = NULL;
+  m_OutputDir           = NULL;
+  m_NumberOfReplicas    = 1;
+  m_Radius              = 1;
 
   SetName("dmri_initialize_path", "find starting path for input to poistats");
 
@@ -134,7 +134,7 @@ bool InitializePathExe::FillArguments() {
     std::string *requiredArguments = GetRequiredArguments();
 
     m_SeedVolumeFileName = requiredArguments[0].c_str();
-    m_OutputDir = requiredArguments[1].c_str();
+    m_OutputDir          = requiredArguments[1].c_str();
 
     isFilled = true;
   } catch (...) {
@@ -219,8 +219,8 @@ void InitializePathExe::Run() {
     } else {
 
       // write out the delimiter
-      const float delimiter = -999;
-      float delimiterPoint[] = {delimiter, delimiter, delimiter};
+      const float delimiter        = -999;
+      float       delimiterPoint[] = {delimiter, delimiter, delimiter};
       WriteDataAppend(pathFileName, delimiterPoint, 1, 3);
 
       // write the pathway appended

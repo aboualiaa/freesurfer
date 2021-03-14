@@ -1,17 +1,12 @@
 /**
- * @file  gcut.h
- * @brief
+ * @brief 
  *
  */
 /*
  * Original Author: Vitali Zagorodnov, ZHU Jiaqi (Sept. 2009, revised Feb. 2010)
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:16 $
- *    $Revision: 1.4 $
  *
  * Copyright © 2009-2010 Nanyang Technological University, Singapore
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -49,13 +44,13 @@ public:
   void SetVariance8V(double variance8V);
   void SetNextNode(CCubeNode *ptrNextNode);
 
-  int GetSubX();
-  int GetSubY();
-  int GetSubZ();
-  int GetIndex();
-  double GetMean();
-  double GetVariance();
-  double GetVariance8V();
+  int        GetSubX();
+  int        GetSubY();
+  int        GetSubZ();
+  int        GetIndex();
+  double     GetMean();
+  double     GetVariance();
+  double     GetVariance8V();
   CCubeNode *GetNextNode();
 
 private:
@@ -76,7 +71,7 @@ public:
   CQueue3D();
   ~CQueue3D();
 
-  void Enqueue(CCubeNode *ptrNewNode);
+  void       Enqueue(CCubeNode *ptrNewNode);
   CCubeNode *Dequeue();
   CCubeNode *GetHead();
   CCubeNode *GetTail();

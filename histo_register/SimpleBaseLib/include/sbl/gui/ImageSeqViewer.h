@@ -36,7 +36,7 @@ public:
   /// a callback to call when the user clicks on the image
   inline void setClickCallback(void (*clickCallback)(int imageIndex, double x,
                                                      double y,
-                                                     int keyModifier)) {
+                                                     int    keyModifier)) {
     m_clickCallback = clickCallback;
   }
 
@@ -58,10 +58,10 @@ private:
   int m_imageCount;
 
   // internal gui elements
-  ImageViewer *m_imageViewer;
-  wxSlider *m_slider;
+  ImageViewer * m_imageViewer;
+  wxSlider *    m_slider;
   wxStaticText *m_statusText;
-  wxBitmap *m_bitmap;
+  wxBitmap *    m_bitmap;
 
   // the current instance (if requested set in constructor)
   static ImageSeqViewer *s_instance;

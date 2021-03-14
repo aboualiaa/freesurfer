@@ -6,17 +6,14 @@
 
 namespace kvl {
 
-/**
- *
- */
 class AtlasMeshProbabilityImageStatisticsCollector
     : public AtlasMeshStatisticsCollector {
 public:
   /** Standard class typedefs */
-  using Self = AtlasMeshProbabilityImageStatisticsCollector;
-  using Superclass = AtlasMeshStatisticsCollector;
-  using Pointer = itk::SmartPointer<Self>;
-  using ConstPointer = itk::SmartPointer<const Self>;
+  typedef AtlasMeshProbabilityImageStatisticsCollector Self;
+  typedef AtlasMeshStatisticsCollector                 Superclass;
+  typedef itk::SmartPointer<Self>                      Pointer;
+  typedef itk::SmartPointer<const Self>                ConstPointer;
 
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
@@ -25,7 +22,7 @@ public:
   itkTypeMacro(AtlasMeshProbabilityImageStatisticsCollector, itk::Object);
 
   /** Some typedefs */
-  using ProbabilityImageType = itk::Image<AtlasAlphasType, 3>;
+  typedef itk::Image<AtlasAlphasType, 3> ProbabilityImageType;
 
   /** */
   void SetProbabilityImage(const ProbabilityImageType *probabilityImage) {
@@ -41,11 +38,11 @@ protected:
                                     const AtlasMesh::PointType &p1,
                                     const AtlasMesh::PointType &p2,
                                     const AtlasMesh::PointType &p3,
-                                    const AtlasAlphasType &alphasInVertex0,
-                                    const AtlasAlphasType &alphasInVertex1,
-                                    const AtlasAlphasType &alphasInVertex2,
-                                    const AtlasAlphasType &alphasInVertex3,
-                                    double &minLogLikelihood,
+                                    const AtlasAlphasType &     alphasInVertex0,
+                                    const AtlasAlphasType &     alphasInVertex1,
+                                    const AtlasAlphasType &     alphasInVertex2,
+                                    const AtlasAlphasType &     alphasInVertex3,
+                                    double &         minLogLikelihood,
                                     AtlasAlphasType &statisticsInVertex0,
                                     AtlasAlphasType &statisticsInVertex1,
                                     AtlasAlphasType &statisticsInVertex2,
@@ -53,8 +50,8 @@ protected:
 
 private:
   AtlasMeshProbabilityImageStatisticsCollector(
-      const Self &);            // purposely not implemented
-  void operator=(const Self &); // purposely not implemented
+      const Self &);            //purposely not implemented
+  void operator=(const Self &); //purposely not implemented
 
   //
   ProbabilityImageType::ConstPointer m_ProbabilityImage;

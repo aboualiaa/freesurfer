@@ -1,16 +1,7 @@
-/**
- * @file  WindowConfigureOverlay.h
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2015/05/05 18:53:40 $
- *    $Revision: 1.13 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,9 +15,9 @@
 #ifndef WINDOWCONFIGUREOVERLAY_H
 #define WINDOWCONFIGUREOVERLAY_H
 
-#include <QWidget>
 #include "UIUpdateHelper.h"
 #include "WidgetHistogram.h"
+#include <QWidget>
 
 namespace Ui {
 class WindowConfigureOverlay;
@@ -48,7 +39,7 @@ public:
 
   void showEvent(QShowEvent *);
   void hideEvent(QHideEvent *);
-  void resizeEvent(QResizeEvent* e);
+  void resizeEvent(QResizeEvent *e);
 
 signals:
   void ActiveFrameChanged(int nframe);
@@ -64,10 +55,10 @@ public slots:
   void LoadLabelMask(const QString &fn);
 
 protected slots:
-  void OnActiveSurfaceChanged(Layer* layer);
+  void OnActiveSurfaceChanged(Layer *layer);
   void OnButtonClicked();
-  void OnSliderOpacity( int nVal );
-  void OnSpinBoxOpacity( double dVal );
+  void OnSliderOpacity(int nVal);
+  void OnSpinBoxOpacity(double dVal);
   void OnButtonAdd();
   bool UpdateOverlayProperty(SurfaceOverlayProperty *p);
   void UpdateThresholdChanges();
@@ -89,18 +80,21 @@ protected slots:
   void OnComboOverlayChanged(int n);
   void OnCycleOverlay();
   void UpdateGeometry();
-  void OnCheckFixedAxes(bool bChecked, bool bUpdateGraph = true);
+  void OnCheckFixedAxes(bool bUpdateGraph = true);
   void OnActiveOverlayChanged();
+  void OnButtonLoadCustom();
+  void OnButtonSaveCustom();
 
 private:
   Ui::WindowConfigureOverlay *ui;
 
-  LineMarkers   m_markers;    // custom gradient markers
-  LayerSurface* m_layerSurface;
-  float*        m_fDataCache;
-  double        m_dSavedOffset;
-  double        m_rangeOverall[2];
-  DialogScreenshotOverlay*  m_dlgScreenshot;
+  LineMarkers              m_markers; // custom gradient markers
+  LayerSurface *           m_layerSurface;
+  float *                  m_fDataCache;
+  double                   m_dSavedOffset;
+  double                   m_rangeOverall[2];
+  int                      m_nMaxHistCount;
+  DialogScreenshotOverlay *m_dlgScreenshot;
 };
 
 #endif // WINDOWCONFIGUREOVERLAY_H

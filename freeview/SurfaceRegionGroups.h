@@ -1,16 +1,11 @@
 /**
- * @file  SurfaceRegionGroups.h
  * @brief Surface region from a surface selection in 3D view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/14 23:44:48 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,9 +21,9 @@
 #ifndef SurfaceRegionGroups_h
 #define SurfaceRegionGroups_h
 
-#include <QObject>
 #include <QColor>
 #include <QList>
+#include <QObject>
 
 class LayerMRI;
 class SurfaceRegion;
@@ -40,12 +35,12 @@ public:
   virtual ~SurfaceRegionGroups();
 
   QColor GetGroupColor(int nGroup);
-  void SetGroupColor(int nGroup, const QColor &color);
+  void   SetGroupColor(int nGroup, const QColor &color);
 
   int GetGroupIdRange(SurfaceRegion *reg);
 
 private:
-  LayerMRI *m_mri;
+  LayerMRI *    m_mri;
   QList<QColor> m_colors;
 };
 

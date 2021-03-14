@@ -1,14 +1,12 @@
 /**
- * @file  vial.h
  * @brief Holds utilities for probabilistic tractography
  *
  * Holds utilities for probabilistic tractography
  */
 /*
  * Original Author: Anastasia Yendiki
- * CVS Revision Info:
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,7 +21,7 @@
 #ifndef VIAL_H
 #define VIAL_H
 
-// define NO_CVS_UP_IN_HERE
+//define NO_CVS_UP_IN_HERE
 
 #ifndef NO_CVS_UP_IN_HERE
 // Needed for CVS - these must be included first or else they don't compile
@@ -50,16 +48,16 @@ public:
   ~AffineReg();
   bool IsEmpty();
   void ReadXfm(const char *XfmFile, const MRI *InRefVol, const MRI *OutRefVol);
-  void ApplyXfm(std::vector<float> &OutPoint,
+  void ApplyXfm(std::vector<float> &               OutPoint,
                 std::vector<float>::const_iterator InPoint);
   void DecomposeXfm();
   void PrintScale();
   void PrintShear();
   void PrintRotate();
-  std::vector<float> GetTranslate();
-  std::vector<float> GetRotate();
-  std::vector<float> GetShear();
-  std::vector<float> GetScale();
+  std::vector<float>::const_iterator GetTranslate();
+  std::vector<float>::const_iterator GetRotate();
+  std::vector<float>::const_iterator GetShear();
+  std::vector<float>::const_iterator GetScale();
 
 private:
   std::vector<float> mInToOut,             // [4 x 4]
@@ -74,9 +72,9 @@ public:
   ~NonlinReg();
   bool IsEmpty();
   void ReadXfm(const char *XfmFile, MRI *OutRefVol);
-  void ApplyXfm(std::vector<float> &OutPoint,
+  void ApplyXfm(std::vector<float> &               OutPoint,
                 std::vector<float>::const_iterator InPoint);
-  void ApplyXfmInv(std::vector<float> &OutPoint,
+  void ApplyXfmInv(std::vector<float> &               OutPoint,
                    std::vector<float>::const_iterator InPoint);
 
 private:

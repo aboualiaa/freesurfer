@@ -1,6 +1,5 @@
 /**
- * @file  mris_wm_volume.c
- * @brief computes the interior volume of the ?h.white surfaces
+ * @brief computes the interior volume of the ?h.white surfaces 
  * (excluding subcortical labels)
  *
  * computes the interior volume of the ?h.white surfaces (excluding
@@ -8,12 +7,8 @@
  */
 /*
  * Original Author: Bruce Fischl
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:34 $
- *    $Revision: 1.7 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -25,31 +20,31 @@
  *
  */
 
-#include "mrisurf.h"
 #include "diag.h"
+#include "mrisurf.h"
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]);
+int        main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
 
 const char *Progname;
 
-static void usage_exit(int code);
-static char sdir[STRLEN] = "";
-static char *white_name = "white";
-static char *aseg_name = "aseg.mgz";
+static void        usage_exit(int code);
+static char        sdir[STRLEN] = "";
+static const char *white_name   = "white";
+static const char *aseg_name    = "aseg.mgz";
 
 static double resolution = 1.0 / 4.0;
 
 int main(int argc, char *argv[]) {
-  char **av, *hemi, fname[STRLEN], *cp, *subject;
-  int ac, nargs, eno, nv, nf, ne;
+  char **      av, *hemi, fname[STRLEN], *cp, *subject;
+  int          ac, nargs, eno, nv, nf, ne;
   MRI_SURFACE *mris;
-  int msec, minutes, seconds;
-  Timer start;
-  double total_volume;
-  MRI *mri_aseg;
+  int          msec, minutes, seconds;
+  Timer        start;
+  double       total_volume;
+  MRI *        mri_aseg;
 
   nargs = handleVersionOption(argc, argv, "mris_wm_volume");
   if (nargs && argc - nargs == 1)
@@ -78,7 +73,7 @@ int main(int argc, char *argv[]) {
     strcpy(sdir, cp);
   }
   subject = argv[1];
-  hemi = argv[2];
+  hemi    = argv[2];
   if (argc < 3)
     usage_exit(1);
 
@@ -104,7 +99,7 @@ int main(int argc, char *argv[]) {
 
   total_volume = MRIScomputeWhiteVolume(mris, mri_aseg, resolution);
   printf("%g\n", total_volume);
-  msec = start.milliseconds();
+  msec    = start.milliseconds();
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   seconds = seconds % 60;
@@ -121,7 +116,7 @@ int main(int argc, char *argv[]) {
            Description:
 ----------------------------------------------------------------------*/
 static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
+  int   nargs = 0;
   char *option;
 
   option = argv[1] + 1; /* past '-' */

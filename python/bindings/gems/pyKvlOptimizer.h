@@ -4,19 +4,19 @@
 #include "kvlAtlasMeshCollection.h"
 #include "pyKvlImage.h"
 
+#include "kvlAtlasMeshDeformationConjugateGradientOptimizer.h"
 #include "kvlAtlasMeshDeformationFixedStepGradientDescentOptimizer.h"
 #include "kvlAtlasMeshDeformationGradientDescentOptimizer.h"
-#include "kvlAtlasMeshDeformationConjugateGradientOptimizer.h"
 #include "kvlAtlasMeshDeformationLBFGSOptimizer.h"
 
+#include "pyKvlCalculator.h"
+#include "pyKvlMesh.h"
 #include "pyKvlNumpy.h"
 #include "pybind11/pybind11.h"
-#include "pyKvlMesh.h"
-#include "pyKvlCalculator.h"
 
 namespace py = pybind11;
 
-using ImageType = itk::Image<float, 3>;
+using ImageType    = itk::Image<float, 3>;
 using ImagePointer = ImageType::Pointer;
 
 class KvlOptimizer {
@@ -25,7 +25,7 @@ class KvlOptimizer {
 public:
   KvlOptimizer(std::string typeName, const KvlMesh &mesh,
                const KvlCostAndGradientCalculator &calculator,
-               std::map<std::string, double> arguments) {
+               std::map<std::string, double>       arguments) {
     switch (typeName[0]) {
       //            case 'F':
       //            {
@@ -73,8 +73,8 @@ public:
     // Parse additional options. Format is always [ 'someString', double ]
     for (auto const &arg : arguments) {
 
-      const std::string optionName = arg.first;
-      const double optionValue = arg.second;
+      const std::string optionName  = arg.first;
+      const double      optionValue = arg.second;
 
       switch (optionName[0]) {
       case 'V': {
@@ -135,7 +135,7 @@ public:
       }
     }
     kvl::AtlasMesh::ConstPointer constMesh = mesh.mesh;
-    kvl::AtlasMesh::Pointer mutableMesh =
+    kvl::AtlasMesh::Pointer      mutableMesh =
         const_cast<kvl::AtlasMesh *>(constMesh.GetPointer());
     // Pass the mesh and calculator to it
     optimizer->SetMesh(mutableMesh);

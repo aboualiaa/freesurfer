@@ -72,7 +72,7 @@ public:
   double default_step_length;
 
 private:
-  void init_parameters();
+  void               init_parameters();
   vnl_cost_function *f_;
   //  vnl_lbfgs() {} // default constructor makes no sense
   // does too.  Can set values for parameters.

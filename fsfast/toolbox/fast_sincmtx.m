@@ -9,17 +9,12 @@ function M = fast_sincmtx(len,delta,rownorm,hw)
 % window, the less the effect of the window. Setting hw=0 is like
 % setting hw = infinity.
 %
-% $Id: fast_sincmtx.m,v 1.6 2011/03/02 00:04:05 nicks Exp $
 
 % fast_sincmtx.m
 %
 % Original Author: Doug Greve
-% CVS Revision Info:
-%    $Author: nicks $
-%    $Date: 2011/03/02 00:04:05 $
-%    $Revision: 1.6 $
 %
-% Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+% Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
 %
 % Terms and conditions for use, reproduction, distribution and contribution
 % are found in the 'FreeSurfer Software License Agreement' contained

@@ -1,17 +1,6 @@
-/**
- * @file  prime.c
- * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
- *
- * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
- */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2011/03/02 00:04:54 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -23,9 +12,9 @@
  *
  */
 
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
+#include <math.h>
 
 #include "prime.h"
 
@@ -89,7 +78,7 @@ int *GetPrimes(int Nmax, int *Nprimes) {
 int *GetPrimeFactors(int N, int *Nfactors) {
   int *pfactors, n, m, NN;
   int *allprimes, nallprimes;
-  int changed;
+  int  changed;
 
   if (N < 1) {
     printf("ERROR: cannot compute prime factors of %d\n", N);
@@ -101,8 +90,8 @@ int *GetPrimeFactors(int N, int *Nfactors) {
 
   /* Go through each prime to see if it is a factor of N */
   *Nfactors = 0;
-  changed = 1;
-  NN = N;
+  changed   = 1;
+  NN        = N;
   while (changed) {
     changed = 0;
     for (n = 0; n < nallprimes; n++) {
@@ -119,9 +108,9 @@ int *GetPrimeFactors(int N, int *Nfactors) {
 
   /* Now go back through and record what the factors are */
   pfactors = (int *)calloc(*Nfactors, sizeof(int));
-  m = 0;
-  changed = 1;
-  NN = N;
+  m        = 0;
+  changed  = 1;
+  NN       = N;
   while (changed) {
     changed = 0;
     for (n = 0; n < nallprimes; n++) {
@@ -187,7 +176,7 @@ int IsPrime(int N) {
    ------------------------------------------------------------- */
 int GetMaxPrimeFactor(int N) {
   int *pfactors, nfactors;
-  int maxfactor;
+  int  maxfactor;
 
   pfactors = GetPrimeFactors(N, &nfactors);
 
@@ -201,7 +190,7 @@ int GetMaxPrimeFactor(int N) {
    ------------------------------------------------------------- */
 int GetClosestPrimeFactor(int N, int P) {
   int *pfactors, nfactors;
-  int n, d, dmin, nmin, fclosest;
+  int  n, d, dmin, nmin, fclosest;
 
   pfactors = GetPrimeFactors(N, &nfactors);
 
@@ -226,7 +215,7 @@ int GetClosestPrimeFactor(int N, int P) {
    ------------------------------------------------------------- */
 int GetClosestPrimeFactorLess(int N, int P) {
   int *pfactors, nfactors;
-  int n, d, dmin, nmin, fclosest;
+  int  n, d, dmin, nmin, fclosest;
 
   pfactors = GetPrimeFactors(N, &nfactors);
 

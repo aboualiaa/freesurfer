@@ -2,8 +2,8 @@
 #define NUMPY_H
 
 #include <algorithm>
-#include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
@@ -41,14 +41,15 @@ py::array_t<T> makeArray(std::vector<ssize_t> shape, MemoryOrder order,
   return makeArray(shape, strides, data, free);
 }
 
-template<class T>
-py::array_t<T> copyArray(std::vector<ssize_t> shape, MemoryOrder order, const T* const data) {
+template <class T>
+py::array_t<T> copyArray(std::vector<ssize_t> shape, MemoryOrder order,
+                         const T *const data) {
   // determine buffer array strides
   std::vector<ssize_t> strides;
   if (order == MemoryOrder::Fortran) {
-    strides = fstrides(shape, sizeof(T));    
+    strides = fstrides(shape, sizeof(T));
   } else {
-    strides = cstrides(shape, sizeof(T));    
+    strides = cstrides(shape, sizeof(T));
   }
   return py::array_t<T>(shape, strides, data);
 }

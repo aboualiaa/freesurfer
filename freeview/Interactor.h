@@ -1,16 +1,11 @@
 /**
- * @file  Interactor.h
  * @brief Base Interactor class manage mouse and key input in render view.
  *
  */
 /*
  * Original Author: Ruopeng Wang
- * CVS Revision Info:
- *    $Author: rpwang $
- *    $Date: 2013/02/28 20:35:34 $
- *    $Revision: 1.14 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -26,9 +21,9 @@
 #ifndef Interactor_h
 #define Interactor_h
 
-#include <QObject>
-#include <QMouseEvent>
 #include <QKeyEvent>
+#include <QMouseEvent>
+#include <QObject>
 
 class vtkRenderer;
 class RenderView;
@@ -64,7 +59,7 @@ public:
     EM_GeoSeg
   };
 
-  int GetAction();
+  int  GetAction();
   void SetAction(int nAction);
 
   // return true if to have parent interactor continue processing the event
@@ -82,7 +77,7 @@ public:
     Q_UNUSED(view);
   }
   virtual void ProcessPostMouseWheelEvent(QWheelEvent *event,
-                                          RenderView *view) {
+                                          RenderView * view) {
     Q_UNUSED(event);
     Q_UNUSED(view);
   }
@@ -95,9 +90,9 @@ protected:
   int m_nDownPosX;
   int m_nDownPosY;
 
-  int m_nAction;
+  int                         m_nAction;
   static Qt::KeyboardModifier CONTROL_MODIFIER;
-  static Qt::Key CONTROL_KEY;
+  static Qt::Key              CONTROL_KEY;
 };
 
 #endif

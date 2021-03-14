@@ -15,22 +15,22 @@
 
   ----------------------------------------------*/
 
+#include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "version.h"
+#include "error.h"
 #include "gw_utils.h"
+#include "macros.h"
+#include "mri.h"
+#include "mrisurf.h"
+#include "proto.h"
+#include "version.h"
 
 char *Progname;
 
@@ -48,12 +48,12 @@ GWUTILS_FACE faces[FACECOUNT] = {{{0, 5, 2}}, {{0, 2, 4}}, {{4, 2, 1}},
 //-----------------------------------
 int main(int argc, char *argv[]) {
   //-----------------------------------
-  char msg[1000];
-  char *cp;
+  char         msg[1000];
+  char *       cp;
   MRI_SURFACE *mris;
-  MHT *mht;
-  MRI *mri;
-  int rslt;
+  MHT *        mht;
+  MRI *        mri;
+  int          rslt;
 
   if (getenv("SKIP_MRISHASH_TEST"))
     exit(77); // bypass

@@ -2,17 +2,12 @@
 #include "minc_internals.h"
 
 /**
- * @file  minc_volume_io.c
  * @brief substitutes for the needed functionality previously obtained from minc
  */
 /*
  * Original Author: Bevin Brett
- * CVS Revision Info:
- *    $Author: Brett $
- *    $Date: 2017/11/01 12:46:00 $
- *    $Revision: 1.00 $
  *
- * Copyright © 2017 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained

@@ -1,0 +1,98 @@
+name: $(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - master
+
+stages:
+  - stage: ClangBuilds
+    jobs:
+      - job: CatalinaBuildAppleClang
+        strategy:
+          matrix:
+            catalina_appleclang_unit:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: appleclang
+              instrumentation: coverage
+            catalina_clang_coverage:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: coverage
+            catalina_clang_asan:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: asan
+            catalina_clang_ubsan:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: ubsan
+            catalina_clang_tsan:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: tsan
+            catalina_clang_cfisan:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: cfisan
+        variables:
+          HOSTING_OS: $(hosting_os)
+          HOSTING_COMPILER: $(hosting_compiler)
+          INSTRUMENTATION: $(instrumentation)
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: $(imageName)
+        steps:
+          - task: DownloadPipelineArtifact@2
+            continueOnError: false
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '3'
+              buildVersionToDownload: 'latest'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - checkout: self
+            submodules: true
+          - script: |
+              set -e
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              brew install git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+              brew cask install arrayfire xquartz || true
+              brew install armadillo cmake eigen fltk gts hdf5 itk coreutils wget \
+              jemalloc lcov libomp llvm ninja open-mpi petsc python@3 qt szip tcsh vtk || true
+            displayName: 'Installing Dependencies'
+            continueOnError: false
+          - script: |
+              set -e
+              export PATH="/usr/local/opt/llvm/bin:/usr/local/opt/python/libexec/bin:$PATH"
+              ./scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh $INSTRUMENTATION
+              ./scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+            continueOnError: false
+          - script: |
+              set -e
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+            continueOnError: true
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'macOS build:'
+

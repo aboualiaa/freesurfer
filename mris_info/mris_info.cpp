@@ -1,16 +1,11 @@
 /**
- * @file  mris_info.cpp
  * @brief Prints out information about a surface file
  *
  */
 /*
  * Original Author: Yasunari Tosa
- * CVS Revision Info:
- *    $Author: greve $
- *    $Date: 2012/12/04 19:17:57 $
- *    $Revision: 1.33 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -22,60 +17,70 @@
  *
  */
 
+#include <cstdio>
+#include <iomanip>
+#include <iostream>
+#include <vector>
 #if (__GNUC__ < 3)
 #include "/usr/include/g++-3/alloc.h"
 #endif
+#include <string>
 #include <sys/utsname.h>
 
+#include "colortab.h"
+#include "diag.h"
+#include "error.h"
 #include "fio.h"
 #include "gcsa.h"
-#include "mrisutils.h"
-#include "version.h"
 #include "gifti.h"
-#include "surfgrad.h"
+#include "mri.h"
+#include "mrisurf.h"
 #include "mrisurf_metricProperties.h"
+#include "mrisutils.h"
+#include "proto.h"
+#include "surfgrad.h"
+#include "transform.h"
+#include "utils.h"
+#include "version.h"
 
 const char *Progname = "mris_info";
 
-static int parse_commandline(int argc, char **argv);
-static void print_usage();
-static void usage_exit();
-static void print_help();
+static int  parse_commandline(int argc, char **argv);
+static void print_usage(void);
+static void usage_exit(void);
+static void print_help(void);
 static void argnerr(char *option, int n);
-static void print_version();
+static void print_version(void);
 
 // copied from mrisurf.c
-#define QUAD_FILE_MAGIC_NUMBER (-1 & 0x00ffffff)
+#define QUAD_FILE_MAGIC_NUMBER     (-1 & 0x00ffffff)
 #define TRIANGLE_FILE_MAGIC_NUMBER (-2 & 0x00ffffff)
 #define NEW_QUAD_FILE_MAGIC_NUMBER (-3 & 0x00ffffff)
 
-static char vcid[] =
-    "$Id: mris_info.cpp,v 1.33 2012/12/04 19:17:57 greve Exp $";
 using namespace std;
-char *surffile = nullptr, *outfile = nullptr, *curvfile = nullptr,
-     *annotfile = nullptr;
-char *SUBJECTS_DIR = nullptr, *subject = nullptr, *hemi = nullptr,
-     *surfname = nullptr;
-int debug = 0;
-char tmpstr[2000];
+char *surffile = NULL, *outfile = NULL, *curvfile = NULL, *annotfile = NULL;
+char *SUBJECTS_DIR = NULL, *subject = NULL, *hemi = NULL, *surfname = NULL;
+int   debug = 0;
+char  tmpstr[2000];
 struct utsname uts;
-int talairach_flag = 0;
-MATRIX *XFM = nullptr;
-int rescale = 0;
-double scale = 0;
-int diag_vno = -1;
-int vnox = -1;
-int DoAreaStats = 0;
-int DoEdgeStats = 0;
-int EdgeMetricId = 0;
-char *edgefile = nullptr;
-MRI *mask = nullptr;
-LABEL *label = nullptr;
-int DoQuality = 0;
-int vmatlab = -1;
-char *vmatlabfile = nullptr;
-int edgenox = -1;
-int CountIntersections = 0;
+int            talairach_flag     = 0;
+MATRIX *       XFM                = NULL;
+int            rescale            = 0;
+double         scale              = 0;
+int            diag_vno           = -1;
+int            vnox               = -1;
+int            DoAreaStats        = 0;
+int            DoEdgeStats        = 0;
+int            EdgeMetricId       = 0;
+char *         edgefile           = NULL;
+MRI *          mask               = NULL;
+LABEL *        label              = NULL;
+int            DoQuality          = 0;
+int            vmatlab            = -1;
+char *         vmatlabfile        = NULL;
+int            edgenox            = -1;
+int            CountIntersections = 0;
+char *         patchname          = NULL;
 
 int MRISsaveMarkedAsPointSet(char *fname, MRIS *surf);
 int MRISedgeVertices2Pointset(MRIS *surf, const MRI *mask, const int metricid,
@@ -85,9 +90,9 @@ int MRISprintEdgeInfo(FILE *fp, const MRIS *surf, int edgeno);
 /*------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
   double InterVertexDistAvg, InterVertexDistStdDev, avgvtxarea, avgfacearea;
-  char ext[STRLEN];
+  char   ext[STRLEN];
   vector<string> type;
-  FILE *fp;
+  FILE *         fp;
   type.push_back("MRIS_BINARY_QUADRANGLE_FILE");
   type.push_back("MRIS_ASCII_TRIANGLE_FILE");
   type.push_back("MRIS_GEO_TRIANGLE_FILE");
@@ -98,7 +103,7 @@ int main(int argc, char *argv[]) {
   if (argc < 2)
     usage_exit();
   parse_commandline(argc, argv);
-  if (surffile == nullptr) {
+  if (surffile == NULL) {
     printf("ERROR: must specify a surface file\n");
     exit(1);
   }
@@ -111,7 +116,7 @@ int main(int argc, char *argv[]) {
       return -1;
     }
     printf("GCSA file %s opened\n", surffile);
-    if (gcsa->ct != nullptr) {
+    if (gcsa->ct != NULL) {
       CTABprintASCII(gcsa->ct, stdout);
     }
     return (0);
@@ -119,13 +124,13 @@ int main(int argc, char *argv[]) {
 
   // Check whether it's a .annot file. If so, just print ctab
   if (!stricmp(FileNameExtension(surffile, ext), (char *)"annot")) {
-    COLOR_TABLE *ctab = nullptr;
-    int return_code = MRISreadCTABFromAnnotationIfPresent(surffile, &ctab);
+    COLOR_TABLE *ctab = NULL;
+    int return_code   = MRISreadCTABFromAnnotationIfPresent(surffile, &ctab);
     if (NO_ERROR != return_code) {
       fprintf(stderr, "ERROR: could not open %s\n", surffile);
       return -1;
     }
-    if (ctab != nullptr) {
+    if (ctab != NULL) {
       CTABprintASCII(ctab, stdout);
     }
     return (0);
@@ -135,7 +140,7 @@ int main(int argc, char *argv[]) {
   if (!stricmp(FileNameExtension(surffile, ext), (char *)"gii")) {
 
     gifti_image *image = gifti_read_image(surffile, 1);
-    if (nullptr == image) {
+    if (NULL == image) {
       fprintf(stderr, "gifti_read_image() returned NULL\n");
       return 1;
     }
@@ -146,7 +151,7 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
-    gifti_disp_gifti_image(nullptr, image, 1);
+    gifti_disp_gifti_image(NULL, image, 1);
 
     return (0);
   }
@@ -157,12 +162,19 @@ int main(int argc, char *argv[]) {
     cerr << "could not open " << surffile << endl;
     return -1;
   }
+  if (patchname) {
+    int err = MRISreadPatch(mris, patchname);
+    if (err)
+      exit(1);
+  }
   MRIScomputeMetricProperties(mris);
-  MRISedges(mris);
-  MRIScorners(mris);
-  MRISfaceMetric(mris, 0);
-  MRISedgeMetric(mris, 0);
-  MRIScornerMetric(mris, 0);
+  if (DoEdgeStats) {
+    MRISedges(mris);
+    MRIScorners(mris);
+    MRISfaceMetric(mris, 0);
+    MRISedgeMetric(mris, 0);
+    MRIScornerMetric(mris, 0);
+  }
 
   if (label) {
     // Create a mask from the label
@@ -190,7 +202,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (DoAreaStats) {
-    double *stats = MRIStriangleAreaStats(mris, mask, nullptr);
+    double *stats = MRIStriangleAreaStats(mris, mask, NULL);
     printf("%d %g %g %g %g\n", (int)stats[0], stats[1], stats[2], stats[3],
            stats[4]);
     free(stats);
@@ -198,14 +210,14 @@ int main(int argc, char *argv[]) {
   }
   if (DoEdgeStats) {
     if (EdgeMetricId >= 0) {
-      double *stats = MRISedgeStats(mris, EdgeMetricId, mask, nullptr);
+      double *stats = MRISedgeStats(mris, EdgeMetricId, mask, NULL);
       printf("%d %g %g %g %g\n", (int)stats[0], stats[1], stats[2], stats[3],
              stats[4]);
       free(stats);
     } else {
       int k;
       for (k = 0; k < 3; k++) {
-        double *stats = MRISedgeStats(mris, k, mask, nullptr);
+        double *stats = MRISedgeStats(mris, k, mask, NULL);
         printf("%d %d %g %g %g %g\n", k, (int)stats[0], stats[1], stats[2],
                stats[3], stats[4]);
         free(stats);
@@ -215,7 +227,7 @@ int main(int argc, char *argv[]) {
   }
   if (edgefile) {
     MRISedgeWrite(edgefile, mris);
-    // MRISedgeVertices2Pointset(mris, mask, 2, 145, "tmp.pointset");
+    //MRISedgeVertices2Pointset(mris, mask, 2, 145, "tmp.pointset");
     exit(0);
   }
 
@@ -257,7 +269,7 @@ int main(int argc, char *argv[]) {
     printf("\n");
     /* Open the file. */
     FILE *fp = fopen(annotfile, "r");
-    if (fp == nullptr)
+    if (fp == NULL)
       ErrorExit(ERROR_NOFILE, "ERROR: could not read annot file %s", annotfile);
 
     /* First int is the number of elements. */
@@ -274,13 +286,13 @@ int main(int argc, char *argv[]) {
            surffile);
 
     // also dump the colortable
-    COLOR_TABLE *ctab = nullptr;
-    int return_code = MRISreadCTABFromAnnotationIfPresent(annotfile, &ctab);
+    COLOR_TABLE *ctab = NULL;
+    int return_code   = MRISreadCTABFromAnnotationIfPresent(annotfile, &ctab);
     if (NO_ERROR != return_code) {
       fprintf(stderr, "ERROR: could not open %s\n", annotfile);
       return -1;
     }
-    if (ctab != nullptr) {
+    if (ctab != NULL) {
       CTABprintASCII(ctab, stdout);
     }
   }
@@ -291,9 +303,9 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
     scale = MRISrescaleMetricProperties(mris);
-    // scale = sqrt((double)mris->group_avg_surface_area/mris->total_area);
-    // printf("scale = %lf\n",scale);
-    // MRISscale(mris,scale);
+    //scale = sqrt((double)mris->group_avg_surface_area/mris->total_area);
+    //printf("scale = %lf\n",scale);
+    //MRISscale(mris,scale);
   }
 
   if (talairach_flag) {
@@ -301,8 +313,8 @@ int main(int argc, char *argv[]) {
       printf("ERROR: need --s with --t\n");
       exit(1);
     }
-    XFM = DevolveXFM(subject, nullptr, nullptr);
-    if (XFM == nullptr)
+    XFM = DevolveXFM(subject, NULL, NULL);
+    if (XFM == NULL)
       exit(1);
     printf("Applying talairach transform\n");
     MatrixPrint(stdout, XFM);
@@ -313,7 +325,7 @@ int main(int argc, char *argv[]) {
   cout << "type        : " << type[mris->type].c_str() << endl;
   if (mris->type == MRIS_BINARY_QUADRANGLE_FILE) {
     FILE *fp = fopen(surffile, "rb");
-    int magic;
+    int   magic;
     fread3(&magic, fp);
     if (magic == QUAD_FILE_MAGIC_NUMBER)
       cout << "              QUAD_FILE_MAGIC_NUMBER" << endl;
@@ -322,10 +334,10 @@ int main(int argc, char *argv[]) {
     fclose(fp);
   }
 
-  InterVertexDistAvg = mris->avg_vertex_dist;
+  InterVertexDistAvg    = mris->avg_vertex_dist;
   InterVertexDistStdDev = mris->std_vertex_dist;
-  avgvtxarea = mris->avg_vertex_area;
-  avgfacearea = mris->total_area / mris->nfaces;
+  avgvtxarea            = mris->avg_vertex_area;
+  avgfacearea           = mris->total_area / mris->nfaces;
 
   cout << "num vertices: " << mris->nvertices << endl;
   cout << "num faces   : " << mris->nfaces << endl;
@@ -364,7 +376,7 @@ int main(int argc, char *argv[]) {
       printf("cmd[%d]: %s\n", i, mris->cmdlines[i]);
   }
   if (argc > 2) {
-    int vno = atoi(argv[2]);
+    int     vno = atoi(argv[2]);
     VERTEX *v;
     v = &mris->vertices[vno];
     printf("mris[%d] = (%2.1f, %2.1f, %2.1f)\n", vno, v->x, v->y, v->z);
@@ -373,9 +385,9 @@ int main(int argc, char *argv[]) {
   uname(&uts);
 
   // Open an output file to capture values
-  if (outfile != nullptr) {
+  if (outfile != NULL) {
     fp = fopen(outfile, "w");
-    if (fp == nullptr) {
+    if (fp == NULL) {
       printf("ERROR: cannot open %s\n", outfile);
       exit(1);
     }
@@ -412,7 +424,7 @@ int main(int argc, char *argv[]) {
   fprintf(fp, "vtx0xyz   %f %f %f\n", mris->vertices[0].x, mris->vertices[0].y,
           mris->vertices[0].z);
 
-  if (outfile != nullptr)
+  if (outfile != NULL)
     fclose(fp);
 
   MRISfree(&mris);
@@ -420,7 +432,7 @@ int main(int argc, char *argv[]) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -453,28 +465,33 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcmp(option, "--o")) {
       if (nargc < 1)
         argnerr(option, 1);
-      outfile = pargv[0];
+      outfile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--v")) {
       if (nargc < 1)
         argnerr(option, 1);
-      diag_vno = atoi(pargv[0]);
+      diag_vno  = atoi(pargv[0]);
       nargsused = 1;
     } else if (!strcmp(option, "--vx")) {
       if (nargc < 1)
         argnerr(option, 1);
-      vnox = atoi(pargv[0]);
+      vnox      = atoi(pargv[0]);
       nargsused = 1;
     } else if (!strcmp(option, "--v-matlab")) {
       if (nargc < 2)
         argnerr(option, 2);
-      vmatlab = atoi(pargv[0]);
+      vmatlab     = atoi(pargv[0]);
       vmatlabfile = pargv[1];
-      nargsused = 2;
+      nargsused   = 2;
     } else if (!strcmp(option, "--ex")) {
       if (nargc < 1)
         argnerr(option, 1);
-      edgenox = atoi(pargv[0]);
+      edgenox   = atoi(pargv[0]);
+      nargsused = 1;
+    } else if (!strcmp(option, "--patch")) {
+      if (nargc < 1)
+        argnerr(option, 1);
+      patchname = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--quality")) {
       DoQuality = 1;
@@ -486,12 +503,12 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       EdgeMetricId = atoi(pargv[0]);
-      DoEdgeStats = 1;
-      nargsused = 1;
+      DoEdgeStats  = 1;
+      nargsused    = 1;
     } else if (!strcmp(option, "--edge-file")) {
       if (nargc < 1)
         argnerr(option, 1);
-      edgefile = pargv[0];
+      edgefile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--label")) {
       if (mask) {
@@ -500,8 +517,8 @@ static int parse_commandline(int argc, char **argv) {
       }
       if (nargc < 1)
         argnerr(option, 1);
-      label = LabelRead(nullptr, pargv[0]);
-      if (label == nullptr)
+      label = LabelRead(NULL, pargv[0]);
+      if (label == NULL)
         exit(1);
       nargsused = 1;
     } else if (!strcmp(option, "--mask")) {
@@ -513,13 +530,13 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1)
         argnerr(option, 1);
       mask = MRIread(pargv[0]);
-      if (mask == nullptr)
+      if (mask == NULL)
         exit(1);
       nargsused = 1;
     } else if (!strcmp(option, "--c")) {
       if (nargc < 1)
         argnerr(option, 1);
-      curvfile = pargv[0];
+      curvfile  = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--a")) {
       if (nargc < 1)
@@ -529,20 +546,20 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--s")) {
       if (nargc < 3)
         argnerr(option, 3);
-      subject = pargv[0];
-      hemi = pargv[1];
-      surfname = pargv[2];
+      subject      = pargv[0];
+      hemi         = pargv[1];
+      surfname     = pargv[2];
       SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-      if (SUBJECTS_DIR == nullptr) {
+      if (SUBJECTS_DIR == NULL) {
         printf("ERROR: SUBJECTS_DIR not defined in environment\n");
         exit(1);
       }
       sprintf(tmpstr, "%s/%s/surf/%s.%s", SUBJECTS_DIR, subject, hemi,
               surfname);
-      surffile = strcpyalloc(tmpstr);
+      surffile  = strcpyalloc(tmpstr);
       nargsused = 3;
     } else {
-      if (nullptr == surffile)
+      if (NULL == surffile)
         surffile = option;
     }
     nargc -= nargsused;
@@ -552,20 +569,21 @@ static int parse_commandline(int argc, char **argv) {
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit() {
+static void usage_exit(void) {
   print_usage();
   exit(1);
 }
 
 /* --------------------------------------------- */
-static void print_usage() {
+static void print_usage(void) {
   printf("USAGE: %s [options] <surfacefile>\n", Progname);
   printf("\nOptions:\n");
   printf("  --o outfile : save some data to outfile\n");
   printf("  --s subject hemi surfname : instead of surfacefile\n");
   printf("  --t : apply talairach xfm before reporting info\n");
-  printf("  --r : rescale group surface so metrics same as "
-         "avg of individuals\n");
+  printf(
+      "  --r : rescale group surface so metrics same as avg of individuals\n");
+  printf("  --patch patchfile : load patch before reporting\n");
   printf("  --v vnum : print out vertex information for vertex vnum\n");
   printf(
       "  --vx vnum : print out extended vertex information for vertex vnum\n");
@@ -600,10 +618,10 @@ static void print_usage() {
 }
 
 /* --------------------------------------------- */
-static void print_help() {
+static void print_help(void) {
   print_usage();
   printf("\n");
-  printf("%s\n", vcid);
+  std::cout << getVersion() << std::endl;
   printf("\n");
   printf("Prints out information about a surface file.\n");
   printf("\n");
@@ -620,8 +638,8 @@ static void argnerr(char *option, int n) {
 }
 
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 
@@ -630,12 +648,12 @@ static void print_version() {
   \brief Outputs a file that can be loaded into freeview with -c
  */
 int MRISsaveMarkedAsPointSet(char *fname, MRIS *surf) {
-  int n, vtxno;
+  int     n, vtxno;
   VERTEX *v;
-  FILE *fp;
+  FILE *  fp;
 
   fp = fopen(fname, "w");
-  n = 0;
+  n  = 0;
   for (vtxno = 0; vtxno < surf->nvertices; vtxno++) {
     v = &(surf->vertices[vtxno]);
     if (!v->marked)
@@ -653,24 +671,24 @@ int MRISsaveMarkedAsPointSet(char *fname, MRIS *surf) {
 
 int MRISedgeVertices2Pointset(MRIS *surf, const MRI *mask, const int metricid,
                               const double thresh, const char *fname) {
-  int edgeno, nthv, npoints;
+  int       edgeno, nthv, npoints;
   MRI_EDGE *e;
-  double metric;
-  FILE *fp;
+  double    metric;
+  FILE *    fp;
 
-  if (surf->edges == nullptr)
+  if (surf->edges == NULL)
     MRISedges(surf);
   MRIScomputeMetricProperties(surf);
   MRISedgeMetric(surf, 0);
 
-  fp = fopen(fname, "w");
+  fp      = fopen(fname, "w");
   npoints = 0;
   for (edgeno = 0; edgeno < surf->nedges; edgeno++) {
-    e = &(surf->edges[edgeno]);
+    e        = &(surf->edges[edgeno]);
     int skip = 0;
     for (nthv = 0; nthv < 4; nthv++) {
-      int vno = e->vtxno[nthv];
-      VERTEX *const v = &(surf->vertices[vno]);
+      int           vno = e->vtxno[nthv];
+      VERTEX *const v   = &(surf->vertices[vno]);
       if (v->ripflag)
         skip = 1;
       if (mask && MRIgetVoxVal(mask, vno, 0, 0, 0) < 0.5)
@@ -696,8 +714,8 @@ int MRISedgeVertices2Pointset(MRIS *surf, const MRI *mask, const int metricid,
     if (metric < thresh)
       continue;
     for (nthv = 0; nthv < 2; nthv++) {
-      int vno = e->vtxno[nthv];
-      VERTEX *const v = &(surf->vertices[vno]);
+      int           vno = e->vtxno[nthv];
+      VERTEX *const v   = &(surf->vertices[vno]);
       fprintf(fp, "%g %g %g\n", v->x, v->y, v->z);
       npoints++;
     }
@@ -711,9 +729,9 @@ int MRISedgeVertices2Pointset(MRIS *surf, const MRI *mask, const int metricid,
 
 int MRISprintEdgeInfo(FILE *fp, const MRIS *surf, int edgeno) {
   MRI_EDGE *e = &(surf->edges[edgeno]);
-  int k, j;
-  VERTEX *v;
-  FACE *f;
+  int       k, j;
+  VERTEX *  v;
+  FACE *    f;
 
   fprintf(fp, "edgeno %d\n", edgeno);
 
@@ -734,7 +752,7 @@ int MRISprintEdgeInfo(FILE *fp, const MRIS *surf, int edgeno) {
 
   for (k = 0; k < 2; k++) {
     f = &(surf->faces[e->faceno[k]]);
-    if (f->norm == nullptr)
+    if (f->norm == NULL)
       continue;
     fprintf(fp, "f%d = [%10.8f %10.8f %10.8f]'; \n", k, f->norm->rptr[1][1],
             f->norm->rptr[2][1], f->norm->rptr[3][1]);

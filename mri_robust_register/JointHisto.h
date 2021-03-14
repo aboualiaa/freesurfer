@@ -1,17 +1,12 @@
 /**
- * @file  JointHisto.h
  * @brief A class for a joint histogram of two images
  *
  */
 
 /*
  * Original Author: Martin Reuter
- * CVS Revision Info:
- *    $Author: mreuter $
- *    $Date: 2012/09/21 23:05:15 $
- *    $Revision: 1.5 $
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -33,11 +28,14 @@
 #include "mriBSpline.h"
 
 #define export // obsolete feature 'export template' used in these headers
-#include <vnl/vnl_matrix_fixed.h>
 #include <vnl/vnl_matlab_print.h>
+#include <vnl/vnl_matrix_fixed.h>
 #undef export
 
 #include <iostream>
+#include <vcl_compiler.h>
+
+using namespace std;
 
 class JointHisto {
 public:
@@ -66,12 +64,12 @@ public:
   void set(const vnl_matrix<double> &histo);
   void smooth(double fwhm1 = 7.0);
   void print(const std::string &n = "H") {
-    vnl_matlab_print(std::cout, histo, n.c_str());
+    vnl_matlab_print(cout, histo, n.c_str());
     std::cout << std::endl;
   };
-  void save(const std::string &fname, const std::string &n = "H");
+  void   save(const std::string &fname, const std::string &n = "H");
   double clip(double thres);
-  void normalize() {
+  void   normalize() {
     if (sum == 0.0 || sum == 1.0)
       return;
     else {
@@ -110,12 +108,12 @@ protected:
     }
   };
 
-  int n;
-  double sum;
+  int                n;
+  double             sum;
   vnl_matrix<double> histo;
   vnl_vector<double> rowsum;
   vnl_vector<double> colsum;
-  bool haseps;
+  bool               haseps;
 };
 
 #endif

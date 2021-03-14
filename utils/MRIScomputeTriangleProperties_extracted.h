@@ -55,7 +55,7 @@ int FUNCTION_NAME(MRIS *mris)
   int const max_threads = omp_get_max_threads();
 
   VECTOR *v_a[_MAX_FS_THREADS], *v_b[_MAX_FS_THREADS], *v_n[_MAX_FS_THREADS];
-  int tno;
+  int     tno;
   for (tno = 0; tno < max_threads; tno++) {
     v_a[tno] = VectorAlloc(3, MATRIX_REAL);
     v_b[tno] = VectorAlloc(3, MATRIX_REAL);
@@ -73,8 +73,8 @@ int FUNCTION_NAME(MRIS *mris)
   }
 
 #define ROMP_VARIABLE fno
-#define ROMP_LO 0
-#define ROMP_HI mris->nfaces
+#define ROMP_LO       0
+#define ROMP_HI       mris->nfaces
 
 #define ROMP_SUMREDUCTION0 reduction_total_area
 
@@ -107,7 +107,7 @@ int FUNCTION_NAME(MRIS *mris)
   VERTEX const *v0 = &mris->vertices[vno0], *v1 = &mris->vertices[vno1],
                *v2 = &mris->vertices[vno2];
 #else
-  FloatXYZ v0xyz;
+  FloatXYZ             v0xyz;
   v0xyz.x = mris->v_x[vno0];
   v0xyz.y = mris->v_y[vno0];
   v0xyz.z = mris->v_z[vno0];
@@ -116,9 +116,9 @@ int FUNCTION_NAME(MRIS *mris)
   v1xyz.y = mris->v_y[vno1];
   v1xyz.z = mris->v_z[vno1];
   FloatXYZ v2xyz;
-  v2xyz.x = mris->v_x[vno2];
-  v2xyz.y = mris->v_y[vno2];
-  v2xyz.z = mris->v_z[vno2];
+  v2xyz.x            = mris->v_x[vno2];
+  v2xyz.y            = mris->v_y[vno2];
+  v2xyz.z            = mris->v_z[vno2];
   FloatXYZ const *v0 = &v0xyz, *v1 = &v1xyz, *v2 = &v2xyz;
 #endif
 
@@ -204,14 +204,14 @@ int FUNCTION_NAME(MRIS *mris)
     VERTEX_EDGE(v_a[tid], vo, va);
     VERTEX_EDGE(v_b[tid], vo, vb);
     float cross = VectorTripleProduct(v_b[tid], v_a[tid], v_n[tid]);
-    float dot = V3_DOT(v_a[tid], v_b[tid]);
+    float dot   = V3_DOT(v_a[tid], v_b[tid]);
     float angle = fastApproxAtan2f(cross, dot);
 
 #ifndef COMPILING_MRIS_MP
     face->angle[ano] = angle;
 #else
     angles_per_triangle_t *f_angle = &mris->f_angle[fno];
-    (*f_angle)[ano] = angle;
+    (*f_angle)[ano]                = angle;
 #endif
   }
 
@@ -253,7 +253,7 @@ int FUNCTION_NAME(MRIS *mris)
 #endif
 
     float area = 0.0;
-    int fn;
+    int   fn;
     for (fn = 0; fn < vt->num; fn++) {
       int const fno = vt->f[fn];
 #ifndef COMPILING_MRIS_MP

@@ -1,16 +1,14 @@
-#include "mris_defects_pointset.help.xml.h"
-#include "mri.h"
 #include "argparse.h"
-#include "pointset.h"
+#include "mri.h"
 #include "mri_circulars.h"
+#include "mris_defects_pointset.help.xml.h"
+#include "pointset.h"
 
 static PointSet::Point sras2ras(MRIS *surf, PointSet::Point point);
 
+static PointSet::Point sras2ras(MRIS *surf, PointSet::Point point);
 
-static PointSet::Point sras2ras(MRIS* surf, PointSet::Point point);
-
-int main(int argc, char **argv) 
-{
+int main(int argc, char **argv) {
 
   // --- setup ----
 
@@ -32,17 +30,17 @@ int main(int argc, char **argv)
   std::cout << "Reading in surface " << surfpath << std::endl;
   MRIS *surf = MRISread(surfpath.c_str());
   if (!surf)
-    logFatal(1) << "could not read surface";
+    fs::fatal() << "could not read surface";
 
   // load defect overlay
   std::string defectpath = parser.retrieve<std::string>("defects");
   std::cout << "Reading in defect segmentation " << defectpath << std::endl;
   MRI *overlay = MRIread(defectpath.c_str());
   if (!overlay)
-    logFatal(1) << "could not read defect segmentation";
+    fs::fatal() << "could not read defect segmentation";
 
   if (overlay->width != surf->nvertices) {
-    logFatal(1) << "error: defect overlay (" << overlay->width << " points) "
+    fs::fatal() << "error: defect overlay (" << overlay->width << " points) "
                 << "does not match surface (" << surf->nvertices
                 << " vertices)";
   }
@@ -56,9 +54,9 @@ int main(int argc, char **argv)
   if (parser.exists("label")) {
     std::string labelpath = parser.retrieve<std::string>("label");
     std::cout << "Reading in label " << labelpath << std::endl;
-    LABEL *label = LabelRead(nullptr, labelpath.c_str());
+    LABEL *label = LabelRead(NULL, labelpath.c_str());
     if (!label)
-      logFatal(1) << "could not read label";
+      fs::fatal() << "could not read label";
     // set values outside of the label to 0
     MRI *tmp = MRISlabel2Mask(surf, label, nullptr);
     for (int v = 0; v < surf->nvertices; v++) {
@@ -94,7 +92,7 @@ int main(int argc, char **argv)
     if (!defect.empty()) {
       // average the points in the defect
       PointSet::Point centroid;
-      int npoints = 0;
+      int             npoints = 0;
       for (auto &vnum : defect) {
         centroid.x += surf->vertices[vnum].x;
         centroid.y += surf->vertices[vnum].y;
@@ -156,8 +154,8 @@ static PointSet::Point sras2ras(MRIS *surf, PointSet::Point point) {
     sras2ras_matrix = RASFromSurfaceRAS_(tmp);
     MRIfree(&tmp);
     // allocate input and output vectors
-    v1 = VectorAlloc(4, MATRIX_REAL);
-    v2 = VectorAlloc(4, MATRIX_REAL);
+    v1                = VectorAlloc(4, MATRIX_REAL);
+    v2                = VectorAlloc(4, MATRIX_REAL);
     VECTOR_ELT(v1, 4) = 1.0;
     VECTOR_ELT(v2, 4) = 1.0;
   }

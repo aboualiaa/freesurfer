@@ -1,14 +1,6 @@
-/**
- * @file  compute_vox2vox.c
- *
- */
 /*
  * Original Author: Avi Z. Snyder, Washington University
- *
- * CVS Revision Info:
- *    $Author: nicks $
- *    $Date: 2010/02/27 01:41:53 $
- *    $Revision: 1.3 $
+ * 
  *
  * Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
  * Washington University, Mallinckrodt Institute of Radiology.
@@ -22,11 +14,11 @@
  *
  */
 
+#include <Getifh.h>
+#include <endianio.h>
+#include <librms.h>
 #include <stdlib.h>
 #include <string.h>
-#include <endianio.h>
-#include <Getifh.h>
-#include <librms.h>
 
 #define MAXL 256
 
@@ -44,8 +36,6 @@ extern void vrtflip_(int *iori, int *imgdim, float *centeri, float *mmppixi,
 /***********/
 /* globals */
 /***********/
-static char rcsid[] =
-    "$Id: compute_vox2vox.c,v 1.3 2010/02/27 01:41:53 nicks Exp $";
 static char program[MAXL];
 
 void t4list(FILE *fp, float *t4) {
@@ -63,21 +53,21 @@ void write_command_line(FILE *outfp, int argc, char *argv[]) {
   fprintf(outfp, "# %s", program);
   for (i = 1; i < argc; i++)
     fprintf(outfp, " %s", argv[i]);
-  fprintf(outfp, "\n# %s\n", rcsid);
+  fprintf(outfp, "\n# %s\n", "freesurfer compute_vox2vox.c");
 }
 
 int main(int argc, char *argv[]) {
   FILE *fp;
-  char srcroot[MAXL], tarroot[MAXL], t4file[MAXL], outfile[MAXL];
-  IFH ifhsrc, ifhtar;
+  char  srcroot[MAXL], tarroot[MAXL], t4file[MAXL], outfile[MAXL];
+  IFH   ifhsrc, ifhtar;
 
   /***********/
   /* utility */
   /***********/
   char *ptr, command[MAXL];
-  int c, i, k;
-  int status = 0;
-  int four = 4;
+  int   c, i, k;
+  int   status = 0;
+  int   four   = 4;
 
   /***************/
   /* computation */
@@ -91,7 +81,7 @@ int main(int argc, char *argv[]) {
   float t4[16]; /* affine warp */
   float mmppixs[3], centers[3], mmppixt[3], centert[3];
 
-  printf("%s\n", rcsid);
+  printf("%s\n", "freesurfer compute_vox2vox.c");
   if (!(ptr = strrchr(argv[0], '/')))
     ptr = argv[0];
   else

@@ -1,15 +1,12 @@
 /**
- * @file  mri_autodet_gwstats.cpp
  * @brief Manages the computation of the gray/white stats used to
  * place the surface (currently in MRIScomputeBorderValues())
  *
  */
 /*
- * Original Author: Douglas N Greve (but basically a rewrite of
- * mris_make_surfaces by BF) CVS Revision Info: $Author: greve $ $Date:
- * 2017/02/15 21:04:18 $ $Revision: 1.246 $
+ * Original Author: Douglas N Greve (but basically a rewrite of mris_make_surfaces by BF)
  *
- * Copyright © 2011 The General Hospital Corporation (Boston, MA) "MGH"
+ * Copyright © 2021 The General Hospital Corporation (Boston, MA) "MGH"
  *
  * Terms and conditions for use, reproduction, distribution and contribution
  * are found in the 'FreeSurfer Software License Agreement' contained
@@ -24,18 +21,18 @@
 // double round(double x);
 #include <sys/utsname.h>
 
-#include "mrisutils.h"
-#include "diag.h"
-#include "mri2.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
+#include "diag.h"
+#include "fio.h"
+#include "mri2.h"
+#include "mrisutils.h"
+#include "version.h"
 
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
 #endif
 
-static int parse_commandline(int argc, char **argv);
+static int  parse_commandline(int argc, char **argv);
 static void check_options();
 static void print_usage();
 static void usage_exit();
@@ -44,34 +41,34 @@ static void print_version();
 static void dump_options(FILE *fp);
 
 struct utsname uts;
-char *cmdline, cwd[2000];
-int debug = 0, checkoptsonly = 0;
-int nthreads = 1;
+char *         cmdline, cwd[2000];
+int            debug = 0, checkoptsonly = 0;
+int            nthreads = 1;
 
 int main(int argc, char *argv[]);
 
-static char vcid[] = "$Id$";
-const char *Progname = "mris_autodet_gwstats";
+const char *   Progname = "mris_autodet_gwstats";
 AutoDetGWStats adgws;
-char *outfile = nullptr;
-char *involpath = nullptr;
-char *wmvolpath = nullptr;
-char *insurfpath = nullptr;
-char *lhsurfpath = nullptr;
-char *rhsurfpath = nullptr;
-char *subject = nullptr, *insurfname = "orig",
-     *involname = "brain.finalsurfs.mgz", *wmvolname = "wm.mgz";
-char tmpstr[2000];
-char *SUBJECTS_DIR = nullptr;
-int hemicode = -1;
+char *         outfile    = NULL;
+char *         involpath  = NULL;
+char *         wmvolpath  = NULL;
+char *         insurfpath = NULL;
+char *         lhsurfpath = NULL;
+char *         rhsurfpath = NULL;
+const char *   subject = NULL, *insurfname = "orig",
+           *involname = "brain.finalsurfs.mgz", *wmvolname = "wm.mgz";
+char  tmpstr[2000];
+char *SUBJECTS_DIR = NULL;
+int   hemicode     = -1;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs;
+  int   nargs;
   char *cmdline2, cwd[2000];
 
   nargs = handleVersionOption(argc, argv, "mris_autodet_gwstats");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -93,7 +90,7 @@ int main(int argc, char **argv) {
     return (0);
 
   // print out version of this program
-  printf("%s\n", vcid);
+  printf("%s\n", getVersion().c_str());
   printf("\n");
   printf("cd %s\n", cwd);
   printf("setenv SUBJECTS_DIR %s\n", getenv("SUBJECTS_DIR"));
@@ -149,7 +146,7 @@ int main(int argc, char **argv) {
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int nargc, nargsused;
+  int    nargc, nargsused;
   char **pargv, *option;
 
   if (argc < 1)
@@ -180,7 +177,7 @@ static int parse_commandline(int argc, char **argv) {
     else if (!strcmp(option, "--o")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      outfile = pargv[0];
+      outfile   = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--i")) {
       if (nargc < 1)
@@ -195,9 +192,9 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      insurfpath = pargv[0];
+      insurfpath         = pargv[0];
       char *surfbasename = fio_basename(pargv[0], nullptr);
-      hemicode = -1;
+      hemicode           = -1;
       if (strncmp(surfbasename, "lh", 2) == 0)
         hemicode = 1;
       if (strncmp(surfbasename, "rh", 2) == 0)
@@ -208,17 +205,17 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 2);
       lhsurfpath = pargv[0];
       rhsurfpath = pargv[1];
-      nargsused = 2;
+      nargsused  = 2;
     } else if (!strcmp(option, "--lh-surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       lhsurfpath = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--rh-surf")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
       rhsurfpath = pargv[0];
-      nargsused = 1;
+      nargsused  = 1;
     } else if (!strcmp(option, "--sd")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
@@ -228,55 +225,56 @@ static int parse_commandline(int argc, char **argv) {
     } else if (!strcmp(option, "--s")) {
       if (nargc < 1)
         CMDargNErr(option, 1);
-      subject = pargv[0];
+      subject   = pargv[0];
       nargsused = 1;
-    }
-    else if(!strcmp(option, "--min_border_white")) {
-      if(nargc < 1) CMDargNErr(option,1);
-      adgws.min_border_white = atof(pargv[0]);
+    } else if (!strcmp(option, "--min_border_white")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      adgws.min_border_white     = atof(pargv[0]);
       adgws.min_border_white_set = 1;
-      nargsused = 1;
-    }
-    else if(!strcmp(option, "--max_border_white")) {
-      if(nargc < 1) CMDargNErr(option,1);
-      adgws.max_border_white = atof(pargv[0]);
+      nargsused                  = 1;
+    } else if (!strcmp(option, "--max_border_white")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      adgws.max_border_white     = atof(pargv[0]);
       adgws.max_border_white_set = 1;
-      nargsused = 1;
-    }
-    else if(!strcmp(option, "--min_gray_at_white_border")) {
-      if(nargc < 1) CMDargNErr(option,1);
-      adgws.min_gray_at_white_border = atof(pargv[0]);
+      nargsused                  = 1;
+    } else if (!strcmp(option, "--min_gray_at_white_border")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      adgws.min_gray_at_white_border     = atof(pargv[0]);
       adgws.min_gray_at_white_border_set = 1;
-      nargsused = 1;
-    }
-    else if(!strcmp(option, "--max_gray")) {
-      if(nargc < 1) CMDargNErr(option,1);
-      adgws.max_gray = atof(pargv[0]);
+      nargsused                          = 1;
+    } else if (!strcmp(option, "--max_gray")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      adgws.max_gray     = atof(pargv[0]);
       adgws.max_gray_set = 1;
-      nargsused = 1;
-    }
-    else if(!strcmp(option, "--max_gray_at_csf_border")) {
-      if(nargc < 1) CMDargNErr(option,1);
-      adgws.max_gray_at_csf_border = atof(pargv[0]);
+      nargsused          = 1;
+    } else if (!strcmp(option, "--max_gray_at_csf_border")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      adgws.max_gray_at_csf_border     = atof(pargv[0]);
       adgws.max_gray_at_csf_border_set = 1;
-      nargsused = 1;
-    }
-    else if(!strcmp(option, "--min_gray_at_csf_border")) {
-      if(nargc < 1) CMDargNErr(option,1);
-      adgws.min_gray_at_csf_border = atof(pargv[0]);
+      nargsused                        = 1;
+    } else if (!strcmp(option, "--min_gray_at_csf_border")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      adgws.min_gray_at_csf_border     = atof(pargv[0]);
       adgws.min_gray_at_csf_border_set = 1;
-      nargsused = 1;
-    }
-    else if(!strcmp(option, "--max_csf")) {
-      if(nargc < 1) CMDargNErr(option,1);
-      adgws.max_csf = atof(pargv[0]);
+      nargsused                        = 1;
+    } else if (!strcmp(option, "--max_csf")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      adgws.max_csf     = atof(pargv[0]);
       adgws.max_csf_set = 1;
-      nargsused = 1;
-    }
-    else if(!strcasecmp(option, "--threads") || !strcasecmp(option, "--nthreads") ){
-      if(nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&nthreads);
-      #ifdef _OPENMP
+      nargsused         = 1;
+    } else if (!strcasecmp(option, "--threads") ||
+               !strcasecmp(option, "--nthreads")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nthreads);
+#ifdef _OPENMP
       omp_set_num_threads(nthreads);
 #endif
       nargsused = 1;
@@ -381,14 +379,14 @@ static void usage_exit() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_version() {
-  printf("%s\n", vcid);
+static void print_version(void) {
+  std::cout << getVersion() << std::endl;
   exit(1);
 }
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
   fprintf(fp, "\n");
-  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "%s\n", getVersion().c_str());
   fprintf(fp, "cwd %s\n", cwd);
   fprintf(fp, "cmdline %s\n", cmdline);
   fprintf(fp, "sysname  %s\n", uts.sysname);
